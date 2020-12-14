@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+
 import { STANDARD } from './config/private-label';
 import { directiveSsr as t } from './plugins/i18n';
 import { trimWhitespaceSsr as trimWhitespace } from './plugins/trim-whitespace';
@@ -70,6 +71,7 @@ module.exports = {
     version,
     dev,
     pl,
+    api
   },
 
   buildDir: dev ? '.nuxt' : '.nuxt-prod',
@@ -329,8 +331,8 @@ function proxyWsOpts(target) {
   };
 }
 
-function onProxyReq(proxyReq, req) {
-  proxyReq.setHeader('x-api-host', req.headers['host']);
+function onProxyReq(proxyReq, req, socket, options) {
+  proxyReq.setHeader('x-api-host', options.target.host || req.headers['host']);
   proxyReq.setHeader('x-forwarded-proto', 'https');
   // console.log(proxyReq.getHeaders());
 }
@@ -338,7 +340,7 @@ function onProxyReq(proxyReq, req) {
 function onProxyReqWs(proxyReq, req, socket, options, head) {
   req.headers.origin = options.target.href;
   proxyReq.setHeader('origin', options.target.href);
-  proxyReq.setHeader('x-api-host', req.headers['host']);
+  proxyReq.setHeader('x-api-host', options.target.host || req.headers['host']);
   proxyReq.setHeader('x-forwarded-proto', 'https');
   // console.log(proxyReq.getHeaders());
 

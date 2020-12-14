@@ -1,8 +1,9 @@
 import https from 'https';
+
 import pkg from '../package.json';
 
 export default function({
-  $axios, isDev, route, redirect, req
+  $axios, isDev, route, redirect, req, env
 }) {
   $axios.defaults.headers.common['Accept'] = 'application/json';
   $axios.defaults.xsrfCookieName = 'CSRF';
@@ -24,6 +25,12 @@ export default function({
 
     $axios.defaults.httpsAgent = insecureAgent;
     $axios.httpsAgent = insecureAgent;
+    if (env.api) {
+      // Force requests made directly to the api to go via Nuxt proxy to avoid CORS issues. This mimics the way other proxy requests work
+      $axios.onRequest((config) => {
+        config.url = config.url.replace(env.api, '');
+      });
+    }
   } else if ( process.server ) {
     // For requests from the server, set the base URL to the URL that the request came in on
     $axios.onRequest((config) => {
