@@ -1215,6 +1215,27 @@ persistentVolumeClaim:
       existing: Use an existing Persistent Volume
 prefs:
   title: Preferences
+  account:
+    label: Account
+    name: Name
+    username: Username
+    change: Change Password
+    changePassword:
+      title: Change Password
+      cancel: Cancel
+      keys: Delete all existing API keys
+      userPassword: User Generated Password
+      generatedPassword: Randomly Generated Password
+      currentPassword: Current Password
+      userGen:
+        newPassword: New Password
+        confirmPassword: Confirm Password
+      randomGen:
+        copy: Copy to Clipboard
+        generated: Generated Password
+      errors:
+        missmatchedPassword: Passwords do not match
+        failedToChange: Failed to change password
   theme:
     label: Theme
     light: Light

@@ -1,0 +1,286 @@
+<script>
+import { mapGetters } from 'vuex';
+import ButtonGroup from '@/components/ButtonGroup';
+import Checkbox from '@/components/form/Checkbox';
+import Card from '@/components/Card';
+import AsyncButton from '@/components/AsyncButton';
+import LabeledInput from '@/components/form/LabeledInput';
+import { CHARSET, randomStr } from '@/utils/string';
+import CopyToClipboard from '@/components/CopyToClipboard.vue';
+
+export default {
+  components: {
+    ButtonGroup, Checkbox, Card, AsyncButton, LabeledInput, CopyToClipboard,
+  },
+  data(ctx) {
+    return {
+      errorMessage:       '',
+      deleteKeys:         false,
+      isUserGenerated:       true,
+      genPasswordOptions: [{
+        labelKey: `prefs.account.changePassword.userPassword`,
+        value:    true
+      }, {
+        labelKey: `prefs.account.changePassword.generatedPassword`,
+        value:    false
+      }],
+      form: {
+        currentP: null,
+        newP:     null,
+        genP:     randomStr(16, CHARSET.ALPHA_NUM),
+        confirmP: null
+      }
+    };
+  },
+  computed:   {
+    ...mapGetters({ t: 'i18n/t' }),
+
+    passwordType: {
+      get() {
+        return this.isUserGenerated;
+      },
+
+      set(isUserGenerated) {
+        this.isUserGenerated = isUserGenerated;
+        if (isUserGenerated) {
+          this.validateNewPassword();
+        } else {
+          this.errorMessage = '';
+        }
+      }
+    },
+
+    passwordNew: {
+      get() {
+        return this.form.newP;
+      },
+
+      set(p) {
+        this.form.newP = p;
+        this.validateNewPassword();
+      }
+    },
+
+    passwordConfirm: {
+      get() {
+        return this.form.confirmP;
+      },
+
+      set(p) {
+        this.form.confirmP = p;
+        this.validateNewPassword();
+      }
+    },
+
+    canSubmit() {
+      return !!this.form.currentP && (this.isUserGenerated ? this.form.newP && this.form.newP === this.form.confirmP : true);
+    }
+
+  },
+  methods: {
+    show(show) {
+      if (show) {
+        this.$modal.show('password-modal');
+        this.isUserGenerated = true;
+        this.form = {
+          ...this.form,
+          currentP: null,
+          newP:     null,
+          confirmP: null
+        };
+      } else {
+        this.$modal.hide('password-modal');
+      }
+    },
+    validateNewPassword() {
+      this.errorMessage = !!this.form.confirmP && this.form.newP !== this.form.confirmP ? this.t('prefs.account.changePassword.errors.missmatchedPassword') : '';
+    },
+    async changePassword(buttonCb) {
+      try {
+        await this.$store.dispatch('rancher/request', {
+          url:           '/v3/users?action=changepassword',
+          method:        'post',
+          headers:       { 'Content-Type': 'application/json' },
+          data:          {
+            currentPassword: this.form.currentP,
+            newPassword:     this.isUserGenerated ? this.form.newP : this.form.genP
+          },
+        });
+
+        buttonCb(true);
+        this.show(false);
+      } catch (err) {
+        // TODO: RC Q cannot convert the returned err codes to i18n id's
+        //   // no current password: {"baseType":"error","code":"InvalidBodyContent","message":"must specify current password","status":422,"type":"error"}
+        //   // invalid current password: {"baseType":"error","code":"InvalidBodyContent","message":"invalid current password","status":422,"type":"error"}
+        this.errorMessage = err.message || this.t('prefs.account.changePassword.errors.failedToChange');
+        buttonCb(false);
+      }
+    },
+    generatePassword() {
+      this.form.genP = randomStr(16, CHARSET.ALPHA_NUM);
+    },
+  },
+};
+</script>
+
+<template>
+  <modal
+    class="change-password-modal"
+    name="password-modal"
+    :width="500"
+    :height="460"
+  >
+    <!-- TODO: RC Q Disable global shortcuts whilst modal shows? -->
+    <Card class="prompt-password" :show-highlight-border="false">
+      <h4 slot="title" class="text-default-text">
+        {{ t("prefs.account.changePassword.title") }}
+      </h4>
+      <div slot="body">
+        <form class="col mb-10">
+          <!-- TODO: RC wire in -->
+          <Checkbox v-model="deleteKeys" :label="t('prefs.account.changePassword.keys')" class="mt-10" />
+          <LabeledInput
+            key="current"
+            v-model="form.currentP"
+            :label="t('prefs.account.changePassword.currentPassword')"
+            :mode="'edit'"
+            :min-height="30"
+            :required="true"
+            type="password"
+            class="mt-10"
+          />
+          <ButtonGroup v-model="passwordType" :options="genPasswordOptions" class="prompt-password__generated mt-10" />
+
+          <div v-if="passwordType" class="userGen">
+            <LabeledInput
+              key="new"
+              v-model="passwordNew"
+              :label="t('prefs.account.changePassword.userGen.newPassword')"
+              :mode="'edit'"
+              :min-height="30"
+              :required="true"
+              type="password"
+              class="mt-10"
+            />
+            <LabeledInput
+              key="confirm"
+              v-model="passwordConfirm"
+              :label="t('prefs.account.changePassword.userGen.confirmPassword')"
+              :mode="'edit'"
+              :min-height="30"
+              :required="true"
+              type="password"
+              class="mt-10"
+            />
+          </div>
+          <div v-else class="prompt-password__randomGen mt-10">
+            <div class="prompt-password__randomGen__label">
+              <LabeledInput
+                key="gen"
+                v-model="form.genP"
+                :label="t('prefs.account.changePassword.randomGen.generated')"
+                :disabled="true"
+                :min-height="30"
+              />
+            </div>
+            <!-- // TODO: RC Q mx-5 didn't seem to work? https://getbootstrap.com/docs/4.0/utilities/spacing/ -->
+            <div class="prompt-password__randomGen__refresh ml-5 mr-5">
+              <button type="button" class="btn btn-sm bg-default" @click="generatePassword()">
+                <i class="icon icon-2x icon-refresh" />
+              </button>
+            </div>
+            <div class="prompt-password__randomGen__copy">
+              <copy-to-clipboard :text="form.genP" :show-label="true"></copy-to-clipboard>
+            </div>
+          </div>
+        </form>
+        <div class="text-error mb-10">
+          <!-- TODO: RC Q use <Banner v-for="(err, i) in errors" :key="i" color="error" :label="err" />? -->
+          <template v-if="!!errorMessage">
+            {{ errorMessage }}
+          </template>
+        </div>
+      </div>
+      <template #actions>
+        <button class="btn role-secondary" @click="show(false)">
+          {{ t("prefs.account.changePassword.cancel") }}
+        </button>
+        <AsyncButton mode="apply" class="btn bg-error ml-10" :disabled="!canSubmit" @click="changePassword" />
+      </template>
+    </Card>
+  </modal>
+</template>
+
+<style lang="scss">
+// TODO: RC Q Should all margin/padding be done via bootstrap spacing? (https://getbootstrap.com/docs/4.0/utilities/spacing/ mt-10, pl-20, etc)
+// TODO: RC Q Styles here are BEM'd, is that ok moving forward (particularly in no-scoped world?)
+    .change-password-modal {
+      // TODO: RC Q these selectors don't work when scoped, standard practise/acceptable?
+
+      .v--modal {
+        display: flex;
+
+        .card-wrap {
+          display: flex;
+          flex-direction: column;
+
+          .card-body {
+            flex: 1;
+            justify-content: start;
+          }
+
+          .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+          }
+        }
+      }
+
+      // .v--modal {
+        // background-color: var(--nav-bg);
+        // border-radius: var(--border-radius);
+        // max-height: 100vh;
+      // }
+    }
+
+    .prompt-password {
+      flex: 1;
+      display: flex;
+
+      &__generated {
+        display: flex;
+
+        .btn {
+          flex: 1;
+        }
+      }
+
+      &__randomGen {
+        display: flex;
+        align-items: center;
+
+        &__label {
+          flex: 1;
+        }
+
+        &__refresh {
+          flex: 0;
+        }
+
+        &__copy {
+          flex: 0;
+          .btn {
+            width: 160px;
+          }
+        }
+      }
+
+      .text-error {
+        min-height: 20px;
+      }
+
+    }
+
+</style>
