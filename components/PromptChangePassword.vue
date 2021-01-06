@@ -15,9 +15,10 @@ export default {
   },
   data(ctx) {
     return {
-      errorMessages:       [],
-      isUserGenerated:       true,
-      genPasswordOptions: [{
+      errorMessages:              [],
+      canShowMissmatchedPassword: false,
+      isUserGenerated:            true,
+      genPasswordOptions:         [{
         labelKey: `prefs.account.changePassword.userPassword`,
         value:    true
       }, {
@@ -81,20 +82,29 @@ export default {
   methods: {
     show(show) {
       if (show) {
+        this.reset();
         this.$modal.show('password-modal');
-        this.isUserGenerated = true;
-        this.form = {
-          ...this.form,
-          currentP: null,
-          newP:     null,
-          confirmP: null
-        };
       } else {
         this.$modal.hide('password-modal');
       }
     },
+    reset() {
+      this.isUserGenerated = true;
+      this.canShowMissmatchedPassword = false;
+      this.form = {
+        ...this.form,
+        currentP: null,
+        newP:     null,
+        confirmP: null
+      };
+      this.errorMessages = [];
+    },
+    passwordConfirmBlurred() {
+      this.canShowMissmatchedPassword = true;
+      this.validateNewPassword();
+    },
     validateNewPassword() {
-      this.errorMessages = !!this.form.confirmP && (this.form.newP !== this.form.confirmP) ? [this.t('prefs.account.changePassword.errors.missmatchedPassword')] : [];
+      this.errorMessages = !!this.form.confirmP && (this.canShowMissmatchedPassword && this.form.newP !== this.form.confirmP) ? [this.t('prefs.account.changePassword.errors.missmatchedPassword')] : [];
     },
     submit(buttonCb) {
       return this.changePassword()
@@ -215,6 +225,7 @@ export default {
               :required="true"
               type="password"
               class="mt-10"
+              @blur="passwordConfirmBlurred()"
             />
           </div>
           <div v-else class="prompt-password__randomGen mt-10">
