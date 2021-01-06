@@ -1,6 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import ButtonGroup from '@/components/ButtonGroup';
+import Banner from '@/components/Banner';
 import Checkbox from '@/components/form/Checkbox';
 import Card from '@/components/Card';
 import AsyncButton from '@/components/AsyncButton';
@@ -10,12 +11,11 @@ import CopyToClipboard from '@/components/CopyToClipboard.vue';
 
 export default {
   components: {
-    ButtonGroup, Checkbox, Card, AsyncButton, LabeledInput, CopyToClipboard,
+    ButtonGroup, Checkbox, Card, AsyncButton, LabeledInput, CopyToClipboard, Banner
   },
   data(ctx) {
     return {
-      errorMessage:       '',
-      deleteKeys:         false,
+      errorMessages:       [],
       isUserGenerated:       true,
       genPasswordOptions: [{
         labelKey: `prefs.account.changePassword.userPassword`,
@@ -25,10 +25,11 @@ export default {
         value:    false
       }],
       form: {
-        currentP: null,
-        newP:     null,
-        genP:     randomStr(16, CHARSET.ALPHA_NUM),
-        confirmP: null
+        deleteKeys: false,
+        currentP:   null,
+        newP:       null,
+        genP:       randomStr(16, CHARSET.ALPHA_NUM),
+        confirmP:   null
       }
     };
   },
@@ -45,7 +46,7 @@ export default {
         if (isUserGenerated) {
           this.validateNewPassword();
         } else {
-          this.errorMessage = '';
+          this.errorMessages = [];
         }
       }
     },
@@ -93,29 +94,61 @@ export default {
       }
     },
     validateNewPassword() {
-      this.errorMessage = !!this.form.confirmP && this.form.newP !== this.form.confirmP ? this.t('prefs.account.changePassword.errors.missmatchedPassword') : '';
+      this.errorMessages = !!this.form.confirmP && (this.form.newP !== this.form.confirmP) ? [this.t('prefs.account.changePassword.errors.missmatchedPassword')] : [];
     },
-    async changePassword(buttonCb) {
-      try {
-        await this.$store.dispatch('rancher/request', {
-          url:           '/v3/users?action=changepassword',
-          method:        'post',
-          headers:       { 'Content-Type': 'application/json' },
-          data:          {
-            currentPassword: this.form.currentP,
-            newPassword:     this.isUserGenerated ? this.form.newP : this.form.genP
-          },
+    submit(buttonCb) {
+      return this.changePassword()
+        .then(() => this.form.deleteKeys ? this.deleteKeys() : null)
+        .then(() => {
+          buttonCb(true);
+          this.show(false);
+        })
+        .catch(() => {
+          buttonCb(false);
         });
-
-        buttonCb(true);
-        this.show(false);
-      } catch (err) {
+    },
+    changePassword() {
+      return this.$store.dispatch('rancher/request', {
+        url:           '/v3/users?action=changepassword',
+        method:        'post',
+        headers:       { 'Content-Type': 'application/json' },
+        data:          {
+          currentPassword: this.form.currentP,
+          newPassword:     this.isUserGenerated ? this.form.newP : this.form.genP
+        },
+      })
+        .catch((err) => {
         // TODO: RC Q cannot convert the returned err codes to i18n id's
         //   // no current password: {"baseType":"error","code":"InvalidBodyContent","message":"must specify current password","status":422,"type":"error"}
         //   // invalid current password: {"baseType":"error","code":"InvalidBodyContent","message":"invalid current password","status":422,"type":"error"}
-        this.errorMessage = err.message || this.t('prefs.account.changePassword.errors.failedToChange');
-        buttonCb(false);
-      }
+          this.errorMessages = [err.message || this.t('prefs.account.changePassword.errors.failedToChange')];
+          throw err;
+        });
+    },
+    deleteKeys() {
+      return this.$store.dispatch('rancher/request', {
+        url:           '/v3/tokens',
+        method:        'get',
+        headers:       { 'Content-Type': 'application/json' },
+      })
+        .then((tokens) => {
+          // TODO: RC 'Cannot delete token for current session. Use logout instead', compare with old behaviour
+          return Promise.all(tokens.data.map(token => this.$store.dispatch('rancher/request', {
+            url:           `/v3/tokens/${ token.id }`, // TODO: RC Q Should this use the token.links.remove url instead?
+            method:        'delete',
+            headers:       { 'Content-Type': 'application/json' },
+          })));
+        })
+        .catch((err) => {
+          if (err.message) {
+            this.errorMessages = [err.message];
+          } else if (err.length > 1) {
+            this.errorMessages = [this.t('prefs.account.changePassword.errors.failedDeleteKeys')];
+          } else {
+            this.errorMessages = [this.t('prefs.account.changePassword.errors.failedDeleteKey')];
+          }
+          throw err;
+        });
     },
     generatePassword() {
       this.form.genP = randomStr(16, CHARSET.ALPHA_NUM);
@@ -129,7 +162,7 @@ export default {
     class="change-password-modal"
     name="password-modal"
     :width="500"
-    :height="460"
+    :height="480"
   >
     <!-- TODO: RC Q Disable global shortcuts whilst modal shows? -->
     <Card class="prompt-password" :show-highlight-border="false">
@@ -137,9 +170,9 @@ export default {
         {{ t("prefs.account.changePassword.title") }}
       </h4>
       <div slot="body">
-        <form class="col mb-10">
-          <!-- TODO: RC wire in -->
-          <Checkbox v-model="deleteKeys" :label="t('prefs.account.changePassword.keys')" class="mt-10" />
+        <form class="mb-10">
+          <!-- TODO: RC 'Delete all existing API keys'. Wire in. DELETE v3/tokens/...token-g65z5 -->
+          <Checkbox v-model="form.deleteKeys" :label="t('prefs.account.changePassword.keys')" class="mt-10" />
           <LabeledInput
             key="current"
             v-model="form.currentP"
@@ -195,18 +228,19 @@ export default {
             </div>
           </div>
         </form>
-        <div class="text-error mb-10">
+        <div v-if="errorMessages && errorMessages.length" class="text-error">
           <!-- TODO: RC Q use <Banner v-for="(err, i) in errors" :key="i" color="error" :label="err" />? -->
-          <template v-if="!!errorMessage">
+          <!-- <template v-if="!!errorMessage">
             {{ errorMessage }}
-          </template>
+          </template> -->
+          <Banner v-for="(err, i) in errorMessages" :key="i" color="error" :label="err" />
         </div>
       </div>
       <template #actions>
         <button class="btn role-secondary" @click="show(false)">
           {{ t("prefs.account.changePassword.cancel") }}
         </button>
-        <AsyncButton mode="apply" class="btn bg-error ml-10" :disabled="!canSubmit" @click="changePassword" />
+        <AsyncButton mode="apply" class="btn bg-error ml-10" :disabled="!canSubmit" @click="submit" />
       </template>
     </Card>
   </modal>
@@ -278,7 +312,7 @@ export default {
       }
 
       .text-error {
-        min-height: 20px;
+        min-height: 38px;
       }
 
     }

@@ -1236,6 +1236,8 @@ prefs:
       errors:
         missmatchedPassword: Passwords do not match
         failedToChange: Failed to change password
+        failedDeleteKey: Failed to delete key
+        failedDeleteKeys: Failed to delete keys
   theme:
     label: Theme
     light: Light
