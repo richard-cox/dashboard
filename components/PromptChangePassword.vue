@@ -126,18 +126,29 @@ export default {
         });
     },
     deleteKeys() {
+      // TODO: RC Q Better way to determin user's tokens?
       return this.$store.dispatch('rancher/request', {
         url:           '/v3/tokens',
         method:        'get',
         headers:       { 'Content-Type': 'application/json' },
       })
-        .then((tokens) => {
-          // TODO: RC 'Cannot delete token for current session. Use logout instead', compare with old behaviour
-          return Promise.all(tokens.data.map(token => this.$store.dispatch('rancher/request', {
-            url:           `/v3/tokens/${ token.id }`, // TODO: RC Q Should this use the token.links.remove url instead?
-            method:        'delete',
-            headers:       { 'Content-Type': 'application/json' },
-          })));
+        .then((res) => {
+          const promises = [];
+
+          (res.data || []).forEach((token) => {
+            if (token.current) {
+            // Ignore the current session, it will error with `Cannot delete token for current session. Use logout instead`
+            // TODO: RC Should we log user out instead or let them keep their current session's token?
+            } else {
+              promises.push(this.$store.dispatch('rancher/request', {
+                url:           `/v3/tokens/${ token.id }`, // TODO: RC Q Should this use the token.links.remove url instead?
+                method:        'delete',
+                headers:       { 'Content-Type': 'application/json' },
+              }));
+            }
+          });
+
+          return promises;
         })
         .catch((err) => {
           if (err.message) {
@@ -171,7 +182,6 @@ export default {
       </h4>
       <div slot="body">
         <form class="mb-10">
-          <!-- TODO: RC 'Delete all existing API keys'. Wire in. DELETE v3/tokens/...token-g65z5 -->
           <Checkbox v-model="form.deleteKeys" :label="t('prefs.account.changePassword.keys')" class="mt-10" />
           <LabeledInput
             key="current"
@@ -229,7 +239,7 @@ export default {
           </div>
         </form>
         <div v-if="errorMessages && errorMessages.length" class="text-error">
-          <!-- TODO: RC Q use <Banner v-for="(err, i) in errors" :key="i" color="error" :label="err" />? -->
+          <!-- TODO: RC Q previously used this, is template a no op element? -->
           <!-- <template v-if="!!errorMessage">
             {{ errorMessage }}
           </template> -->
@@ -248,7 +258,6 @@ export default {
 
 <style lang="scss">
 // TODO: RC Q Should all margin/padding be done via bootstrap spacing? (https://getbootstrap.com/docs/4.0/utilities/spacing/ mt-10, pl-20, etc)
-// TODO: RC Q Styles here are BEM'd, is that ok moving forward (particularly in no-scoped world?)
     .change-password-modal {
       // TODO: RC Q these selectors don't work when scoped, standard practise/acceptable?
 
@@ -279,6 +288,7 @@ export default {
       // }
     }
 
+    // TODO: RC Q Styles here are BEM'd, is that ok moving forward (particularly in no-scoped world?)
     .prompt-password {
       flex: 1;
       display: flex;

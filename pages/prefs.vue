@@ -136,7 +136,7 @@ export default {
           <div><t k="prefs.account.name" />: {{ principal.name }}</div>
           <div><t k="prefs.account.username" />: {{ principal.loginName }}</div>
         </div>
-        <!-- TODO: RC better way than $refs? -->
+        <!-- TODO: RC Q better way than $refs? -->
         <button
           type="button"
           class="btn role-secondary"
