@@ -137,6 +137,10 @@ export default {
     },
     deleteKeys() {
       // TODO: RC Q Better way to determin user's tokens?
+    //     return dispatch('rancher/findAll', { // Does this cache? if so how is it cleared if processed repeated?
+    //   type: 'authConfig',
+    //   opt:  { url: `/v3/authConfigs` }
+    // }, { root: true });
       return this.$store.dispatch('rancher/request', {
         url:           '/v3/tokens',
         method:        'get',
