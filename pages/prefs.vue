@@ -112,15 +112,11 @@ export default {
     },
 
     principal() {
-      // TODO: RC Q Where does this info originally come from, session? how does it get into the store?
       return this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
     },
-
     canChangePassword() {
-      // TODO: RC Q Should also only show if local provider? (principal --> .provider === local)
-      return this.$store.getters['auth/enabled'];
+      return this.$store.getters['auth/enabled'] && !!this.principal.loginName;
     },
-
   },
 };
 </script>
@@ -128,7 +124,6 @@ export default {
 <template>
   <div>
     <h1 v-t="'prefs.title'" />
-    <!-- TODO: RC UX/UI Review -->
     <div v-if="canChangePassword" class="account">
       <h4 v-t="'prefs.account.label'" />
       <div class="account__details">
@@ -136,7 +131,6 @@ export default {
           <div><t k="prefs.account.name" />: {{ principal.name }}</div>
           <div><t k="prefs.account.username" />: {{ principal.loginName }}</div>
         </div>
-        <!-- TODO: RC Q better way than $refs? -->
         <button
           type="button"
           class="btn role-secondary"

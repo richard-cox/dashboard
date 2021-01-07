@@ -8,6 +8,7 @@ import AsyncButton from '@/components/AsyncButton';
 import LabeledInput from '@/components/form/LabeledInput';
 import { CHARSET, randomStr } from '@/utils/string';
 import CopyToClipboard from '@/components/CopyToClipboard.vue';
+import { NORMAN } from '@/config/types';
 
 export default {
   components: {
@@ -120,50 +121,33 @@ export default {
     },
     async changePassword() {
       try {
-        await this.$store.dispatch('rancher/request', {
-          url:           '/v3/users?action=changepassword',
-          method:        'post',
-          headers:       { 'Content-Type': 'application/json' },
-          data:          {
+        await this.$store.dispatch('rancher/collectionAction', {
+          type:       NORMAN.USER,
+          actionName: 'changepassword',
+          body:          {
             currentPassword: this.form.currentP,
             newPassword:     this.isUserGenerated ? this.form.newP : this.form.genP
           },
         });
       } catch (err) {
-        // TODO: RC Q cannot convert the returned err codes to i18n id's
-        //   // no current password: {"baseType":"error","code":"InvalidBodyContent","message":"must specify current password","status":422,"type":"error"}
-        //   // invalid current password: {"baseType":"error","code":"InvalidBodyContent","message":"invalid current password","status":422,"type":"error"}
         this.errorMessages = [err.message || this.t('prefs.account.changePassword.errors.failedToChange')];
         throw err;
       }
     },
     async deleteKeys() {
-      // TODO: RC Q Better way to determin user's tokens?
-    //     return dispatch('rancher/findAll', { // Does this cache? if so how is it cleared if processed repeated?
-    //   type: 'authConfig',
-    //   opt:  { url: `/v3/authConfigs` }
-    // }, { root: true });
       try {
-        const resp = await this.$store.dispatch('rancher/request', {
-          url:           '/v3/tokens',
-          method:        'get',
-          headers:       { 'Content-Type': 'application/json' },
-        });
-        const promises = [];
+        const resp = await this.$store.dispatch('rancher/findAll', {
+          type: NORMAN.TOKEN,
+          opt:  { force: true } // Always fetch the latest
+        }, { root: true }); // TODO: RC Q what does root mean, it's not cluster based?
 
-        (resp.data || []).forEach((token) => {
-          if (token.current) {
-            // Ignore the current session, it will error with `Cannot delete token for current session. Use logout instead`
-            // TODO: RC Should we log user out instead or let them keep their current session's token?
-          } else {
-            promises.push(this.$store.dispatch('rancher/request', {
-              url:           `/v3/tokens/${ token.id }`, // TODO: RC Q Should this use the token.links.remove url instead?
-              method:        'delete',
-              headers:       { 'Content-Type': 'application/json' },
-            }));
+        await Promise.all(resp.reduce((res, token) => {
+          if (!token.current) {
+            res.push(this.deleteKey(token));
           }
-        });
-        await Promise.all(promises);
+
+          return res;
+        }, []));
       } catch (err) {
         if (err.message) {
           this.errorMessages = [err.message];
@@ -174,6 +158,14 @@ export default {
         }
         throw err;
       }
+    },
+    deleteKey(token) {
+      // TODO: RC Q token.remove() `Cannot read property 'push' of undefined`
+      return this.$store.dispatch('rancher/request', {
+        type:   NORMAN.TOKEN,
+        method: 'delete',
+        url:    token.links.remove,
+      });
     },
     generatePassword() {
       this.form.genP = randomStr(16, CHARSET.ALPHA_NUM);
@@ -189,7 +181,6 @@ export default {
     :width="500"
     :height="480"
   >
-    <!-- TODO: RC Q Disable global shortcuts whilst modal shows? -->
     <Card class="prompt-password" :show-highlight-border="false">
       <h4 slot="title" class="text-default-text">
         {{ t("prefs.account.changePassword.title") }}
@@ -207,7 +198,7 @@ export default {
             type="password"
             class="mt-10"
           />
-          <ButtonGroup v-model="passwordType" :options="genPasswordOptions" class="prompt-password__generated mt-10" />
+          <ButtonGroup v-model="passwordType" :options="genPasswordOptions" class="generated mt-10" />
 
           <div v-if="passwordType" class="userGen">
             <LabeledInput
@@ -232,8 +223,8 @@ export default {
               @blur="passwordConfirmBlurred()"
             />
           </div>
-          <div v-else class="prompt-password__randomGen mt-10">
-            <div class="prompt-password__randomGen__label">
+          <div v-else class="randomGen mt-10">
+            <div class="randomGen__label">
               <LabeledInput
                 key="gen"
                 v-model="form.genP"
@@ -242,22 +233,17 @@ export default {
                 :min-height="30"
               />
             </div>
-            <!-- // TODO: RC Q mx-5 didn't seem to work? https://getbootstrap.com/docs/4.0/utilities/spacing/ -->
-            <div class="prompt-password__randomGen__refresh ml-5 mr-5">
+            <div class="randomGen__refresh ml-5 mr-5">
               <button type="button" class="btn btn-sm bg-default" @click="generatePassword()">
                 <i class="icon icon-2x icon-refresh" />
               </button>
             </div>
-            <div class="prompt-password__randomGen__copy">
+            <div class="randomGen__copy">
               <copy-to-clipboard :text="form.genP" :show-label="true"></copy-to-clipboard>
             </div>
           </div>
         </form>
         <div v-if="errorMessages && errorMessages.length" class="text-error">
-          <!-- TODO: RC Q previously used this, is template a no op element? -->
-          <!-- <template v-if="!!errorMessage">
-            {{ errorMessage }}
-          </template> -->
           <Banner v-for="(err, i) in errorMessages" :key="i" color="error" :label="err" />
         </div>
       </div>
@@ -271,12 +257,9 @@ export default {
   </modal>
 </template>
 
-<style lang="scss">
-// TODO: RC Q Should all margin/padding be done via bootstrap spacing? (https://getbootstrap.com/docs/4.0/utilities/spacing/ mt-10, pl-20, etc)
+<style lang="scss" scoped>
     .change-password-modal {
-      // TODO: RC Q these selectors don't work when scoped, standard practise/acceptable?
-
-      .v--modal {
+      ::v-deep .v--modal {
         display: flex;
 
         .card-wrap {
@@ -295,28 +278,21 @@ export default {
           }
         }
       }
-
-      // .v--modal {
-        // background-color: var(--nav-bg);
-        // border-radius: var(--border-radius);
-        // max-height: 100vh;
-      // }
     }
 
-    // TODO: RC Q Styles here are BEM'd, is that ok moving forward (particularly in no-scoped world?)
     .prompt-password {
       flex: 1;
       display: flex;
 
-      &__generated {
+      .generated {
         display: flex;
 
-        .btn {
+        ::v-deep .btn {
           flex: 1;
         }
       }
 
-      &__randomGen {
+      .randomGen {
         display: flex;
         align-items: center;
 
