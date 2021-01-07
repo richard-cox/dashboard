@@ -96,6 +96,11 @@ export default {
             <nuxt-link tag="li" :to="{name: 'prefs'}" class="hand">
               <a>Preferences <i class="icon icon-fw icon-gear" /></a>
             </nuxt-link>
+            <nuxt-link tag="li" :to="{name: 'account'}" class="hand">
+              <!-- TODO: RC Translate?? -->
+              <!-- TODO: RC icon?? -->
+              <a>Account &amp; API Keys <i class="icon icon-fw icon-gear" /></a>
+            </nuxt-link>
             <nuxt-link v-if="authEnabled" tag="li" :to="{name: 'auth-logout'}" class="pt-5 pb-5 hand">
               <a>Log Out <i class="icon icon-fw icon-close" /></a>
             </nuxt-link>

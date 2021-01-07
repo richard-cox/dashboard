@@ -160,6 +160,10 @@ export default {
       }
     },
     deleteKey(token) {
+      // debugger;
+
+      // return token.remove();
+
       // TODO: RC Q token.remove() `Cannot read property 'push' of undefined`
       return this.$store.dispatch('rancher/request', {
         type:   NORMAN.TOKEN,

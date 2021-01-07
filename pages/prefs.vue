@@ -1,18 +1,16 @@
 <script>
 import day from 'dayjs';
 import ButtonGroup from '@/components/ButtonGroup';
-import PromptChangePassword from '@/components/PromptChangePassword';
 import Checkbox from '@/components/form/Checkbox';
 import {
   mapPref, THEME, LANDING, KEYMAP, DEV, DATE_FORMAT, TIME_FORMAT, ROWS_PER_PAGE, HIDE_DESC
 } from '@/store/prefs';
 import LabeledSelect from '@/components/form/LabeledSelect';
 import { addObject } from '@/utils/array';
-import { NORMAN } from '@/config/types';
 
 export default {
   components: {
-    ButtonGroup, LabeledSelect, Checkbox, PromptChangePassword
+    ButtonGroup, LabeledSelect, Checkbox
   },
   computed:   {
     theme:      mapPref(THEME),
@@ -111,12 +109,6 @@ export default {
       }
     },
 
-    principal() {
-      return this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
-    },
-    canChangePassword() {
-      return this.$store.getters['auth/enabled'] && !!this.principal.loginName;
-    },
   },
 };
 </script>
@@ -124,23 +116,6 @@ export default {
 <template>
   <div>
     <h1 v-t="'prefs.title'" />
-    <div v-if="canChangePassword" class="account">
-      <h4 v-t="'prefs.account.label'" />
-      <div class="account__details">
-        <div class="col mt-10">
-          <div><t k="prefs.account.name" />: {{ principal.name }}</div>
-          <div><t k="prefs.account.username" />: {{ principal.loginName }}</div>
-        </div>
-        <button
-          type="button"
-          class="btn role-secondary"
-          @click="$refs.promptChangePassword.show(true)"
-        >
-          {{ t("prefs.account.change") }}
-        </button>
-      </div>
-      <hr />
-    </div>
     <h4 v-t="'prefs.theme.label'" />
     <div>
       <ButtonGroup v-model="theme" :options="themeOptions" />
@@ -190,17 +165,11 @@ export default {
         <Checkbox v-model="hideDescriptions" :label="t('prefs.hideDesc.label')" />
       </div>
     </div>
-    <PromptChangePassword ref="promptChangePassword" />
   </div>
 </template>
 
 <style lang="scss" scoped>
   hr {
     margin: 20px 0;
-  }
-  .account {
-    &__details {
-      display: flex;
-    }
   }
 </style>
