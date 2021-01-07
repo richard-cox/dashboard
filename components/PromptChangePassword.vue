@@ -106,74 +106,74 @@ export default {
     validateNewPassword() {
       this.errorMessages = !!this.form.confirmP && (this.canShowMissmatchedPassword && this.form.newP !== this.form.confirmP) ? [this.t('prefs.account.changePassword.errors.missmatchedPassword')] : [];
     },
-    submit(buttonCb) {
-      return this.changePassword()
-        .then(() => this.form.deleteKeys ? this.deleteKeys() : null)
-        .then(() => {
-          buttonCb(true);
-          this.show(false);
-        })
-        .catch(() => {
-          buttonCb(false);
-        });
+    async submit(buttonCb) {
+      try {
+        await this.changePassword();
+        if (this.form.deleteKeys) {
+          await this.deleteKeys();
+        }
+        buttonCb(true);
+        this.show(false);
+      } catch (err) {
+        buttonCb(false);
+      }
     },
-    changePassword() {
-      return this.$store.dispatch('rancher/request', {
-        url:           '/v3/users?action=changepassword',
-        method:        'post',
-        headers:       { 'Content-Type': 'application/json' },
-        data:          {
-          currentPassword: this.form.currentP,
-          newPassword:     this.isUserGenerated ? this.form.newP : this.form.genP
-        },
-      })
-        .catch((err) => {
+    async changePassword() {
+      try {
+        await this.$store.dispatch('rancher/request', {
+          url:           '/v3/users?action=changepassword',
+          method:        'post',
+          headers:       { 'Content-Type': 'application/json' },
+          data:          {
+            currentPassword: this.form.currentP,
+            newPassword:     this.isUserGenerated ? this.form.newP : this.form.genP
+          },
+        });
+      } catch (err) {
         // TODO: RC Q cannot convert the returned err codes to i18n id's
         //   // no current password: {"baseType":"error","code":"InvalidBodyContent","message":"must specify current password","status":422,"type":"error"}
         //   // invalid current password: {"baseType":"error","code":"InvalidBodyContent","message":"invalid current password","status":422,"type":"error"}
-          this.errorMessages = [err.message || this.t('prefs.account.changePassword.errors.failedToChange')];
-          throw err;
-        });
+        this.errorMessages = [err.message || this.t('prefs.account.changePassword.errors.failedToChange')];
+        throw err;
+      }
     },
-    deleteKeys() {
+    async deleteKeys() {
       // TODO: RC Q Better way to determin user's tokens?
     //     return dispatch('rancher/findAll', { // Does this cache? if so how is it cleared if processed repeated?
     //   type: 'authConfig',
     //   opt:  { url: `/v3/authConfigs` }
     // }, { root: true });
-      return this.$store.dispatch('rancher/request', {
-        url:           '/v3/tokens',
-        method:        'get',
-        headers:       { 'Content-Type': 'application/json' },
-      })
-        .then((res) => {
-          const promises = [];
+      try {
+        const resp = await this.$store.dispatch('rancher/request', {
+          url:           '/v3/tokens',
+          method:        'get',
+          headers:       { 'Content-Type': 'application/json' },
+        });
+        const promises = [];
 
-          (res.data || []).forEach((token) => {
-            if (token.current) {
+        (resp.data || []).forEach((token) => {
+          if (token.current) {
             // Ignore the current session, it will error with `Cannot delete token for current session. Use logout instead`
             // TODO: RC Should we log user out instead or let them keep their current session's token?
-            } else {
-              promises.push(this.$store.dispatch('rancher/request', {
-                url:           `/v3/tokens/${ token.id }`, // TODO: RC Q Should this use the token.links.remove url instead?
-                method:        'delete',
-                headers:       { 'Content-Type': 'application/json' },
-              }));
-            }
-          });
-
-          return promises;
-        })
-        .catch((err) => {
-          if (err.message) {
-            this.errorMessages = [err.message];
-          } else if (err.length > 1) {
-            this.errorMessages = [this.t('prefs.account.changePassword.errors.failedDeleteKeys')];
           } else {
-            this.errorMessages = [this.t('prefs.account.changePassword.errors.failedDeleteKey')];
+            promises.push(this.$store.dispatch('rancher/request', {
+              url:           `/v3/tokens/${ token.id }`, // TODO: RC Q Should this use the token.links.remove url instead?
+              method:        'delete',
+              headers:       { 'Content-Type': 'application/json' },
+            }));
           }
-          throw err;
         });
+        await Promise.all(promises);
+      } catch (err) {
+        if (err.message) {
+          this.errorMessages = [err.message];
+        } else if (err.length > 1) {
+          this.errorMessages = [this.t('prefs.account.changePassword.errors.failedDeleteKeys')];
+        } else {
+          this.errorMessages = [this.t('prefs.account.changePassword.errors.failedDeleteKey')];
+        }
+        throw err;
+      }
     },
     generatePassword() {
       this.form.genP = randomStr(16, CHARSET.ALPHA_NUM);
