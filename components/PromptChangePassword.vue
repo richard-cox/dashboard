@@ -8,7 +8,7 @@ import AsyncButton from '@/components/AsyncButton';
 import LabeledInput from '@/components/form/LabeledInput';
 import { CHARSET, randomStr } from '@/utils/string';
 import CopyToClipboard from '@/components/CopyToClipboard.vue';
-import { NORMAN } from '@/config/types';
+import { MANAGEMENT, NORMAN } from '@/config/types';
 
 export default {
   components: {
@@ -134,16 +134,30 @@ export default {
         throw err;
       }
     },
+    fetchTokens1() {
+      // TODO: RC This causes resulting token.remove() to fail (after delete request) due to missing store.queue
+      return this.$store.dispatch('rancher/findAll', {
+        type: NORMAN.TOKEN,
+        opt:  { force: true } // Always fetch the latest
+      }); // TODO: RC Q what does root mean, it's not cluster based?
+    },
+    fetchTokens2() {
+      // TODO: RC This returns tokens for ALL users, not just current user, couldn't find a way to filter via pi
+      // TODO: RC Token's `current' value is incorrect (always false, in norman was true for requesting token)
+      return this.$store.dispatch('management/findAll', {
+        type: MANAGEMENT.TOKEN,
+        opt:  { force: true, // Always fetch the latest
+        }
+      }); // TODO: RC Q what does adding { root: true } here mean, it's not cluster based? did this cause the empty queue issue?
+    },
     async deleteKeys() {
       try {
-        const resp = await this.$store.dispatch('rancher/findAll', {
-          type: NORMAN.TOKEN,
-          opt:  { force: true } // Always fetch the latest
-        }, { root: true }); // TODO: RC Q what does root mean, it's not cluster based?
+        const resp = await this.fetchTokens1();
 
         await Promise.all(resp.reduce((res, token) => {
+          //
           if (!token.current) {
-            res.push(this.deleteKey(token));
+            res.push(token.remove());
           }
 
           return res;
@@ -159,18 +173,22 @@ export default {
         throw err;
       }
     },
-    deleteKey(token) {
-      // debugger;
+    // TODO: RC DELETE
+    // deleteKey1(token) {
+    //   return token.remove();
+    // },
+    // deleteKey2(token) {
+    //   // debugger;
 
-      // return token.remove();
+    //   // return token.remove();
 
-      // TODO: RC Q token.remove() `Cannot read property 'push' of undefined`
-      return this.$store.dispatch('rancher/request', {
-        type:   NORMAN.TOKEN,
-        method: 'delete',
-        url:    token.links.remove,
-      });
-    },
+    //   // TODO: RC Q token.remove() `Cannot read property 'push' of undefined`
+    //   return this.$store.dispatch('rancher/request', {
+    //     type:   NORMAN.TOKEN,
+    //     method: 'delete',
+    //     url:    token.links.remove,
+    //   });
+    // },
     generatePassword() {
       this.form.genP = randomStr(16, CHARSET.ALPHA_NUM);
     },

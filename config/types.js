@@ -127,6 +127,7 @@ export const MANAGEMENT = {
   PROJECT:          'management.cattle.io.project',
   SETTING:          'management.cattle.io.setting',
   USER:             'management.cattle.io.user',
+  TOKEN:            'management.cattle.io.token',
 };
 
 // --------------------------------------
