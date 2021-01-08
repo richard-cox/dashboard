@@ -108,6 +108,7 @@ export default {
         this.hideDesc = val;
       }
     },
+
   },
 };
 </script>
@@ -115,7 +116,6 @@ export default {
 <template>
   <div>
     <h1 v-t="'prefs.title'" />
-
     <h4 v-t="'prefs.theme.label'" />
     <div>
       <ButtonGroup v-model="theme" :options="themeOptions" />
@@ -165,7 +165,6 @@ export default {
         <Checkbox v-model="hideDescriptions" :label="t('prefs.hideDesc.label')" />
       </div>
     </div>
-  </div>
   </div>
 </template>
 
