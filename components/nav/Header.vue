@@ -87,16 +87,16 @@ export default {
         placement="bottom"
         offset="-10"
         trigger="manual"
-        :delay="{show: 0, hide: 200}"
+        :delay="{show: 0, hide: 0}"
         :popper-options="{modifiers: { flip: { enabled: false } } }"
       >
-        <div class="text-right" @mouseover="showMenu(true)" @click="showMenu(true)">
+        <div class="text-right hand" @click="showMenu(true)">
           <img v-if="principal && principal.avatarSrc" :src="principal.avatarSrc" :class="{'avatar-round': principal.roundAvatar}" width="40" height="40" />
           <i v-else class="icon icon-user icon-3x avatar" />
         </div>
 
         <template slot="popover">
-          <ul class="list-unstyled dropdown" @mouseleave="showMenu(false)">
+          <ul class="list-unstyled dropdown">
             <li v-if="authEnabled" class="user-info">
               <div class="user-name">
                 <i class="icon icon-lg icon-user" /> {{ principal.loginName }}
