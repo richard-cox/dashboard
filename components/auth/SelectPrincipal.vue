@@ -22,6 +22,11 @@ export default {
       default() {
         return ['group'];
       },
+    },
+
+    retainSelection: {
+      type:    Boolean,
+      default: false
     }
   },
 
@@ -68,7 +73,9 @@ export default {
   methods: {
     add(id) {
       this.$emit('add', id);
-      this.newValue = '';
+      if (!this.retainSelection) {
+        this.newValue = '';
+      }
     },
 
     onSearch(str, loading, vm) {
@@ -112,8 +119,6 @@ export default {
     }
   }
 };
-</script>
-}
 </script>
 
 <template>

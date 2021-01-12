@@ -14,6 +14,7 @@ export const STEVE = {
 export const NORMAN = {
   AUTH_CONFIG: 'authconfig',
   PRINCIPAL:   'principal',
+  GROUP:       'group'
 };
 
 // Public (via Norman)
@@ -115,16 +116,18 @@ export const LONGHORN = {
 // Rancher Management API (via Steve)
 // Base: /v1
 export const MANAGEMENT = {
-  AUTH_CONFIG:      'management.cattle.io.authconfig',
-  CATALOG_TEMPLATE: 'management.cattle.io.catalogtemplate',
-  CATALOG:          'management.cattle.io.catalog',
-  CLUSTER:          'management.cattle.io.cluster',
-  GROUP:            'management.cattle.io.group',
-  NODE_POOL:        'management.cattle.io.nodepool',
-  NODE_TEMPLATE:    'management.cattle.io.nodetemplate',
-  PROJECT:          'management.cattle.io.project',
-  SETTING:          'management.cattle.io.setting',
-  USER:             'management.cattle.io.user',
+  AUTH_CONFIG:          'management.cattle.io.authconfig',
+  CATALOG_TEMPLATE:     'management.cattle.io.catalogtemplate',
+  CATALOG:              'management.cattle.io.catalog',
+  CLUSTER:              'management.cattle.io.cluster',
+  GROUP:                'management.cattle.io.group',
+  NODE_POOL:            'management.cattle.io.nodepool',
+  NODE_TEMPLATE:        'management.cattle.io.nodetemplate',
+  PROJECT:              'management.cattle.io.project',
+  SETTING:              'management.cattle.io.setting',
+  USER:                 'management.cattle.io.user',
+  GLOBAL_ROLE_BINDINGS: 'management.cattle.io.globalrolebinding',
+  GLOBAL_ROLE:          'management.cattle.io.globalrole'
 };
 
 // --------------------------------------

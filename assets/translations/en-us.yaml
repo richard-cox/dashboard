@@ -145,7 +145,13 @@ authConfig:
         <li>Click "Register application"</li>
         <li>Copy and paste the Client ID and Client Secret of your newly created OAuth app into the fields below</li>
 
-
+authGroups:
+  title: Groups
+  actions:
+    refresh: Refresh Group Memberships
+    assignRoles: Assign Global Role
+  assign:
+      title: Assign Global Roles To Group
 
 
 
