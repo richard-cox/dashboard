@@ -2,9 +2,10 @@
 <script>
 import { mapGetters } from 'vuex';
 import { RBAC } from '@/config/types';
+import Checkbox from '@/components/form/Checkbox';
 
 export default {
-  components: {},
+  components: { Checkbox },
   props:      {
     isView: {
       type:    Boolean,
@@ -19,27 +20,29 @@ export default {
     const roles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
     // console.log(roles);
-
-    this.allRoles = roles.reduce((res, role) => {
+    this.allRoles = {
+      global:  {},
+      builtin: {},
+      custom:  {}
+    };
+    roles.forEach((role) => {
       const mapped = {
         label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
         description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
+        // checked:     false,
+        id:          role.id
       };
+
+      this.allRoles[role.id] = mapped;
 
       // TODO: RC Q how to defined three types of roles... builtin... custom (annotation "field.cattle.io/creatorId") ... global ("authz.management.cattle.io/bootstrapping": "default-globalrole",)
       if (this.globalPermissions.find(p => p === role.id)) {
-        res.global.push(mapped);
+        this.sortedRoles.global.push(mapped);
       } else if (role.builtin) {
-        res.builtin.push(mapped);
+        this.sortedRoles.builtin.push(mapped);
       } else {
-        res.custom.push(mapped);
+        this.sortedRoles.custom.push(mapped);
       }
-
-      return res;
-    }, {
-      global:  [],
-      builtin: [],
-      custom:  []
     });
   },
   data() {
@@ -50,7 +53,8 @@ export default {
         'user',
         'user-base',
       ],
-      allRoles: {
+      allRoles:    {},
+      sortedRoles: {
         global:  [],
         builtin: [],
         custom:  []
@@ -60,7 +64,6 @@ export default {
   computed: { ...mapGetters({ t: 'i18n/t' }) },
   watch:    {
     async principalId(principalId, oldPrincipalId) {
-      console.log('principalId triggered: ', principalId);
       if (!principalId || principalId === oldPrincipalId) {
         return;
       }
@@ -69,9 +72,15 @@ export default {
       // aka all entries where groupPrincipalName is one in string[],
       const globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
 
-      const boundRoles = globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
+      const boundRoles = globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
 
-      // this.principal = await this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.principalId)
+      console.log(principalId, boundRoles);
+
+      Object.entries(this.allRoles).forEach(([key, val]) => {
+        this.allRoles[key].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === key);
+      });
+
+      console.log(this.allRoles);
     }
   }
 };
@@ -80,17 +89,31 @@ export default {
 <template>
   <div>
     <!-- hello world {{ principalId }}<br> -->
-    <h2>Global Permissions</h2>
-    <div v-for="(row, i) in allRoles.global" :key="'global-' + i">
-      {{ row.label }} - {{ row.description }}
+    <!-- <h2>Global Permissions</h2> -->
+    <div v-for="(sortedRole, type) in sortedRoles" :key="type">
+      <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
+      <div v-for="(role, i) in sortedRole" :key="type + i">
+        <Checkbox v-model="allRoles[role.id].checked" :disabled="isView" :label="role.label" />
+        {{ role.description }}<br>
+        ¬¬{{ role.id }}¬¬
+        ¬¬{{ !!allRoles[role.id] }}¬¬
+        ¬¬{{ allRoles[role.id].checked }}¬¬
+      </div>
+    </div>
+
+    <!-- <div v-for="(role, i) in sortedRoles.global" :key="'global-' + i">
+      <template v-if="isView">{{ role.label }} - {{ role.description }} - {{ role.checked }}</template> -->
+    <!-- @input="update"
+      <Checkbox v-model="allRoles[role.id].checked" :disabled="isView" :label="role.label" />
+      {{ role.description }}
     </div>
     <h2>Custom</h2>
-    <div v-for="(row, i) in allRoles.custom" :key="'custom-' + i">
-      {{ row.label }} - {{ row.description }}
+    <div v-for="(role, i) in sortedRoles.custom" :key="'custom-' + i">
+      {{ role.label }} - {{ role.description }} - {{ role.checked }}
     </div>
     <h2>Built-in</h2>
-    <div v-for="(row, i) in allRoles.builtin" :key="'builtin-' + i">
-      {{ row.label }} - {{ row.description }}
-    </div>
+    <div v-for="(role, i) in sortedRoles.builtin" :key="'builtin-' + i">
+      {{ role.label }} - {{ role.description }} - {{ role.checked }}
+    </div> -->
   </div>
 </template>

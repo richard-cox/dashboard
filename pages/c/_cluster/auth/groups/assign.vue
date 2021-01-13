@@ -49,14 +49,14 @@ export default {
     <form>
       <SelectPrincipal :mode="'true'" :retain-selection="true" @add="addPrincipal" />
       <GlobalRoleBindings :principal-id="principalId">
-        <FooterComponent
-          :mode="footerMode"
-          :errors="errors"
-          @save="save"
-          @done="cancel"
-        >
-        </footercomponent>
       </globalrolebindings>
+      <FooterComponent
+        :mode="footerMode"
+        :errors="errors"
+        @save="save"
+        @done="cancel"
+      >
+      </footercomponent>
     </form>
   </div>
 </template>

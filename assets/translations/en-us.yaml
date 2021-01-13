@@ -1365,6 +1365,10 @@ rbac:
     fleetworkspace-member: Member
     fleetworkspace-readonly: Read-Only
   globalRoles:
+    types:
+      global: Global Permissions
+      builtin: Built-in
+      custom: Custom
     restricted-admin:
       label: 1Restricted Admin
       description: 1Resctricted admins have full control over all resources in all downstream clusters but no access to the local cluster.
