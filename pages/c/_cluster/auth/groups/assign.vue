@@ -1,21 +1,25 @@
 <script>
 import FooterComponent from '@/components/form/Footer';
 import SelectPrincipal from '@/components/auth/SelectPrincipal.vue';
+import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 
 export default {
   components: {
     SelectPrincipal,
-    FooterComponent
+    FooterComponent,
+    GlobalRoleBindings
   },
   data() {
     return {
-      errors:     [],
-      footerMode: 'edit'
+      errors:      [],
+      footerMode:  'edit',
+      principalId: null
     };
   },
   methods: {
     addPrincipal(id) {
       console.log('addPrincipal', id);
+      this.principalId = id;
 
       return true;
     },
@@ -44,13 +48,15 @@ export default {
 
     <form>
       <SelectPrincipal :mode="'true'" :retain-selection="true" @add="addPrincipal" />
-      <FooterComponent
-        :mode="footerMode"
-        :errors="errors"
-        @save="save"
-        @done="cancel"
-      >
-      </footercomponent>
+      <GlobalRoleBindings :principal-id="principalId">
+        <FooterComponent
+          :mode="footerMode"
+          :errors="errors"
+          @save="save"
+          @done="cancel"
+        >
+        </footercomponent>
+      </globalrolebindings>
     </form>
   </div>
 </template>

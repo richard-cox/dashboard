@@ -126,8 +126,6 @@ export const MANAGEMENT = {
   PROJECT:              'management.cattle.io.project',
   SETTING:              'management.cattle.io.setting',
   USER:                 'management.cattle.io.user',
-  GLOBAL_ROLE_BINDINGS: 'management.cattle.io.globalrolebinding',
-  GLOBAL_ROLE:          'management.cattle.io.globalrole'
 };
 
 // --------------------------------------

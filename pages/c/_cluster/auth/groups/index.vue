@@ -1,7 +1,7 @@
 <script>
 import SortableTable from '@/components/SortableTable';
 import Loading from '@/components/Loading';
-import { MANAGEMENT, NORMAN } from '@/config/types';
+import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
 
 // TODO: RC Q Should this be a custom list showing selected principals... or all principals... what about groups?
 // TODO: RC Group Roles & Bindings vs Cluster roles & bindings
@@ -32,10 +32,7 @@ export default {
     async updateGlobalRoleBindings(force) {
       // TODO: RC Can this be filtered by only the principals we're interested in... as this could be huge?
       // aka all entries where groupPrincipalName is one in string[],
-      this.globalRoleBindings = await this.$store.dispatch('management/findAll', {
-        type: MANAGEMENT.GLOBAL_ROLE_BINDINGS,
-        opt:  { force }
-      });
+      this.globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
     },
     async updateRows() {
       if (!this.principals) {
@@ -46,7 +43,7 @@ export default {
       }
 
       // Up front fetch all global roles, in stead of individually when needed (results in many duplicated requests)
-      await this.$store.dispatch('management/findAll', { type: MANAGEMENT.GLOBAL_ROLE });
+      await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
       // TODO: Q does this always redraw... and as such recreate (RE refresh group memberships)
       this.rows = this.principals.filter((principal) => {

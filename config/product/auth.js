@@ -39,6 +39,7 @@ export function init(store) {
   });
 
   // TODO: RC Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
+  // Can this be done with virtualType / spoofedType?
   virtualType({
     label:       'Groups', // TODO: RC i10n
     icon:        'lock', // TODO: RC
