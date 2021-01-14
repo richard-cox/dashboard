@@ -31,7 +31,7 @@ export default {
 
 <template>
   <div>
-    <!-- TODO: RC These should be links each Role's Detail page, still currently WIP -->
+    <!-- TODO: RC link to details page for role. see model details link <entity>.detailLocation -->
     {{ bindings.join(', ') }}
   </div>
 </template>

@@ -35,12 +35,18 @@ export default {
 
       this.allRoles[role.id] = mapped;
 
-      // TODO: RC Q how to defined three types of roles... builtin... custom (annotation "field.cattle.io/creatorId") ... global ("authz.management.cattle.io/bootstrapping": "default-globalrole",)
+      // custom (annotation "field.cattle.io/creatorId")
+      // See
+      // - lib/global-admin/addon/security/accounts/new-group
+      // - lib/global-admin/addon/components/cru-group-account
+      // - lib/global-admin/addon/components/form-global-roles/component.js
+      // TODO: RC CHECK EMBER Q how to defined three types of roles... builtin...  ... global ("authz.management.cattle.io/bootstrapping": "default-globalrole",)
       if (this.globalPermissions.find(p => p === role.id)) {
         this.sortedRoles.global.push(mapped);
       } else if (role.builtin) {
         this.sortedRoles.builtin.push(mapped);
-      } else {
+      } else if (!role.isHidden) {
+        // TODO: RC test isHidden
         this.sortedRoles.custom.push(mapped);
       }
     });
@@ -68,8 +74,6 @@ export default {
         return;
       }
 
-      // TODO: RC Can this be filtered by only the principals we're interested in... as this could be huge?
-      // aka all entries where groupPrincipalName is one in string[],
       const globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
 
       const boundRoles = globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
@@ -77,7 +81,9 @@ export default {
       console.log(principalId, boundRoles);
 
       Object.entries(this.allRoles).forEach(([key, val]) => {
-        this.allRoles[key].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === key);
+        this.$nextTick(() => {
+          this.allRoles[key].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === key);
+        });
       });
 
       console.log(this.allRoles);
@@ -94,10 +100,10 @@ export default {
       <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
       <div v-for="(role, i) in sortedRole" :key="type + i">
         <Checkbox v-model="allRoles[role.id].checked" :disabled="isView" :label="role.label" />
-        {{ role.description }}<br>
+        <!-- {{ role.description }}<br>
         ¬¬{{ role.id }}¬¬
         ¬¬{{ !!allRoles[role.id] }}¬¬
-        ¬¬{{ allRoles[role.id].checked }}¬¬
+        ¬¬{{ allRoles[role.id].checked }}¬¬ -->
       </div>
     </div>
 

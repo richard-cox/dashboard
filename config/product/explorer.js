@@ -68,7 +68,6 @@ export function init(store) {
     RBAC.CLUSTER_ROLE,
     RBAC.ROLE_BINDING,
     RBAC.CLUSTER_ROLE_BINDING,
-    // TODO: RC Q Where does global role bindings fit in, are they removed from here as there's a specific page for them?
   ], 'rbac');
 
   weightGroup('cluster', 99, true);

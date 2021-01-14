@@ -6,6 +6,8 @@ import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
 // TODO: RC Q Should this be a custom list showing selected principals... or all principals... what about groups?
 // TODO: RC Group Roles & Bindings vs Cluster roles & bindings
 
+// TODO: RC Move this into list folder, so just list section us used
+
 export default {
   components: { SortableTable, Loading },
   async fetch() {
@@ -21,20 +23,24 @@ export default {
       rows:               [],
     };
   },
-  methods: {
+  computed: {},
+  methods:  {
     async updatePrincipals() {
-      // TODO: RC Can this be filtered by principalType === 'group'?
+      // TODO: RC nope QCan this be filtered by principalType === 'group'?
       this.principals = await this.$store.dispatch('rancher/findAll', {
-        type: NORMAN.PRINCIPLE,
+        type: NORMAN.PRINCIPLE, // TODO: RC typo PRINCIPAL
         opt:  { url: '/v3/principals' }
       });
     },
     async updateGlobalRoleBindings(force) {
       // TODO: RC Can this be filtered by only the principals we're interested in... as this could be huge?
       // aka all entries where groupPrincipalName is one in string[],
-      this.globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
+      this.globalRoleBindings = await this.$store.dispatch('management/findAll', {
+        type: RBAC.GLOBAL_ROLE_BINDING,
+        opt:  { force: true }
+      });
     },
-    async updateRows() {
+    async updateRows() { // TODO: RC update with computed + test with
       if (!this.principals) {
         await this.updatePrincipals();
       }
@@ -45,7 +51,7 @@ export default {
       // Up front fetch all global roles, in stead of individually when needed (results in many duplicated requests)
       await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-      // TODO: Q does this always redraw... and as such recreate (RE refresh group memberships)
+      // TODO: CHECK Q does this always redraw... and as such recreate (RE refresh group memberships)
       this.rows = this.principals.filter((principal) => {
         return principal.principalType === 'group' && this.principalHasGlobalRoleBinding(this.globalRoleBindings, principal);
       });
@@ -54,12 +60,34 @@ export default {
       return !!globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === principal.id);
     },
     async refreshGroupMemberships() {
-      // TODO: RC Double check ... just need to refresh global role bindings?
+      // TODO: RC FIX - specific api action Q Double check ... just need to refresh global role bindings?
+      // TODO: RC use action button to show state
       await this.updateGlobalRoleBindings(true);
       await this.updateRows();
     },
   }
 };
+
+/**
+ * actions: {
+      refreshAllTokens() {
+        set(this, 'refreshing', true);        this.globalStore.request({
+          url:    '/v3/users?action=refreshauthprovideraccess',
+          method: 'POST',
+          data:   {}
+        }).then(() => {
+          const successTitle   = this.intl.t('action.refreshAuthProviderAccess.allSuccess.title');
+          const successMessage = this.intl.t('action.refreshAuthProviderAccess.allSuccess.message');          this.growl.success(successTitle, successMessage)
+        })
+          .catch((err) => {
+            set(this, 'errors', [err.message]);
+          })
+          .finally(() => {
+            set(this, 'refreshing', false);
+          });
+      },
+    },
+*/
 
 </script>
 

@@ -38,15 +38,15 @@ export function init(store) {
     route:       { name: 'c-cluster-auth-config' },
   });
 
-  // TODO: RC Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
+  // TODO: RC use spoofedType monitoring/logging. Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
   // Can this be done with virtualType / spoofedType?
   virtualType({
     label:       'Groups', // TODO: RC i10n
     icon:        'lock', // TODO: RC
     namespaced:  false,
     name:        'groups',
-    weight:      0, // TODO: Q This never moves below users
-    count:       12345, // TODO: RC Q Should the groups table show all groups/principles?
+    weight:      -1, // TODO: Use weightType on user Q This never moves below users.
+    // count:       12345, // TODO: RC remove Q Should the groups table show all groups/principles?
     route:       { name: 'c-cluster-auth-groups' },
   });
 
@@ -62,10 +62,9 @@ export function init(store) {
   basicType([
     'config',
     MANAGEMENT.USER,
-    'groups' // TODO: RC Q Conditionally add given providers. Just show warning at top (like that in assign roles)?
+    'groups' // TODO: RC see adding to virtualType ifhavetype Q Conditionally add given providers. Just show warning at top (like that in assign roles)?
   ]);
 
-  // TODO: RC Q Should this be here?
   headers(MANAGEMENT.USER, [
     STATE,
     USER_ID,
@@ -75,7 +74,7 @@ export function init(store) {
     AGE
   ]);
 
-  // TODO: RC Q Should this be here?
+  // TODO: RC use directly for custom types
   headers(NORMAN.PRINCIPAL, [
     GROUP_NAME,
     GROUP_ROLE_NAME
