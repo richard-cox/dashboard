@@ -3,13 +3,19 @@
 import { mapGetters } from 'vuex';
 import { RBAC } from '@/config/types';
 import Checkbox from '@/components/form/Checkbox';
+import { _VIEW } from '@/config/query-params';
+import Loading from '@/components/Loading';
+import richard from '@/utils/richards';
 
 export default {
-  components: { Checkbox },
+  components: {
+    Checkbox,
+    Loading
+  },
   props:      {
-    isView: {
-      type:    Boolean,
-      default: false,
+    mode: {
+      type:    String,
+      default: _VIEW,
     },
     principalId: {
       type:     String,
@@ -20,20 +26,17 @@ export default {
     const roles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
     // console.log(roles);
-    this.allRoles = {
-      global:  {},
-      builtin: {},
-      custom:  {}
-    };
+    this.allRoles = { };
     roles.forEach((role) => {
       const mapped = {
         label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
         description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
-        // checked:     false,
-        id:          role.id
+        checked:     false,
+        id:          role.id,
+        role,
       };
 
-      this.allRoles[role.id] = mapped;
+      // this.allRoles[role.id] = false;
 
       // custom (annotation "field.cattle.io/creatorId")
       // See
@@ -41,15 +44,14 @@ export default {
       // - lib/global-admin/addon/components/cru-group-account
       // - lib/global-admin/addon/components/form-global-roles/component.js
       // TODO: RC CHECK EMBER Q how to defined three types of roles... builtin...  ... global ("authz.management.cattle.io/bootstrapping": "default-globalrole",)
-      if (this.globalPermissions.find(p => p === role.id)) {
-        this.sortedRoles.global.push(mapped);
-      } else if (role.builtin) {
-        this.sortedRoles.builtin.push(mapped);
-      } else if (!role.isHidden) {
-        // TODO: RC test isHidden
-        this.sortedRoles.custom.push(mapped);
+      const type = this.getType(role);
+
+      if (type) {
+        // console.error(type, role.id);
+        this.sortedRoles[type][role.id] = mapped;
       }
     });
+    await this.updateRoles();
   },
   data() {
     return {
@@ -61,16 +63,43 @@ export default {
       ],
       allRoles:    {},
       sortedRoles: {
-        global:  [],
-        builtin: [],
-        custom:  []
+        global:  {},
+        builtin: {},
+        custom:  {}
       },
+      junk: false
     };
   },
-  computed: { ...mapGetters({ t: 'i18n/t' }) },
+  computed: {
+    ...mapGetters({ t: 'i18n/t' }),
+    // getMode() {
+    //   return this.mode || _VIEW;
+    // }
+    hmmm() {
+      return a => this.allRoles[a];
+    }
+  },
   watch:    {
     async principalId(principalId, oldPrincipalId) {
-      if (!principalId || principalId === oldPrincipalId) {
+      if (principalId === oldPrincipalId) {
+        return;
+      }
+      await this.updateRoles();
+    }
+  },
+  methods: {
+    getType(role) {
+      if (this.globalPermissions.find(p => p === role.id)) {
+        return 'global';
+      } else if (role.builtin) {
+        return 'builtin';
+      } else if (!role.isHidden) {
+        // TODO: RC test isHidden
+        return 'custom';
+      }
+    },
+    async updateRoles() {
+      if (!this.principalId) {
         return;
       }
 
@@ -78,48 +107,41 @@ export default {
 
       const boundRoles = globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
 
-      console.log(principalId, boundRoles);
+      richard.log(this.principalId, boundRoles);
 
-      Object.entries(this.allRoles).forEach(([key, val]) => {
-        this.$nextTick(() => {
-          this.allRoles[key].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === key);
+      // Object.entries(this.allRoles).forEach(([key, val]) => {
+      //   // this.$nextTick(() => {
+      //   this.allRoles[key] = !!boundRoles.find(boundRole => boundRole.globalRoleName === key);
+      //   // });
+      // });
+      // const allRoles = Object.values(this.sortedRoles);
+
+      // richard.log('allRoles: ', allRoles);
+      Object.entries(this.sortedRoles).forEach(([type, types]) => {
+        Object.entries(types).forEach(([roleId, mappedRole]) => {
+          this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
         });
       });
-
-      console.log(this.allRoles);
+    },
+    toggleAll(type, roleId, a) {
+      richard.log('', type);
+      richard.log('', roleId);
+      richard.log('', a);
+      this.sortedRoles[type][roleId].checked = a;
+      // this.allRoles[roleId] = a;
     }
   }
 };
 </script>
 
 <template>
-  <div>
-    <!-- hello world {{ principalId }}<br> -->
-    <!-- <h2>Global Permissions</h2> -->
+  <Loading v-if="$fetchState.pending" />
+  <div v-else>
     <div v-for="(sortedRole, type) in sortedRoles" :key="type">
       <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
       <div v-for="(role, i) in sortedRole" :key="type + i">
-        <Checkbox v-model="allRoles[role.id].checked" :disabled="isView" :label="role.label" />
-        <!-- {{ role.description }}<br>
-        ¬¬{{ role.id }}¬¬
-        ¬¬{{ !!allRoles[role.id] }}¬¬
-        ¬¬{{ allRoles[role.id].checked }}¬¬ -->
+        <Checkbox v-model="role.checked" :label="role.label" :mode="mode" /> (DEBUG: {{ role.checked }})
       </div>
     </div>
-
-    <!-- <div v-for="(role, i) in sortedRoles.global" :key="'global-' + i">
-      <template v-if="isView">{{ role.label }} - {{ role.description }} - {{ role.checked }}</template> -->
-    <!-- @input="update"
-      <Checkbox v-model="allRoles[role.id].checked" :disabled="isView" :label="role.label" />
-      {{ role.description }}
-    </div>
-    <h2>Custom</h2>
-    <div v-for="(role, i) in sortedRoles.custom" :key="'custom-' + i">
-      {{ role.label }} - {{ role.description }} - {{ role.checked }}
-    </div>
-    <h2>Built-in</h2>
-    <div v-for="(role, i) in sortedRoles.builtin" :key="'builtin-' + i">
-      {{ role.label }} - {{ role.description }} - {{ role.checked }}
-    </div> -->
   </div>
 </template>
