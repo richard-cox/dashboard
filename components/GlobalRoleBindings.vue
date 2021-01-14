@@ -25,32 +25,20 @@ export default {
   async fetch() {
     const roles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-    // console.log(roles);
-    this.allRoles = { };
     roles.forEach((role) => {
-      const mapped = {
-        label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
-        description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
-        checked:     false,
-        id:          role.id,
-        role,
-      };
-
-      // this.allRoles[role.id] = false;
-
-      // custom (annotation "field.cattle.io/creatorId")
-      // See
-      // - lib/global-admin/addon/security/accounts/new-group
-      // - lib/global-admin/addon/components/cru-group-account
-      // - lib/global-admin/addon/components/form-global-roles/component.js
-      // TODO: RC CHECK EMBER Q how to defined three types of roles... builtin...  ... global ("authz.management.cattle.io/bootstrapping": "default-globalrole",)
-      const type = this.getType(role);
+      const type = this.getRoleType(role);
 
       if (type) {
-        // console.error(type, role.id);
-        this.sortedRoles[type][role.id] = mapped;
+        this.sortedRoles[type][role.id] = {
+          label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
+          description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
+          checked:     false,
+          id:          role.id,
+          role,
+        };
       }
     });
+    // Cover first load case, this is probably edit
     await this.updateRoles();
   },
   data() {
@@ -61,24 +49,14 @@ export default {
         'user',
         'user-base',
       ],
-      allRoles:    {},
       sortedRoles: {
         global:  {},
         builtin: {},
         custom:  {}
       },
-      junk: false
     };
   },
-  computed: {
-    ...mapGetters({ t: 'i18n/t' }),
-    // getMode() {
-    //   return this.mode || _VIEW;
-    // }
-    hmmm() {
-      return a => this.allRoles[a];
-    }
-  },
+  computed: { ...mapGetters({ t: 'i18n/t' }) },
   watch:    {
     async principalId(principalId, oldPrincipalId) {
       if (principalId === oldPrincipalId) {
@@ -88,7 +66,12 @@ export default {
     }
   },
   methods: {
-    getType(role) {
+    getRoleType(role) {
+      // See
+      // - lib/global-admin/addon/security/accounts/new-group
+      // - lib/global-admin/addon/components/cru-group-account
+      // - lib/global-admin/addon/components/form-global-roles/component.js
+      // TODO: RC CHECK EMBER Q how to defined three types of roles... builtin...  ... global ("authz.management.cattle.io/bootstrapping": "default-globalrole",)
       if (this.globalPermissions.find(p => p === role.id)) {
         return 'global';
       } else if (role.builtin) {
@@ -107,29 +90,12 @@ export default {
 
       const boundRoles = globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
 
-      richard.log(this.principalId, boundRoles);
-
-      // Object.entries(this.allRoles).forEach(([key, val]) => {
-      //   // this.$nextTick(() => {
-      //   this.allRoles[key] = !!boundRoles.find(boundRole => boundRole.globalRoleName === key);
-      //   // });
-      // });
-      // const allRoles = Object.values(this.sortedRoles);
-
-      // richard.log('allRoles: ', allRoles);
       Object.entries(this.sortedRoles).forEach(([type, types]) => {
         Object.entries(types).forEach(([roleId, mappedRole]) => {
-          this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+          // this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
         });
       });
     },
-    toggleAll(type, roleId, a) {
-      richard.log('', type);
-      richard.log('', roleId);
-      richard.log('', a);
-      this.sortedRoles[type][roleId].checked = a;
-      // this.allRoles[roleId] = a;
-    }
   }
 };
 </script>
