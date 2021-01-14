@@ -995,6 +995,14 @@ export default {
     };
   },
 
+  goToList() {
+    return () => {
+      const location = this.listLocation;
+
+      this.currentRouter().push(location);
+    };
+  },
+
   cloneYaml() {
     return (moreQuery = {}) => {
       const location = this.detailLocation;

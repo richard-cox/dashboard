@@ -23,21 +23,8 @@ export default {
     },
   },
   async fetch() {
-    const roles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
+    this.allRoles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-    roles.forEach((role) => {
-      const type = this.getRoleType(role);
-
-      if (type) {
-        this.sortedRoles[type][role.id] = {
-          label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
-          description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
-          checked:     false,
-          id:          role.id,
-          role,
-        };
-      }
-    });
     // Cover first load case, this is probably edit
     await this.updateRoles();
   },
@@ -49,11 +36,8 @@ export default {
         'user',
         'user-base',
       ],
-      sortedRoles: {
-        global:  {},
-        builtin: {},
-        custom:  {}
-      },
+      sortedRoles: {},
+      allRoles:    []
     };
   },
   computed: { ...mapGetters({ t: 'i18n/t' }) },
@@ -86,13 +70,35 @@ export default {
         return;
       }
 
+      if (!this.sortedRoles[this.principalId]) {
+        this.sortedRoles[this.principalId] = {
+          global:  {},
+          builtin: {},
+          custom:  {}
+        };
+      }
+
+      this.allRoles.forEach((role) => {
+        const type = this.getRoleType(role);
+
+        if (type) {
+          this.sortedRoles[this.principalId][type][role.id] = {
+            label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
+            description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
+            checked:     false,
+            id:          role.id,
+            role,
+          };
+        }
+      });
+
       const globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
 
       const boundRoles = globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
 
-      Object.entries(this.sortedRoles).forEach(([type, types]) => {
+      Object.entries(this.sortedRoles[this.principalId]).forEach(([type, types]) => {
         Object.entries(types).forEach(([roleId, mappedRole]) => {
-          // this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+          this.sortedRoles[this.principalId][type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
         });
       });
     },
@@ -103,7 +109,7 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
-    <div v-for="(sortedRole, type) in sortedRoles" :key="type">
+    <div v-for="(sortedRole, type) in sortedRoles[principalId]" :key="type">
       <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
       <div v-for="(role, i) in sortedRole" :key="type + i">
         <Checkbox v-model="role.checked" :label="role.label" :mode="mode" /> (DEBUG: {{ role.checked }})

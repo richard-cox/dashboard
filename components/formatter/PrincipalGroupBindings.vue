@@ -1,5 +1,5 @@
 <script>
-import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
+import { NORMAN, RBAC } from '@/config/types';
 
 export default {
   props:      {

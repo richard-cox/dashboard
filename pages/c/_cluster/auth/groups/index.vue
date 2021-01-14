@@ -1,7 +1,7 @@
 <script>
 import SortableTable from '@/components/SortableTable';
 import Loading from '@/components/Loading';
-import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
+import { NORMAN, RBAC } from '@/config/types';
 
 // TODO: RC Q Should this be a custom list showing selected principals... or all principals... what about groups?
 // TODO: RC Group Roles & Bindings vs Cluster roles & bindings
@@ -15,7 +15,7 @@ export default {
   },
   data() {
     return {
-      schema:             null, // this.$store.getters['norman/schemaFor'](NORMAN.PRINCIPLE)// TODO: RC Q confirm, no schema's for norman?
+      schema:             null, // this.$store.getters['norman/schemaFor'](NORMAN.PRINCIPAL)// TODO: RC Q confirm, no schema's for norman?
       headers:            this.$store.getters['type-map/headersFor']({ id: NORMAN.PRINCIPAL }),
       // Provided by fetch & updateRows later
       principals:         null,
@@ -28,7 +28,7 @@ export default {
     async updatePrincipals() {
       // TODO: RC nope QCan this be filtered by principalType === 'group'?
       this.principals = await this.$store.dispatch('rancher/findAll', {
-        type: NORMAN.PRINCIPLE, // TODO: RC typo PRINCIPAL
+        type: NORMAN.PRINCIPAL, // TODO: RC typo PRINCIPAL
         opt:  { url: '/v3/principals' }
       });
     },
@@ -110,7 +110,7 @@ export default {
           </span>
           <n-link
             v-if="rows.length > 0"
-            :to="'groups/assign'"
+            :to="'group.principal/assign-edit'"
             class="btn role-primary"
           >
             {{ t("authGroups.actions.assignRoles") }}

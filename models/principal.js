@@ -39,33 +39,4 @@ export default {
     return `${ provider } ${ ucFirst(this.providerSpecificType) }`;
   },
 
-  availableActions() {
-    // TODO: RC These actions are for principals shown in groups view
-    return [
-      // TODO: RC Edit
-      {
-        action:  this.canUpdate ? 'goToEdit' : 'goToViewConfig',
-        label:   this.t(this.canUpdate ? 'action.edit' : 'action.view'),
-        icon:    'icon icon-edit',
-        enabled:  this.canCustomEdit,
-      },
-      // TODO: RC Delete (which is not delete group... but remove all bindings from group/s?)
-      {
-        action:     'unassignGroupRoles',
-        // altAction:  'remove',
-        label:      this.t('action.remove'),
-        icon:       'icon icon-trash',
-        bulkable:   true,
-        enabled:    true,
-        bulkAction: 'unassignGroupRoles',
-      },
-      ...this._standardActions
-    ];
-  },
-
-  unassignGroupRoles() {
-    return (resources = this) => {
-      // this.$dispatch('promptRemove', resources);
-    };
-  },
 };

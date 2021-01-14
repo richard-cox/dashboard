@@ -14,7 +14,8 @@ export const STEVE = {
 export const NORMAN = {
   AUTH_CONFIG: 'authconfig',
   PRINCIPAL:   'principal',
-  GROUP:       'group'
+  GROUP:       'group',
+  SPOOFED:     { GROUP_PRINCIPAL: 'group.principal' }
 };
 
 // Public (via Norman)

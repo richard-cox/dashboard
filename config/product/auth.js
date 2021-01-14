@@ -1,8 +1,8 @@
 import { DSL } from '@/store/type-map';
 // import { STATE, NAME as NAME_COL, AGE } from '@/config/table-headers';
-import { MANAGEMENT, NORMAN } from '@/config/types';
+import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
 import {
-  AGE, GROUP_NAME, GROUP_ROLE_NAME, STATE, USER_DISPLAY_NAME, USER_ID, USER_PROVIDER, NAME as NAME_COL
+  AGE, GROUP_NAME, GROUP_ROLE_NAME, STATE, USER_DISPLAY_NAME, USER_ID, USER_PROVIDER
 } from '@/config/table-headers';
 import { USERNAME } from '@/config/cookies';
 
@@ -12,11 +12,12 @@ export function init(store) {
   const {
     product,
     basicType,
-    // weightType,
+    weightType,
     configureType,
     componentForType,
     headers,
-    // mapType,
+    mapType,
+    spoofedType,
     virtualType,
   } = DSL(store, NAME);
 
@@ -41,14 +42,58 @@ export function init(store) {
   // TODO: RC use spoofedType monitoring/logging. Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
   // Can this be done with virtualType / spoofedType?
   virtualType({
-    label:       'Groups', // TODO: RC i10n
+    label:       '(OLD) Groups', // TODO: RC i10n
     icon:        'lock', // TODO: RC
     namespaced:  false,
     name:        'groups',
     weight:      -1, // TODO: Use weightType on user Q This never moves below users.
-    // count:       12345, // TODO: RC remove Q Should the groups table show all groups/principles?
+    // count:       12345, // TODO: RC remove Q Should the groups table show all groups/PRINCIPALs?
     route:       { name: 'c-cluster-auth-groups' },
   });
+
+  spoofedType({
+    label:             'Groups',
+    // icon:           'lock', // TODO: RC
+    // namespaced:  false,
+    // weight:      -5,
+    type:              NORMAN.SPOOFED.GROUP_PRINCIPAL,
+    collectionMethods: [],
+    schemas:           [
+      {
+        id:                NORMAN.SPOOFED.GROUP_PRINCIPAL,
+        type:              'schema',
+        collectionMethods: [],
+        resourceFields:    {},
+        icon:              'lock', // TODO: RC see type-map getTree, allTypes. allTypes does not bring in icon from here... should it?
+        // Two types in allTypes... one from schema and one from top level. schema one does not copy of icon. top level is ignored isBasic && !groupForBasicType
+      }
+    ],
+    getInstances: async() => {
+      const principals = await store.dispatch('rancher/findAll', {
+        type: NORMAN.PRINCIPAL,
+        opt:  { url: '/v3/principals' }
+      });
+      const globalRoleBindings = await store.dispatch('management/findAll', {
+        type: RBAC.GLOBAL_ROLE_BINDING,
+        opt:  { force: true }
+      });
+
+      // Up front fetch all global roles, in stead of individually when needed (results in many duplicated requests)
+      await store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
+
+      // TODO: CHECK Q does this always redraw... and as such recreate (RE refresh group memberships)
+      // TODO: RC This returns instances of principal... with availableActions from that. table looks at instances not of type spoofed
+      return principals
+        .filter(principal => principal.principalType === 'group' &&
+           !!globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === principal.id)
+        )
+        .map(principal => ({
+          ...principal,
+          type: NORMAN.SPOOFED.GROUP_PRINCIPAL
+        }));
+    }
+  });
+  mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, '(New) Groups');// TODO: RC ?
 
   configureType(MANAGEMENT.AUTH_CONFIG, {
     isCreatable: false,
@@ -59,10 +104,13 @@ export function init(store) {
 
   componentForType(`${ MANAGEMENT.AUTH_CONFIG }/github`, 'auth/github');
 
+  weightType(MANAGEMENT.USER, 10);
+
   basicType([
     'config',
     MANAGEMENT.USER,
-    'groups' // TODO: RC see adding to virtualType ifhavetype Q Conditionally add given providers. Just show warning at top (like that in assign roles)?
+    'groups', // TODO: RC see adding to virtualType ifhavetype Q Conditionally add given providers. Just show warning at top (like that in assign roles)?
+    NORMAN.SPOOFED.GROUP_PRINCIPAL
   ]);
 
   headers(MANAGEMENT.USER, [
@@ -75,7 +123,7 @@ export function init(store) {
   ]);
 
   // TODO: RC use directly for custom types
-  headers(NORMAN.PRINCIPAL, [
+  headers(NORMAN.SPOOFED.GROUP_PRINCIPAL, [
     GROUP_NAME,
     GROUP_ROLE_NAME
   ]);
