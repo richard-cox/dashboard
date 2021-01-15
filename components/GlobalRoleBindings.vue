@@ -33,8 +33,6 @@ export default {
     try {
       this.allRoles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-      this.show = false;
-      // this.allValues = { [this.timestamp]: { admin: true } };
       this.allValues = { [this.timestamp]: { [this.principalId]: [] } };
 
       if (!this.sortedRoles) {
@@ -53,9 +51,6 @@ export default {
       }
 
       this.allRoles.forEach((role) => {
-        // if (role.id !== 'admin' && role.id !== 'user') {
-        //   return;
-        // }
         const type = this.getRoleType(role);
 
         if (type) {
@@ -66,8 +61,6 @@ export default {
             id:          role.id,
             role,
           };
-          // this.allValues[this.timestamp][role.id] = [];
-          // this.allValues[this.timestamp][role.id] = false;
         }
       });
 
@@ -84,8 +77,6 @@ export default {
           }
         });
       });
-
-      this.show = true;
     } catch (e) {
       console.error('""""', e);
     }
@@ -100,11 +91,10 @@ export default {
       ],
       sortedRoles: null,
       allValues:   null,
-      show:        false,
-      timestamp:   new Date().getTime(),
+      timestamp:   ''// new Date().getTime(),
     };
   },
-  computed: {},
+  computed: { ...mapGetters({ t: 'i18n/t' }) },
   watch:    {
     async principalId(principalId, oldPrincipalId) {
       if (principalId === oldPrincipalId) {
@@ -113,10 +103,6 @@ export default {
       await this.$fetch();
     }
   },
-  // created() {
-  //   richard.log('CREATED');
-  //   this.$fetch();
-  // },
   methods: {
     getRoleType(role) {
       // See
@@ -160,6 +146,7 @@ export default {
             :label="role.label"
             :mode="mode"
           />
+          {{ role.description }}
         </div>
       </div>
     </form>
