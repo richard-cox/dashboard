@@ -110,7 +110,7 @@ export default {
           </span>
           <n-link
             v-if="rows.length > 0"
-            :to="'group.principal/assign-edit'"
+            :to="'group.principal/assign-edit?select=true'"
             class="btn role-primary"
           >
             {{ t("authGroups.actions.assignRoles") }}

@@ -17,6 +17,7 @@ export default {
   async fetch() {
     this.principalId = this.$route.query.principal;
     this.mode = this.$route.query.mode; // TODO: RC edit vs view .. edit const
+    this.showSelect = this.$route.query.select;
 
     this.spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
     // this.principal = await this.$store.dispatch('rancher/find', {
@@ -24,7 +25,6 @@ export default {
     //   id:   this.principalId,
     //   opt:  { url: `/v3/principals/${this.principalId}` }
     // });
-    // console.log('!!!!!!!!!!!!!!!!!!FETCH: ', this.spoofed.detailLocation);
   },
   data() {
     return {
@@ -35,6 +35,7 @@ export default {
       principal:   null,
       spoofed:     null,
       mode:        _VIEW,
+      showSelect:  true,
     };
   },
   methods: {
@@ -76,8 +77,8 @@ export default {
     </header>
 
     <form>
+      <SelectPrincipal v-if="showSelect" :mode="'true'" :retain-selection="true" @add="addPrincipal" />
       <PrincipalComponent v-if="principalId" :key="principalId" :value="principalId" :use-muted="false" />
-      <SelectPrincipal v-else :mode="'true'" :retain-selection="true" @add="addPrincipal" />
 
       <GlobalRoleBindings :principal-id="principalId" :mode="mode" />
 

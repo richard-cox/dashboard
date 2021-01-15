@@ -1,6 +1,7 @@
 <script>
 import $ from 'jquery';
-import { _EDIT } from '@/config/query-params';
+import { _EDIT, _VIEW } from '@/config/query-params';
+import richard from '@/utils/richards';
 
 export default {
   props: {
@@ -47,13 +48,18 @@ export default {
 
   computed: {
     isDisabled() {
-      return (this.disabled || this.mode === 'view' );
+      // richard.log(this.disabled, this.mode === _VIEW );
+      // richard.log(this.mode);
+
+      return (this.disabled || this.mode === _VIEW );
     }
   },
 
   methods: {
     clicked(event) {
+      // debugger;
       if (!this.isDisabled) {
+        richard.log('CLICKED')
         const click = $.Event('click');
 
         click.shiftKey = event.shiftKey;
