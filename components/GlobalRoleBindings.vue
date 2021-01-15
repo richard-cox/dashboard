@@ -124,20 +124,48 @@ export default {
 
   <div v-else>
     <form v-if="selectedRoles">
-      {{ selectedRoles }}
-      <div v-for="(sortedRole, type) in sortedRoles" :key="getUnique(type)">
+      <br>{{ selectedRoles }}<br><br>
+      <div v-for="(sortedRole, type) in sortedRoles" :key="getUnique(type)" class="role-group mb-10">
         <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
-        <div v-for="(role, roleId) in sortedRoles[type]" :key="getUnique(type, roleId)">
-          <Checkbox
-            :key="getUnique(type, roleId, 'checkbox')"
-            v-model="selectedRoles"
-            :value-when-true="roleId"
-            :label="role.label"
-            :mode="mode"
-          />
-          {{ role.description }}
+        <div class="checkbox-section" :class="'checkbox-section--' + type">
+          <div v-for="(role, roleId) in sortedRoles[type]" :key="getUnique(type, roleId)" class="checkbox mb-10 mr-10">
+            <Checkbox
+              :key="getUnique(type, roleId, 'checkbox')"
+              v-model="selectedRoles"
+              :value-when-true="roleId"
+              :label="role.label"
+              :mode="mode"
+            />
+            <div class="description">
+              {{ role.description }}
+            </div>
+          </div>
         </div>
       </div>
     </form>
   </div>
 </template>
+
+<style lang='scss' scoped>
+  .role-group {
+    .checkbox-section {
+      display: grid;
+
+      grid-template-columns: repeat(3, 1fr);
+
+      &--global {
+        grid-template-columns: 100%;
+      }
+
+      .checkbox {
+        display: flex;
+        flex-direction: column;
+
+        .description {
+          font-size: 11px; // TODO: RC
+          margin-top: 5px;
+        }
+      }
+    }
+  }
+</style>

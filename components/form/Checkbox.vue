@@ -75,41 +75,8 @@ export default {
   },
 
   methods: {
-    // emit() {
-    //   if (this.isMultiCheckbox) {
-    //     console.log(this.isChecked, this.value);
-
-    //     const found = this.value.indexOf(this.valueWhenTrue);
-
-    //     if (found) {
-    //       this.value = this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
-    //     } else {
-    //       this.value.push(this.valueWhenTrue);
-    //     }
-
-    //     this.$emit('input', this.value);
-    //   } else {
-    //     this.$emit('input', !this.value);
-    //   }
-    // },
-    // changed(e) {
-    //   richard.log('CLICKED: changed: ', e);
-
-    //   const isChecked = e.target.checked;
-    //   const val = e.target.value;
-
-    //   if (isChecked) {
-    //     this.value.push(val);
-    //   } else {
-    //     this.value.splice(this.value.indexOf(val), 1);
-    //   }
-    // },
     clicked(event) {
-      // richard.log('CLICKED: START: ', `${ this.id } - ${ this.value }`);
-      // richard.log('CLICKED: this.isDisabled: ', this.isDisabled);
-      // debugger;
       if (!this.isDisabled) {
-        // richard.log('CLICKED')
         const click = $.Event('click');
 
         click.shiftKey = event.shiftKey;
@@ -117,7 +84,6 @@ export default {
         click.ctrlKey = event.ctrlKey;
         click.metaKey = event.metaKey;
 
-        // this.emit();
         if (Array.isArray(this.value)) {
           if (this.value.find(v => v === this.valueWhenTrue)) {
             this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
