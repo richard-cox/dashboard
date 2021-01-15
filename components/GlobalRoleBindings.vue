@@ -30,50 +30,32 @@ export default {
     try {
       this.allRoles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-      this.selectedRoles = [] ;
-
-      // if (!this.sortedRoles) {
-      //   this.sortedRoles = {};
-      // }
-      // if (!this.sortedRoles[this.timestamp]) {
-      //   this.sortedRoles[this.timestamp] = {};
-      // }
-
       if (!this.sortedRoles) {
         this.sortedRoles = {
           global:  {},
           builtin: {},
           custom:  {}
         };
-      }
 
-      this.allRoles.forEach((role) => {
-        const type = this.getRoleType(role);
+        this.allRoles.forEach((role) => {
+          const type = this.getRoleType(role);
 
-        if (type) {
-          this.sortedRoles[type][role.id] = {
-            label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
-            description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
-            checked:     false,
-            id:          role.id,
-            role,
-          };
-        }
-      });
-
-      const globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
-
-      const boundRoles = globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
-
-      Object.entries(this.sortedRoles).forEach(([type, types]) => {
-        Object.entries(types).forEach(([roleId, mappedRole]) => {
-          // this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
-          // this.selectedRoles[roleId] = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
-          if (!!boundRoles.find(boundRole => boundRole.globalRoleName === roleId)) {
-            this.selectedRoles.push(roleId);
+          if (type) {
+            this.sortedRoles[type][role.id] = {
+              label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
+              description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
+              checked:     false,
+              id:          role.id,
+              role,
+            };
           }
         });
-      });
+
+        // TODO: RC This could be a lot of roles... when we really only want those for the current principal
+        this.globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
+
+        await this.update();
+      }
     } catch (e) {
       console.error('""""', e); // TODO: RC
     }
@@ -86,18 +68,18 @@ export default {
         'user',
         'user-base',
       ],
-      sortedRoles:   null,
-      selectedRoles:   null,
-      timestamp:     ''// new Date().getTime(),
+      globalRoleBindings: null,
+      sortedRoles:        null,
+      selectedRoles:      [],
     };
   },
   computed: { ...mapGetters({ t: 'i18n/t' }) },
   watch:    {
-    async principalId(principalId, oldPrincipalId) {
+    principalId(principalId, oldPrincipalId) {
       if (principalId === oldPrincipalId) {
         return;
       }
-      await this.$fetch();
+      this.update();
     }
   },
   methods: {
@@ -117,10 +99,26 @@ export default {
       }
     },
     getUnique(...ids) {
-      return `${ this.timestamp }-${ this.principalId }-${ ids.join('-') }`;
+      return `${ this.principalId }-${ ids.join('-') }`;
     },
     inputChanged(a) {
       richard.log('', a);
+    },
+
+    update() {
+      this.selectedRoles = [] ;
+
+      const boundRoles = this.globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
+
+      Object.entries(this.sortedRoles).forEach(([type, types]) => {
+        Object.entries(types).forEach(([roleId, mappedRole]) => {
+          // this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+          // this.selectedRoles[roleId] = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+          if (!!boundRoles.find(boundRole => boundRole.globalRoleName === roleId)) {
+            this.selectedRoles.push(roleId);
+          }
+        });
+      });
     }
   }
 };
