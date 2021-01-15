@@ -37,7 +37,9 @@ export default {
         'user-base',
       ],
       sortedRoles: {},
-      allRoles:    []
+      allRoles:    [],
+      show:        false,
+      timestamp:   new Date().getTime()
     };
   },
   computed: { ...mapGetters({ t: 'i18n/t' }) },
@@ -69,6 +71,7 @@ export default {
       if (!this.principalId) {
         return;
       }
+      this.show = false;
 
       if (!this.sortedRoles[this.principalId]) {
         this.sortedRoles[this.principalId] = {
@@ -101,18 +104,33 @@ export default {
           this.sortedRoles[this.principalId][type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
         });
       });
+
+      this.show = true;
     },
+    getUnique(...ids) {
+      const unqiue = `${ ids.join('-') }-${ this.timestamp }`;
+
+      richard.log(unqiue);
+
+      return unqiue;
+    }
   }
 };
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" />
+  <Loading v-if="$fetchState.pending && !show" />
   <div v-else>
-    <div v-for="(sortedRole, type) in sortedRoles[principalId]" :key="type">
+    <!-- <div v-for="(sortedRole, type) in sortedRoles[principalId]" :key="getUnique(type)">
       <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
-      <div v-for="(role, i) in sortedRole" :key="type + i">
-        <Checkbox v-model="role.checked" :label="role.label" :mode="mode" /> (DEBUG: {{ role.checked }})
+      <div v-for="(role, i) in sortedRole" :key="getUnique(type, i)">
+        <Checkbox :key="getUnique(type, i, 'checkbox')" v-model="role.checked" :label="role.label" :mode="mode" /> (DEBUG: {{ role.checked }})
+      </div>
+    </div> -->
+    <div v-for="(sortedRole, type) in sortedRoles[principalId]" :key="getUnique(type)">
+      <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
+      <div v-for="(role, roleId) in sortedRoles[principalId][type]" :key="getUnique(type, roleId)">
+        <Checkbox :key="getUnique(type, roleId, 'checkbox')" v-model="sortedRoles[principalId][type][roleId].checked" :label="role.label" :mode="mode" /> (DEBUG: {{ role.checked }})
       </div>
     </div>
   </div>

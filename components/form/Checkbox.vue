@@ -59,7 +59,7 @@ export default {
     clicked(event) {
       // debugger;
       if (!this.isDisabled) {
-        richard.log('CLICKED')
+        // richard.log('CLICKED')
         const click = $.Event('click');
 
         click.shiftKey = event.shiftKey;
