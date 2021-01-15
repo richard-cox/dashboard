@@ -23,10 +23,6 @@ export default {
     },
   },
   async fetch() {
-    if (!this.principalId) {
-      return;
-    }
-
     try {
       this.allRoles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
@@ -52,9 +48,10 @@ export default {
         });
 
         // TODO: RC This could be a lot of roles... when we really only want those for the current principal
+        // Moving this out into the watch has issues....
         this.globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
 
-        await this.update();
+        this.update();
       }
     } catch (e) {
       console.error('""""', e); // TODO: RC
@@ -101,19 +98,17 @@ export default {
     getUnique(...ids) {
       return `${ this.principalId }-${ ids.join('-') }`;
     },
-    inputChanged(a) {
-      richard.log('', a);
-    },
-
     update() {
+      if (!this.principalId) {
+        return;
+      }
+
       this.selectedRoles = [] ;
 
       const boundRoles = this.globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
 
       Object.entries(this.sortedRoles).forEach(([type, types]) => {
         Object.entries(types).forEach(([roleId, mappedRole]) => {
-          // this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
-          // this.selectedRoles[roleId] = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
           if (!!boundRoles.find(boundRole => boundRole.globalRoleName === roleId)) {
             this.selectedRoles.push(roleId);
           }
@@ -133,7 +128,6 @@ export default {
       <div v-for="(sortedRole, type) in sortedRoles" :key="getUnique(type)">
         <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
         <div v-for="(role, roleId) in sortedRoles[type]" :key="getUnique(type, roleId)">
-          <!-- :id="getUnique(type, roleId, principalId, 'checkbox')" -->
           <Checkbox
             :key="getUnique(type, roleId, 'checkbox')"
             v-model="selectedRoles"
