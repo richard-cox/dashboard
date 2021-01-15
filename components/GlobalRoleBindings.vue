@@ -49,9 +49,9 @@ export default {
       }
 
       this.allRoles.forEach((role) => {
-        if (role.id !== 'admin' && role.id !== 'user') {
-          return;
-        }
+        // if (role.id !== 'admin' && role.id !== 'user') {
+        //   return;
+        // }
         const type = this.getRoleType(role);
 
         if (type) {
@@ -75,6 +75,9 @@ export default {
         Object.entries(types).forEach(([roleId, mappedRole]) => {
           this.sortedRoles[this.timestamp][this.principalId][type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
           // this.allValues[this.timestamp][roleId] = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+          if (!!boundRoles.find(boundRole => boundRole.globalRoleName === roleId)) {
+            this.allValues[this.timestamp].push(roleId);
+          }
         });
       });
 
@@ -217,7 +220,7 @@ export default {
           :name="roleId"
           @change="inputChanged"
         > -->
-        {{ roleId }}
+        <!-- {{ roleId }}
         <Checkbox
           :id="`input-aaaa2-${roleId}`"
           :key="`input-aaaa-${roleId}`"
@@ -225,7 +228,21 @@ export default {
           type="checkbox"
           :value-when-true="roleId"
           :label="role.label"
-        />
+        /> -->
+      </div>
+
+      <div v-for="(sortedRole, type) in sortedRoles[timestamp][principalId]" :key="getUnique(type)">
+        <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
+        <div v-for="(role, roleId) in sortedRoles[timestamp][principalId][type]" :key="getUnique(type, roleId)">
+          <Checkbox
+            :id="getUnique(type, roleId, 'checkbox')"
+            :key="getUnique(type, roleId, 'checkbox')"
+            v-model="allValues[timestamp]"
+            :value-when-true="roleId"
+            :label="role.label"
+            :mode="mode"
+          />
+        </div>
       </div>
     </form>
   </div>
