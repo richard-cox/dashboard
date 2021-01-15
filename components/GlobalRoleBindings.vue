@@ -6,7 +6,6 @@ import Checkbox from '@/components/form/Checkbox';
 import { _VIEW } from '@/config/query-params';
 import Loading from '@/components/Loading';
 import richard from '@/utils/richards';
-import Type from '@/components/nav/Type.vue';
 
 export default {
   components: {
@@ -24,8 +23,6 @@ export default {
     },
   },
   async fetch() {
-    richard.log('FETCH');
-
     if (!this.principalId) {
       return;
     }
@@ -33,17 +30,17 @@ export default {
     try {
       this.allRoles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-      this.allValues = { [this.timestamp]: { [this.principalId]: [] } };
+      this.selectedRoles = [] ;
+
+      // if (!this.sortedRoles) {
+      //   this.sortedRoles = {};
+      // }
+      // if (!this.sortedRoles[this.timestamp]) {
+      //   this.sortedRoles[this.timestamp] = {};
+      // }
 
       if (!this.sortedRoles) {
-        this.sortedRoles = {};
-      }
-      if (!this.sortedRoles[this.timestamp]) {
-        this.sortedRoles[this.timestamp] = {};
-      }
-
-      if (!this.sortedRoles[this.timestamp][this.principalId]) {
-        this.sortedRoles[this.timestamp][this.principalId] = {
+        this.sortedRoles = {
           global:  {},
           builtin: {},
           custom:  {}
@@ -54,7 +51,7 @@ export default {
         const type = this.getRoleType(role);
 
         if (type) {
-          this.sortedRoles[this.timestamp][this.principalId][type][role.id] = {
+          this.sortedRoles[type][role.id] = {
             label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
             description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
             checked:     false,
@@ -68,17 +65,17 @@ export default {
 
       const boundRoles = globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
 
-      Object.entries(this.sortedRoles[this.timestamp][this.principalId]).forEach(([type, types]) => {
+      Object.entries(this.sortedRoles).forEach(([type, types]) => {
         Object.entries(types).forEach(([roleId, mappedRole]) => {
-          this.sortedRoles[this.timestamp][this.principalId][type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
-          // this.allValues[this.timestamp][roleId] = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+          // this.sortedRoles[type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+          // this.selectedRoles[roleId] = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
           if (!!boundRoles.find(boundRole => boundRole.globalRoleName === roleId)) {
-            this.allValues[this.timestamp][this.principalId].push(roleId);
+            this.selectedRoles.push(roleId);
           }
         });
       });
     } catch (e) {
-      console.error('""""', e);
+      console.error('""""', e); // TODO: RC
     }
   },
   data() {
@@ -89,9 +86,9 @@ export default {
         'user',
         'user-base',
       ],
-      sortedRoles: null,
-      allValues:   null,
-      timestamp:   ''// new Date().getTime(),
+      sortedRoles:   null,
+      selectedRoles:   null,
+      timestamp:     ''// new Date().getTime(),
     };
   },
   computed: { ...mapGetters({ t: 'i18n/t' }) },
@@ -133,15 +130,15 @@ export default {
   <Loading v-if="$fetchState.pending" />
 
   <div v-else>
-    <form v-if="allValues">
-      {{ allValues[timestamp][principalId] }}
-      <div v-for="(sortedRole, type) in sortedRoles[timestamp][principalId]" :key="getUnique(type)">
+    <form v-if="selectedRoles">
+      {{ selectedRoles }}
+      <div v-for="(sortedRole, type) in sortedRoles" :key="getUnique(type)">
         <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
-        <div v-for="(role, roleId) in sortedRoles[timestamp][principalId][type]" :key="getUnique(type, roleId)">
+        <div v-for="(role, roleId) in sortedRoles[type]" :key="getUnique(type, roleId)">
           <!-- :id="getUnique(type, roleId, principalId, 'checkbox')" -->
           <Checkbox
-            :key="getUnique(type, roleId, principalId, 'checkbox')"
-            v-model="allValues[timestamp][principalId]"
+            :key="getUnique(type, roleId, 'checkbox')"
+            v-model="selectedRoles"
             :value-when-true="roleId"
             :label="role.label"
             :mode="mode"
