@@ -45,10 +45,10 @@ export default {
       default: null
     },
 
-    id: {
-      type:    String,
-      default: null
-    },
+    // id: {
+    //   type:    String,
+    //   default: null
+    // },
     valueWhenTrue: { default: true },
   },
 
@@ -59,53 +59,54 @@ export default {
 
       return (this.disabled || this.mode === _VIEW );
     },
-    isChecked() {
-      if (this.isMultiCheckbox) {
-        debugger;
+    // isChecked() {
+    //   if (this.isMultiCheckbox) {
+    //     debugger;
 
-        return !!this.value.find(v => v === this.valueWhenTrue);
-      }
+    //     return !!this.value.find(v => v === this.valueWhenTrue);
+    //   }
 
-      return this.value;
-    },
-    isMultiCheckbox() {
-      return this.value.length !== undefined;
-    },
+    //   return this.value;
+    // },
+    // isMultiCheckbox() {
+    //   return this.value.length !== undefined;
+    // },
 
   },
 
   methods: {
-    emit() {
-      if (this.isMultiCheckbox) {
-        console.log(this.isChecked, this.value);
+    // emit() {
+    //   if (this.isMultiCheckbox) {
+    //     console.log(this.isChecked, this.value);
 
-        const found = this.value.indexOf(this.valueWhenTrue);
+    //     const found = this.value.indexOf(this.valueWhenTrue);
 
-        if (found) {
-          this.value = this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
-        } else {
-          this.value.push(this.valueWhenTrue);
-        }
+    //     if (found) {
+    //       this.value = this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
+    //     } else {
+    //       this.value.push(this.valueWhenTrue);
+    //     }
 
-        this.$emit('input', this.value);
-      } else {
-        this.$emit('input', !this.value);
-      }
-    },
-    changed(e) {
-      richard.log('CLICKED: changed: ', e);
+    //     this.$emit('input', this.value);
+    //   } else {
+    //     this.$emit('input', !this.value);
+    //   }
+    // },
+    // changed(e) {
+    //   richard.log('CLICKED: changed: ', e);
 
-      const isChecked = e.target.checked;
-      const val = e.target.value;
+    //   const isChecked = e.target.checked;
+    //   const val = e.target.value;
 
-      if (isChecked) {
-        this.value.push(val);
-      } else {
-        this.value.splice(this.value.indexOf(val), 1);
-      }
-    },
+    //   if (isChecked) {
+    //     this.value.push(val);
+    //   } else {
+    //     this.value.splice(this.value.indexOf(val), 1);
+    //   }
+    // },
     clicked(event) {
-      richard.log('CLICKED: START: ', `${ this.id } - ${ this.value }`);
+      // richard.log('CLICKED: START: ', `${ this.id } - ${ this.value }`);
+      // richard.log('CLICKED: this.isDisabled: ', this.isDisabled);
       // debugger;
       if (!this.isDisabled) {
         // richard.log('CLICKED')
@@ -117,7 +118,7 @@ export default {
         click.metaKey = event.metaKey;
 
         // this.emit();
-        if (this.isMultiCheckbox) {
+        if (Array.isArray(this.value)) {
           if (this.value.find(v => v === this.valueWhenTrue)) {
             this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
           } else {
@@ -144,32 +145,12 @@ export default {
     @keydown.space.prevent="clicked($event)"
     @click.stop.prevent="clicked($event)"
   >
-    <!-- @click.stop.prevent="clicked($event)" -->
-    <!--  -->
-    <!-- @change="$emit('input', $event.target.checked)" -->
-    <!--  -->
 
-    <!-- :value="id2"       -->
-    <!-- :value="valueWhenTrue" -->
-    <!-- <template v-if="isMultiCheckbox"> -->
-    <!-- multi `{{ id }}`-`{{ isChecked }}`-`{{ valueWhenTrue }}``
+    <!-- :id="id"
+      :key="id + 'sdfsdfdsfdsf'" -->
+    <!-- :checked="value" TODO: RC -->
     <input
 
-      :id="id"
-      :key="id"
-      :v-model="value[id]"
-      type="checkbox"
-      :tabindex="-1"
-      :value="valueWhenTrue"
-    /> -->
-    <!-- @changed="changed" -->
-    <!-- @click.stop.prevent -->
-
-    <!-- </template> -->
-    <!-- :checked="value" -->
-    <input
-      :id="id"
-      :key="id + 'sdfsdfdsfdsf'"
       v-model="value"
       :value="valueWhenTrue"
       type="checkbox"

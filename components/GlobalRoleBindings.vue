@@ -26,12 +26,16 @@ export default {
   async fetch() {
     richard.log('FETCH');
 
+    if (!this.principalId) {
+      return;
+    }
+
     try {
       this.allRoles = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
       this.show = false;
       // this.allValues = { [this.timestamp]: { admin: true } };
-      this.allValues = { [this.timestamp]: [] };
+      this.allValues = { [this.timestamp]: { [this.principalId]: [] } };
 
       if (!this.sortedRoles) {
         this.sortedRoles = {};
@@ -76,7 +80,7 @@ export default {
           this.sortedRoles[this.timestamp][this.principalId][type][roleId].checked = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
           // this.allValues[this.timestamp][roleId] = !!boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
           if (!!boundRoles.find(boundRole => boundRole.globalRoleName === roleId)) {
-            this.allValues[this.timestamp].push(roleId);
+            this.allValues[this.timestamp][this.principalId].push(roleId);
           }
         });
       });
@@ -95,7 +99,7 @@ export default {
         'user-base',
       ],
       sortedRoles: null,
-      allValues:   {},
+      allValues:   null,
       show:        false,
       timestamp:   new Date().getTime(),
     };
@@ -109,10 +113,10 @@ export default {
       await this.$fetch();
     }
   },
-  created() {
-    richard.log('CREATED');
-    this.$fetch();
-  },
+  // created() {
+  //   richard.log('CREATED');
+  //   this.$fetch();
+  // },
   methods: {
     getRoleType(role) {
       // See
@@ -130,11 +134,7 @@ export default {
       }
     },
     getUnique(...ids) {
-      const unqiue = `${ this.timestamp }-${ this.principalId }-${ ids.join('-') }`;
-
-      // richard.log(unqiue);
-
-      return unqiue;
+      return `${ this.timestamp }-${ this.principalId }-${ ids.join('-') }`;
     },
     inputChanged(a) {
       richard.log('', a);
@@ -147,97 +147,15 @@ export default {
   <Loading v-if="$fetchState.pending" />
 
   <div v-else>
-    <form>
-      <!-- <div v-if="allValues[timestamp]">
-      <Checkbox :key="getUnique('global', 'admin', 'checkbox')" v-model="allValues[timestamp].admin" :label="'asdsad'" :mode="mode" /> (DEBUG: {{ allValues[timestamp].admin }})
-      {{ getUnique('global', 'admin', 'checkbox') }}
-    </div> -->
-      <!-- <div v-if="sortedRoles && sortedRoles[timestamp] && sortedRoles[timestamp][principalId] && sortedRoles[timestamp][principalId].global">
-      <Checkbox :key="getUnique('global', 'admin', 'checkbox')" v-model="sortedRoles[timestamp][principalId].global.admin.checked" :label="'asdsad'" :mode="mode" />
-      (DEBUG: {{ sortedRoles[timestamp][principalId].global.admin.checked }})
-      {{ getUnique('global', 'admin', 'checkbox') }}
-    </div> -->
-      <!-- WORKS! -->
-      <!-- <div v-if="allValues[timestamp]">
-      <Checkbox :key="getUnique('global', 'admin', 'checkbox')" v-model="allValues[timestamp].admin" :label="'asdsad'" :mode="mode" />
-      (DEBUG: {{ allValues[timestamp].admin }})
-      {{ getUnique('global', 'admin', 'checkbox') }}
-    </div> -->
-      <!-- works -->
-      <!-- <div v-if="allValues[timestamp]">
-      <Checkbox :key="getUnique('global', 'admin', 'checkbox')" v-model="allValues[timestamp]['admin']" :label="'asdsad'" :mode="mode" />
-      (DEBUG: {{ allValues[timestamp].admin }})
-      {{ getUnique('global', 'admin', 'checkbox') }}
-    </div> -->
-      <!-- <div v-if="allValues[timestamp]">
-      <div v-for="(role, id) in { admin: false }" :key="id">
-        <Checkbox :key="getUnique('global', 'admin', 'checkbox')" v-model="allValues[timestamp]" :label="'asdsad'" :mode="mode" />
-          (DEBUG: {{ allValues[timestamp].admin }})
-          {{ id }}- {{ getUnique('global', 'admin', 'checkbox') }}
-      </div>
-    </div> -->
-      -------------<br>
-      <!-- fail -->
-      <!-- <template v-if="allValues[timestamp]">
+    <form v-if="allValues">
+      {{ allValues[timestamp][principalId] }}
       <div v-for="(sortedRole, type) in sortedRoles[timestamp][principalId]" :key="getUnique(type)">
         <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
         <div v-for="(role, roleId) in sortedRoles[timestamp][principalId][type]" :key="getUnique(type, roleId)">
-          <Checkbox :key="getUnique(type, roleId, 'checkbox')" v-model="allValues[timestamp][roleId]" :label="role.label" :mode="mode" /> (DEBUG: {{ allValues[timestamp][roleId] }})
-        </div>
-      </div>
-    </template> -->
-      <h2>{{ t("rbac.globalRoles.types.global") }}</h2>
-      <div v-for="(role, roleId, i) in sortedRoles[timestamp][principalId].global" :key="i">
-        <!-- :id2="getUnique('global', roleId, '1checkbox')" -->
-        <!-- <Checkbox :key="i" v-model="allValues[timestamp]" :label="role.label" :mode="mode" :id2="i" /> (DEBUG: {{ allValues[timestamp][roleId] }})
-      {{ roleId }} - {{ getUnique('global', roleId, '1checkbox') }} -->
-
-        <!-- <input :id="roleId" :key="`input-${roleId}`" v-model="allValues[timestamp][roleId]" type="checkbox" :value="true">
-        <label :key="`label-${roleId}`" :for="roleId">{{ role.label }}</label>
-        {{ roleId }} -->
-        <!-- <input :id="roleId" :key="`input-${roleId}`" v-model="allValues[timestamp]" type="checkbox" :value="roleId" >
-        <label :key="`label-${roleId}`" :for="roleId">{{ role.label }}</label>
-        {{ roleId }} -->
-      </div>
-      {{ allValues[timestamp] }}
-      <!-- <h2>{{ t("rbac.globalRoles.types.builtin") }}</h2>
-    <div v-for="(role, roleId) in sortedRoles[timestamp][principalId].builtin" :key="getUnique('builtin', roleId)">
-      <Checkbox :key="getUnique('builtin', roleId, 'checkbox')" v-model="allValues[timestamp][roleId]" :label="role.label" :mode="mode" /> (DEBUG: {{ allValues[timestamp][roleId] }})
-    </div>
-    <h2>{{ t("rbac.globalRoles.types.custom") }}</h2>
-    <div v-for="(role, roleId) in sortedRoles[timestamp][principalId].custom" :key="getUnique('custom', roleId)">
-      <Checkbox :key="getUnique('custom', roleId, 'checkbox')" v-model="allValues[timestamp][roleId]" :label="role.label" :mode="mode" /> (DEBUG: {{ allValues[timestamp][roleId] }})
-    </div> -->
-
-      <div v-for="(role, roleId, i) in sortedRoles[timestamp][principalId].global" :key="'2' + i">
-        <!-- <input :id="roleId" :key="`input-${roleId}`" v-model="allValues[timestamp]" type="checkbox" :value="roleId"> -->
-        <!-- <input
-          :id="roleId"
-          :key="`input-${roleId}`"
-          v-model="allValues[timestamp]"
-          type="checkbox"
-          :value="roleId"
-          :name="roleId"
-          @change="inputChanged"
-        > -->
-        <!-- {{ roleId }}
-        <Checkbox
-          :id="`input-aaaa2-${roleId}`"
-          :key="`input-aaaa-${roleId}`"
-          v-model="allValues[timestamp]"
-          type="checkbox"
-          :value-when-true="roleId"
-          :label="role.label"
-        /> -->
-      </div>
-
-      <div v-for="(sortedRole, type) in sortedRoles[timestamp][principalId]" :key="getUnique(type)">
-        <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
-        <div v-for="(role, roleId) in sortedRoles[timestamp][principalId][type]" :key="getUnique(type, roleId)">
+          <!-- :id="getUnique(type, roleId, principalId, 'checkbox')" -->
           <Checkbox
-            :id="getUnique(type, roleId, 'checkbox')"
-            :key="getUnique(type, roleId, 'checkbox')"
-            v-model="allValues[timestamp]"
+            :key="getUnique(type, roleId, principalId, 'checkbox')"
+            v-model="allValues[timestamp][principalId]"
             :value-when-true="roleId"
             :label="role.label"
             :mode="mode"
