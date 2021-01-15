@@ -40,7 +40,6 @@ export default {
             this.sortedRoles[type][role.id] = {
               label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
               description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
-              checked:     false,
               id:          role.id,
               role,
             };

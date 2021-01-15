@@ -150,8 +150,10 @@ authGroups:
   actions:
     refresh: Refresh Group Memberships
     assignRoles: Assign Global Role
-  assign:
-      title: Assign Global Roles To Group
+  assignEdit:
+      assignTitle: Assign Global Roles To Group
+      editTitle: Edit Global Roles
+      viewTitle: View Global Roles
 
 
 

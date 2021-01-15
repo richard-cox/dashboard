@@ -1,5 +1,6 @@
 <script>
 import FooterComponent from '@/components/form/Footer';
+import Loading from '@/components/Loading';
 import SelectPrincipal from '@/components/auth/SelectPrincipal.vue';
 import PrincipalComponent from '@/components/auth/Principal.vue';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
@@ -12,12 +13,14 @@ export default {
     SelectPrincipal,
     PrincipalComponent,
     FooterComponent,
-    GlobalRoleBindings
+    GlobalRoleBindings,
+    Loading
   },
   async fetch() {
     this.principalId = this.$route.query.principal;
+    this.isEdit = !!this.principalId;
     this.mode = this.$route.query.mode; // TODO: RC edit vs view .. edit const
-    this.showSelect = this.$route.query.select;
+    this.isSelect = this.$route.query.select;
 
     this.spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
     // this.principal = await this.$store.dispatch('rancher/find', {
@@ -29,24 +32,28 @@ export default {
   data() {
     return {
       errors:      [],
-      footerMode:  'edit',
       isView:      true,
+      isSelect:    true,
       principalId: null,
-      principal:   null,
       spoofed:     null,
       mode:        _VIEW,
-      showSelect:  true,
+
     };
+  },
+  computed: {
+    title() {
+      const view = this.mode === _VIEW ? 'viewTitle' : this.isEdit ? 'editTitle' : 'assignTitle';
+
+      return `authGroups.assignEdit.${ view }`;
+    }
   },
   methods: {
     addPrincipal(id) {
-      richard.log('addPrincipal', id);
       this.principalId = id;
 
       return true;
     },
     cancel() {
-      richard.log('¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬' );
       // TODO: RC
       // this.$route.name === c-cluster-auth-group.principal-assign-edit
       this.spoofed.goToList(); // TODO: Can't create spoofed
@@ -55,7 +62,6 @@ export default {
       // this.$router.push({ name: 'c-cluster-auth-groups' }); // from old virtual route.. can't assign route to spoofedType (schema added, not top level)
     },
     save(buttonDone) {
-      richard.log('submit');
       this.errors = [];
       buttonDone(true);
     }
@@ -65,32 +71,34 @@ export default {
 </script>
 
 <template>
-  <!-- // TODO: RC add loading -->
-  <div>
-    <header>
-      <div class="title">
-        <h1 class="m-0">
-          <!-- TODO: RC assign / update -->
-          {{ t("authGroups.assign.title") }}
-        </h1>
-      </div>
-    </header>
+  <Loading v-if="$fetchState.pending" />
 
-    <form>
-      <SelectPrincipal v-if="showSelect" :mode="'true'" :retain-selection="true" @add="addPrincipal" />
-      <PrincipalComponent v-if="principalId" :key="principalId" :value="principalId" :use-muted="false" />
+  <div v-else>
+    <div>
+      <header>
+        <div class="title">
+          <h1 class="m-0">
+            {{ t(title) }}
+          </h1>
+        </div>
+      </header>
 
-      <GlobalRoleBindings :principal-id="principalId" :mode="mode" />
+      <form>
+        <SelectPrincipal v-if="isSelect" :mode="'true'" :retain-selection="true" @add="addPrincipal" />
+        <PrincipalComponent v-if="principalId" :key="principalId" :value="principalId" :use-muted="false" />
 
-      <!-- TODO: RC is is view... not save button -->
-      <FooterComponent
-        :mode="footerMode"
-        :errors="errors"
-        @save="save"
-        @done="cancel"
-      >
-      </footercomponent>
-    </form>
+        <GlobalRoleBindings :principal-id="principalId" :mode="mode" />
+
+        <!-- TODO: RC is is view... not save button -->
+        <FooterComponent
+          :mode="mode"
+          :errors="errors"
+          @save="save"
+          @done="cancel"
+        >
+        </footercomponent>
+      </form>
+    </div>
   </div>
 </template>
 
