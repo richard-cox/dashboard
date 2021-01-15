@@ -6,7 +6,7 @@ import richard from '@/utils/richards';
 export default {
   props: {
     value: {
-      type:    Boolean,
+      type:    [Boolean, Array],
       default: false
     },
 
@@ -44,6 +44,12 @@ export default {
       type:    String,
       default: null
     },
+
+    id: {
+      type:    String,
+      default: null
+    },
+    valueWhenTrue: { default: true },
   },
 
   computed: {
@@ -52,11 +58,54 @@ export default {
       // richard.log(this.mode);
 
       return (this.disabled || this.mode === _VIEW );
-    }
+    },
+    isChecked() {
+      if (this.isMultiCheckbox) {
+        debugger;
+
+        return !!this.value.find(v => v === this.valueWhenTrue);
+      }
+
+      return this.value;
+    },
+    isMultiCheckbox() {
+      return this.value.length !== undefined;
+    },
+
   },
 
   methods: {
+    emit() {
+      if (this.isMultiCheckbox) {
+        console.log(this.isChecked, this.value);
+
+        const found = this.value.indexOf(this.valueWhenTrue);
+
+        if (found) {
+          this.value = this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
+        } else {
+          this.value.push(this.valueWhenTrue);
+        }
+
+        this.$emit('input', this.value);
+      } else {
+        this.$emit('input', !this.value);
+      }
+    },
+    changed(e) {
+      richard.log('CLICKED: changed: ', e);
+
+      const isChecked = e.target.checked;
+      const val = e.target.value;
+
+      if (isChecked) {
+        this.value.push(val);
+      } else {
+        this.value.splice(this.value.indexOf(val), 1);
+      }
+    },
     clicked(event) {
+      richard.log('CLICKED: START: ', `${ this.id } - ${ this.value }`);
       // debugger;
       if (!this.isDisabled) {
         // richard.log('CLICKED')
@@ -67,8 +116,20 @@ export default {
         click.ctrlKey = event.ctrlKey;
         click.metaKey = event.metaKey;
 
-        this.$emit('input', !this.value);
-        $(this.$el).trigger(click);
+        // this.emit();
+        if (this.isMultiCheckbox) {
+          if (this.value.find(v => v === this.valueWhenTrue)) {
+            this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
+          } else {
+            this.value.push(this.valueWhenTrue);
+          }
+          this.$emit('input', this.value);
+        } else {
+          this.$emit('input', !this.value);
+          $(this.$el).trigger(click);
+        }
+
+        richard.log('CLICKED: ', `${ this.id } - ${ this.value }`);
       }
     }
   }
@@ -83,9 +144,34 @@ export default {
     @keydown.space.prevent="clicked($event)"
     @click.stop.prevent="clicked($event)"
   >
+    <!-- @click.stop.prevent="clicked($event)" -->
+    <!--  -->
+    <!-- @change="$emit('input', $event.target.checked)" -->
+    <!--  -->
+
+    <!-- :value="id2"       -->
+    <!-- :value="valueWhenTrue" -->
+    <!-- <template v-if="isMultiCheckbox"> -->
+    <!-- multi `{{ id }}`-`{{ isChecked }}`-`{{ valueWhenTrue }}``
     <input
-      :checked="value"
-      :v-model="value"
+
+      :id="id"
+      :key="id"
+      :v-model="value[id]"
+      type="checkbox"
+      :tabindex="-1"
+      :value="valueWhenTrue"
+    /> -->
+    <!-- @changed="changed" -->
+    <!-- @click.stop.prevent -->
+
+    <!-- </template> -->
+    <!-- :checked="value" -->
+    <input
+      :id="id"
+      :key="id + 'sdfsdfdsfdsf'"
+      v-model="value"
+      :value="valueWhenTrue"
       type="checkbox"
       :tabindex="-1"
       @click.stop.prevent
