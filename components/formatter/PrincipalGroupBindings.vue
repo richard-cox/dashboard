@@ -12,6 +12,7 @@ export default {
 
     boundRoles() {
       const principal = this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.value);
+      // TODO: RC Q Costly....
       const globalRoleBindings = this.$store.getters['management/all'](RBAC.GLOBAL_ROLE_BINDING);
 
       return globalRoleBindings
@@ -23,7 +24,7 @@ export default {
 
           return {
             detailLocation: role.detailLocation,
-            label:          role ? role.displayName : 'Unknown role',
+            label:          role ? role.displayName : role.id, // nameDisplay contains principal name, not required here
           };
         })
         .sort((a, b) => a.label.localeCompare(b.label));

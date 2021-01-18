@@ -45,7 +45,7 @@ export default {
       const view = this.mode === _VIEW ? 'viewTitle' : this.isEdit ? 'editTitle' : 'assignTitle';
 
       return `authGroups.assignEdit.${ view }`;
-    }
+    },
   },
   methods: {
     addPrincipal(id) {
@@ -56,70 +56,40 @@ export default {
     cancel() {
       this.spoofed.goToList();
     },
+    async saveAddedRoles() {
+      const newBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
+        type:               RBAC.GLOBAL_ROLE_BINDING,
+        metadata:           { generateName: `ui-` }, // TODO: RC is this correct... can/should it be empty?
+        globalRoleName:     role,
+        groupPrincipalName: this.principalId,
+      })));
+
+      await Promise.all(newBindings.map(newBinding => newBinding.save()));
+    },
+    async saveRemovedRoles() {
+      const existingBindings = await Promise.all(this.roleChanges.removeBindings.map(bindingId => this.$store.dispatch('management/find', {
+        type: RBAC.GLOBAL_ROLE_BINDING,
+        id:   bindingId
+      })));
+
+      await Promise.all(existingBindings.map(existingBinding => existingBinding.remove()));
+    },
     async save(buttonDone) {
       this.errors = [];
 
-      // {
-      //         globalRoleName: role,
-      //         groupPrincipalName: this.principalId,
-      //       }
       try {
-        const addBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
-          type:               RBAC.GLOBAL_ROLE_BINDING,
-          metadata:           { generateName: `ui-` },
-          globalRoleName:     role,
-          groupPrincipalName: this.principalId,
-        })));
-        const executeAddNewBindings = await Promise.all(addBindings.map(newBinding => newBinding.save()));
-        const a = await Promise.all(executeAddNewBindings);
-
-        console.warn('adds: ', a);
-
-        const removeBindings = await Promise.all(this.roleChanges.removeBindings.map(bindingId => this.$store.dispatch('management/find', {
-          type: RBAC.GLOBAL_ROLE_BINDING,
-          id:   bindingId
-        })));
-        const executeRemoveBindings = await Promise.all(removeBindings.map(binding => binding.remove()));
+        await this.saveAddedRoles();
+        await this.saveRemovedRoles();
 
         buttonDone(true);
-        this.spoofed.goToList();// TODO: RC does this update the list
+        this.spoofed.goToList();
       } catch (err) {
-        console.error('!!!!!!!!!!!save: ', err);
         this.errors = exceptionToErrorsArray(err);
         buttonDone(false);
       }
-
-      // this.res = await this.$store.dispatch(`management/create`, { type: RBAC.GLOBAL_ROLE_BINDING });
-
-      // const obj = this.$store.dispatch(`${ inStore }/create`, {
-      //         type,
-      //         metadata: {
-      //           generateName: `ui-${ this.filterRoleValue ? `${ this.filterRoleValue }-` : '' }`,
-      //           namespace:    this.namespace,
-      //         },
-      //         roleRef: {
-      //           apiGroup,
-      //           kind: row.roleKind,
-      //           name: row.role,
-      //         },
-      //         subjects: [
-      //           {
-      //             apiGroup,
-      //             kind: row.subjectKind,
-      //             name: row.subject,
-      //           },
-      //         ]
-      //       });
     },
-
-    // initialRoles: this.startingSelectedRoles,
-
     rolesChanged($event) {
       this.roleChanges = $event;
-      console.warn('assignEdit starting: ', $event.initialRoles);
-      console.warn('assignEdit added: ', $event.addRoles);
-      console.warn('assignEdit removed: ', $event.removeBindings);
-      console.warn('assignEdit principalId: ', this.principalId);
     }
   }
 };

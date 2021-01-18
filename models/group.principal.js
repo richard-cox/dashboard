@@ -1,4 +1,5 @@
 import { AS, MODE, _EDIT, _UNFLAG } from '@/config/query-params';
+import { RBAC } from '@/config/types';
 import richard from '@/utils/richards';
 
 export default {
@@ -61,8 +62,18 @@ export default {
     // TODO: RC implement
     // TODO: RC test single, multiple
     return (resources = this) => {
-      richard.log('unassignGroupRoles', resources);
-      // this.$dispatch('promptRemove', resources);
+      const principals = Array.isArray(resources) ? resources : [resources];
+
+      debugger;
+
+      // TODO: RC Q Costly....
+      const a = this.$getters['all'](RBAC.GLOBAL_ROLE_BINDING);
+      const globalRoleBindings = a
+        // Bindings for this group
+        .filter(globalRoleBinding => principals.find(principal => principal.id === globalRoleBinding.groupPrincipalName));
+
+      richard.log('unassignGroupRoles', globalRoleBindings);
+      this.$dispatch('promptRemove', globalRoleBindings);
     };
   },
 };
