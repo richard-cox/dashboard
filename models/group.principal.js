@@ -39,31 +39,27 @@ export default {
   },
 
   availableActions() {
-    // TODO: RC These actions are for principals shown in groups view
     return [
-      // TODO: RC Edit
       {
         action:  'goToEdit',
-        label:   this.t('action.edit'), // TODO: RC 'edit config'
+        label:   this.t('action.edit'),
         icon:    'icon icon-edit',
         enabled:  true,
       },
-      // TODO: RC Delete (which is not delete group... but remove all bindings from group/s?)
       {
         action:     'unassignGroupRoles',
-        // altAction:  'remove',
-        // label:      this.t('action.remove'),// TODO: RC
-        label:      'Unassign',
+        label:      this.t('action.unassign'), // TODO: RC This shows up as 'Edit Config'
         icon:       'icon icon-trash',
         bulkable:   true,
         enabled:    true,
         bulkAction: 'unassignGroupRoles',
       },
-      // ...this._standardActions
     ];
   },
 
   unassignGroupRoles() {
+    // TODO: RC implement
+    // TODO: RC test single, multiple
     return (resources = this) => {
       richard.log('unassignGroupRoles', resources);
       // this.$dispatch('promptRemove', resources);

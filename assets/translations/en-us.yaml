@@ -2562,6 +2562,7 @@ action:
   view: View Config
   viewInApi: View in API
   viewYaml: View YAML
+  unassign: Unassign
 
 unit:
   sec: secs

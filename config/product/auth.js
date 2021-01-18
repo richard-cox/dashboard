@@ -39,17 +39,19 @@ export function init(store) {
     route:       { name: 'c-cluster-auth-config' },
   });
 
+  // TODO: RC Remove c-cluster-auth-groups page
+
   // TODO: RC use spoofedType monitoring/logging. Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
   // Can this be done with virtualType / spoofedType?
-  virtualType({
-    label:       '(OLD) Groups', // TODO: RC i10n
-    icon:        'lock', // TODO: RC
-    namespaced:  false,
-    name:        'groups',
-    weight:      -1, // TODO: Use weightType on user Q This never moves below users.
-    // count:       12345, // TODO: RC remove Q Should the groups table show all groups/PRINCIPALs?
-    route:       { name: 'c-cluster-auth-groups' },
-  });
+  // virtualType({
+  //   label:       '(OLD) Groups', // TODO: RC i10n
+  //   icon:        'lock', // TODO: RC
+  //   namespaced:  false,
+  //   name:        'groups',
+  //   weight:      -1, // TODO: Use weightType on user Q This never moves below users.
+  //   // count:       12345, // TODO: RC remove Q Should the groups table show all groups/PRINCIPALs?
+  //   route:       { name: 'c-cluster-auth-groups' },
+  // });
 
   spoofedType({
     label:             'Groups',
@@ -109,7 +111,7 @@ export function init(store) {
   basicType([
     'config',
     MANAGEMENT.USER,
-    'groups', // TODO: RC see adding to virtualType ifhavetype Q Conditionally add given providers. Just show warning at top (like that in assign roles)?
+    // 'groups',
     NORMAN.SPOOFED.GROUP_PRINCIPAL
   ]);
 
@@ -122,7 +124,6 @@ export function init(store) {
     AGE
   ]);
 
-  // TODO: RC use directly for custom types
   headers(NORMAN.SPOOFED.GROUP_PRINCIPAL, [
     GROUP_NAME,
     GROUP_ROLE_NAME

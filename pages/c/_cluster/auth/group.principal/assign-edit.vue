@@ -4,9 +4,9 @@ import Loading from '@/components/Loading';
 import SelectPrincipal from '@/components/auth/SelectPrincipal.vue';
 import PrincipalComponent from '@/components/auth/Principal.vue';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
-import { NORMAN } from '@/config/types';
-import richard from '@/utils/richards';
+import { NORMAN, RBAC } from '@/config/types';
 import { _VIEW } from '@/config/query-params';
+import { exceptionToErrorsArray } from '@/utils/error';
 
 export default {
   components: {
@@ -19,7 +19,7 @@ export default {
   async fetch() {
     this.principalId = this.$route.query.principal;
     this.isEdit = !!this.principalId;
-    this.mode = this.$route.query.mode; // TODO: RC edit vs view .. edit const
+    this.mode = this.$route.query.mode;
     this.isSelect = this.$route.query.select;
 
     this.spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
@@ -37,7 +37,7 @@ export default {
       principalId: null,
       spoofed:     null,
       mode:        _VIEW,
-
+      roleChanges: null,
     };
   },
   computed: {
@@ -54,16 +54,72 @@ export default {
       return true;
     },
     cancel() {
-      // TODO: RC
-      // this.$route.name === c-cluster-auth-group.principal-assign-edit
-      this.spoofed.goToList(); // TODO: Can't create spoofed
-      // this.$router.push({ path: `/c/local/auth/group.principal` }); // Contains local
-      // this.$router.push({ name: `c-cluster-auth-group.principal` });// Route with name 'c-cluster-auth-group.principal' does not exist
-      // this.$router.push({ name: 'c-cluster-auth-groups' }); // from old virtual route.. can't assign route to spoofedType (schema added, not top level)
+      this.spoofed.goToList();
     },
-    save(buttonDone) {
+    async save(buttonDone) {
       this.errors = [];
-      buttonDone(true);
+
+      // {
+      //         globalRoleName: role,
+      //         groupPrincipalName: this.principalId,
+      //       }
+      try {
+        const addBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
+          type:               RBAC.GLOBAL_ROLE_BINDING,
+          metadata:           { generateName: `ui-` },
+          globalRoleName:     role,
+          groupPrincipalName: this.principalId,
+        })));
+        const executeAddNewBindings = await Promise.all(addBindings.map(newBinding => newBinding.save()));
+        const a = await Promise.all(executeAddNewBindings);
+
+        console.warn('adds: ', a);
+
+        const removeBindings = await Promise.all(this.roleChanges.removeBindings.map(bindingId => this.$store.dispatch('management/find', {
+          type: RBAC.GLOBAL_ROLE_BINDING,
+          id:   bindingId
+        })));
+        const executeRemoveBindings = await Promise.all(removeBindings.map(binding => binding.remove()));
+
+        buttonDone(true);
+        this.spoofed.goToList();// TODO: RC does this update the list
+      } catch (err) {
+        console.error('!!!!!!!!!!!save: ', err);
+        this.errors = exceptionToErrorsArray(err);
+        buttonDone(false);
+      }
+
+      // this.res = await this.$store.dispatch(`management/create`, { type: RBAC.GLOBAL_ROLE_BINDING });
+
+      // const obj = this.$store.dispatch(`${ inStore }/create`, {
+      //         type,
+      //         metadata: {
+      //           generateName: `ui-${ this.filterRoleValue ? `${ this.filterRoleValue }-` : '' }`,
+      //           namespace:    this.namespace,
+      //         },
+      //         roleRef: {
+      //           apiGroup,
+      //           kind: row.roleKind,
+      //           name: row.role,
+      //         },
+      //         subjects: [
+      //           {
+      //             apiGroup,
+      //             kind: row.subjectKind,
+      //             name: row.subject,
+      //           },
+      //         ]
+      //       });
+    },
+
+    // initialRoles: this.startingSelectedRoles,
+
+    rolesChanged($event) {
+      this.roleChanges = $event;
+      console.warn('assignEdit starting: ', $event.initialRoles);
+      console.warn('assignEdit added: ', $event.addRoles);
+      console.warn('assignEdit removed: ', $event.removeBindings);
+      console.warn('assignEdit principalId: ', this.principalId);
     }
   }
 };
@@ -87,9 +143,9 @@ export default {
         <SelectPrincipal v-if="isSelect" :mode="'true'" :retain-selection="true" @add="addPrincipal" />
         <PrincipalComponent v-if="principalId" :key="principalId" :value="principalId" :use-muted="false" />
 
-        <GlobalRoleBindings :principal-id="principalId" :mode="mode" />
+        <GlobalRoleBindings :principal-id="principalId" :mode="mode" @changed="rolesChanged" />
 
-        <!-- TODO: RC is is view... not save button -->
+        <!-- // TODO: RC Q How to disable button if there's no change? -->
         <FooterComponent
           :mode="mode"
           :errors="errors"

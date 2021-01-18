@@ -3,9 +3,6 @@ import SortableTable from '@/components/SortableTable';
 import Loading from '@/components/Loading';
 import { NORMAN, RBAC } from '@/config/types';
 
-// TODO: RC Q Should this be a custom list showing selected principals... or all principals... what about groups?
-// TODO: RC Group Roles & Bindings vs Cluster roles & bindings
-
 // TODO: RC Move this into list folder, so just list section us used
 
 export default {
@@ -15,7 +12,7 @@ export default {
   },
   data() {
     return {
-      schema:             null, // this.$store.getters['norman/schemaFor'](NORMAN.PRINCIPAL)// TODO: RC Q confirm, no schema's for norman?
+      schema:             null,
       headers:            this.$store.getters['type-map/headersFor']({ id: NORMAN.PRINCIPAL }),
       // Provided by fetch & updateRows later
       principals:         null,
@@ -26,18 +23,17 @@ export default {
   computed: {},
   methods:  {
     async updatePrincipals() {
-      // TODO: RC nope QCan this be filtered by principalType === 'group'?
       this.principals = await this.$store.dispatch('rancher/findAll', {
         type: NORMAN.PRINCIPAL, // TODO: RC typo PRINCIPAL
         opt:  { url: '/v3/principals' }
       });
     },
     async updateGlobalRoleBindings(force) {
-      // TODO: RC Can this be filtered by only the principals we're interested in... as this could be huge?
+      // TODO: RC Q Can this be filtered by only the principals we're interested in... as this could be huge?
       // aka all entries where groupPrincipalName is one in string[],
       this.globalRoleBindings = await this.$store.dispatch('management/findAll', {
         type: RBAC.GLOBAL_ROLE_BINDING,
-        opt:  { force: true }
+        opt:  { force }
       });
     },
     async updateRows() { // TODO: RC update with computed + test with
@@ -60,34 +56,24 @@ export default {
       return !!globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === principal.id);
     },
     async refreshGroupMemberships() {
-      // TODO: RC FIX - specific api action Q Double check ... just need to refresh global role bindings?
       // TODO: RC use action button to show state
-      await this.updateGlobalRoleBindings(true);
-      await this.updateRows();
+      try {
+        // TODO: RC Test - See ./ui/lib/global-admin/addon/security/accounts/groups/controller.js
+        await this.$store.dispatch('rancher/request', {
+          url:           '/v3/users?action=refreshauthprovideraccess',
+          method:        'post',
+          // headers:       { 'Content-Type': 'application/json' },
+          data:          { },
+        });
+
+        await this.updateGlobalRoleBindings(true);
+        await this.updateRows();
+      } catch (error) {
+        this.$store.dispatch('growl/fromError', { title: 'Error refreshing group memberships', error }, { root: true });
+      }
     },
   }
 };
-
-/**
- * actions: {
-      refreshAllTokens() {
-        set(this, 'refreshing', true);        this.globalStore.request({
-          url:    '/v3/users?action=refreshauthprovideraccess',
-          method: 'POST',
-          data:   {}
-        }).then(() => {
-          const successTitle   = this.intl.t('action.refreshAuthProviderAccess.allSuccess.title');
-          const successMessage = this.intl.t('action.refreshAuthProviderAccess.allSuccess.message');          this.growl.success(successTitle, successMessage)
-        })
-          .catch((err) => {
-            set(this, 'errors', [err.message]);
-          })
-          .finally(() => {
-            set(this, 'refreshing', false);
-          });
-      },
-    },
-*/
 
 </script>
 
@@ -118,8 +104,6 @@ export default {
         </div>
       </div>
     </header>
-    <!-- TODO: RC Q Row actions ... currently only 'view in api'... needs to be edit & delete -->
-    <!-- Create model for steve principals... what if shown elsehwere? -->
     <SortableTable
       :rows="rows"
       :table-actions="false"

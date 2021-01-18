@@ -102,16 +102,36 @@ export default {
         return;
       }
 
-      this.selectedRoles = [] ;
+      this.selectedRoles = [];
+      this.startingSelectedRoles = [];
 
       const boundRoles = this.globalRoleBindings.filter(globalRoleBinding => globalRoleBinding.groupPrincipalName === this.principalId);
 
       Object.entries(this.sortedRoles).forEach(([type, types]) => {
         Object.entries(types).forEach(([roleId, mappedRole]) => {
-          if (!!boundRoles.find(boundRole => boundRole.globalRoleName === roleId)) {
+          const boundRole = boundRoles.find(boundRole => boundRole.globalRoleName === roleId);
+
+          if (!!boundRole) {
             this.selectedRoles.push(roleId);
+            this.startingSelectedRoles.push({
+              roleId,
+              bindingId: boundRole.id
+            });
           }
         });
+      });
+    },
+    checkboxChanged() {
+      const addRoles = this.selectedRoles
+        .filter(selected => !this.startingSelectedRoles.find(startingRole => startingRole.roleId === selected));
+      const removeBindings = this.startingSelectedRoles
+        .filter(startingRole => !this.selectedRoles.find(selected => selected === startingRole.roleId))
+        .map(startingRole => startingRole.bindingId);
+
+      this.$emit('changed', {
+        initialRoles: this.startingSelectedRoles,
+        addRoles,
+        removeBindings
       });
     }
   }
@@ -138,6 +158,7 @@ export default {
                 :value-when-true="roleId"
                 :label="role.label"
                 :mode="mode"
+                @input="checkboxChanged"
               />
               <div class="description">
                 {{ role.description }}
