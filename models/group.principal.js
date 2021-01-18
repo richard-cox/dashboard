@@ -59,17 +59,11 @@ export default {
   },
 
   unassignGroupRoles() {
-    // TODO: RC implement
-    // TODO: RC test single, multiple
+    // TODO: RC terminology.... promptRemove is 'Delete'
     return (resources = this) => {
       const principals = Array.isArray(resources) ? resources : [resources];
 
-      debugger;
-
-      // TODO: RC Q Costly....
-      const a = this.$getters['all'](RBAC.GLOBAL_ROLE_BINDING);
-      const globalRoleBindings = a
-        // Bindings for this group
+      const globalRoleBindings = this.$getters['all'](RBAC.GLOBAL_ROLE_BINDING)
         .filter(globalRoleBinding => principals.find(principal => principal.id === globalRoleBinding.groupPrincipalName));
 
       richard.log('unassignGroupRoles', globalRoleBindings);
