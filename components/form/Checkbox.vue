@@ -1,7 +1,6 @@
 <script>
 import $ from 'jquery';
 import { _EDIT, _VIEW } from '@/config/query-params';
-import richard from '@/utils/richards';
 
 export default {
   props: {
@@ -45,33 +44,19 @@ export default {
       default: null
     },
 
-    // id: {
-    //   type:    String,
-    //   default: null
-    // },
-    valueWhenTrue: { default: true },
+    valueWhenTrue: {
+      type:    null,
+      default: true
+    },
   },
 
   computed: {
     isDisabled() {
-      // richard.log(this.disabled, this.mode === _VIEW );
-      // richard.log(this.mode);
-
       return (this.disabled || this.mode === _VIEW );
     },
-    // isChecked() {
-    //   if (this.isMultiCheckbox) {
-    //     debugger;
-
-    //     return !!this.value.find(v => v === this.valueWhenTrue);
-    //   }
-
-    //   return this.value;
-    // },
-    // isMultiCheckbox() {
-    //   return this.value.length !== undefined;
-    // },
-
+    isChecked() {
+      return this.isMulti() ? this.value.find(v => v === this.valueWhenTrue) : this.value === this.valueWhenTrue;
+    }
   },
 
   methods: {
@@ -84,8 +69,9 @@ export default {
         click.ctrlKey = event.ctrlKey;
         click.metaKey = event.metaKey;
 
-        if (Array.isArray(this.value)) {
-          if (this.value.find(v => v === this.valueWhenTrue)) {
+        // Flip the value
+        if (this.isMulti()) {
+          if (this.isChecked) {
             this.value.splice(this.value.indexOf(this.valueWhenTrue), 1);
           } else {
             this.value.push(this.valueWhenTrue);
@@ -95,9 +81,10 @@ export default {
           this.$emit('input', !this.value);
           $(this.$el).trigger(click);
         }
-
-        richard.log('CLICKED: ', `${ this.id } - ${ this.value }`);
       }
+    },
+    isMulti() {
+      return Array.isArray(this.value);
     }
   }
 };
@@ -106,18 +93,14 @@ export default {
 <template>
   <label
     class="checkbox-container"
-    :class="{disabled}"
+    :class="{ 'disabled': isDisabled}"
     @keydown.enter.prevent="clicked($event)"
     @keydown.space.prevent="clicked($event)"
     @click.stop.prevent="clicked($event)"
   >
-
-    <!-- :id="id"
-      :key="id + 'sdfsdfdsfdsf'" -->
-    <!-- :checked="value" TODO: RC -->
     <input
-
       v-model="value"
+      :checked="isChecked"
       :value="valueWhenTrue"
       type="checkbox"
       :tabindex="-1"

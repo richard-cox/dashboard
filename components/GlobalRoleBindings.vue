@@ -7,6 +7,7 @@ import { _VIEW } from '@/config/query-params';
 import Loading from '@/components/Loading';
 import richard from '@/utils/richards';
 
+// TODO: RC Case when there's no auth providers / groups
 export default {
   components: {
     Checkbox,
@@ -38,22 +39,22 @@ export default {
 
           if (type) {
             this.sortedRoles[type][role.id] = {
-              label:       this.t(`rbac.globalRoles.${ role.id }.label`) || role.displayName,
-              description: this.t(`rbac.globalRoles.${ role.id }.description`) || role.description || 'No description provided',
+              label:       this.t(`rbac.globalRoles.role.${ role.id }.label`) || role.displayName,
+              description: this.t(`rbac.globalRoles.role.${ role.id }.detail`) || role.description || this.t(`rbac.globalRoles.unknownRole.detail`),
               id:          role.id,
               role,
             };
           }
         });
 
-        // TODO: RC This could be a lot of roles... when we really only want those for the current principal
+        // TODO: RC Q This could be a lot of roles... when we really only want those for the current principal
         // Moving this out into the watch has issues....
         this.globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
 
         this.update();
       }
     } catch (e) {
-      console.error('""""', e); // TODO: RC
+      console.error('""""', e); // TODO: RC ! Is there a generic pattern for this?
     }
   },
   data() {
@@ -64,9 +65,11 @@ export default {
         'user',
         'user-base',
       ],
+      user:               null, // This will be populated when user view is done
       globalRoleBindings: null,
       sortedRoles:        null,
       selectedRoles:      [],
+
     };
   },
   computed: { ...mapGetters({ t: 'i18n/t' }) },
@@ -79,18 +82,15 @@ export default {
     }
   },
   methods: {
+    // TODO: RC validate - confirmUserCanLogIn - lib/global-admin/addon/components/form-global-roles/component.js
     getRoleType(role) {
-      // See
-      // - lib/global-admin/addon/security/accounts/new-group
-      // - lib/global-admin/addon/components/cru-group-account
-      // - lib/global-admin/addon/components/form-global-roles/component.js
-      // TODO: RC CHECK EMBER Q how to defined three types of roles... builtin...  ... global ("authz.management.cattle.io/bootstrapping": "default-globalrole",)
       if (this.globalPermissions.find(p => p === role.id)) {
         return 'global';
+      } else if (role.hidden) {
+        return null;
       } else if (role.builtin) {
         return 'builtin';
-      } else if (!role.isHidden) {
-        // TODO: RC test isHidden
+      } else {
         return 'custom';
       }
     },
@@ -125,28 +125,37 @@ export default {
     <form v-if="selectedRoles">
       <br>{{ selectedRoles }}<br><br>
       <div v-for="(sortedRole, type) in sortedRoles" :key="getUnique(type)" class="role-group mb-10">
-        <h2>{{ t("rbac.globalRoles.types." + type) }}</h2>
-        <div class="checkbox-section" :class="'checkbox-section--' + type">
-          <div v-for="(role, roleId) in sortedRoles[type]" :key="getUnique(type, roleId)" class="checkbox mb-10 mr-10">
-            <Checkbox
-              :key="getUnique(type, roleId, 'checkbox')"
-              v-model="selectedRoles"
-              :value-when-true="roleId"
-              :label="role.label"
-              :mode="mode"
-            />
-            <div class="description">
-              {{ role.description }}
+        <template v-if="Object.keys(sortedRole).length">
+          <h2>{{ t(`rbac.globalRoles.types.${type}.label`) }}</h2>
+          <div class="type-description mb-10">
+            {{ t(`rbac.globalRoles.types.${type}.detail`, { type: 'Application', isUser: !!user }) }}
+          </div>
+          <div class="checkbox-section" :class="'checkbox-section--' + type">
+            <div v-for="(role, roleId) in sortedRoles[type]" :key="getUnique(type, roleId)" class="checkbox mb-10 mr-10">
+              <Checkbox
+                :key="getUnique(type, roleId, 'checkbox')"
+                v-model="selectedRoles"
+                :value-when-true="roleId"
+                :label="role.label"
+                :mode="mode"
+              />
+              <div class="description">
+                {{ role.description }}
+              </div>
             </div>
           </div>
-        </div>
+        </template>
       </div>
     </form>
   </div>
 </template>
 
 <style lang='scss' scoped>
+  $detailSize: 11px;// TODO: RC
   .role-group {
+    .type-description {
+      font-size: $detailSize;
+    }
     .checkbox-section {
       display: grid;
 
@@ -161,7 +170,7 @@ export default {
         flex-direction: column;
 
         .description {
-          font-size: 11px; // TODO: RC
+          font-size: $detailSize;
           margin-top: 5px;
         }
       }

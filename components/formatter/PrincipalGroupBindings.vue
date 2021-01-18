@@ -10,7 +10,7 @@ export default {
   },
   computed: {
 
-    bindings() {
+    boundRoles() {
       const principal = this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.value);
       const globalRoleBindings = this.$store.getters['management/all'](RBAC.GLOBAL_ROLE_BINDING);
 
@@ -21,17 +21,32 @@ export default {
         .map((binding) => {
           const role = this.$store.getters['management/byId'](RBAC.GLOBAL_ROLE, binding.globalRoleName);
 
-          return role ? role.displayName : 'Unknown role';
+          return {
+            detailLocation: role.detailLocation,
+            label:          role ? role.displayName : 'Unknown role',
+          };
         })
-        .sort((a, b) => a.localeCompare(b));
+        .sort((a, b) => a.label.localeCompare(b.label));
     }
   }
 };
 </script>
 
 <template>
-  <div>
-    <!-- TODO: RC link to details page for role. see model details link <entity>.detailLocation -->
-    {{ bindings.join(', ') }}
+  <div class="pgb">
+    <template v-for="(role, i) in boundRoles">
+      <nuxt-link :key="role.id" :to="role.detailLocation">
+        {{ role.label }}
+      </nuxt-link>
+      <template v-if="i + 1 < boundRoles.length">
+        ,&nbsp;
+      </template>
+    </template>
   </div>
 </template>
+
+<style lang='scss' scoped>
+.pgb{
+  display: flex;
+}
+</style>
