@@ -24,9 +24,7 @@ export default {
   detailLocation() {
     const detailLocation = clone(this._detailLocation);
 
-    richard.log('detailLocation BEFORE', detailLocation.params.id);
     detailLocation.params.id = this.id; // Base fn removes part of the id (`github_team://3375666` --> `3375666`)
-    richard.log('detailLocation AFTER', detailLocation.params.id);
 
     return detailLocation;
 

@@ -69,7 +69,7 @@ export default {
       globalRoleBindings: null,
       sortedRoles:        null,
       selectedRoles:      [],
-
+      roleChanges:        {}
     };
   },
   computed: { ...mapGetters({ t: 'i18n/t' }) },
@@ -128,11 +128,34 @@ export default {
         .filter(startingRole => !this.selectedRoles.find(selected => selected === startingRole.roleId))
         .map(startingRole => startingRole.bindingId);
 
-      this.$emit('changed', {
+      this.roleChanges = {
         initialRoles: this.startingSelectedRoles,
         addRoles,
         removeBindings
-      });
+      };
+      this.$emit('changed', this.roleChanges);
+    },
+    async saveAddedRoles() {
+      const newBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
+        type:               RBAC.GLOBAL_ROLE_BINDING,
+        metadata:           { generateName: `ui-` }, // TODO: RC is this correct... can/should it be empty?
+        globalRoleName:     role,
+        groupPrincipalName: this.principalId,
+      })));
+
+      await Promise.all(newBindings.map(newBinding => newBinding.save()));
+    },
+    async saveRemovedRoles() {
+      const existingBindings = await Promise.all(this.roleChanges.removeBindings.map(bindingId => this.$store.dispatch('management/find', {
+        type: RBAC.GLOBAL_ROLE_BINDING,
+        id:   bindingId
+      })));
+
+      await Promise.all(existingBindings.map(existingBinding => existingBinding.remove()));
+    },
+    async save() {
+      await this.saveAddedRoles();
+      await this.saveRemovedRoles();
     }
   }
 };

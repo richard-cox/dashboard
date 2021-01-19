@@ -84,7 +84,10 @@ export function init(store) {
   configureType(NORMAN.SPOOFED.GROUP_PRINCIPAL, {
     isCreatable: false,
     showAge:     false,
-    // location:    null,
+    showState:   false,
+    isRemovable: false,
+    // location:    null, TODO: RC Is this helpfull??
+
   });
   mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, 'Groups'); // TODO: RC i10n
   weightType(NORMAN.SPOOFED.GROUP_PRINCIPAL, -1, true);

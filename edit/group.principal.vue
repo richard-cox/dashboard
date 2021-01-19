@@ -2,6 +2,7 @@
 import createEditView from '@/mixins/create-edit-view';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import CruResource from '@/components/CruResource';
+import { exceptionToErrorsArray } from '@/utils/error';
 
 export default {
   components: {
@@ -13,9 +14,19 @@ export default {
     return { errors: [] };
   },
   methods:  {
-    save() {
-      console.log('SSSAVVVEEE');
-    }
+    async save(buttonDone) {
+      this.errors = [];
+
+      try {
+        await this.$refs.grb.save();
+
+        buttonDone(true);
+        // TODO: RC Should this go back to list view on save??
+      } catch (err) {
+        this.errors = exceptionToErrorsArray(err);
+        buttonDone(false);
+      }
+    },
   }
 };
 </script>
@@ -29,11 +40,11 @@ export default {
       :mode="mode"
       :resource="value"
       :validation-passed="true"
-
       :errors="errors"
+      :can-yaml="false"
       @finish="save"
     >
-      <GlobalRoleBindings :principal-id="value.id" :mode="mode" @changed="rolesChanged" />
+      <GlobalRoleBindings ref="grb" :principal-id="value.id" :mode="mode" />
     </CruResource>
   </div>
 </template>

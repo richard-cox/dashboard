@@ -37,7 +37,11 @@ export default {
       principalId: null,
       spoofed:     null,
       mode:        _VIEW,
-      roleChanges: null,
+      // roleChanges: {
+      //   initialRoles: [],
+      //   addRoles: [],
+      //   removeBindings: []
+      // },
     };
   },
   computed: {
@@ -56,30 +60,29 @@ export default {
     cancel() {
       this.spoofed.goToList();
     },
-    async saveAddedRoles() {
-      const newBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
-        type:               RBAC.GLOBAL_ROLE_BINDING,
-        metadata:           { generateName: `ui-` }, // TODO: RC is this correct... can/should it be empty?
-        globalRoleName:     role,
-        groupPrincipalName: this.principalId,
-      })));
+    // async saveAddedRoles() {
+    //   const newBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
+    //     type:               RBAC.GLOBAL_ROLE_BINDING,
+    //     metadata:           { generateName: `ui-` }, // TODO: RC is this correct... can/should it be empty?
+    //     globalRoleName:     role,
+    //     groupPrincipalName: this.principalId,
+    //   })));
 
-      await Promise.all(newBindings.map(newBinding => newBinding.save()));
-    },
-    async saveRemovedRoles() {
-      const existingBindings = await Promise.all(this.roleChanges.removeBindings.map(bindingId => this.$store.dispatch('management/find', {
-        type: RBAC.GLOBAL_ROLE_BINDING,
-        id:   bindingId
-      })));
+    //   await Promise.all(newBindings.map(newBinding => newBinding.save()));
+    // },
+    // async saveRemovedRoles() {
+    //   const existingBindings = await Promise.all(this.roleChanges.removeBindings.map(bindingId => this.$store.dispatch('management/find', {
+    //     type: RBAC.GLOBAL_ROLE_BINDING,
+    //     id:   bindingId
+    //   })));
 
-      await Promise.all(existingBindings.map(existingBinding => existingBinding.remove()));
-    },
+    //   await Promise.all(existingBindings.map(existingBinding => existingBinding.remove()));
+    // },
     async save(buttonDone) {
       this.errors = [];
 
       try {
-        await this.saveAddedRoles();
-        await this.saveRemovedRoles();
+        await this.$refs.grb.save();
 
         buttonDone(true);
         this.spoofed.goToList();
@@ -88,9 +91,9 @@ export default {
         buttonDone(false);
       }
     },
-    rolesChanged($event) {
-      this.roleChanges = $event;
-    }
+    // rolesChanged($event) {
+    //   this.roleChanges = $event;
+    // }
   }
 };
 
@@ -113,7 +116,7 @@ export default {
         <SelectPrincipal v-if="isSelect" :mode="'true'" :retain-selection="true" @add="addPrincipal" />
         <PrincipalComponent v-if="!isSelect && principalId" :key="principalId" :value="principalId" :use-muted="false" />
 
-        <GlobalRoleBindings :principal-id="principalId" :mode="mode" @changed="rolesChanged" />
+        <GlobalRoleBindings ref="grb" :principal-id="principalId" :mode="mode" @changed="rolesChanged" />
 
         <!-- // TODO: RC Q How to disable button if there's no change? -->
         <FooterComponent
