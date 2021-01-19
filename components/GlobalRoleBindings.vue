@@ -166,7 +166,7 @@ export default {
 
   <div v-else>
     <form v-if="selectedRoles">
-      <br>{{ selectedRoles }}<br><br>
+      <!-- <br>{{ selectedRoles }}<br><br> -->
       <div v-for="(sortedRole, type) in sortedRoles" :key="getUnique(type)" class="role-group mb-10">
         <template v-if="Object.keys(sortedRole).length">
           <h2>{{ t(`rbac.globalRoles.types.${type}.label`) }}</h2>

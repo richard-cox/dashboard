@@ -152,11 +152,8 @@ authGroups:
     assignRoles: Assign Global Role
   assignEdit:
       assignTitle: Assign Global Roles To Group
-      editTitle: Edit Global Roles
-      viewTitle: View Global Roles
-
-
-
+      editTitle: Edit Global Roles TODO RC DELETE ME
+      viewTitle: View Global Roles TODO RC DELETE ME
 assignTo:
   title: |-
     {count, plural,

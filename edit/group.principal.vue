@@ -3,6 +3,7 @@ import CreateEditView from '@/mixins/create-edit-view';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import CruResource from '@/components/CruResource';
 import { exceptionToErrorsArray } from '@/utils/error';
+import { _EDIT } from '@/config/query-params';
 
 export default {
   components: {
@@ -13,7 +14,8 @@ export default {
   data() {
     return {
       errors: [],
-      valid:  false
+      valid:  false,
+      mode:   _EDIT
     };
   },
   methods:  {
@@ -30,7 +32,7 @@ export default {
       }
     },
     changed(changes) {
-      this.valid = changes.addRoles.length || changes.removeBindings.length;
+      this.valid = !!changes.addRoles.length || !!changes.removeBindings.length;
     }
   }
 };

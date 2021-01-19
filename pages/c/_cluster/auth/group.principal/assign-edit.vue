@@ -17,42 +17,32 @@ export default {
     Loading
   },
   async fetch() {
-    this.principalId = this.$route.query.principal;
-    this.isEdit = !!this.principalId;
+    // this.principalId = this.$route.query.principal;
+    // this.isEdit = !!this.principalId;
     this.mode = this.$route.query.mode;
-    this.isSelect = this.$route.query.select;
+    // this.isSelect = this.$route.query.select;
 
     this.spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
-    // this.principal = await this.$store.dispatch('rancher/find', {
-    //   type: NORMAN.PRINCIPAL,
-    //   id:   this.principalId,
-    //   opt:  { url: `/v3/principals/${this.principalId}` }
-    // });
   },
   data() {
     return {
       errors:      [],
-      isView:      true,
-      isSelect:    true,
+      // isView:      true,
+      // isSelect:    true,
       principalId: null,
       spoofed:     null,
       mode:        _VIEW,
-      // roleChanges: {
-      //   initialRoles: [],
-      //   addRoles: [],
-      //   removeBindings: []
-      // },
     };
   },
-  computed: {
-    title() {
-      const view = this.mode === _VIEW ? 'viewTitle' : this.isEdit ? 'editTitle' : 'assignTitle';
+  // computed: {
+  //   title() {
+  //     const view = this.mode === _VIEW ? 'viewTitle' : this.isEdit ? 'editTitle' : 'assignTitle';
 
-      return `authGroups.assignEdit.${ view }`;
-    },
-  },
+  //     return `authGroups.assignEdit.assignTitle`;
+  //   },
+  // },
   methods: {
-    addPrincipal(id) {
+    setPrincipal(id) {
       this.principalId = id;
 
       return true;
@@ -60,24 +50,6 @@ export default {
     cancel() {
       this.spoofed.goToList();
     },
-    // async saveAddedRoles() {
-    //   const newBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
-    //     type:               RBAC.GLOBAL_ROLE_BINDING,
-    //     metadata:           { generateName: `ui-` }, // TODO: RC is this correct... can/should it be empty?
-    //     globalRoleName:     role,
-    //     groupPrincipalName: this.principalId,
-    //   })));
-
-    //   await Promise.all(newBindings.map(newBinding => newBinding.save()));
-    // },
-    // async saveRemovedRoles() {
-    //   const existingBindings = await Promise.all(this.roleChanges.removeBindings.map(bindingId => this.$store.dispatch('management/find', {
-    //     type: RBAC.GLOBAL_ROLE_BINDING,
-    //     id:   bindingId
-    //   })));
-
-    //   await Promise.all(existingBindings.map(existingBinding => existingBinding.remove()));
-    // },
     async save(buttonDone) {
       this.errors = [];
 
@@ -91,9 +63,6 @@ export default {
         buttonDone(false);
       }
     },
-    // rolesChanged($event) {
-    //   this.roleChanges = $event;
-    // }
   }
 };
 
@@ -104,19 +73,23 @@ export default {
 
   <div v-else>
     <div>
-      <header>
-        <div class="title">
-          <h1 class="m-0">
-            {{ t(title) }}
-          </h1>
-        </div>
-      </header>
+      <div class="masthead">
+        <header>
+          <div class="title">
+            <h1 class="m-0">
+              {{ t('authGroups.assignEdit.assignTitle') }}
+            </h1>
+          </div>
+        </header>
+      </div>
 
       <form>
-        <SelectPrincipal v-if="isSelect" :mode="'true'" :retain-selection="true" @add="addPrincipal" />
-        <PrincipalComponent v-if="!isSelect && principalId" :key="principalId" :value="principalId" :use-muted="false" />
+        <!-- TODO: RC type in to get github user... shouldn't be allowed? should be but currently isn't in groups list? -->
+        <!--  v-if="isSelect" -->
+        <SelectPrincipal :mode="'true'" :retain-selection="true" class="mb-20" @add="setPrincipal" />
+        <!-- <PrincipalComponent v-if="!isSelect && principalId" :key="principalId" :value="principalId" :use-muted="false" /> -->
 
-        <GlobalRoleBindings ref="grb" :principal-id="principalId" :mode="mode" @changed="rolesChanged" />
+        <GlobalRoleBindings ref="grb" :principal-id="principalId" :mode="mode" />
 
         <!-- // TODO: RC Q How to disable button if there's no change? -->
         <FooterComponent
@@ -132,6 +105,14 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+  .masthead {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  HEADER {
+    margin: 0;
+  }
   .actions {
     display: flex;
     justify-content: flex-end;
