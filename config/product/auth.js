@@ -39,26 +39,8 @@ export function init(store) {
     route:       { name: 'c-cluster-auth-config' },
   });
 
-  // TODO: RC Remove c-cluster-auth-groups page
-
-  // TODO: RC use spoofedType monitoring/logging. Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
-  // Can this be done with virtualType / spoofedType?
-  virtualType({
-    label:       '(OLD) Groups', // TODO: RC i10n
-    icon:        'lock', // TODO: RC
-    namespaced:  false,
-    name:        'groups',
-    weight:      -1, // TODO: Use weightType on user Q This never moves below users.
-    // count:       12345, // TODO: RC remove Q Should the groups table show all groups/PRINCIPALs?
-    route:       { name: 'c-cluster-auth-groups' },
-  });
-
   spoofedType({
     label:             'Groups',
-    name:              'sddfgdfg',
-    // icon:           'lock', // TODO: RC
-    // namespaced:  false,
-    // weight:      -5,
     type:              NORMAN.SPOOFED.GROUP_PRINCIPAL,
     collectionMethods: [],
     schemas:           [
@@ -67,11 +49,14 @@ export function init(store) {
         type:              'schema',
         collectionMethods: [],
         resourceFields:    {},
-        icon:              'lock', // TODO: RC see type-map getTree, allTypes. allTypes does not bring in icon from here... should it?
+        // icon:              'lock', // TODO: RC see type-map getTree, allTypes. allTypes does not bring in icon from here... should it?
         // Two types in allTypes... one from schema and one from top level. schema one does not copy of icon. top level is ignored isBasic && !groupForBasicType
       }
     ],
     getInstances: async() => {
+      // TODO: RC Q Manually set this
+      // const counts = rootGetters[`${module}/all`](COUNT)?.[0]?.counts || {};
+
       const principals = await store.dispatch('rancher/findAll', {
         type: NORMAN.PRINCIPAL,
         opt:  { url: '/v3/principals' }
@@ -96,7 +81,14 @@ export function init(store) {
         }));
     }
   });
-  // mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, '(New) Groups');// TODO: RC ?
+  configureType(NORMAN.SPOOFED.GROUP_PRINCIPAL, {
+    isCreatable: false,
+    showAge:     false,
+    // location:    null,
+  });
+  mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, 'Groups'); // TODO: RC i10n
+  weightType(NORMAN.SPOOFED.GROUP_PRINCIPAL, -1, true);
+  weightType(MANAGEMENT.USER, 100);
 
   configureType(MANAGEMENT.AUTH_CONFIG, {
     isCreatable: false,
@@ -106,8 +98,6 @@ export function init(store) {
   });
 
   componentForType(`${ MANAGEMENT.AUTH_CONFIG }/github`, 'auth/github');
-
-  weightType(MANAGEMENT.USER, 10);
 
   basicType([
     'config',
@@ -129,4 +119,16 @@ export function init(store) {
     GROUP_NAME,
     GROUP_ROLE_NAME
   ]);
+
+  // ---------------------------  TODO: RC Remove c-cluster-auth-groups page
+  // TODO: RC use spoofedType monitoring/logging. Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
+  // Can this be done with virtualType / spoofedType?
+  virtualType({
+    label:       '(Old) Groups', // TODO: RC i10n
+    icon:        'lock', // TODO: RC
+    namespaced:  false,
+    name:        'groups',
+    weight:      -1, // TODO: Use weightType on user Q This never moves below users.
+    route:       { name: 'c-cluster-auth-groups' },
+  });
 }

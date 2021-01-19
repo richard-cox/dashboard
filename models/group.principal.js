@@ -1,6 +1,7 @@
 import { AS, MODE, _EDIT, _UNFLAG } from '@/config/query-params';
-import { RBAC } from '@/config/types';
+import { NORMAN, RBAC } from '@/config/types';
 import richard from '@/utils/richards';
+import { clone } from '@/utils/object';
 
 export default {
 
@@ -10,37 +11,59 @@ export default {
     return false;
   },
 
+  nameDisplay() {
+    return this.principalNameDisplay;
+  },
+
+  principalNameDisplay() {
+    const principal = this.$rootGetters['rancher/byId'](NORMAN.PRINCIPAL, this.id);
+
+    return `${ principal.name } (${ principal.displayType })`;
+  },
+
   detailLocation() {
-    richard.log(this.id, this.id?.replace(/.*\//, ''));
+    const detailLocation = clone(this._detailLocation);
 
-    return {
-      path: `/c/local/auth/group.principal/assign-edit?principal=${ this.id }`
-      // name:   `c-cluster-product-resource${ schema?.attributes?.namespaced ? '-namespace' : '' }-id`,
-      // params: {
-      //   product:   'auth',
-      //   cluster:   this.$rootGetters['clusterId'],
-      // }
-    };
+    richard.log('detailLocation BEFORE', detailLocation.params.id);
+    detailLocation.params.id = this.id; // Base fn removes part of the id (`github_team://3375666` --> `3375666`)
+    richard.log('detailLocation AFTER', detailLocation.params.id);
+
+    return detailLocation;
+
+    // return {
+    //   path: `/c/local/auth/group.principal/assign-edit?principal=${ this.id }`
+    //   // name:   `c-cluster-product-resource${ schema?.attributes?.namespaced ? '-namespace' : '' }-id`,
+    //   // params: {
+    //   //   product:   'auth',
+    //   //   cluster:   this.$rootGetters['clusterId'],
+    //   // }
+    // };
   },
 
-  goToEdit() {
-    return (moreQuery = {}) => {
-      richard.log('moreQuery: ', moreQuery);
-      const location = this.detailLocation;
+  // goToEdit() {
+  //   return (moreQuery = {}) => {
+  //     richard.log('moreQuery: ', moreQuery);
+  //     const location = this.detailLocation;
 
-      location.query = {
-        ...location.query,
-        [MODE]: _EDIT,
-        [AS]:   _UNFLAG,
-        ...moreQuery
-      };
+  //     location.query = {
+  //       ...location.query,
+  //       [MODE]: _EDIT,
+  //       [AS]:   _UNFLAG,
+  //       ...moreQuery
+  //     };
 
-      this.currentRouter().push(location);
-    };
-  },
+  //     this.currentRouter().push(location);
+  //   };
+  // },
 
   availableActions() {
     return [
+      {
+        action:  'goToViewConfig',
+        label:   this.t('action.view'),
+        icon:    'icon icon-edit',
+        enabled:  this.canCustomEdit,
+      },
       {
         action:  'goToEdit',
         label:   this.t('action.edit'),
