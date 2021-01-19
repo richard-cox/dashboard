@@ -43,18 +43,19 @@ export function init(store) {
 
   // TODO: RC use spoofedType monitoring/logging. Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
   // Can this be done with virtualType / spoofedType?
-  // virtualType({
-  //   label:       '(OLD) Groups', // TODO: RC i10n
-  //   icon:        'lock', // TODO: RC
-  //   namespaced:  false,
-  //   name:        'groups',
-  //   weight:      -1, // TODO: Use weightType on user Q This never moves below users.
-  //   // count:       12345, // TODO: RC remove Q Should the groups table show all groups/PRINCIPALs?
-  //   route:       { name: 'c-cluster-auth-groups' },
-  // });
+  virtualType({
+    label:       '(OLD) Groups', // TODO: RC i10n
+    icon:        'lock', // TODO: RC
+    namespaced:  false,
+    name:        'groups',
+    weight:      -1, // TODO: Use weightType on user Q This never moves below users.
+    // count:       12345, // TODO: RC remove Q Should the groups table show all groups/PRINCIPALs?
+    route:       { name: 'c-cluster-auth-groups' },
+  });
 
   spoofedType({
     label:             'Groups',
+    name:              'sddfgdfg',
     // icon:           'lock', // TODO: RC
     // namespaced:  false,
     // weight:      -5,
@@ -95,7 +96,7 @@ export function init(store) {
         }));
     }
   });
-  mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, '(New) Groups');// TODO: RC ?
+  // mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, '(New) Groups');// TODO: RC ?
 
   configureType(MANAGEMENT.AUTH_CONFIG, {
     isCreatable: false,
@@ -111,7 +112,7 @@ export function init(store) {
   basicType([
     'config',
     MANAGEMENT.USER,
-    // 'groups',
+    'groups',
     NORMAN.SPOOFED.GROUP_PRINCIPAL
   ]);
 

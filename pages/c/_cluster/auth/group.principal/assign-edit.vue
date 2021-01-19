@@ -111,7 +111,7 @@ export default {
 
       <form>
         <SelectPrincipal v-if="isSelect" :mode="'true'" :retain-selection="true" @add="addPrincipal" />
-        <PrincipalComponent v-if="principalId" :key="principalId" :value="principalId" :use-muted="false" />
+        <PrincipalComponent v-if="!isSelect && principalId" :key="principalId" :value="principalId" :use-muted="false" />
 
         <GlobalRoleBindings :principal-id="principalId" :mode="mode" @changed="rolesChanged" />
 

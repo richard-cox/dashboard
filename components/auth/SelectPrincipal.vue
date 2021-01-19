@@ -125,11 +125,13 @@ export default {
   <LabeledSelect
     v-model="newValue"
     :mode="mode"
-    label="Add Member"
+    :label="retainSelection ? `Select Member` : `Add Member`"
     placeholder="Start typing to search for principals"
     :options="options"
     :searchable="true"
     :filterable="false"
+    class="select-principal"
+    :class="{'retain-selection': retainSelection}"
     @input="add"
     @search="onSearch"
   >
@@ -142,5 +144,22 @@ export default {
     <template #option="option">
       <Principal :key="option.label" :value="option.label" :use-muted="false" />
     </template>
+
+    <template v-if="retainSelection" #selected-option="option">
+      <Principal :key="option.label" :value="option.label" :use-muted="false" class="mt-10 mb-10" />
+    </template>
   </LabeledSelect>
 </template>
+
+<style lang="scss" scoped>
+  .select-principal {
+    &.retain-selection {
+      min-height: 84px;
+      &.focused {
+        .principal {
+          display: none;
+        }
+      }
+    }
+  }
+</style>

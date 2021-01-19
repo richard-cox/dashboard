@@ -58,6 +58,14 @@ export default {
     ];
   },
 
+  // validationErrors() // TODO: RC?
+
+  // TODO: RC Assign this to action?? use in save??
+  roleBindings() {
+    return !!this.$getters['all'](RBAC.GLOBAL_ROLE_BINDING)
+      .filter(globalRoleBinding => this.id === globalRoleBinding.groupPrincipalName);
+  },
+
   unassignGroupRoles() {
     // TODO: RC terminology.... promptRemove is 'Delete'
     return (resources = this) => {
