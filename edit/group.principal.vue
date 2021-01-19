@@ -1,5 +1,5 @@
 <script>
-import createEditView from '@/mixins/create-edit-view';
+import CreateEditView from '@/mixins/create-edit-view';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import CruResource from '@/components/CruResource';
 import { exceptionToErrorsArray } from '@/utils/error';
@@ -9,9 +9,12 @@ export default {
     GlobalRoleBindings,
     CruResource
   },
-  mixins: [createEditView],
+  mixins: [CreateEditView],
   data() {
-    return { errors: [] };
+    return {
+      errors: [],
+      valid:  false
+    };
   },
   methods:  {
     async save(buttonDone) {
@@ -19,32 +22,32 @@ export default {
 
       try {
         await this.$refs.grb.save();
-
+        this.$router.replace({ name: this.doneRoute }); // No navigation without this prod
         buttonDone(true);
-        // TODO: RC Should this go back to list view on save??
       } catch (err) {
         this.errors = exceptionToErrorsArray(err);
         buttonDone(false);
       }
     },
+    changed(changes) {
+      this.valid = changes.addRoles.length || changes.removeBindings.length;
+    }
   }
 };
 </script>
 
 <template>
   <div>
-    <!-- -->
-    <!-- :validation-passed="true" TODO: RC -->
     <CruResource
       :done-route="doneRoute"
       :mode="mode"
       :resource="value"
-      :validation-passed="true"
+      :validation-passed="valid"
       :errors="errors"
       :can-yaml="false"
       @finish="save"
     >
-      <GlobalRoleBindings ref="grb" :principal-id="value.id" :mode="mode" />
+      <GlobalRoleBindings ref="grb" :principal-id="value.id" :mode="mode" @changed="changed" />
     </CruResource>
   </div>
 </template>
