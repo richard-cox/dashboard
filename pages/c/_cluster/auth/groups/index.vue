@@ -3,7 +3,7 @@ import SortableTable from '@/components/SortableTable';
 import Loading from '@/components/Loading';
 import { NORMAN, RBAC } from '@/config/types';
 
-// TODO: RC Move this into list folder, so just list section us used
+// TODO: RC BUTTONS This file and parent folder can be deleted once buttons moved out
 
 export default {
   components: { SortableTable, Loading },
@@ -24,7 +24,7 @@ export default {
   methods:  {
     async updatePrincipals() {
       this.principals = await this.$store.dispatch('rancher/findAll', {
-        type: NORMAN.PRINCIPAL, // TODO: RC typo PRINCIPAL
+        type: NORMAN.PRINCIPAL,
         opt:  { url: '/v3/principals' }
       });
     },
@@ -36,7 +36,7 @@ export default {
         opt:  { force }
       });
     },
-    async updateRows() { // TODO: RC update with computed + test with
+    async updateRows() { // TODO: RC BUTTONS update with computed + test with
       if (!this.principals) {
         await this.updatePrincipals();
       }
@@ -47,7 +47,7 @@ export default {
       // Up front fetch all global roles, in stead of individually when needed (results in many duplicated requests)
       await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-      // TODO: CHECK Q does this always redraw... and as such recreate (RE refresh group memberships)
+      // TODO: BUTTONS CHECK Q does this always redraw... and as such recreate (RE refresh group memberships)
       this.rows = this.principals.filter((principal) => {
         return principal.principalType === 'group' && this.principalHasGlobalRoleBinding(this.globalRoleBindings, principal);
       });
@@ -56,9 +56,9 @@ export default {
       return !!globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === principal.id);
     },
     async refreshGroupMemberships() {
-      // TODO: RC use action button to show state
+      // TODO: RC BUTTONS use async button to show state
       try {
-        // TODO: RC Test - See ./ui/lib/global-admin/addon/security/accounts/groups/controller.js
+        // TODO: RC BUTTONS test - See ./ui/lib/global-admin/addon/security/accounts/groups/controller.js
         await this.$store.dispatch('rancher/request', {
           url:           '/v3/users?action=refreshauthprovideraccess',
           method:        'post',
@@ -80,6 +80,7 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
+    TO BE REMOVED
     <header>
       <div class="title">
         <h1 class="m-0">
@@ -104,7 +105,7 @@ export default {
         </div>
       </div>
     </header>
-    <SortableTable
+    <!-- <SortableTable
       :rows="rows"
       :table-actions="false"
       :headers="headers"
@@ -112,7 +113,7 @@ export default {
       key-field="id"
       default-sort-by="group-name"
       :paged="true"
-    />
+    /> -->
   </div>
 </template>
 

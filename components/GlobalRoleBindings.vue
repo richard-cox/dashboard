@@ -53,9 +53,7 @@ export default {
 
         this.update();
       }
-    } catch (e) {
-      console.error('""""', e); // TODO: RC ! Is there a generic pattern for this?
-    }
+    } catch (e) { }
   },
   data() {
     return {
@@ -65,7 +63,7 @@ export default {
         'user',
         'user-base',
       ],
-      user:               null, // This will be populated when user view is done
+      user:               null, // TODO: Populate in edit user mode
       globalRoleBindings: null,
       sortedRoles:        null,
       selectedRoles:      [],
@@ -82,7 +80,6 @@ export default {
     }
   },
   methods: {
-    // TODO: RC validate - confirmUserCanLogIn - lib/global-admin/addon/components/form-global-roles/component.js
     getRoleType(role) {
       if (this.globalPermissions.find(p => p === role.id)) {
         return 'global';
@@ -120,6 +117,10 @@ export default {
           }
         });
       });
+
+      // TODO: If in create user mode... apply default selection using role.newUserDefault
+      // TODO: If in create/edit user mode... apply validation as per rancher/ui lib/global-admin/addon/components/form-global-roles/component.js
+      // Should validation come in via validationErrors property on model?
     },
     checkboxChanged() {
       const addRoles = this.selectedRoles
@@ -138,7 +139,7 @@ export default {
     async saveAddedRoles() {
       const newBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
         type:               RBAC.GLOBAL_ROLE_BINDING,
-        metadata:           { generateName: `ui-` }, // TODO: RC is this correct... can/should it be empty?
+        metadata:           { generateName: `ui-` }, // TODO: RC Q Is this correct... can/should it be empty?
         globalRoleName:     role,
         groupPrincipalName: this.principalId,
       })));
@@ -195,7 +196,7 @@ export default {
 </template>
 
 <style lang='scss' scoped>
-  $detailSize: 11px;// TODO: RC
+  $detailSize: 11px;// TODO: UX REVIEW RC
   .role-group {
     .type-description {
       font-size: $detailSize;

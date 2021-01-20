@@ -146,7 +146,6 @@ authConfig:
         <li>Copy and paste the Client ID and Client Secret of your newly created OAuth app into the fields below</li>
 
 authGroups:
-  title: Groups
   actions:
     refresh: Refresh Group Memberships
     assignRoles: Assign Global Role
@@ -189,6 +188,10 @@ asyncButton:
     action:  'Delete'
     waiting: 'Deleting&hellip;'
     success: 'Deleted'
+  remove:
+    action:  'Remove'
+    waiting: 'Removing&hellip;'
+    success: 'Removed'
   continue:
     action:  'Continue'
     waiting: 'Saving&hellip;'
@@ -2544,6 +2547,11 @@ typeLabel:
     {count, plural,
       one { Route }
       other { Routes }
+    }
+  group.principal: |-
+    {count, plural,
+      one { Group }
+      other { Groups }
     }
 
 action:

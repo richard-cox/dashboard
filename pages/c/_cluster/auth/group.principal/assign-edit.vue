@@ -4,34 +4,26 @@ import Loading from '@/components/Loading';
 import SelectPrincipal from '@/components/auth/SelectPrincipal.vue';
 import PrincipalComponent from '@/components/auth/Principal.vue';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
-import { NORMAN, RBAC } from '@/config/types';
+import { NORMAN } from '@/config/types';
 import { _VIEW } from '@/config/query-params';
 import { exceptionToErrorsArray } from '@/utils/error';
 
 export default {
   components: {
     SelectPrincipal,
-    PrincipalComponent,
     FooterComponent,
     GlobalRoleBindings,
     Loading
   },
-  async fetch() {
-    // this.principalId = this.$route.query.principal;
-    // this.isEdit = !!this.principalId;
-    this.mode = this.$route.query.mode;
-    // this.isSelect = this.$route.query.select;
-
-    this.spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
+  fetch() {
+    // this.mode = this.$route.query.mode;
   },
   data() {
     return {
+      mode:        this.$route.query.mode,
       errors:      [],
-      // isView:      true,
-      // isSelect:    true,
       principalId: null,
       spoofed:     null,
-      mode:        _VIEW,
     };
   },
   // computed: {
@@ -47,8 +39,10 @@ export default {
 
       return true;
     },
-    cancel() {
-      this.spoofed.goToList();
+    async cancel() {
+      const spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
+
+      spoofed.goToList();
     },
     async save(buttonDone) {
       this.errors = [];
@@ -85,13 +79,10 @@ export default {
 
       <form>
         <!-- TODO: RC type in to get github user... shouldn't be allowed? should be but currently isn't in groups list? -->
-        <!--  v-if="isSelect" -->
         <SelectPrincipal :mode="'true'" :retain-selection="true" class="mb-20" @add="setPrincipal" />
-        <!-- <PrincipalComponent v-if="!isSelect && principalId" :key="principalId" :value="principalId" :use-muted="false" /> -->
 
         <GlobalRoleBindings ref="grb" :principal-id="principalId" :mode="mode" />
 
-        <!-- // TODO: RC Q How to disable button if there's no change? -->
         <FooterComponent
           :mode="mode"
           :errors="errors"

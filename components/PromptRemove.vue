@@ -224,6 +224,7 @@ export default {
 
     // If spoofed we need to reload the values as the server can't have watchers for them.
     refreshSpoofedTypes(types) {
+      // TODO: RC cluster / managemenet
       const promises = types.map(type => this.$store.dispatch('cluster/findAll', { type, opt: { force: true } }, { root: true }));
 
       return Promise.all(promises);
@@ -269,7 +270,7 @@ export default {
         <button class="btn role-secondary" @click="close">
           Cancel
         </button>
-        <AsyncButton mode="delete" class="btn bg-error ml-10" :disabled="preventDelete" @click="remove" />
+        <AsyncButton mode="remove" class="btn bg-error ml-10" :disabled="preventDelete" @click="remove" />
       </template>
     </Card>
   </modal>

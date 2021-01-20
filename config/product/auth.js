@@ -5,6 +5,7 @@ import {
   AGE, GROUP_NAME, GROUP_ROLE_NAME, STATE, USER_DISPLAY_NAME, USER_ID, USER_PROVIDER
 } from '@/config/table-headers';
 import { USERNAME } from '@/config/cookies';
+import { camalize } from '@/utils/string';
 
 export const NAME = 'auth';
 
@@ -40,7 +41,7 @@ export function init(store) {
   });
 
   spoofedType({
-    label:             'Groups',
+    label:             store.getters['type-map/labelFor']({ id: NORMAN.SPOOFED.GROUP_PRINCIPAL }, 2),
     type:              NORMAN.SPOOFED.GROUP_PRINCIPAL,
     collectionMethods: [],
     schemas:           [
@@ -49,8 +50,6 @@ export function init(store) {
         type:              'schema',
         collectionMethods: [],
         resourceFields:    {},
-        // icon:              'lock', // TODO: RC see type-map getTree, allTypes. allTypes does not bring in icon from here... should it?
-        // Two types in allTypes... one from schema and one from top level. schema one does not copy of icon. top level is ignored isBasic && !groupForBasicType
       }
     ],
     getInstances: async() => {
@@ -69,8 +68,7 @@ export function init(store) {
       // Up front fetch all global roles, in stead of individually when needed (results in many duplicated requests)
       await store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-      // TODO: CHECK Q does this always redraw... and as such recreate (RE refresh group memberships)
-      // TODO: RC This returns instances of principal... with availableActions from that. table looks at instances not of type spoofed
+      // TODO: BUTTON does this always redraw... and as such recreate (RE refresh group memberships)
       return principals
         .filter(principal => principal.principalType === 'group' &&
            !!globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === principal.id)
@@ -86,10 +84,11 @@ export function init(store) {
     showAge:     false,
     showState:   false,
     isRemovable: false,
-    // location:    null, TODO: RC Is this helpfull??
-
   });
-  mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, 'Groups'); // TODO: RC i10n
+
+  // Use labelFor... so lookup succeeds with .'s in path.... and end result is 'trimmed' as per other entries
+  mapType(NORMAN.SPOOFED.GROUP_PRINCIPAL, store.getters['type-map/labelFor']({ id: NORMAN.SPOOFED.GROUP_PRINCIPAL }, 2));
+
   weightType(NORMAN.SPOOFED.GROUP_PRINCIPAL, -1, true);
   weightType(MANAGEMENT.USER, 100);
 
@@ -105,7 +104,7 @@ export function init(store) {
   basicType([
     'config',
     MANAGEMENT.USER,
-    'groups',
+    'groups', // TODO: RC BUTTONS Remove
     NORMAN.SPOOFED.GROUP_PRINCIPAL
   ]);
 
@@ -123,15 +122,13 @@ export function init(store) {
     GROUP_ROLE_NAME
   ]);
 
-  // ---------------------------  TODO: RC Remove c-cluster-auth-groups page
-  // TODO: RC use spoofedType monitoring/logging. Q Should this virtual type extend to a model (table row actions) and custom create/edit page?
-  // Can this be done with virtualType / spoofedType?
+  // ---------------------------  TODO: RC BUTTONS Remove c-cluster-auth-groups page
   virtualType({
-    label:       '(Old) Groups', // TODO: RC i10n
-    icon:        'lock', // TODO: RC
+    label:       '(Old) Groups',
+    icon:        'lock',
     namespaced:  false,
     name:        'groups',
-    weight:      -1, // TODO: Use weightType on user Q This never moves below users.
+    weight:      -1,
     route:       { name: 'c-cluster-auth-groups' },
   });
 }

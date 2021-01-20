@@ -3,7 +3,6 @@ import CreateEditView from '@/mixins/create-edit-view';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import CruResource from '@/components/CruResource';
 import { exceptionToErrorsArray } from '@/utils/error';
-import { _EDIT } from '@/config/query-params';
 
 export default {
   components: {
@@ -15,7 +14,6 @@ export default {
     return {
       errors: [],
       valid:  false,
-      mode:   _EDIT
     };
   },
   methods:  {
@@ -24,7 +22,7 @@ export default {
 
       try {
         await this.$refs.grb.save();
-        this.$router.replace({ name: this.doneRoute }); // No navigation without this prod
+        this.$router.replace({ name: this.doneRoute }); // There's no navigation without this prod
         buttonDone(true);
       } catch (err) {
         this.errors = exceptionToErrorsArray(err);
