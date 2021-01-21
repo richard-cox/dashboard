@@ -1418,8 +1418,9 @@ accountAndKeys:
       title: Change Password
       cancel: Cancel
       keys: Delete all existing API keys
-      userPassword: User Generated Password
-      generatedPassword: Randomly Generated Password
+      generatePassword: Generate a random password
+      DELETEuserPassword: User Generated PasswordTODO RC delete
+      DELETEgeneratedPassword: Randomly Generated PasswordTODO RC delete
       currentPassword: Current Password
       userGen:
         newPassword: New Password
@@ -2684,6 +2685,9 @@ action:
   view: View Config
   viewInApi: View in API
   viewYaml: View YAML
+  show: Show
+  hide: Hide
+  copy: Copy
 
 unit:
   sec: secs
