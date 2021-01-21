@@ -130,6 +130,13 @@ export const MANAGEMENT = {
   TOKEN:            'management.cattle.io.token',
 };
 
+export const CAPI = {
+  CAPI_CLUSTER: 'cluster.x-k8s.io.cluster',
+  RKE_CLUSTER:  'cluster.cattle.io.rkecluster',
+  NODE_CONFIG:  'node-config.cattle.io',
+  SPOOFED:      { NODE_CONFIG: 'node-config.cattle.io' }
+};
+
 // --------------------------------------
 // 3. Optional add-on packages in a cluster
 // --------------------------------------

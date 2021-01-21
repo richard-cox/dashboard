@@ -96,7 +96,7 @@ export default {
         </div>
 
         <template slot="popover">
-          <ul class="list-unstyled dropdown">
+          <ul class="list-unstyled dropdown" @mouseleave="showMenu(false)">
             <li v-if="authEnabled" class="user-info">
               <div class="user-name">
                 <i class="icon icon-lg icon-user" /> {{ principal.loginName }}
