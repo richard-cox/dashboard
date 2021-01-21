@@ -691,6 +691,7 @@ export const GROUP_NAME = {
   sort:      'name',
   search:    ['name'],
   formatter: 'Principal',
+  width:     350
 };
 export const GROUP_ROLE_NAME = {
   name:      'group-role-names',

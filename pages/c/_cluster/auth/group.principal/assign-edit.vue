@@ -2,37 +2,30 @@
 import FooterComponent from '@/components/form/Footer';
 import Loading from '@/components/Loading';
 import SelectPrincipal from '@/components/auth/SelectPrincipal.vue';
-import PrincipalComponent from '@/components/auth/Principal.vue';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import { NORMAN } from '@/config/types';
 import { _VIEW } from '@/config/query-params';
 import { exceptionToErrorsArray } from '@/utils/error';
+import richards from '@/utils/richards';
 
 export default {
   components: {
     SelectPrincipal,
     FooterComponent,
     GlobalRoleBindings,
-    Loading
-  },
-  fetch() {
-    // this.mode = this.$route.query.mode;
   },
   data() {
     return {
-      mode:        this.$route.query.mode,
       errors:      [],
       principalId: null,
       spoofed:     null,
     };
   },
-  // computed: {
-  //   title() {
-  //     const view = this.mode === _VIEW ? 'viewTitle' : this.isEdit ? 'editTitle' : 'assignTitle';
-
-  //     return `authGroups.assignEdit.assignTitle`;
-  //   },
-  // },
+  computed: {
+    mode() {
+      return !this.principalId ? _VIEW : this.$route.query.mode || _VIEW;
+    }
+  },
   methods: {
     setPrincipal(id) {
       this.principalId = id;
@@ -40,32 +33,42 @@ export default {
       return true;
     },
     async cancel() {
-      const spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
-
-      spoofed.goToList();
+      await this.return();
     },
     async save(buttonDone) {
       this.errors = [];
 
       try {
         await this.$refs.grb.save();
-
+        await this.refreshSpoofed();
+        await this.return();
         buttonDone(true);
-        this.spoofed.goToList();
       } catch (err) {
         this.errors = exceptionToErrorsArray(err);
         buttonDone(false);
       }
     },
+    async return() {
+      const spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
+
+      spoofed.goToList();
+    },
+    async refreshSpoofed() {
+      const a = await this.$store.dispatch('cluster/findAll', {
+        type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
+        opt:  { force: true }
+      }, { root: true });
+
+      richards.log('updated list: ', a);
+    }
+
   }
 };
 
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" />
-
-  <div v-else>
+  <div>
     <div>
       <div class="masthead">
         <header>

@@ -49,5 +49,6 @@ export default {
 <style lang='scss' scoped>
 .pgb{
   display: flex;
+  flex-wrap: wrap;
 }
 </style>

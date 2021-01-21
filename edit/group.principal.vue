@@ -3,6 +3,8 @@ import CreateEditView from '@/mixins/create-edit-view';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import CruResource from '@/components/CruResource';
 import { exceptionToErrorsArray } from '@/utils/error';
+import { NORMAN } from '@/config/types';
+import richards from '@/utils/richards';
 
 export default {
   components: {
@@ -22,6 +24,7 @@ export default {
 
       try {
         await this.$refs.grb.save();
+        await this.refreshSpoofed();
         this.$router.replace({ name: this.doneRoute }); // There's no navigation without this prod
         buttonDone(true);
       } catch (err) {
@@ -31,6 +34,16 @@ export default {
     },
     changed(changes) {
       this.valid = !!changes.addRoles.length || !!changes.removeBindings.length;
+    },
+    async refreshSpoofed() {
+      // TODO: RC REFRESH - The below, as per promptRemove... does not work (getInstances is called.. but there's no change in the table)
+      // Need to also fix assign-edit & promptRemove use case
+      const a = await this.$store.dispatch('cluster/findAll', {
+        type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
+        opt:  { force: true }
+      }, { root: true });
+
+      richards.log('updated list: ', a);
     }
   }
 };
