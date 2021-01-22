@@ -8,21 +8,13 @@ export default {
   components: {
     Card, AsyncButton, ChangePassword
   },
-  data(ctx) {
-    return {};
+  data() {
+    return { valid: false };
   },
-  computed:   {
-    ...mapGetters({ t: 'i18n/t' }),
-
-    canSubmit() {
-      return this.$refs?.changePassword?.canSubmit;
-    }
-
-  },
-  methods: {
+  computed:   { ...mapGetters({ t: 'i18n/t' }) },
+  methods:  {
     show(show) {
       if (show) {
-        // this.reset();
         this.$modal.show('password-modal');
       } else {
         this.$modal.hide('password-modal');
@@ -47,12 +39,12 @@ export default {
       <h4 slot="title" class="text-default-text">
         {{ t("accountAndKeys.account.changePassword.title") }}
       </h4>
-      <ChangePassword ref="changePassword" slot="body" />
+      <ChangePassword ref="changePassword" slot="body" @valid="valid = $event" />
       <template #actions>
         <button class="btn role-secondary" @click="show(false)">
           {{ t("accountAndKeys.account.changePassword.cancel") }}
         </button>
-        <AsyncButton mode="apply" class="btn bg-error ml-10" :disabled="!canSubmit" @click="submit" />
+        <AsyncButton mode="apply" class="btn bg-error ml-10" :disabled="!valid" @click="submit" />
       </template>
     </Card>
   </modal>

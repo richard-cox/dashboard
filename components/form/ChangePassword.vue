@@ -1,10 +1,8 @@
 <script>
 import { mapGetters } from 'vuex';
-import ButtonGroup from '@/components/ButtonGroup';
 import Banner from '@/components/Banner';
 import Checkbox from '@/components/form/Checkbox';
 import Password from '@/components/form/Password';
-import CopyToClipboard from '@/components/CopyToClipboard.vue';
 import { NORMAN } from '@/config/types';
 
 export default {
@@ -35,11 +33,19 @@ export default {
 
       set(isRandomGenerated) {
         this.pIsRandomGenerated = isRandomGenerated;
-        if (this.isRandomGenerated) {
-          this.errorMessages = [];
-        } else {
-          this.validateNewPassword();
-        }
+        this.errorMessages = [];
+        this.validate();
+      }
+    },
+
+    passwordCurrent: {
+      get() {
+        return this.form.currentP;
+      },
+
+      set(p) {
+        this.form.currentP = p;
+        this.validate();
       }
     },
 
@@ -50,7 +56,7 @@ export default {
 
       set(p) {
         this.form.newP = p;
-        this.validateNewPassword();
+        this.validate();
       }
     },
 
@@ -61,14 +67,9 @@ export default {
 
       set(p) {
         this.form.confirmP = p;
-        this.validateNewPassword();
+        this.validate();
       }
     },
-
-    canSubmit() {
-      return !!this.form.currentP && (!this.isRandomGenerated ? this.form.newP && this.form.newP === this.form.confirmP : true);
-    }
-
   },
   methods: {
     created() {
@@ -88,10 +89,17 @@ export default {
     },
     passwordConfirmBlurred() {
       this.canShowMissmatchedPassword = true;
-      this.validateNewPassword();
+      this.validate();
     },
-    validateNewPassword() {
-      this.errorMessages = !!this.form.confirmP && (this.canShowMissmatchedPassword && this.form.newP !== this.form.confirmP) ? [this.t('accountAndKeys.account.changePassword.errors.missmatchedPassword')] : [];
+    passwordsMatch() {
+      const match = this.passwordNew === this.passwordConfirm;
+
+      this.errorMessages = this.canShowMissmatchedPassword && !match ? [this.t('accountAndKeys.account.changePassword.errors.missmatchedPassword')] : [];
+
+      return match;
+    },
+    validate() {
+      this.$emit('valid', this.isRandomGenerated ? !!this.passwordCurrent : this.passwordsMatch() && !!this.passwordCurrent && this.passwordNew);
     },
     async submit(buttonCb) {
       try {
@@ -157,7 +165,7 @@ export default {
       <div class="fields">
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
 
-        <Password v-model="form.currentP" class="mt-10" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
+        <Password v-model="passwordCurrent" class="mt-10" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
         <Password v-if="isRandomGenerated" v-model="form.genP" class="mt-10" :is-random="true" :label="t('accountAndKeys.account.changePassword.randomGen.generated')" />
         <div v-else class="userGen">
           <Password v-model="passwordNew" class="mt-10" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
