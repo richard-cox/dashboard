@@ -5,6 +5,9 @@ import Checkbox from '@/components/form/Checkbox';
 import Password from '@/components/form/Password';
 import { NORMAN } from '@/config/types';
 
+// TODO: RC actual submit
+// TODO: RC actual submit delete keys
+
 export default {
   components: {
     Checkbox, Banner, Password
@@ -27,7 +30,6 @@ export default {
         genP:       '',
         confirmP:   ''
       },
-      // fields: ['passwordCurrent', 'passwordGen', 'passwordNew', 'passwordConfirm']
     };
   },
   computed:   {
@@ -90,8 +92,6 @@ export default {
     },
 
     password() {
-      console.warn('CHANGEPASSWORD passwod: ', this.isRandomGenerated ? this.passwordGen : this.passwordNew);
-
       return this.isRandomGenerated ? this.passwordGen : this.passwordNew;
     },
 
@@ -100,21 +100,6 @@ export default {
     },
   },
   methods: {
-    created() {
-      this.reset();
-    },
-    reset() {
-      // TODO: RC init
-      this.isRandomGenerated = false;
-      this.canShowMissmatchedPassword = false;
-      this.form = {
-        ...this.form,
-        currentP: '',
-        newP:     '',
-        confirmP: ''
-      };
-      this.errorMessages = [];
-    },
     passwordConfirmBlurred() {
       this.canShowMissmatchedPassword = true;
       this.validate();
@@ -128,21 +113,11 @@ export default {
     },
     validate() {
       this.$emit('valid', this.isRandomGenerated ? !!this.passwordCurrent : this.passwordsMatch() && !!this.passwordCurrent && this.passwordNew);
-      console.warn('CHANGEPASSWORD EMIT: ', this.isRandomGenerated ? this.passwordGen : this.passwordNew);
       this.$emit('input', this.password);
     },
     async submit() {
-      // console.log(this.$refs);
-      // this.fields.forEach((field) => {
-      //   const ref = this.$refs[field];
-
-      //   if (ref) {
-      //     // ref.show(false);
-      //   }
-      // });
-
       await this.changePassword();
-      if (this.form.deleteKeys) { // TODO: RC _mode if create
+      if (this.form.deleteKeys) {
         await this.deleteKeys();
       }
     },
@@ -198,21 +173,16 @@ export default {
     <div class="form">
       <div class="fields">
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
-        <!-- TODO: RC Even when setting this as a standard input, not hidden, it was ignored by lastpass -->
-        <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName"> -->
+        <!-- TODO: RC test with these removed! -->
+        <!-- Username is ignored by LastPass -->
         <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName">
         <input id="password" type="password" name="password" autocomplete="password" :value="password">
-        {{ password }}
-        <!-- name="aaacurrent-password"
-          autocomplete="aaacurrent-password" -->
         <Password
           ref="passwordCurrent"
           v-model="passwordCurrent"
           class="mt-10"
           :label="t('accountAndKeys.account.changePassword.currentPassword')"
         ></Password>
-        <!-- name="aaanew-password"
-          autocomplete="aaanew-password" -->
         <Password
           v-if="isRandomGenerated"
           ref="passwordGen"
@@ -222,16 +192,12 @@ export default {
           :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
         />
         <div v-else class="userGen">
-          <!-- name="aaanew-password"
-            autocomplete="aaanew-password" -->
           <Password
             ref="passwordNew"
             v-model="passwordNew"
             class="mt-10"
             :label="t('accountAndKeys.account.changePassword.userGen.newPassword')"
           />
-          <!-- name="aaaconfirm-password"
-            autocomplete="aaanew-password" -->
           <Password
             ref="passwordConfirm"
             v-model="passwordConfirm"
@@ -260,10 +226,6 @@ export default {
       .fields{
         height: 215px;
         #username, #password {
-          // display: none;
-          // opacity: 0;
-          // height 0, width 0, tabindex -1
-          opacity: 1;
           height: 0;
           width: 0;
           background-size: 0;

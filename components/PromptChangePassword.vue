@@ -28,7 +28,7 @@ export default {
     },
     async submit(buttonCb) {
       try {
-        await this.$refs.changePassword.submit(); buttonCb(true);
+        await this.$refs.changePassword.submit();
         this.show(false);
         buttonCb(true);
       } catch (err) {
@@ -44,7 +44,7 @@ export default {
     class="change-password-modal"
     name="password-modal"
     :width="500"
-    :height="545"
+    :height="445"
   >
     <Card class="prompt-password" :show-highlight-border="false">
       <h4 slot="title" class="text-default-text">
@@ -52,10 +52,6 @@ export default {
       </h4>
       <div slot="body">
         <form @submit.prevent>
-          <!-- <input type="hidden" name="username" autocomplete="username" :value="'ab'">
-          <input type="hidden" name="password" autocomplete="password" :value="'ab'"> -->
-          <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName">
-          <input id="password" type="password" name="password" autocomplete="password" :value="password"> -->
           <ChangePassword ref="changePassword" v-model="password" @valid="valid = $event" />
         </form>
       </div>
@@ -110,17 +106,6 @@ export default {
       display: flex;
       form {
         flex: 1;
-        // #username, #password {
-        //   // display: none;
-        //   // opacity: 0;
-        //   // height 0, width 0, tabindex -1
-        //   opacity: 1;
-        //   height: 0;
-        //   width: 0;
-        //   background-size: 0;
-        //   padding: 0;
-        //   border: none;
-        // }
       }
     }
 

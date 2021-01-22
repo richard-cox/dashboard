@@ -28,10 +28,7 @@ export default {
     }
   },
   data() {
-    return {
-      reveal:         false,
-      randomPassword: randomStr(16, CHARSET.ALPHA_NUM)
-    };
+    return { reveal: false };
   },
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
@@ -40,17 +37,10 @@ export default {
         return this.value;
       },
       set(val) {
-        console.warn('PASSWORD: EMIT: ', val);
         this.$emit('input', val);
       }
     },
-    inputName() {
-      return this.reveal ? `${ this.name }_shown` : this.name;
-    },
-    inputAutocomplete() {
-      return this.reveal ? 'off' : this.autocomplete;
-    },
-    identity() {
+    attributes() {
       const attributes = { };
 
       if (this.name) {
@@ -78,16 +68,16 @@ export default {
     }
   }
 };
-// TODO: RC actual submit
 </script>
 
 <template>
   <div class="password">
+    <!-- TODO: RC is this still a thing? -->
     <!-- If this is marked with :disabled="isRandom" LastPass will fail to store -->
-    <!-- data-lpignore="true" -->
+    <!--  -->
     <LabeledInput
       v-model="password"
-      v-bind="identity"
+      v-bind="attributes"
       :type="isRandom || reveal ? 'text' : 'password'"
       :readonly="isRandom"
       :label="label"
@@ -104,9 +94,6 @@ export default {
         </div>
       </template>
     </LabeledInput>
-    <!-- <template v-if="reveal">
-      <input :id="name" :value="password" :name="name" :autocomplete="autocomplete" type="password">
-    </template> -->
     <div v-if="isRandom" class="mt-10 genPassword">
       <a href="#" @click.prevent.stop="generatePassword"><i class="icon icon-refresh" /> {{ t('accountAndKeys.account.changePassword.newGeneratedPassword') }}</a>
     </div>
