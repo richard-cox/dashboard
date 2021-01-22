@@ -70,6 +70,10 @@ export default {
         this.validate();
       }
     },
+
+    principal() {
+      return this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
+    },
   },
   methods: {
     created() {
@@ -101,15 +105,10 @@ export default {
     validate() {
       this.$emit('valid', this.isRandomGenerated ? !!this.passwordCurrent : this.passwordsMatch() && !!this.passwordCurrent && this.passwordNew);
     },
-    async submit(buttonCb) {
-      try {
-        await this.changePassword();
-        if (this.form.deleteKeys) { // TODO: RC _mode if create
-          await this.deleteKeys();
-        }
-        buttonCb(true);
-      } catch (err) {
-        buttonCb(false);
+    async submit() {
+      await this.changePassword();
+      if (this.form.deleteKeys) { // TODO: RC _mode if create
+        await this.deleteKeys();
       }
     },
     async changePassword() {
@@ -165,11 +164,18 @@ export default {
       <div class="fields">
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
 
-        <Password v-model="passwordCurrent" class="mt-10" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
-        <Password v-if="isRandomGenerated" v-model="form.genP" class="mt-10" :is-random="true" :label="t('accountAndKeys.account.changePassword.randomGen.generated')" />
+        <Password v-model="passwordCurrent" class="mt-10" name="password-current" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
+        <Password
+          v-if="isRandomGenerated"
+          v-model="form.genP"
+          :name="password-random"
+          class="mt-10"
+          :is-random="true"
+          :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
+        />
         <div v-else class="userGen">
-          <Password v-model="passwordNew" class="mt-10" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
-          <Password v-model="passwordConfirm" class="mt-10" :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')" @blur="passwordConfirmBlurred()" />
+          <Password v-model="passwordNew" class="mt-10" name="password-new" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
+          <Password v-model="passwordConfirm" class="mt-10" name="password-confirm" :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')" @blur="passwordConfirmBlurred()" />
         </div>
       </div>
       <Checkbox v-model="isRandomGenerated" :label="t('accountAndKeys.account.changePassword.generatePassword')" class="mt-10 type" />
@@ -190,6 +196,10 @@ export default {
       flex-direction: column;
       .fields{
         height: 215px;
+
+        #username {
+          display: none;
+        }
       }
     }
 

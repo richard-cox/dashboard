@@ -20,9 +20,14 @@ export default {
         this.$modal.hide('password-modal');
       }
     },
-    async submit() {
-      await this.$refs.changePassword.submit();
-      this.show(false);
+    async submit(buttonCb) {
+      try {
+        await this.$refs.changePassword.submit(); buttonCb(true);
+        this.show(false);
+        buttonCb(true);
+      } catch (err) {
+        buttonCb(false);
+      }
     }
   },
 };
@@ -39,12 +44,15 @@ export default {
       <h4 slot="title" class="text-default-text">
         {{ t("accountAndKeys.account.changePassword.title") }}
       </h4>
+      <input type="hidden" name="username" autocomplete="username" :value="'ab'">
+      <input type="hidden" name="username" autocomplete="password" :value="'ab'">
+
       <ChangePassword ref="changePassword" slot="body" @valid="valid = $event" />
       <template #actions>
         <button class="btn role-secondary" @click="show(false)">
           {{ t("accountAndKeys.account.changePassword.cancel") }}
         </button>
-        <AsyncButton mode="apply" class="btn bg-error ml-10" :disabled="!valid" @click="submit" />
+        <AsyncButton type="submit" mode="apply" class="btn bg-error ml-10" :disabled="!valid" @click="submit" />
       </template>
     </Card>
   </modal>

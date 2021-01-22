@@ -17,6 +17,10 @@ export default {
     label: {
       default: '',
       type:    String,
+    },
+    name: {
+      required: true,
+      type:     String
     }
   },
   data() {
@@ -41,21 +45,10 @@ export default {
       this.generatePassword();
     }
   },
-  // watch:    {
-  //   isRandom(newIsRandom) {
-  //     console.log(newIsRandom);
-  //     if (newIsRandom) {
-  //       this.generatePassword();
-  //     }
-  //   }
-  // },
   methods: {
     generatePassword() {
       this.password = randomStr(16, CHARSET.ALPHA_NUM);
     }
-  //   generatePassword() {
-  //     this.value = ;
-  //   },
   }
 };
 // TODO: RC last pass compatible
@@ -69,6 +62,8 @@ export default {
   <div class="password">
     <LabeledInput
       v-model="password"
+      :name="name"
+      :autocomplete="name"
       :type="isRandom || reveal ? 'text' : 'password'"
       :readonly="isRandom"
       :disabled="isRandom"
