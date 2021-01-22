@@ -27,7 +27,7 @@ export default {
         genP:       '',
         confirmP:   ''
       },
-      fields: ['passwordCurrent', 'passwordGen', 'passwordNew', 'passwordConfirm']
+      // fields: ['passwordCurrent', 'passwordGen', 'passwordNew', 'passwordConfirm']
     };
   },
   computed:   {
@@ -78,6 +78,10 @@ export default {
       }
     },
 
+    password() {
+      return this.isRandomGenerated ? this.passwordGen : this.passwordNew;
+    },
+
     principal() {
       return this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
     },
@@ -111,17 +115,17 @@ export default {
     },
     validate() {
       this.$emit('valid', this.isRandomGenerated ? !!this.passwordCurrent : this.passwordsMatch() && !!this.passwordCurrent && this.passwordNew);
-      this.$emit('input', this.isRandomGenerated ? this.passwordGen : this.passwordNew);
+      this.$emit('input', this.password);
     },
     async submit() {
-      console.log(this.$refs);
-      this.fields.forEach((field) => {
-        const ref = this.$refs[field];
+      // console.log(this.$refs);
+      // this.fields.forEach((field) => {
+      //   const ref = this.$refs[field];
 
-        if (ref) {
-          // ref.show(false);
-        }
-      });
+      //   if (ref) {
+      //     // ref.show(false);
+      //   }
+      // });
 
       await this.changePassword();
       if (this.form.deleteKeys) { // TODO: RC _mode if create
@@ -183,42 +187,41 @@ export default {
         <!-- TODO: RC Even when setting this as a standard input, not hidden, it was ignored by lastpass -->
         <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName"> -->
         <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName">
-        <input id="password" type="password" name="password" autocomplete="password" :value="passwordNew">
-        -------
+        <input id="password" type="password" name="password" autocomplete="password" :value="password">
 
+        <!-- name="aaacurrent-password"
+          autocomplete="aaacurrent-password" -->
         <Password
           ref="passwordCurrent"
           v-model="passwordCurrent"
           class="mt-10"
-          name="aaacurrent-password"
-          autocomplete="aaacurrent-password"
           :label="t('accountAndKeys.account.changePassword.currentPassword')"
         ></Password>
+        <!-- name="aaanew-password"
+          autocomplete="aaanew-password" -->
         <Password
           v-if="isRandomGenerated"
           ref="passwordGen"
           v-model="form.genP"
-          name="aaanew-password"
-          autocomplete="aaanew-password"
           class="mt-10"
           :is-random="true"
           :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
         />
         <div v-else class="userGen">
+          <!-- name="aaanew-password"
+            autocomplete="aaanew-password" -->
           <Password
             ref="passwordNew"
             v-model="passwordNew"
             class="mt-10"
-            name="aaanew-password"
-            autocomplete="aaanew-password"
             :label="t('accountAndKeys.account.changePassword.userGen.newPassword')"
           />
+          <!-- name="aaaconfirm-password"
+            autocomplete="aaanew-password" -->
           <Password
             ref="passwordConfirm"
             v-model="passwordConfirm"
             class="mt-10"
-            name="aaaconfirm-password"
-            autocomplete="aaanew-password"
             :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')"
             @blur="passwordConfirmBlurred()"
           />
