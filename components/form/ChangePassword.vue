@@ -9,6 +9,12 @@ export default {
   components: {
     Checkbox, Banner, Password
   },
+  props: {
+    value: {
+      type:    [String],
+      default: ''
+    },
+  },
   data(ctx) {
     return {
       errorMessages:              [],
@@ -105,6 +111,7 @@ export default {
     },
     validate() {
       this.$emit('valid', this.isRandomGenerated ? !!this.passwordCurrent : this.passwordsMatch() && !!this.passwordCurrent && this.passwordNew);
+      this.$emit('input', this.isRandomGenerated ? this.passwordGen : this.passwordNew);
     },
     async submit() {
       console.log(this.$refs);
@@ -112,7 +119,7 @@ export default {
         const ref = this.$refs[field];
 
         if (ref) {
-          ref.show(false);
+          // ref.show(false);
         }
       });
 
@@ -236,7 +243,15 @@ export default {
       .fields{
         height: 215px;
         #username, #password {
-          display: none;
+          // display: none;
+          // opacity: 0;
+          // height 0, width 0, tabindex -1
+          opacity: 1;
+          height: 0;
+          width: 0;
+          background-size: 0;
+          padding: 0;
+          border: none;
         }
       }
     }

@@ -80,7 +80,6 @@ export default {
       :autocomplete="autocomplete"
       :label="label"
       :required="!isRandom"
-      :data-lpignore="reveal"
       @blur="$emit('blur', $event)"
     >
       <template #suffix>

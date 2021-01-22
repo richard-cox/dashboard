@@ -3,15 +3,21 @@ import { mapGetters } from 'vuex';
 import ChangePassword from '@/components/form/ChangePassword';
 import Card from '@/components/Card';
 import AsyncButton from '@/components/AsyncButton';
+import { NORMAN } from '@/config/types';
 
 export default {
   components: {
     Card, AsyncButton, ChangePassword
   },
   data() {
-    return { valid: false };
+    return { valid: false, password: '' };
   },
-  computed:   { ...mapGetters({ t: 'i18n/t' }) },
+  computed:   {
+    ...mapGetters({ t: 'i18n/t' }),
+    principal() {
+      return this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
+    },
+  },
   methods:  {
     show(show) {
       if (show) {
@@ -48,7 +54,9 @@ export default {
         <form @submit.prevent>
           <!-- <input type="hidden" name="username" autocomplete="username" :value="'ab'">
           <input type="hidden" name="password" autocomplete="password" :value="'ab'"> -->
-          <ChangePassword ref="changePassword" @valid="valid = $event" />
+          <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName">
+          <input id="password" type="password" name="password" autocomplete="password" :value="password"> -->
+          <ChangePassword ref="changePassword" v-model="password" @valid="valid = $event" />
         </form>
       </div>
 
@@ -102,6 +110,17 @@ export default {
       display: flex;
       form {
         flex: 1;
+        // #username, #password {
+        //   // display: none;
+        //   // opacity: 0;
+        //   // height 0, width 0, tabindex -1
+        //   opacity: 1;
+        //   height: 0;
+        //   width: 0;
+        //   background-size: 0;
+        //   padding: 0;
+        //   border: none;
+        // }
       }
     }
 
