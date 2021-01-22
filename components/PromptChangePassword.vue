@@ -44,15 +44,27 @@ export default {
       <h4 slot="title" class="text-default-text">
         {{ t("accountAndKeys.account.changePassword.title") }}
       </h4>
-      <input type="hidden" name="username" autocomplete="username" :value="'ab'">
-      <input type="hidden" name="username" autocomplete="password" :value="'ab'">
+      <div slot="body">
+        <form @submit.prevent>
+          <!-- <input type="hidden" name="username" autocomplete="username" :value="'ab'">
+          <input type="hidden" name="password" autocomplete="password" :value="'ab'"> -->
+          <ChangePassword ref="changePassword" @valid="valid = $event" />
+        </form>
+      </div>
 
-      <ChangePassword ref="changePassword" slot="body" @valid="valid = $event" />
       <template #actions>
+        <!-- Buttons moved to body to be included in form -->
         <button class="btn role-secondary" @click="show(false)">
           {{ t("accountAndKeys.account.changePassword.cancel") }}
         </button>
-        <AsyncButton type="submit" mode="apply" class="btn bg-error ml-10" :disabled="!valid" @click="submit" />
+        <AsyncButton
+          type="submit"
+          mode="apply"
+          class="btn bg-error ml-10"
+          :disabled="!valid"
+          value="LOGIN"
+          @click="submit"
+        />
       </template>
     </Card>
   </modal>
@@ -88,6 +100,9 @@ export default {
     .prompt-password {
       flex: 1;
       display: flex;
+      form {
+        flex: 1;
+      }
     }
 
 </style>

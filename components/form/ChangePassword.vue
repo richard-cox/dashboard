@@ -160,26 +160,34 @@ export default {
 
 <template>
   <div class="change-password">
-    <form>
+    <div class="form">
       <div class="fields">
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
-
-        <Password v-model="passwordCurrent" class="mt-10" name="password-current" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
+        <input id="username" type="hidden" name="username" autocomplete="username" :value="principal.loginName">
+        <Password v-model="passwordCurrent" class="mt-10" name="current-password" autocomplete="current-password" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
         <Password
           v-if="isRandomGenerated"
           v-model="form.genP"
-          :name="password-random"
+          name="password"
+          autocomplete="new-password"
           class="mt-10"
           :is-random="true"
           :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
         />
         <div v-else class="userGen">
-          <Password v-model="passwordNew" class="mt-10" name="password-new" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
-          <Password v-model="passwordConfirm" class="mt-10" name="password-confirm" :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')" @blur="passwordConfirmBlurred()" />
+          <Password v-model="passwordNew" class="mt-10" name="password" autocomplete="new-password" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
+          <Password
+            v-model="passwordConfirm"
+            class="mt-10"
+            name="password-confirm"
+            autocomplete="new-password"
+            :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')"
+            @blur="passwordConfirmBlurred()"
+          />
         </div>
       </div>
       <Checkbox v-model="isRandomGenerated" :label="t('accountAndKeys.account.changePassword.generatePassword')" class="mt-10 type" />
-    </form>
+    </div>
     <div v-if="errorMessages && errorMessages.length" class="text-error">
       <Banner v-for="(err, i) in errorMessages" :key="i" color="error" :label="err" class="mb-0" />
     </div>
@@ -191,14 +199,14 @@ export default {
     display: flex;
     flex-direction: column;
 
-    form {
+    .form {
       display: flex;
       flex-direction: column;
       .fields{
         height: 215px;
 
         #username {
-          display: none;
+          // display: none;
         }
       }
     }

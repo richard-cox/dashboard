@@ -19,8 +19,12 @@ export default {
       type:    String,
     },
     name: {
-      required: true,
+      default: '',
       type:     String
+    },
+    autocomplete: {
+      type:      String,
+      default:   ''
     }
   },
   data() {
@@ -47,7 +51,7 @@ export default {
   },
   methods: {
     generatePassword() {
-      this.password = randomStr(16, CHARSET.ALPHA_NUM);
+      this.password = 'abc';// randomStr(16, CHARSET.ALPHA_NUM);
     }
   }
 };
@@ -57,16 +61,17 @@ export default {
 
 <template>
   <!--autocomplete="new-password"  -->
+  <!-- :autocomplete="name" -->
 
-  <!--v-model.trim="value"  -->
   <div class="password">
     <LabeledInput
+      :id="name"
       v-model="password"
       :name="name"
-      :autocomplete="name"
       :type="isRandom || reveal ? 'text' : 'password'"
       :readonly="isRandom"
       :disabled="isRandom"
+      :autocomplete="autocomplete"
       :label="label"
       :required="!isRandom"
       @blur="$emit('blur', $event)"

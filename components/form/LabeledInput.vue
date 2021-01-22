@@ -30,6 +30,12 @@ export default {
       type:    Boolean,
       default: true,
     },
+
+    name: {
+      type:      String,
+      default:   null
+    },
+
   },
 
   computed: {
@@ -55,6 +61,10 @@ export default {
       } catch (e) {
         return this.t('generic.invalidCron');
       }
+    },
+
+    attributes() {
+      return this.$attr;
     }
   },
 
