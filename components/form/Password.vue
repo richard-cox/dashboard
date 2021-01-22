@@ -40,6 +40,7 @@ export default {
         return this.value;
       },
       set(val) {
+        console.warn('PASSWORD: EMIT: ', val);
         this.$emit('input', val);
       }
     },
@@ -48,6 +49,19 @@ export default {
     },
     inputAutocomplete() {
       return this.reveal ? 'off' : this.autocomplete;
+    },
+    identity() {
+      const attributes = { };
+
+      if (this.name) {
+        attributes.id = this.name;
+        attributes.name = this.name;
+      }
+      if (this.autocomplete) {
+        attributes.autocomplete = this.autocomplete;
+      }
+
+      return attributes;
     }
   },
   created() {
@@ -72,12 +86,10 @@ export default {
     <!-- If this is marked with :disabled="isRandom" LastPass will fail to store -->
     <!-- data-lpignore="true" -->
     <LabeledInput
-      :id="name"
       v-model="password"
-      :name="name"
+      v-bind="identity"
       :type="isRandom || reveal ? 'text' : 'password'"
       :readonly="isRandom"
-      :autocomplete="autocomplete"
       :label="label"
       :required="!isRandom"
       @blur="$emit('blur', $event)"

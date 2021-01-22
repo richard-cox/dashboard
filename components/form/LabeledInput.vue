@@ -64,7 +64,7 @@ export default {
     },
 
     attributes() {
-      console.log(this.$attrs);
+      // console.log(this.$attrs); TODO: RC
 
       return this.$attrs;
     }

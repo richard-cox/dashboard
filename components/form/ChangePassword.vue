@@ -45,6 +45,17 @@ export default {
       }
     },
 
+    passwordGen: {
+      get() {
+        return this.form.genP;
+      },
+
+      set(p) {
+        this.form.genP = p;
+        this.validate();
+      }
+    },
+
     passwordCurrent: {
       get() {
         return this.form.currentP;
@@ -79,6 +90,8 @@ export default {
     },
 
     password() {
+      console.warn('CHANGEPASSWORD passwod: ', this.isRandomGenerated ? this.passwordGen : this.passwordNew);
+
       return this.isRandomGenerated ? this.passwordGen : this.passwordNew;
     },
 
@@ -115,6 +128,7 @@ export default {
     },
     validate() {
       this.$emit('valid', this.isRandomGenerated ? !!this.passwordCurrent : this.passwordsMatch() && !!this.passwordCurrent && this.passwordNew);
+      console.warn('CHANGEPASSWORD EMIT: ', this.isRandomGenerated ? this.passwordGen : this.passwordNew);
       this.$emit('input', this.password);
     },
     async submit() {
@@ -188,7 +202,7 @@ export default {
         <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName"> -->
         <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName">
         <input id="password" type="password" name="password" autocomplete="password" :value="password">
-
+        {{ password }}
         <!-- name="aaacurrent-password"
           autocomplete="aaacurrent-password" -->
         <Password
@@ -202,7 +216,7 @@ export default {
         <Password
           v-if="isRandomGenerated"
           ref="passwordGen"
-          v-model="form.genP"
+          v-model="passwordGen"
           class="mt-10"
           :is-random="true"
           :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
