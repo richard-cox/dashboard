@@ -64,7 +64,9 @@ export default {
     },
 
     attributes() {
-      return this.$attr;
+      console.log(this.$attrs);
+
+      return this.$attrs;
     }
   },
 
@@ -129,12 +131,12 @@ export default {
         v-else
         ref="value"
         :class="{'no-label': !hasLabel}"
-        v-bind="$attrs"
+        v-bind="attributes"
+        :name="name"
         :disabled="isDisabled"
         :type="type === 'cron' ? 'text' : type"
         :value="value"
         :placeholder="placeholder"
-        autocomplete="off"
         autocapitalize="off"
         @input="$emit('input', $event.target.value)"
         @focus="onFocus"

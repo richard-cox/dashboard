@@ -163,23 +163,24 @@ export default {
     <div class="form">
       <div class="fields">
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
-        <input id="username" type="hidden" name="username" autocomplete="username" :value="principal.loginName">
+        <!-- TODO: RC Even when setting this as a standard input, not hidden, it was ignored by lastpass -->
+        <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName"> -->
         <Password v-model="passwordCurrent" class="mt-10" name="current-password" autocomplete="current-password" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
         <Password
           v-if="isRandomGenerated"
           v-model="form.genP"
-          name="password"
+          name="new-password"
           autocomplete="new-password"
           class="mt-10"
           :is-random="true"
           :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
         />
         <div v-else class="userGen">
-          <Password v-model="passwordNew" class="mt-10" name="password" autocomplete="new-password" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
+          <Password v-model="passwordNew" class="mt-10" name="new-password" autocomplete="new-password" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
           <Password
             v-model="passwordConfirm"
             class="mt-10"
-            name="password-confirm"
+            name="new-password"
             autocomplete="new-password"
             :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')"
             @blur="passwordConfirmBlurred()"
@@ -204,10 +205,9 @@ export default {
       flex-direction: column;
       .fields{
         height: 215px;
-
-        #username {
-          // display: none;
-        }
+        // #username {
+        //   display: none;
+        // }
       }
     }
 

@@ -50,11 +50,6 @@ export default {
       default: ''
     },
 
-    autocomplete: {
-      type:    String,
-      default: ''
-    },
-
     value: {
       type:    [String, Number, Object],
       default: ''

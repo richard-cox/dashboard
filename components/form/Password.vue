@@ -55,22 +55,18 @@ export default {
     }
   }
 };
-// TODO: RC last pass compatible
 // TODO: RC actual submit
 </script>
 
 <template>
-  <!--autocomplete="new-password"  -->
-  <!-- :autocomplete="name" -->
-
   <div class="password">
+    <!-- If this is marked with :disabled="isRandom" LastPass will fail to store -->
     <LabeledInput
       :id="name"
       v-model="password"
       :name="name"
       :type="isRandom || reveal ? 'text' : 'password'"
       :readonly="isRandom"
-      :disabled="isRandom"
       :autocomplete="autocomplete"
       :label="label"
       :required="!isRandom"
