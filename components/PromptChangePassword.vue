@@ -38,7 +38,7 @@ export default {
     class="change-password-modal"
     name="password-modal"
     :width="500"
-    :height="445"
+    :height="545"
   >
     <Card class="prompt-password" :show-highlight-border="false">
       <h4 slot="title" class="text-default-text">
@@ -53,8 +53,8 @@ export default {
       </div>
 
       <template #actions>
-        <!-- Buttons moved to body to be included in form -->
-        <button class="btn role-secondary" @click="show(false)">
+        <!-- type reset is required by lastpass -->
+        <button class="btn role-secondary" type="reset" @click="show(false)">
           {{ t("accountAndKeys.account.changePassword.cancel") }}
         </button>
         <AsyncButton

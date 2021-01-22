@@ -43,12 +43,12 @@ export default {
         this.$emit('input', val);
       }
     },
-    // inputName() {
-    //   return this.reveal ? `${ this.name }_shown` : this.name;
-    // },
-    // inputAutocomplete() {
-    //   return this.reveal ? 'off' : this.autocomplete;
-    // }
+    inputName() {
+      return this.reveal ? `${ this.name }_shown` : this.name;
+    },
+    inputAutocomplete() {
+      return this.reveal ? 'off' : this.autocomplete;
+    }
   },
   created() {
     if (this.isRandom) {
@@ -70,6 +70,7 @@ export default {
 <template>
   <div class="password">
     <!-- If this is marked with :disabled="isRandom" LastPass will fail to store -->
+    <!-- data-lpignore="true" -->
     <LabeledInput
       :id="name"
       v-model="password"
@@ -79,6 +80,7 @@ export default {
       :autocomplete="autocomplete"
       :label="label"
       :required="!isRandom"
+      :data-lpignore="reveal"
       @blur="$emit('blur', $event)"
     >
       <template #suffix>

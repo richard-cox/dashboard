@@ -175,20 +175,24 @@ export default {
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
         <!-- TODO: RC Even when setting this as a standard input, not hidden, it was ignored by lastpass -->
         <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName"> -->
+        <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName">
+        <input id="password" type="password" name="password" autocomplete="password" :value="passwordNew">
+        -------
+
         <Password
           ref="passwordCurrent"
           v-model="passwordCurrent"
           class="mt-10"
-          name="current-password"
-          autocomplete="current-password"
+          name="aaacurrent-password"
+          autocomplete="aaacurrent-password"
           :label="t('accountAndKeys.account.changePassword.currentPassword')"
         ></Password>
         <Password
           v-if="isRandomGenerated"
           ref="passwordGen"
           v-model="form.genP"
-          name="new-password"
-          autocomplete="new-password"
+          name="aaanew-password"
+          autocomplete="aaanew-password"
           class="mt-10"
           :is-random="true"
           :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
@@ -198,16 +202,16 @@ export default {
             ref="passwordNew"
             v-model="passwordNew"
             class="mt-10"
-            name="new-password"
-            autocomplete="new-password"
+            name="aaanew-password"
+            autocomplete="aaanew-password"
             :label="t('accountAndKeys.account.changePassword.userGen.newPassword')"
           />
           <Password
             ref="passwordConfirm"
             v-model="passwordConfirm"
             class="mt-10"
-            name="confirm-password"
-            autocomplete="new-password"
+            name="aaaconfirm-password"
+            autocomplete="aaanew-password"
             :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')"
             @blur="passwordConfirmBlurred()"
           />
@@ -231,9 +235,9 @@ export default {
       flex-direction: column;
       .fields{
         height: 215px;
-        // #username {
-        //   display: none;
-        // }
+        #username, #password {
+          display: none;
+        }
       }
     }
 
