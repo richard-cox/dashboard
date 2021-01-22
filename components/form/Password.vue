@@ -25,10 +25,20 @@ export default {
       randomPassword: randomStr(16, CHARSET.ALPHA_NUM)
     };
   },
-  computed: { ...mapGetters({ t: 'i18n/t' }) },
+  computed: {
+    ...mapGetters({ t: 'i18n/t' }),
+    password: {
+      get() {
+        return this.value;
+      },
+      set(val) {
+        this.$emit('input', val);
+      }
+    }
+  },
   created() {
     if (this.isRandom) {
-      this.value = this.randomPassword;
+      this.generatePassword();
     }
   },
   // watch:    {
@@ -39,44 +49,62 @@ export default {
   //     }
   //   }
   // },
-  // methods: {
+  methods: {
+    generatePassword() {
+      this.password = randomStr(16, CHARSET.ALPHA_NUM);
+    }
   //   generatePassword() {
   //     this.value = ;
   //   },
-  // }
+  }
 };
 // TODO: RC last pass compatible
-// TODO: RC model/value changed error
 // TODO: RC actual submit
 </script>
 
 <template>
   <!--autocomplete="new-password"  -->
-  <LabeledInput
-    v-model.trim="value"
-    :type="isRandom || reveal ? 'text' : 'password'"
-    :readonly="isRandom"
-    :disabled="isRandom"
-    :label="label"
-    :required="true"
-  >
-    <template #suffix>
-      <div v-if="isRandom" class="addon">
-        <a href="#" @click.prevent.stop="$copyText(value)">{{ t('action.copy') }}</a>
-      </div>
-      <div v-else class="addon">
-        <a v-if="reveal" href="#" @click.prevent.stop="reveal = false">{{ t('action.hide') }}</a>
-        <a v-else href="#" @click.prevent.stop="reveal=true">{{ t('action.show') }}</a>
-      </div>
-    </template>
-  </LabeledInput>
+
+  <!--v-model.trim="value"  -->
+  <div class="password">
+    <LabeledInput
+      v-model="password"
+      :type="isRandom || reveal ? 'text' : 'password'"
+      :readonly="isRandom"
+      :disabled="isRandom"
+      :label="label"
+      :required="true"
+      @blur="$emit('blur', $event)"
+    >
+      <template #suffix>
+        <div v-if="isRandom" class="addon">
+          <a href="#" @click.prevent.stop="$copyText(password)">{{ t('action.copy') }}</a>
+        </div>
+        <div v-else class="addon">
+          <a v-if="reveal" href="#" @click.prevent.stop="reveal = false">{{ t('action.hide') }}</a>
+          <a v-else href="#" @click.prevent.stop="reveal=true">{{ t('action.show') }}</a>
+        </div>
+      </template>
+    </LabeledInput>
+    <div v-if="isRandom" class="mt-10 genPassword">
+      <a href="#" @click.prevent.stop="generatePassword"><i class="icon icon-refresh" /> {{ t('accountAndKeys.account.changePassword.newGeneratedPassword') }}</a>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-  .labeled-input {
-     .addon {
-        padding-left: 12px;
-        min-width: 65px;
+  .password {
+    display: flex;
+    flex-direction: column;
+    .labeled-input {
+      .addon {
+          padding-left: 12px;
+          min-width: 65px;
+      }
+    }
+    .genPassword {
+      display: flex;
+      justify-content: flex-end;
     }
   }
 

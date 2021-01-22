@@ -21,7 +21,7 @@ export default {
       //   labelKey: `accountAndKeys.account.changePassword.userPassword`,
       //   value:    true
       // }, {
-      //   labelKey: `accountAndKeys.account.changePassword.generatedPassword`,
+      //   labelKey: `accountAndKeys.account.changePassword.newGeneratedPassword`,
       //   value:    false
       // }],
       form:                       {
@@ -161,7 +161,7 @@ export default {
 
 <template>
   <div class="change-password">
-    <form class="mb-10">
+    <form>
       <div class="fields">
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
 
@@ -172,35 +172,35 @@ export default {
           <Password v-model="passwordConfirm" class="mt-10" :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')" @blur="passwordConfirmBlurred()" />
         </div>
       </div>
-      <div class="type">
-        <Checkbox v-model="isRandomGenerated" :label="t('accountAndKeys.account.changePassword.generatePassword')" class="mt-10" />
-      </div>
+      <!-- <div class="type"> -->
+      <Checkbox v-model="isRandomGenerated" :label="t('accountAndKeys.account.changePassword.generatePassword')" class="mt-10 type" />
+      <!-- </div> -->
     </form>
     <div v-if="errorMessages && errorMessages.length" class="text-error">
-      <Banner v-for="(err, i) in errorMessages" :key="i" color="error" :label="err" />
+      <Banner v-for="(err, i) in errorMessages" :key="i" color="error" :label="err" class="mb-0" />
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
   .change-password {
-    flex: 1;
     display: flex;
+    flex-direction: column;
 
     form {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      .fields {
-        flex: 1;
-      }
-      .userGen {
-        flex: 0;
+      .fields{
+        height: 215px;
       }
     }
 
     .text-error {
+      flex: 0;
       min-height: 38px;
+    }
+    .banner.error {
+
     }
   }
 

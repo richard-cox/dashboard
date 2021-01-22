@@ -1419,8 +1419,7 @@ accountAndKeys:
       cancel: Cancel
       keys: Delete all existing API keys
       generatePassword: Generate a random password
-      DELETEuserPassword: User Generated PasswordTODO RC delete
-      DELETEgeneratedPassword: Randomly Generated PasswordTODO RC delete
+      newGeneratedPassword: Suggest a password
       currentPassword: Current Password
       userGen:
         newPassword: New Password
