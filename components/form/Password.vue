@@ -73,7 +73,7 @@ export default {
       :readonly="isRandom"
       :disabled="isRandom"
       :label="label"
-      :required="true"
+      :required="!isRandom"
       @blur="$emit('blur', $event)"
     >
       <template #suffix>

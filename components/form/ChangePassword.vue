@@ -16,14 +16,6 @@ export default {
       errorMessages:              [],
       canShowMissmatchedPassword: false,
       pIsRandomGenerated:            false,
-      // TODO: RC Remove translations
-      // genPasswordOptions:         [{
-      //   labelKey: `accountAndKeys.account.changePassword.userPassword`,
-      //   value:    true
-      // }, {
-      //   labelKey: `accountAndKeys.account.changePassword.newGeneratedPassword`,
-      //   value:    false
-      // }],
       form:                       {
         deleteKeys: false,
         currentP:   '',
@@ -172,9 +164,7 @@ export default {
           <Password v-model="passwordConfirm" class="mt-10" :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')" @blur="passwordConfirmBlurred()" />
         </div>
       </div>
-      <!-- <div class="type"> -->
       <Checkbox v-model="isRandomGenerated" :label="t('accountAndKeys.account.changePassword.generatePassword')" class="mt-10 type" />
-      <!-- </div> -->
     </form>
     <div v-if="errorMessages && errorMessages.length" class="text-error">
       <Banner v-for="(err, i) in errorMessages" :key="i" color="error" :label="err" class="mb-0" />
@@ -195,13 +185,6 @@ export default {
       }
     }
 
-    .text-error {
-      flex: 0;
-      min-height: 38px;
-    }
-    .banner.error {
-
-    }
   }
 
 </style>
