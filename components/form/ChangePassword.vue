@@ -20,7 +20,8 @@ export default {
         newP:       '',
         genP:       '',
         confirmP:   ''
-      }
+      },
+      fields: ['passwordCurrent', 'passwordGen', 'passwordNew', 'passwordConfirm']
     };
   },
   computed:   {
@@ -106,6 +107,15 @@ export default {
       this.$emit('valid', this.isRandomGenerated ? !!this.passwordCurrent : this.passwordsMatch() && !!this.passwordCurrent && this.passwordNew);
     },
     async submit() {
+      console.log(this.$refs);
+      this.fields.forEach((field) => {
+        const ref = this.$refs[field];
+
+        if (ref) {
+          ref.show(false);
+        }
+      });
+
       await this.changePassword();
       if (this.form.deleteKeys) { // TODO: RC _mode if create
         await this.deleteKeys();
@@ -165,9 +175,17 @@ export default {
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
         <!-- TODO: RC Even when setting this as a standard input, not hidden, it was ignored by lastpass -->
         <!-- <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName"> -->
-        <Password v-model="passwordCurrent" class="mt-10" name="current-password" autocomplete="current-password" :label="t('accountAndKeys.account.changePassword.currentPassword')"></Password>
+        <Password
+          ref="passwordCurrent"
+          v-model="passwordCurrent"
+          class="mt-10"
+          name="current-password"
+          autocomplete="current-password"
+          :label="t('accountAndKeys.account.changePassword.currentPassword')"
+        ></Password>
         <Password
           v-if="isRandomGenerated"
+          ref="passwordGen"
           v-model="form.genP"
           name="new-password"
           autocomplete="new-password"
@@ -176,11 +194,19 @@ export default {
           :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
         />
         <div v-else class="userGen">
-          <Password v-model="passwordNew" class="mt-10" name="new-password" autocomplete="new-password" :label="t('accountAndKeys.account.changePassword.userGen.newPassword')" />
           <Password
-            v-model="passwordConfirm"
+            ref="passwordNew"
+            v-model="passwordNew"
             class="mt-10"
             name="new-password"
+            autocomplete="new-password"
+            :label="t('accountAndKeys.account.changePassword.userGen.newPassword')"
+          />
+          <Password
+            ref="passwordConfirm"
+            v-model="passwordConfirm"
+            class="mt-10"
+            name="confirm-password"
             autocomplete="new-password"
             :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')"
             @blur="passwordConfirmBlurred()"

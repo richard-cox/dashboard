@@ -42,7 +42,13 @@ export default {
       set(val) {
         this.$emit('input', val);
       }
-    }
+    },
+    // inputName() {
+    //   return this.reveal ? `${ this.name }_shown` : this.name;
+    // },
+    // inputAutocomplete() {
+    //   return this.reveal ? 'off' : this.autocomplete;
+    // }
   },
   created() {
     if (this.isRandom) {
@@ -51,7 +57,10 @@ export default {
   },
   methods: {
     generatePassword() {
-      this.password = 'abc';// randomStr(16, CHARSET.ALPHA_NUM);
+      this.password = 'abc';// TODO: RC randomStr(16, CHARSET.ALPHA_NUM);
+    },
+    show(reveal) {
+      this.reveal = reveal;
     }
   }
 };
@@ -82,6 +91,9 @@ export default {
         </div>
       </template>
     </LabeledInput>
+    <!-- <template v-if="reveal">
+      <input :id="name" :value="password" :name="name" :autocomplete="autocomplete" type="password">
+    </template> -->
     <div v-if="isRandom" class="mt-10 genPassword">
       <a href="#" @click.prevent.stop="generatePassword"><i class="icon icon-refresh" /> {{ t('accountAndKeys.account.changePassword.newGeneratedPassword') }}</a>
     </div>
