@@ -5,7 +5,6 @@ import {
   AGE, GROUP_NAME, GROUP_ROLE_NAME, STATE, USER_DISPLAY_NAME, USER_ID, USER_PROVIDER
 } from '@/config/table-headers';
 import { USERNAME } from '@/config/cookies';
-import { camalize } from '@/utils/string';
 
 export const NAME = 'auth';
 
@@ -53,19 +52,20 @@ export function init(store) {
       }
     ],
     getInstances: async() => {
-      // TODO: RC Q Manually set this
+      // TODO: RC Q Manually set this ?
       // const counts = rootGetters[`${module}/all`](COUNT)?.[0]?.counts || {};
 
       const principals = await store.dispatch('rancher/findAll', {
         type: NORMAN.PRINCIPAL,
         opt:  { url: '/v3/principals' }
       });
+      // TODO: RC Costly....
       const globalRoleBindings = await store.dispatch('management/findAll', {
         type: RBAC.GLOBAL_ROLE_BINDING,
         opt:  { force: true }
       });
 
-      // Up front fetch all global roles, in stead of individually when needed (results in many duplicated requests)
+      // Up front fetch all global roles, instead of individually when needed (results in many duplicated requests)
       await store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
       // TODO: BUTTON does this always redraw... and as such recreate (RE refresh group memberships)
@@ -104,7 +104,6 @@ export function init(store) {
   basicType([
     'config',
     MANAGEMENT.USER,
-    'groups', // TODO: RC BUTTONS Remove
     NORMAN.SPOOFED.GROUP_PRINCIPAL
   ]);
 

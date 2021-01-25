@@ -36,14 +36,9 @@ export default {
       this.valid = !!changes.addRoles.length || !!changes.removeBindings.length;
     },
     async refreshSpoofed() {
-      // TODO: RC REFRESH - The below, as per promptRemove... does not work (getInstances is called.. but there's no change in the table)
-      // Need to also fix assign-edit & promptRemove use case
-      const a = await this.$store.dispatch('cluster/findAll', {
-        type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
-        opt:  { force: true }
-      }, { root: true });
+      const spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
 
-      richards.log('updated list: ', a);
+      await spoofed.updateList();
     }
   }
 };

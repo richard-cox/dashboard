@@ -2,6 +2,7 @@ import { AS, MODE, _EDIT, _UNFLAG } from '@/config/query-params';
 import { NORMAN, RBAC } from '@/config/types';
 import richard from '@/utils/richards';
 import { clone } from '@/utils/object';
+import richards from '@/utils/richards';
 
 export default {
 
@@ -69,8 +70,25 @@ export default {
     };
   },
 
-  refreshGroupMemberships() {
+  async refreshGroupMemberships() {
+    // TODO: RC BUTTONS use async button to show state
+    try {
+      // TODO: RC BUTTONS test - See ./ui/lib/global-admin/addon/security/accounts/groups/controller.js
+      await this.$dispatch('rancher/request', {
+        url:           '/v3/users?action=refreshauthprovideraccess',
+        method:        'post',
+        // headers:       { 'Content-Type': 'application/json' },
+        data:          { },
+      });
 
+      const spoofed = await this.$dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
+
+      await spoofed.updateList();
+
+      // TODO: RC How does this update the lists associated with this type??
+    } catch (error) {
+      this.$dispatch('growl/fromError', { title: 'Error refreshing group memberships', error }, { root: true });
+    }
   },
 
   goToGlobalAssign() {
@@ -78,6 +96,17 @@ export default {
       path:  'group.principal/assign-edit',
       query: { [MODE]: _EDIT }
     });
+  },
+
+  async updateList() {
+    // TODO: RC REFRESH - The below, as per promptRemove... does not work (getInstances is called.. but there's no change in the table)
+    // Need to also fix assign-edit & promptRemove use case
+    const a = await this.$dispatch('cluster/findAll', {
+      type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
+      opt:  { force: true }
+    }, { root: true });
+
+    richards.log('updated list: ', a);
   }
 
 };
