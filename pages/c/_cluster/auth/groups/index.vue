@@ -48,6 +48,7 @@ export default {
       await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
       // TODO: BUTTONS CHECK Q does this always redraw... and as such recreate (RE refresh group memberships)
+      // See how this workes with unassign modal/action .. there was an action that kicked of refetch
       this.rows = this.principals.filter((principal) => {
         return principal.principalType === 'group' && this.principalHasGlobalRoleBinding(this.globalRoleBindings, principal);
       });

@@ -43,6 +43,18 @@ export default {
         enabled:    true,
         bulkAction: 'unassignGroupRoles',
       },
+      {
+        action:  'refreshGroupMemberships',
+        label:   this.t('authGroups.actions.refresh'),
+        icon:    'icon icon-edit',
+        enabled:  true,
+      },
+      {
+        action:  'goToGlobalAssign',
+        label:   this.t('authGroups.actions.assignRoles'),
+        icon:    'icon icon-edit',
+        enabled:  true,
+      },
     ];
   },
 
@@ -56,4 +68,16 @@ export default {
       this.$dispatch('promptRemove', globalRoleBindings);
     };
   },
+
+  refreshGroupMemberships() {
+
+  },
+
+  goToGlobalAssign() {
+    this.currentRouter().push({
+      path:  'group.principal/assign-edit',
+      query: { [MODE]: _EDIT }
+    });
+  }
+
 };
