@@ -5,10 +5,6 @@ import Checkbox from '@/components/form/Checkbox';
 import Password from '@/components/form/Password';
 import { NORMAN } from '@/config/types';
 
-// TODO: RC actual submit
-// TODO: RC actual submit delete keys
-// TODO: RC test last pass disabled
-
 export default {
   components: {
     Checkbox, Banner, Password
@@ -251,7 +247,6 @@ export default {
         }
       }
     }
-
   }
 
 </style>

@@ -61,7 +61,7 @@ export default {
   },
   methods: {
     generatePassword() {
-      this.password = 'abc';// TODO: RC randomStr(16, CHARSET.ALPHA_NUM);
+      this.password = randomStr(16, CHARSET.ALPHA_NUM);
     },
     show(reveal) {
       this.reveal = reveal;
