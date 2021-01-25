@@ -1,22 +1,49 @@
 <script>
 import PromptChangePassword from '@/components/PromptChangePassword';
 import { NORMAN } from '@/config/types';
+import Loading from '@/components/Loading';
 
 export default {
-  components: { PromptChangePassword },
+  components: { PromptChangePassword, Loading },
+  async fetch() {
+    this.canChangePassword = await this.calcCanChangePassword();
+  },
+  data() {
+    return { canChangePassword: false };
+  },
   computed:   {
     principal() {
       return this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
     },
-    canChangePassword() {
-      return this.$store.getters['auth/enabled'] && !!this.principal.loginName;
-    },
+  },
+  methods: {
+    async calcCanChangePassword() {
+      if (!this.$store.getters['auth/enabled']) {
+        return false;
+      }
+
+      if (this.principal.provider === 'local') {
+        return !!this.principal.loginName;
+      }
+
+      const users = await this.$store.dispatch('rancher/findAll', {
+        type: NORMAN.USER,
+        opt:  { url: '/v3/users', filter: { me: true } }
+      });
+
+      if (users && users.length === 1) {
+        return !!users[0].username;
+      }
+
+      return false;
+    }
   }
 };
 </script>
 
 <template>
-  <div>
+  <Loading v-if="$fetchState.pending" />
+  <div v-else>
     <h1 v-t="'accountAndKeys.title'" />
     <section class="account">
       <h4 v-t="'accountAndKeys.account.title'" />

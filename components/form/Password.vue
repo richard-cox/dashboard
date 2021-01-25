@@ -72,9 +72,6 @@ export default {
 
 <template>
   <div class="password">
-    <!-- TODO: RC is this still a thing? -->
-    <!-- If this is marked with :disabled="isRandom" LastPass will fail to store -->
-    <!--  -->
     <LabeledInput
       v-model="password"
       v-bind="attributes"
@@ -82,6 +79,7 @@ export default {
       :readonly="isRandom"
       :label="label"
       :required="!isRandom"
+      :disabled="isRandom"
       @blur="$emit('blur', $event)"
     >
       <template #suffix>

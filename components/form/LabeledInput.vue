@@ -63,11 +63,6 @@ export default {
       }
     },
 
-    attributes() {
-      // console.log(this.$attrs); TODO: RC
-
-      return this.$attrs;
-    }
   },
 
   methods: {
@@ -131,7 +126,7 @@ export default {
         v-else
         ref="value"
         :class="{'no-label': !hasLabel}"
-        v-bind="attributes"
+        v-bind="$attrs"
         :name="name"
         :disabled="isDisabled"
         :type="type === 'cron' ? 'text' : type"

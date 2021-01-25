@@ -7,6 +7,7 @@ import { NORMAN } from '@/config/types';
 
 // TODO: RC actual submit
 // TODO: RC actual submit delete keys
+// TODO: RC test last pass disabled
 
 export default {
   components: {
@@ -18,12 +19,27 @@ export default {
       default: ''
     },
   },
+  async fetch() {
+    if (this.principal.provider === 'local' && !!this.principal.loginName) {
+      this.username = this.principal.loginName;
+    }
+
+    const users = await this.$store.dispatch('rancher/findAll', {
+      type: NORMAN.USER,
+      opt:  { url: '/v3/users', filter: { me: true } }
+    });
+
+    if (users && users.length === 1) {
+      this.username = users[0].username;
+    }
+  },
   data(ctx) {
     return {
-      errorMessages:              [],
-      canShowMissmatchedPassword: false,
+      username:                    '',
+      errorMessages:               [],
+      pCanShowMissmatchedPassword: false,
       pIsRandomGenerated:            false,
-      form:                       {
+      form:                        {
         deleteKeys: false,
         currentP:   '',
         newP:       '',
@@ -91,6 +107,17 @@ export default {
       }
     },
 
+    passwordConfirmBlurred: {
+      get() {
+        return this.pCanShowMissmatchedPassword;
+      },
+
+      set(p) {
+        this.pCanShowMissmatchedPassword = p;
+        this.validate();
+      }
+    },
+
     password() {
       return this.isRandomGenerated ? this.passwordGen : this.passwordNew;
     },
@@ -100,14 +127,10 @@ export default {
     },
   },
   methods: {
-    passwordConfirmBlurred() {
-      this.canShowMissmatchedPassword = true;
-      this.validate();
-    },
     passwordsMatch() {
       const match = this.passwordNew === this.passwordConfirm;
 
-      this.errorMessages = this.canShowMissmatchedPassword && !match ? [this.t('accountAndKeys.account.changePassword.errors.missmatchedPassword')] : [];
+      this.errorMessages = this.passwordConfirmBlurred && !match ? [this.t('accountAndKeys.account.changePassword.errors.missmatchedPassword')] : [];
 
       return match;
     },
@@ -173,19 +196,15 @@ export default {
     <div class="form">
       <div class="fields">
         <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
-        <!-- TODO: RC test with these removed! -->
-        <!-- Username is ignored by LastPass -->
-        <input id="username" type="text" name="username" autocomplete="username" :value="principal.loginName">
+        <input id="username" type="text" name="username" autocomplete="username" :value="username">
         <input id="password" type="password" name="password" autocomplete="password" :value="password">
         <Password
-          ref="passwordCurrent"
           v-model="passwordCurrent"
           class="mt-10"
           :label="t('accountAndKeys.account.changePassword.currentPassword')"
         ></Password>
         <Password
           v-if="isRandomGenerated"
-          ref="passwordGen"
           v-model="passwordGen"
           class="mt-10"
           :is-random="true"
@@ -193,17 +212,15 @@ export default {
         />
         <div v-else class="userGen">
           <Password
-            ref="passwordNew"
             v-model="passwordNew"
             class="mt-10"
             :label="t('accountAndKeys.account.changePassword.userGen.newPassword')"
           />
           <Password
-            ref="passwordConfirm"
             v-model="passwordConfirm"
             class="mt-10"
             :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')"
-            @blur="passwordConfirmBlurred()"
+            @blur="passwordConfirmBlurred = true"
           />
         </div>
       </div>
