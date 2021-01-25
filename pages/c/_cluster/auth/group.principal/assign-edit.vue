@@ -1,6 +1,5 @@
 <script>
 import FooterComponent from '@/components/form/Footer';
-import Loading from '@/components/Loading';
 import SelectPrincipal from '@/components/auth/SelectPrincipal.vue';
 import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import { NORMAN } from '@/config/types';
@@ -81,8 +80,7 @@ export default {
       </div>
 
       <form>
-        <!-- TODO: RC type in to get github user... shouldn't be allowed? should be but currently isn't in groups list? -->
-        <SelectPrincipal :mode="'true'" :retain-selection="true" class="mb-20" @add="setPrincipal" />
+        <SelectPrincipal :retain-selection="true" class="mb-20" :show-my-group-types="['group']" :search-group-types="'group'" @add="setPrincipal" />
 
         <GlobalRoleBindings ref="grb" :principal-id="principalId" :mode="mode" />
 

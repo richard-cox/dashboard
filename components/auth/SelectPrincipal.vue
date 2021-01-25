@@ -24,6 +24,12 @@ export default {
       },
     },
 
+    // either 'user' or 'group'
+    searchGroupTypes: {
+      type:    String,
+      default: null,
+    },
+
     retainSelection: {
       type:    Boolean,
       default: false
@@ -104,7 +110,10 @@ export default {
           type:       NORMAN.PRINCIPAL,
           actionName: 'search',
           opt:        { url: '/v3/principals?action=search' },
-          body:       { name: str }
+          body:       {
+            name:          str,
+            principalType: this.searchGroupTypes
+          }
         });
 
         if ( this.searchStr === str ) {
