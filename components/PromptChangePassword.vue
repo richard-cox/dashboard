@@ -12,12 +12,7 @@ export default {
   data() {
     return { valid: false, password: '' };
   },
-  computed:   {
-    ...mapGetters({ t: 'i18n/t' }),
-    principal() {
-      return this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.$store.getters['auth/principalId']) || {};
-    },
-  },
+  computed:   { ...mapGetters({ t: 'i18n/t' }) },
   methods:  {
     show(show) {
       if (show) {
@@ -48,7 +43,7 @@ export default {
   >
     <Card class="prompt-password" :show-highlight-border="false">
       <h4 slot="title" class="text-default-text">
-        {{ t("accountAndKeys.account.changePassword.title") }}
+        {{ t("changePassword.title") }}
       </h4>
       <div slot="body">
         <form @submit.prevent>
@@ -59,7 +54,7 @@ export default {
       <template #actions>
         <!-- type reset is required by lastpass -->
         <button class="btn role-secondary" type="reset" @click="show(false)">
-          {{ t("accountAndKeys.account.changePassword.cancel") }}
+          {{ t("changePassword.cancel") }}
         </button>
         <AsyncButton
           type="submit"

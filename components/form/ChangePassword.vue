@@ -126,7 +126,7 @@ export default {
     passwordsMatch() {
       const match = this.passwordNew === this.passwordConfirm;
 
-      this.errorMessages = this.passwordConfirmBlurred && !match ? [this.t('accountAndKeys.account.changePassword.errors.missmatchedPassword')] : [];
+      this.errorMessages = this.passwordConfirmBlurred && !match ? [this.t('changePassword.errors.missmatchedPassword')] : [];
 
       return match;
     },
@@ -151,7 +151,7 @@ export default {
           },
         });
       } catch (err) {
-        this.errorMessages = [err.message || this.t('accountAndKeys.account.changePassword.errors.failedToChange')];
+        this.errorMessages = [err.message || this.t('changePassword.errors.failedToChange')];
         throw err;
       }
     },
@@ -176,9 +176,9 @@ export default {
         if (err.message) {
           this.errorMessages = [err.message];
         } else if (err.length > 1) {
-          this.errorMessages = [this.t('accountAndKeys.account.changePassword.errors.failedDeleteKeys')];
+          this.errorMessages = [this.t('changePassword.errors.failedDeleteKeys')];
         } else {
-          this.errorMessages = [this.t('accountAndKeys.account.changePassword.errors.failedDeleteKey')];
+          this.errorMessages = [this.t('changePassword.errors.failedDeleteKey')];
         }
         throw err;
       }
@@ -191,36 +191,50 @@ export default {
   <div class="change-password">
     <div class="form">
       <div class="fields">
-        <Checkbox v-model="form.deleteKeys" :label="t('accountAndKeys.account.changePassword.keys')" class="mt-10" />
-        <input id="username" type="text" name="username" autocomplete="username" :value="username">
-        <input id="password" type="password" name="password" autocomplete="password" :value="password">
+        <Checkbox v-model="form.deleteKeys" :label="t('changePassword.keys')" class="mt-10" />
+        <input
+          id="username"
+          type="text"
+          name="username"
+          autocomplete="username"
+          :value="username"
+          tabindex="-1"
+        >
+        <input
+          id="password"
+          type="password"
+          name="password"
+          autocomplete="password"
+          :value="password"
+          tabindex="-1"
+        >
         <Password
           v-model="passwordCurrent"
           class="mt-10"
-          :label="t('accountAndKeys.account.changePassword.currentPassword')"
+          :label="t('changePassword.currentPassword')"
         ></Password>
         <Password
           v-if="isRandomGenerated"
           v-model="passwordGen"
           class="mt-10"
           :is-random="true"
-          :label="t('accountAndKeys.account.changePassword.randomGen.generated')"
+          :label="t('changePassword.randomGen.generated')"
         />
         <div v-else class="userGen">
           <Password
             v-model="passwordNew"
             class="mt-10"
-            :label="t('accountAndKeys.account.changePassword.userGen.newPassword')"
+            :label="t('changePassword.userGen.newPassword')"
           />
           <Password
             v-model="passwordConfirm"
             class="mt-10"
-            :label="t('accountAndKeys.account.changePassword.userGen.confirmPassword')"
+            :label="t('changePassword.userGen.confirmPassword')"
             @blur="passwordConfirmBlurred = true"
           />
         </div>
       </div>
-      <Checkbox v-model="isRandomGenerated" :label="t('accountAndKeys.account.changePassword.generatePassword')" class="mt-10 type" />
+      <Checkbox v-model="isRandomGenerated" :label="t('changePassword.generatePassword')" class="mt-10 type" />
     </div>
     <div v-if="errorMessages && errorMessages.length" class="text-error">
       <Banner v-for="(err, i) in errorMessages" :key="i" color="error" :label="err" class="mb-0" />

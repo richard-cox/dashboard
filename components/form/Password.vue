@@ -93,7 +93,7 @@ export default {
       </template>
     </LabeledInput>
     <div v-if="isRandom" class="mt-10 genPassword">
-      <a href="#" @click.prevent.stop="generatePassword"><i class="icon icon-refresh" /> {{ t('accountAndKeys.account.changePassword.newGeneratedPassword') }}</a>
+      <a href="#" @click.prevent.stop="generatePassword"><i class="icon icon-refresh" /> {{ t('changePassword.newGeneratedPassword') }}</a>
     </div>
   </div>
 </template>
