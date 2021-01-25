@@ -30,12 +30,6 @@ export default {
       type:    Boolean,
       default: true,
     },
-
-    name: {
-      type:      String,
-      default:   null
-    },
-
   },
 
   computed: {
@@ -61,8 +55,7 @@ export default {
       } catch (e) {
         return this.t('generic.invalidCron');
       }
-    },
-
+    }
   },
 
   methods: {
@@ -127,11 +120,11 @@ export default {
         ref="value"
         :class="{'no-label': !hasLabel}"
         v-bind="$attrs"
-        :name="name"
         :disabled="isDisabled"
         :type="type === 'cron' ? 'text' : type"
         :value="value"
         :placeholder="placeholder"
+        autocomplete="off"
         autocapitalize="off"
         @input="$emit('input', $event.target.value)"
         @focus="onFocus"
