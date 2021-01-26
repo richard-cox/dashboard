@@ -13,7 +13,7 @@ export default {
   mixins: [CreateEditView],
   data() {
     return {
-      errors: [],
+      errors:       [],
       valid:  false,
     };
   },
@@ -29,7 +29,7 @@ export default {
           opt:  { force: true }
         }, { root: true }); // See PromptRemove.vue
 
-        this.$router.replace({ name: this.doneRoute }); // There's no navigation without this prod
+        this.$router.replace({ name: this.doneRoute });
         buttonDone(true);
       } catch (err) {
         this.errors = exceptionToErrorsArray(err);

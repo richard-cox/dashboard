@@ -5,6 +5,8 @@ import Masthead from '@/components/ResourceList/Masthead';
 import { NORMAN } from '@/config/types';
 import AsyncButton from '@/components/AsyncButton';
 import { applyProducts } from '@/store/type-map';
+import { NAME } from '@/config/product/auth';
+import { MODE, _EDIT } from '@/config/query-params';
 
 export default {
   components: {
@@ -25,7 +27,14 @@ export default {
     this.rows = await this.$store.dispatch('cluster/findAll', { type: NORMAN.SPOOFED.GROUP_PRINCIPAL }, { root: true }); // See PromptRemove.vue
   },
   data() {
-    return { rows: null };
+    return {
+      rows:           null,
+      assignLocation:  {
+        // TODO: Q
+        path:   `/c/local/${ NAME }/${ NORMAN.SPOOFED.GROUP_PRINCIPAL }/assign-edit`,
+        query: { [MODE]: _EDIT }
+      }
+    };
   },
   computed: {
     hasRows() {
@@ -81,7 +90,7 @@ export default {
         />
         <n-link
           v-if="hasRows"
-          :to="`group.principal/assign-edit?mode=edit`"
+          :to="assignLocation"
           class="btn role-primary"
         >
           {{ t("authGroups.actions.assignRoles") }}

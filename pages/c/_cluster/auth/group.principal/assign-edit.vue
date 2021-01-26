@@ -5,7 +5,7 @@ import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import { NORMAN } from '@/config/types';
 import { _VIEW } from '@/config/query-params';
 import { exceptionToErrorsArray } from '@/utils/error';
-import richards from '@/utils/richards';
+import { NAME } from '@/config/product/auth';
 
 export default {
   components: {
@@ -15,9 +15,8 @@ export default {
   },
   data() {
     return {
-      errors:      [],
-      principalId: null,
-      spoofed:     null,
+      errors:       [],
+      principalId:  null,
     };
   },
   computed: {
@@ -39,29 +38,27 @@ export default {
 
       try {
         await this.$refs.grb.save();
-        await this.refreshSpoofed();
-        await this.return();
+
+        await this.$store.dispatch('cluster/findAll', {
+          type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
+          opt:  { force: true }
+        }, { root: true }); // See PromptRemove.vue
+
+        this.$router.replace({
+          name:   `c-cluster-product-resource`,
+          params: {
+            cluster:  'local',
+            product:  NAME,
+            resource: NORMAN.SPOOFED.GROUP_PRINCIPAL,
+          },
+        });
+
         buttonDone(true);
       } catch (err) {
         this.errors = exceptionToErrorsArray(err);
         buttonDone(false);
       }
     },
-    async return() {
-      // TODO: RC Fix
-      const spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
-
-      spoofed.goToList();
-    },
-    async refreshSpoofed() {
-      const a = await this.$store.dispatch('cluster/findAll', {
-        type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
-        opt:  { force: true }
-      }, { root: true });
-
-      richards.log('updated list: ', a);
-    }
-
   }
 };
 
