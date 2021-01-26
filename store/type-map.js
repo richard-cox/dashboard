@@ -614,6 +614,7 @@ export const getters = {
   getSpoofedInstances(state, getters, rootState, rootGetters) {
     return async (type, product) => {
       product = product || rootGetters['productId'];
+
       const getInstances = instanceMethods[product]?.[type] || (() => []);
       const instances = await getInstances();
 
@@ -687,7 +688,6 @@ export const getters = {
           mode,
           weight,
           schema,
-          // icon: 'lock', TODO: 
           name: schema.id,
           namespaced: attrs.namespaced,
           count: count ? count.summary.count || 0 : null,
@@ -738,13 +738,8 @@ export const getters = {
 
       const spoofedTypes = state.spoofedTypes[product] || [];
       spoofedTypes.forEach(type => {
-        // console.log(type.name, type);
         out[type.name] = type;
       });
-
-      // Object.entries(out).forEach(([val, key]) => {
-      //   console.log(key, val);
-      // });
 
       return out;
     };
@@ -1104,9 +1099,9 @@ export const mutations = {
     }
 
     const copy = clone(obj);
-
     instanceMethods[product] = instanceMethods[product] || {};
     instanceMethods[product][copy.type] = copy.getInstances;
+
     delete copy.getInstances;
 
     copy.isSpoofed = true;
