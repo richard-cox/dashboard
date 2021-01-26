@@ -12,7 +12,6 @@ export default {
 
     boundRoles() {
       const principal = this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.value);
-      // TODO: RC Q Costly....
       const globalRoleBindings = this.$store.getters['management/all'](RBAC.GLOBAL_ROLE_BINDING);
 
       return globalRoleBindings

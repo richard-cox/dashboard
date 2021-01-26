@@ -4,7 +4,6 @@ import GlobalRoleBindings from '@/components/GlobalRoleBindings.vue';
 import CruResource from '@/components/CruResource';
 import { exceptionToErrorsArray } from '@/utils/error';
 import { NORMAN } from '@/config/types';
-import richards from '@/utils/richards';
 
 export default {
   components: {
@@ -24,7 +23,6 @@ export default {
 
       try {
         await this.$refs.grb.save();
-        await this.refreshSpoofed();
         this.$router.replace({ name: this.doneRoute }); // There's no navigation without this prod
         buttonDone(true);
       } catch (err) {
@@ -35,11 +33,6 @@ export default {
     changed(changes) {
       this.valid = !!changes.addRoles.length || !!changes.removeBindings.length;
     },
-    async refreshSpoofed() {
-      const spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
-
-      await spoofed.updateList();
-    }
   }
 };
 </script>

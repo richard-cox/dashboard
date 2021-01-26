@@ -1,10 +1,10 @@
 import { DSL } from '@/store/type-map';
-// import { STATE, NAME as NAME_COL, AGE } from '@/config/table-headers';
 import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
 import {
   AGE, GROUP_NAME, GROUP_ROLE_NAME, STATE, USER_DISPLAY_NAME, USER_ID, USER_PROVIDER
 } from '@/config/table-headers';
 import { USERNAME } from '@/config/cookies';
+import richards from '@/utils/richards';
 
 export const NAME = 'auth';
 
@@ -59,7 +59,7 @@ export function init(store) {
         type: NORMAN.PRINCIPAL,
         opt:  { url: '/v3/principals' }
       });
-      // TODO: RC Costly....
+      // TODO: RC Q Costly....
       const globalRoleBindings = await store.dispatch('management/findAll', {
         type: RBAC.GLOBAL_ROLE_BINDING,
         opt:  { force: true }
@@ -68,10 +68,9 @@ export function init(store) {
       // Up front fetch all global roles, instead of individually when needed (results in many duplicated requests)
       await store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE });
 
-      // TODO: BUTTON does this always redraw... and as such recreate (RE refresh group memberships)
       return principals
         .filter(principal => principal.principalType === 'group' &&
-           !!globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === principal.id)
+          !!globalRoleBindings.find(globalRoleBinding => globalRoleBinding.groupPrincipalName === principal.id)
         )
         .map(principal => ({
           ...principal,
@@ -80,10 +79,11 @@ export function init(store) {
     }
   });
   configureType(NORMAN.SPOOFED.GROUP_PRINCIPAL, {
-    isCreatable: false,
-    showAge:     false,
-    showState:   false,
-    isRemovable: false,
+    isCreatable:      false,
+    showAge:          false,
+    showState:        false,
+    isRemovable:      false,
+    showListMasthead: false,
   });
 
   // Use labelFor... so lookup succeeds with .'s in path.... and end result is 'trimmed' as per other entries
@@ -130,14 +130,4 @@ export function init(store) {
     GROUP_NAME,
     GROUP_ROLE_NAME
   ]);
-
-  // ---------------------------  TODO: RC BUTTONS Remove c-cluster-auth-groups page
-  virtualType({
-    label:       '(Old) Groups',
-    icon:        'lock',
-    namespaced:  false,
-    name:        'groups',
-    weight:      -1,
-    route:       { name: 'c-cluster-auth-groups' },
-  });
 }

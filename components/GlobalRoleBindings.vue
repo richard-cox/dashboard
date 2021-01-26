@@ -5,7 +5,6 @@ import { RBAC } from '@/config/types';
 import Checkbox from '@/components/form/Checkbox';
 import { _VIEW } from '@/config/query-params';
 import Loading from '@/components/Loading';
-import richard from '@/utils/richards';
 
 // TODO: RC Case when there's no auth providers / groups
 export default {
@@ -47,7 +46,6 @@ export default {
           }
         });
 
-        // TODO: RC Q This could be a lot of roles... when we really only want those for the current principal
         // Moving this out into the watch has issues....
         this.globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
 
