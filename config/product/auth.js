@@ -1,10 +1,10 @@
 import { DSL } from '@/store/type-map';
+// import { STATE, NAME as NAME_COL, AGE } from '@/config/table-headers';
 import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
 import {
   AGE, GROUP_NAME, GROUP_ROLE_NAME, STATE, USER_DISPLAY_NAME, USER_ID, USER_PROVIDER
 } from '@/config/table-headers';
 import { USERNAME } from '@/config/cookies';
-import richards from '@/utils/richards';
 
 export const NAME = 'auth';
 
@@ -52,9 +52,6 @@ export function init(store) {
       }
     ],
     getInstances: async() => {
-      // TODO: RC Q Manually set this ?
-      // const counts = rootGetters[`${module}/all`](COUNT)?.[0]?.counts || {};
-
       const principals = await store.dispatch('rancher/findAll', {
         type: NORMAN.PRINCIPAL,
         opt:  { url: '/v3/principals' }

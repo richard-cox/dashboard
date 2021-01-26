@@ -688,7 +688,7 @@ export const GROUP_NAME = {
   name:      'group-name',
   label:     'Group Name',
   value:     'id',
-  sort:      'name',
+  sort:      ['name'],
   search:    ['name'],
   formatter: 'Principal',
   width:     350

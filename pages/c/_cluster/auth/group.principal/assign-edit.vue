@@ -48,6 +48,7 @@ export default {
       }
     },
     async return() {
+      // TODO: RC Fix
       const spoofed = await this.$store.dispatch(`rancher/create`, { type: NORMAN.SPOOFED.GROUP_PRINCIPAL });
 
       spoofed.goToList();

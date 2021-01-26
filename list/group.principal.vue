@@ -1,24 +1,38 @@
 <script>
-import ResourceList from '@/components/ResourceList';
-import { AS, MODE, _EDIT, _UNFLAG } from '@/config/query-params';
+import ResourceTable from '@/components/ResourceTable';
+import Loading from '@/components/Loading';
+import Masthead from '@/components/ResourceList/Masthead';
 import { NORMAN } from '@/config/types';
 import AsyncButton from '@/components/AsyncButton';
-import richards from '@/utils/richards';
+import { applyProducts } from '@/store/type-map';
 
 export default {
-  components: { AsyncButton },
-  mixins:     [
-    ResourceList
-  ],
+  components: {
+    AsyncButton, ResourceTable, Masthead, Loading
+  },
+  props: {
+    resource: {
+      type:     String,
+      required: true,
+    },
+
+    schema: {
+      type:     Object,
+      required: true,
+    },
+  },
   async fetch() {
-    richards.log('list: fetch');
-    this.rows = await this.$store.dispatch('cluster/findAll', {
-      type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
-      opt:  { force: true }
-    });
+    this.rows = await this.$store.dispatch('cluster/findAll', { type: NORMAN.SPOOFED.GROUP_PRINCIPAL }, { root: true }); // See PromptRemove.vue
+  },
+  data() {
+    return { rows: null };
+  },
+  computed: {
+    hasRows() {
+      return this.rows?.length > 0;
+    }
   },
   methods: {
-
     async refreshGroupMemberships(buttonDone) {
       try {
         await this.$store.dispatch('rancher/request', {
@@ -27,10 +41,16 @@ export default {
           data:          { },
         });
 
+        // HACK!!
+        // In SPA this is not needed. In SRR I think the runs client side... where this has not been called (not sure how not...)
+        // If this is not here... when cluster/findAll is dispatched... we fail to find the spoofed type's getInstance fn as it hasn't been
+        // registered yet
+        await applyProducts(this.$store);
+
         this.rows = await this.$store.dispatch('cluster/findAll', {
           type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
-          opt:  { force: true } // TODO: RC force honoured?
-        });
+          opt:  { force: true }
+        }, { root: true });
 
         buttonDone(true);
       } catch (err) {
@@ -60,7 +80,7 @@ export default {
           @click="refreshGroupMemberships"
         />
         <n-link
-          v-if="rows.length > 0"
+          v-if="hasRows"
           :to="`group.principal/assign-edit?mode=edit`"
           class="btn role-primary"
         >
@@ -69,9 +89,6 @@ export default {
       </template>
     </Masthead>
 
-    <ResourceTable :schema="schema" :rows="rows" :group-by="groupBy" />
+    <ResourceTable :schema="schema" :rows="rows" />
   </div>
 </template>
-
-<style lang="scss">
-</style>

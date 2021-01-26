@@ -26,8 +26,8 @@ export default {
 
         await this.$store.dispatch('cluster/findAll', {
           type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
-          opt:  { force: true } // TODO: RC force honoured?
-        });
+          opt:  { force: true }
+        }, { root: true }); // See PromptRemove.vue
 
         this.$router.replace({ name: this.doneRoute }); // There's no navigation without this prod
         buttonDone(true);

@@ -12,9 +12,7 @@ export default {
     // Handle spoofed types instead of making an actual request
     // Spoofing is handled here to ensure it's done for both yaml and form editing.
     // It became apparent that this was the only place that both intersected
-    debugger;
     if (opt.url.includes(SPOOFED_PREFIX) || opt.url.includes(SPOOFED_API_PREFIX)) {
-      debugger;
       const [empty, scheme, type, ...rest] = opt.url.split('/'); // eslint-disable-line no-unused-vars
       const id = rest.join('/');
       const isApi = scheme === SPOOFED_API_PREFIX;
