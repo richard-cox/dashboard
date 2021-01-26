@@ -14,7 +14,7 @@ export default {
     // It became apparent that this was the only place that both intersected
     if (opt.url.includes(SPOOFED_PREFIX) || opt.url.includes(SPOOFED_API_PREFIX)) {
       const [empty, scheme, type, ...rest] = opt.url.split('/'); // eslint-disable-line no-unused-vars
-      const id = rest.join('/');
+      const id = rest.join('/'); // Cover case where id contains a '/'
       const isApi = scheme === SPOOFED_API_PREFIX;
       const typemapGetter = id ? 'getSpoofedInstance' : 'getSpoofedInstances';
       const schemas = await rootGetters['cluster/all'](SCHEMA);

@@ -1,10 +1,7 @@
 import { DSL } from '@/store/type-map';
 // import { STATE, NAME as NAME_COL, AGE } from '@/config/table-headers';
 import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
-import {
-  AGE, GROUP_NAME, GROUP_ROLE_NAME, STATE, USER_DISPLAY_NAME, USER_ID, USER_PROVIDER
-} from '@/config/table-headers';
-import { USERNAME } from '@/config/cookies';
+import { GROUP_NAME, GROUP_ROLE_NAME } from '@/config/table-headers';
 
 export const NAME = 'auth';
 
@@ -56,7 +53,6 @@ export function init(store) {
         type: NORMAN.PRINCIPAL,
         opt:  { url: '/v3/principals' }
       });
-      // TODO: RC Q Costly....
       const globalRoleBindings = await store.dispatch('management/findAll', {
         type: RBAC.GLOBAL_ROLE_BINDING,
         opt:  { force: true }
@@ -112,15 +108,6 @@ export function init(store) {
     'config',
     MANAGEMENT.USER,
     NORMAN.SPOOFED.GROUP_PRINCIPAL
-  ]);
-
-  headers(MANAGEMENT.USER, [
-    STATE,
-    USER_ID,
-    USER_DISPLAY_NAME,
-    USER_PROVIDER,
-    USERNAME,
-    AGE
   ]);
 
   headers(NORMAN.SPOOFED.GROUP_PRINCIPAL, [

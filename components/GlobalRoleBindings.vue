@@ -6,8 +6,6 @@ import Checkbox from '@/components/form/Checkbox';
 import { _VIEW } from '@/config/query-params';
 import Loading from '@/components/Loading';
 
-// TODO: RC Case when there's no auth providers / groups
-// TODO: RC Q comment about user mjode // TODO: If in create user
 export default {
   components: {
     Checkbox,
@@ -138,7 +136,7 @@ export default {
     async saveAddedRoles() {
       const newBindings = await Promise.all(this.roleChanges.addRoles.map(role => this.$store.dispatch(`management/create`, {
         type:               RBAC.GLOBAL_ROLE_BINDING,
-        metadata:           { generateName: `ui-` }, // TODO: RC Q Is this correct... can/should it be empty?
+        metadata:           { generateName: `ui-` },
         globalRoleName:     role,
         groupPrincipalName: this.principalId,
       })));
@@ -166,7 +164,6 @@ export default {
 
   <div v-else>
     <form v-if="selectedRoles">
-      <!-- <br>{{ selectedRoles }}<br><br> -->
       <div v-for="(sortedRole, type) in sortedRoles" :key="getUnique(type)" class="role-group mb-10">
         <template v-if="Object.keys(sortedRole).length">
           <h2>{{ t(`rbac.globalRoles.types.${type}.label`) }}</h2>
@@ -195,7 +192,7 @@ export default {
 </template>
 
 <style lang='scss' scoped>
-  $detailSize: 11px;// TODO: UX REVIEW RC
+  $detailSize: 11px;
   .role-group {
     .type-description {
       font-size: $detailSize;

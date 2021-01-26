@@ -38,5 +38,4 @@ export default {
 
     return `${ provider } ${ ucFirst(this.providerSpecificType) }`;
   },
-
 };
