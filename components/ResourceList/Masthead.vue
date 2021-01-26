@@ -2,7 +2,8 @@
 import { mapGetters } from 'vuex';
 import Favorite from '@/components/nav/Favorite';
 import TypeDescription from '@/components/TypeDescription';
-import { get } from '@/utils/object';
+import { clone, get } from '@/utils/object';
+import { AS, _YAML } from '@/config/query-params';
 
 export default {
   components: {
@@ -20,15 +21,15 @@ export default {
     },
     typeDisplay: {
       type:    String,
-      default: '',
+      default: null,
     },
     isCreatable: {
       type:    Boolean,
-      default: false,
+      default: null,
     },
     isYamlCreatable: {
       type:    Boolean,
-      default: false,
+      default: null,
     },
     createLocation: {
       type:    Object,
@@ -38,6 +39,27 @@ export default {
       type:    Object,
       default: null,
     },
+  },
+
+  data() {
+    const params = { ...this.$route.params };
+    const resource = params.resource;
+
+    const formRoute = { name: `${ this.$route.name }-create`, params };
+
+    const hasEditComponent = this.$store.getters['type-map/hasCustomEdit'](resource);
+
+    const yamlRoute = {
+      name:  `${ this.$route.name }-create`,
+      params,
+      query: { [AS]: _YAML },
+    };
+
+    return {
+      formRoute,
+      yamlRoute,
+      hasEditComponent,
+    };
   },
 
   computed: {
@@ -51,6 +73,68 @@ export default {
 
       return this.resource;
     },
+
+    extraAction() {
+      const opt = this.$store.getters[`type-map/optionsFor`](this.resource).extraListAction;
+
+      if ( opt ) {
+        const to = opt.to ? opt.to : clone(this.createLocation);
+
+        if ( opt.query ) {
+          to.query = Object.assign({}, to.query || {}, opt.query);
+        }
+
+        return {
+          to,
+          class: opt.classNames || 'btn role-primary',
+          label: (opt.labelKey ? this.t(opt.labelKey) : opt.label || 'Action?' ),
+        };
+      }
+
+      return null;
+    },
+
+    _typeDisplay() {
+      if ( this.typeDisplay !== null) {
+        return this.typeDisplay;
+      }
+
+      if ( !this.schema ) {
+        return '?';
+      }
+
+      return this.$store.getters['type-map/labelFor'](this.schema, 99);
+    },
+
+    _isYamlCreatable() {
+      if ( this.isYamlCreatable !== null) {
+        return this.isYamlCreatable;
+      }
+
+      return this.schema && this._isCreatable && this.$store.getters['type-map/optionsFor'](this.$route.params.resource).canYaml;
+    },
+
+    _isCreatable() {
+      // Does not take into account hasEditComponent, such that _isYamlCreatable works
+      if ( this.isCreatable !== null) {
+        return this.isCreatable;
+      }
+
+      if ( this.schema && !this.schema?.collectionMethods.find(x => x.toLowerCase() === 'post') ) {
+        return false;
+      }
+
+      return this.$store.getters['type-map/optionsFor'](this.$route.params.resource).isCreatable;
+    },
+
+    _createLocation() {
+      return this.createLocation || this.formRoute;
+    },
+
+    _yamlCreateLocation() {
+      return this.yamlCreateLocation || this.yamlRoute;
+    }
+
   },
 };
 </script>
@@ -60,22 +144,32 @@ export default {
     <TypeDescription :resource="resource" />
     <div class="title">
       <h1 class="m-0">
-        {{ typeDisplay }} <Favorite v-if="isExplorer" :resource="resource" />
+        {{ _typeDisplay }} <Favorite v-if="isExplorer" :resource="resource" />
       </h1>
     </div>
     <div class="actions-container">
       <!-- TODO: RC BUTTONS see vince's cluster Q Should there be a generic masthead that takes in title and actions via slots? -->
       <div class="actions">
+        <slot name="extraActions">
+        </slot>
+
         <n-link
-          v-if="isCreatable"
-          :to="createLocation"
+          v-if="extraAction"
+          :to="extraAction.to"
+          :class="extraAction.class"
+        >
+          {{ extraAction.label }}
+        </n-link>
+        <n-link
+          v-if="hasEditComponent && _isCreatable"
+          :to="_createLocation"
           class="btn role-primary"
         >
           {{ t("resourceList.head.create") }}
         </n-link>
         <n-link
-          v-else-if="isYamlCreatable"
-          :to="yamlCreateLocation"
+          v-else-if="_isYamlCreatable"
+          :to="_yamlCreateLocation"
           class="btn role-primary"
         >
           {{ t("resourceList.head.createFromYaml") }}
