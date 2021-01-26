@@ -103,14 +103,6 @@ suffix:
 ##############################
 # Components & Pages
 ##############################
-authGroups:
-  actions:
-    refresh: Refresh Group Memberships
-    assignRoles: Assign Global Role
-  assignEdit:
-    assignTitle: Assign Global Roles To Group
-    editTitle: Edit Global Roles TODO RC DELETE ME
-    viewTitle: View Global Roles TODO RC DELETE ME
 
 authConfig:
   accessMode:
@@ -254,6 +246,13 @@ authConfig:
     disabled: '{provider} is currently disabled.'
     enabled: '{provider} is currently enabled.'
   testAndEnable: Test and Enable Authentication
+
+authGroups:
+  actions:
+    refresh: Refresh Group Memberships
+    assignRoles: Assign Global Roles
+  assignEdit:
+    assignTitle: Assign Global Roles To Group
 
 assignTo:
   title: |-

@@ -1,14 +1,24 @@
 <script>
 import ResourceList from '@/components/ResourceList';
+import { AS, MODE, _EDIT, _UNFLAG } from '@/config/query-params';
 import { NORMAN } from '@/config/types';
 import AsyncButton from '@/components/AsyncButton';
+import richards from '@/utils/richards';
 
 export default {
   components: { AsyncButton },
   mixins:     [
     ResourceList
   ],
+  async fetch() {
+    richards.log('list: fetch');
+    this.rows = await this.$store.dispatch('cluster/findAll', {
+      type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
+      opt:  { force: true }
+    });
+  },
   methods: {
+
     async refreshGroupMemberships(buttonDone) {
       try {
         await this.$store.dispatch('rancher/request', {
@@ -19,7 +29,7 @@ export default {
 
         this.rows = await this.$store.dispatch('cluster/findAll', {
           type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
-          opt:  { force: true }
+          opt:  { force: true } // TODO: RC force honoured?
         });
 
         buttonDone(true);

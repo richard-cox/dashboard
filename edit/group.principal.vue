@@ -23,6 +23,12 @@ export default {
 
       try {
         await this.$refs.grb.save();
+
+        await this.$store.dispatch('cluster/findAll', {
+          type: NORMAN.SPOOFED.GROUP_PRINCIPAL,
+          opt:  { force: true } // TODO: RC force honoured?
+        });
+
         this.$router.replace({ name: this.doneRoute }); // There's no navigation without this prod
         buttonDone(true);
       } catch (err) {

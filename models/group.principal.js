@@ -50,7 +50,7 @@ export default {
     return (resources = this) => {
       const principals = Array.isArray(resources) ? resources : [resources];
 
-      const globalRoleBindings = this.$getters['all'](RBAC.GLOBAL_ROLE_BINDING)
+      const globalRoleBindings = this.$rootGetters['management/all'](RBAC.GLOBAL_ROLE_BINDING)
         .filter(globalRoleBinding => principals.find(principal => principal.id === globalRoleBinding.groupPrincipalName));
 
       this.$dispatch('promptRemove', globalRoleBindings);
