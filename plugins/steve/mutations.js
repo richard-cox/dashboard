@@ -58,7 +58,10 @@ function load(state, { data, ctx, existing }) {
   if ( existing && !existing.id ) {
     // A specific proxy instance to used was passed in (for create -> save),
     // use it instead of making a new proxy
+    // console.log('30', id, existing.description, existing._description);
+    // console.log('31', id, data.description, data._description);
     entry = replace(existing, data);
+    // console.log('32', id, data.description, data._description);
     addObject(cache.list, entry);
     cache.map.set(id, entry);
     // console.log('### Mutation added from existing proxy', type, id);
@@ -67,11 +70,17 @@ function load(state, { data, ctx, existing }) {
 
     if ( entry ) {
       // There's already an entry in the store, update it
+      // console.log('35', id, entry.description, entry._description);
       replace(entry, data);
+      // console.log('36', id, entry.description, entry._description);
+      // console.log('37', id, data.description, data._description);
+
       // console.log('### Mutation Updated', type, id);
     } else {
       // There's no entry, make a new proxy
+      // console.log('38', id, data.description, data._description);
       entry = proxyFor(ctx, data);
+      // console.log('39.2', id, entry.description, entry._description);
       addObject(cache.list, entry);
       cache.map.set(id, entry);
       // console.log('### Mutation', type, id);

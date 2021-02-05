@@ -128,7 +128,7 @@ export default {
         return;
       }
       // Save user edits
-      this.value._description = this.form.description;
+      this.value.description = this.form.description;
       this.value.displayName = this.form.displayName;
       this.value.mustChangePassword = this.form.password.userChangeOnLogin;
       await this.value.save();

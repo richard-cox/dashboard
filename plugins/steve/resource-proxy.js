@@ -41,13 +41,13 @@ export function proxyFor(ctx, obj, isClone = false) {
 
   // Hack for now, the resource-instance name() overwrites the model name.
   if ( obj.name ) {
-    obj._name = obj.name;
+    obj._name = obj.name; // TODO: RC
     delete obj.name;
   }
-  if ( obj.description ) {
-    obj._description = obj.description;
-    delete obj.description;
-  }
+  // if ( obj.description ) {
+  // obj._description = obj.description;
+  // delete obj.description;
+  // }
 
   const proxy = new Proxy(obj, {
     get(target, name) {
@@ -70,8 +70,10 @@ export function proxyFor(ctx, obj, isClone = false) {
         }
 
         return priv;
+      } else if (name === 'description') {
+        // TODO: RC add for name, check with neil
+        return target.description;
       }
-
       let fn;
 
       if ( model && Object.prototype.hasOwnProperty.call(model, name) ) {

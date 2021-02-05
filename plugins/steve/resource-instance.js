@@ -284,7 +284,7 @@ export default {
   },
 
   description() {
-    return this._description || this.metadata?.annotations?.[DESCRIPTION];
+    return this.metadata?.annotations?.[DESCRIPTION];
   },
 
   labels() {
@@ -852,7 +852,12 @@ export default {
       }
 
       // @TODO remove this once the API maps steve _type <-> k8s type in both directions
+      // console.log('10', this._description);
       opt.data = { ...this };
+      // if (opt?.data._description) {
+      //   opt.data.description = opt.data._description;
+      // }
+      // console.log('11', opt.data.description, opt.data._description);
 
       if (opt?.data._type) {
         opt.data.type = opt.data._type;
@@ -861,11 +866,23 @@ export default {
       try {
         const res = await this.$dispatch('request', opt);
 
+        // if (res.description) {
+        //   res._description = res.description;
+        // }
+        // console.log('12', res.description, res._description);
+
         // console.log('### Resource Save', this.type, this.id);
 
         // Steve sometimes returns Table responses instead of the resource you just saved.. ignore
         if ( res && res.kind !== 'Table') {
+          // console.log('13.1', res.description, res._description);
+          // console.log('13.2', this.description, this._description);
+
           await this.$dispatch('load', { data: res, existing: (forNew ? this : undefined ) });
+
+          // console.log('13.3', a.description, a._description);
+          // console.log('13.4', res.description, res._description);
+          // console.log('13.5', this.description, this._description);
         }
       } catch (e) {
         if ( this.type && this.id && e?._status === 409) {
@@ -879,6 +896,7 @@ export default {
 
         return Promise.reject(e);
       }
+      // console.log('14', this.description, this._description);
 
       return this;
     };

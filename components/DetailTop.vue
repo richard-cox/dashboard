@@ -44,6 +44,9 @@ export default {
     },
 
     description() {
+      // console.warn('20', this.value._description, this.value.description);
+      // console.warn('21', this.value);
+
       return this.value?.description;
     },
 

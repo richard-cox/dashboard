@@ -78,15 +78,29 @@ export default {
 
   save() {
     return async(opt) => {
+      // Clone deletes the description, so save and reapply
+      // const description = this.description;
+
+      // console.log('1', this.description, this._description);
       const clone = await this.$dispatch('clone', { resource: this });
 
-      // Ensure for create the description is correct ().
-      clone.description = this.description;
+      // console.log('2', this.description, this._description);
+      // console.log('3', clone.description, clone._description);
+      // this.description = description;
+      // Overwrite resource instance Ensure for create the description is correct ().
+      // clone.description = this.description;
 
       // Remove local properties
       delete clone.canRefreshAccess;
 
       return clone._save(opt);
+
+      // const a = clone._save(opt);
+
+      // console.log('4', a.description, a._description);
+      // console.log('5', a);
+
+      // return a;
     };
   },
 
