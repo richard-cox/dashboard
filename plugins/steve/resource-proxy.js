@@ -44,6 +44,10 @@ export function proxyFor(ctx, obj, isClone = false) {
     obj._name = obj.name;
     delete obj.name;
   }
+  if ( obj.description ) {
+    obj._description = obj.description;
+    delete obj.description;
+  }
 
   const proxy = new Proxy(obj, {
     get(target, name) {

@@ -284,7 +284,7 @@ export default {
   },
 
   description() {
-    return this.metadata?.annotations?.[DESCRIPTION];
+    return this._description || this.metadata?.annotations?.[DESCRIPTION];
   },
 
   labels() {
@@ -802,6 +802,10 @@ export default {
   },
 
   save() {
+    return this._save;
+  },
+
+  _save() {
     return async(opt = {}) => {
       delete this.__rehydrate;
       const forNew = !this.id;
@@ -1391,6 +1395,10 @@ export default {
   },
 
   details() {
+    return this._details;
+  },
+
+  _details() {
     const details = [];
 
     if (this.owners?.length > 0) {
