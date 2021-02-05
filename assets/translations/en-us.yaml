@@ -1588,7 +1588,7 @@ promptRemove:
     =1 {, and one other.}
     other {, and {count} others.}
     }
-  attemptingToRemove: "You are attempting to remove the {type}"
+  attemptingToRemove: "You are attempting to delete the {type}"
   protip: "Tip: Hold the {alternateLabel} key while clicking delete to bypass this confirmation"
 
 rbac:
@@ -2250,6 +2250,7 @@ user:
       username:
         label: Username
         placeholder: e.g. jsmith
+        exists: 'Username is already in use. Please choose a new username'
       displayName:
         label: Display Name
         placeholder: e.g. John Smith

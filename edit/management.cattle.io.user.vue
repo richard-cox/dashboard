@@ -103,6 +103,13 @@ export default {
       }
     },
     async createUser() {
+      // Ensure username is unique (this does not happen in the backend)
+      const users = await this.$store.dispatch('management/findAll', { type: MANAGEMENT.USER });
+
+      if (users.find(u => u.username === this.form.username)) {
+        throw new Error(this.t('user.edit.credentials.username.exists'));
+      }
+
       const user = await this.$store.dispatch('management/create', {
         type:               MANAGEMENT.USER,
         metadata:           { generateName: `user-` },
