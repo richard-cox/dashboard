@@ -20,6 +20,10 @@ export default {
       type:    String,
       default: _VIEW,
     },
+    realMode: {
+      type:    String,
+      default: _VIEW,
+    },
     type: {
       type:    String,
       default: 'group',
@@ -55,7 +59,6 @@ export default {
           }
         });
 
-        // Moving this out into the watch has issues....
         if (!this.isCreate) {
           this.globalRoleBindings = await this.$store.dispatch('management/findAll', { type: RBAC.GLOBAL_ROLE_BINDING });
         }
@@ -83,7 +86,7 @@ export default {
     ...mapGetters({ t: 'i18n/t' }),
 
     isCreate() {
-      return this.mode === _CREATE;
+      return this.realMode === _CREATE;
     },
 
     isUser() {
@@ -120,7 +123,6 @@ export default {
     update() {
       this.selectedRoles = [];
       this.startingSelectedRoles = [];
-
       if (this.isCreate) {
         // Start with the new user default for each role
         Object.entries(this.sortedRoles).forEach(([roleType, types]) => {

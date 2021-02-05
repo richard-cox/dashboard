@@ -121,9 +121,7 @@ export default {
         username:           this.form.username,
       });
 
-      await user.save();
-
-      return user;
+      return user.save();
     },
     async editUser() {
       if (!this.credentialsChanged) {
@@ -212,8 +210,9 @@ export default {
       <div class="global-permissions">
         <GlobalRoleBindings
           ref="grb"
-          :user-id="value.id"
+          :user-id="value.id || originalValue.id"
           :mode="mode"
+          :real-mode="realMode"
           type="user"
           @hasChanges="validation.rolesChanged = $event"
           @canLogIn="validation.roles = $event"

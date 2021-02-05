@@ -77,11 +77,12 @@ export default {
   },
 
   save() {
-    return async() => {
+    return async(opt) => {
       const clone = await this.$dispatch('clone', { resource: this });
 
       delete clone.canRefreshAccess;
-      clone._save();
+
+      return clone._save(opt);
     };
   },
 
