@@ -80,6 +80,10 @@ export default {
     return async(opt) => {
       const clone = await this.$dispatch('clone', { resource: this });
 
+      // Ensure for create the description is correct ().
+      clone.description = this.description;
+
+      // Remove local properties
       delete clone.canRefreshAccess;
 
       return clone._save(opt);
