@@ -11,6 +11,8 @@ FAKE_CONSTRUCTOR.toString = function() {
   return 'ResourceProxy';
 };
 
+const nativeProperties = ['description'];
+
 export function proxyFor(ctx, obj, isClone = false) {
   // Attributes associated to the proxy, but not stored on the actual backing object
   let priv;
@@ -72,6 +74,10 @@ export function proxyFor(ctx, obj, isClone = false) {
 
       if ( model && Object.prototype.hasOwnProperty.call(model, name) ) {
         fn = model[name];
+      } else if ( nativeProperties.includes(name) && obj[name] !== undefined) {
+        // If there's not a model specific override for this property check if it exists natively in the object... otherwise fall back on
+        // the default resource instance property/fn. This ensures it's correctly stored over fetch/clone/etc and sent when persisted
+        return obj[name];
       }
 
       if ( !fn ) {

@@ -106,6 +106,7 @@ suffix:
 ##############################
 # Components & Pages
 ##############################
+
 authConfig:
   accessMode:
     label: 'Configure who should be able to login and use {vendor}'
@@ -250,7 +251,12 @@ authConfig:
     enabled: '{provider} is currently enabled.'
   testAndEnable: Test and Enable Authentication
 
-
+authGroups:
+  actions:
+    refresh: Refresh Group Memberships
+    assignRoles: Assign Global Roles
+  assignEdit:
+    assignTitle: Assign Global Roles To Group
 
 assignTo:
   title: |-
@@ -290,6 +296,10 @@ asyncButton:
     action:  'Delete'
     waiting: 'Deleting&hellip;'
     success: 'Deleted'
+  remove:
+    action:  'Remove'
+    waiting: 'Removing&hellip;'
+    success: 'Removed'
   continue:
     action:  'Continue'
     waiting: 'Saving&hellip;'
@@ -1457,16 +1467,23 @@ accountAndKeys:
 changePassword:
   title: Change Password
   cancel: Cancel
-  keys: Delete all existing API keys
-  generatePassword: Generate a random password
-  newGeneratedPassword: Suggest a password
-  currentPassword: Current Password
+  deleteKeys:
+    label: Delete all existing API keys
+  changeOnLogin:
+    label: Ask user to change their password on first login
+  generatePassword:
+    label: Generate a random password
+  currentPassword:
+    label: Current Password
   userGen:
-    newPassword: New Password
-    confirmPassword: Confirm Password
+    newPassword:
+      label: New Password
+    confirmPassword:
+      label: Confirm Password
   randomGen:
-    copy: Copy to Clipboard
-    generated: Generated Password
+    generated:
+      label: Generated Password
+  newGeneratedPassword: Suggest a password
   errors:
     missmatchedPassword: Passwords do not match
     failedToChange: Failed to change password
@@ -1571,7 +1588,7 @@ promptRemove:
     =1 {, and one other.}
     other {, and {count} others.}
     }
-  attemptingToRemove: "You are attempting to remove the {type}"
+  attemptingToRemove: "You are attempting to delete the {type}"
   protip: "Tip: Hold the {alternateLabel} key while clicking delete to bypass this confirmation"
 
 rbac:
@@ -1586,6 +1603,88 @@ rbac:
     fleetworkspace-admin: Admin
     fleetworkspace-member: Member
     fleetworkspace-readonly: Read-Only
+  globalRoles:
+    types:
+      global:
+        label: Global Permissions
+        description: |-
+          Controls what access the {isUser, select,
+          true {user}
+          false {group}} has to administer the overall {appName} installation.
+      custom:
+        label: Custom
+        description: Roles not created by Rancher.
+      builtin:
+        label: Built-in
+        description: Additional roles to define more fine-grain permissions model.
+    unknownRole:
+        description: No description provided
+    role:
+      admin:
+        label: Administrator
+        description: Administrators have full control over the entire installation and all resources in all clusters.
+      restricted-admin:
+        label: Restricted Administrator
+        description: Restricted Admins have full control over all resources in all downstream clusters but no access to the local cluster.
+      user:
+        label: Standard User
+        description: Standard Users can create new clusters and manage clusters and projects they have been granted access to.
+      user-base:
+        label: User-Base
+        description: User-Base users have login-access only.
+      clusters-create:
+        label: Create new Clusters
+        description: Allows the user to create new clusters and become the owner of them.  Standard Users have this permission by default.
+      clustertemplates-create:
+        label: Create new RKE Cluster Templates
+        description: Allows the user to create new RKE cluster templates and become the owner of them.
+      authn-manage:
+        label: Configure Authentication
+        description: Allows the user to enable, configure, and disable all Authentication provider settings.
+      catalogs-manage:
+        label: Configure Catalogs
+        description: Allows the user to add, edit, and remove Catalogs.
+      clusters-manage:
+        label: Manage all Clusters
+        description: Allows the user to manage all clusters, including ones they are not a member of.
+      clusterscans-manage:
+        label: Manage CIS Cluster Scans
+        description: Allows the user to launch new and manage CIS cluster scans.
+      kontainerdrivers-manage:
+        label: Create new Cluster Drivers
+        description: Allows the user to create new cluster drivers and become the owner of them.
+      features-manage:
+        label: Configure Feature Flags
+        description: Allows the user to enable and disable custom features via feature flag settings.
+      nodedrivers-manage:
+        label: Configure Node Drivers
+        description: Allows the user to enable, configure, and remove all Node Driver settings.
+      nodetemplates-manage:
+        label: Manage Node Templates
+        description: Allows the user to define, edit, and remove Node Templates.
+      podsecuritypolicytemplates-manage:
+        label: Manage Pod Security Policies (PSPs)
+        description: Allows the user to define, edit, and remove PSPs.
+      roles-manage:
+        label: Manage Roles
+        description: Allows the user to define, edit, and remove Role definitions.
+      settings-manage:
+        label: Manage Settings
+        description: Allows the user to manage Rancher Settings.
+      users-manage:
+        label: Manage Users
+        description: Allows the user to create, remove, and set passwords for all Users.
+      catalogs-use:
+        label: Use Catalogs
+        description: Allows the user to see and deploy Templates from the Catalog.  Standard Users have this permission by default.
+      nodetemplates-use:
+        label: Use Node Templates
+        description: Allows the user to deploy new Nodes using any existing Node Templates.
+      view-rancher-metrics:
+        label: View Rancher Metrics
+        description: Allows the user to view Metrics through the API.
+      base:
+        label: Login Access
   roletemplate:
     newUserDefault:
       no: No
@@ -1614,7 +1713,6 @@ rbac:
         defaultLabel: Project Creator Default
       noContext:
         label: No Context
-
 
 resourceDetail:
   detailTop:
@@ -2123,6 +2221,42 @@ target:
     label: Version
     placeholder: Select a version
 
+user:
+  detail:
+    username: Username
+    globalPermissions:
+      label: Global Permissions
+      description: Access to manage resources that affect the entire installation
+      adminMessage: This user is an administrator and has all permissions
+      tableHeaders:
+        permission: Permission
+    clusterRoles:
+      label: Cluster Roles
+      description: Roles granted to this user for individual clusters
+      tableHeaders:
+        cluster: Cluster
+    projectRoles:
+      label: Project Roles
+      description: Roles granted to this user for individual projects
+      tableHeaders:
+        project: Project
+    generic:
+      tableHeaders:
+        role: Role
+        granted: Granted
+  edit:
+    credentials:
+      label: Credentials
+      username:
+        label: Username
+        placeholder: e.g. jsmith
+        exists: 'Username is already in use. Please choose a new username'
+      displayName:
+        label: Display Name
+        placeholder: e.g. John Smith
+      userDescription:
+        label: Description
+        placeholder: e.g. This account is for John Smith
 validation:
   arrayLength:
     between: '"{key}" should contain between {min} and {max} {max, plural, =1 {item} other {items}}'
@@ -2888,6 +3022,11 @@ typeLabel:
       one { RKE2 Cluster }
       other { RKE2 Clusters }
     }
+  group.principal: |-
+    {count, plural,
+      one { Group }
+      other { Groups }
+    }
 
 action:
   clone: Clone
@@ -2902,9 +3041,12 @@ action:
   view: View Config
   viewInApi: View in API
   viewYaml: View YAML
+  activate: Activate
+  deactivate: Deactivate
   show: Show
   hide: Hide
   copy: Copy
+  unassign: 'Unassign'
 
 unit:
   sec: secs
