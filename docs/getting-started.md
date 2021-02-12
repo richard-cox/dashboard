@@ -1,18 +1,20 @@
 # Getting Started
 
+This guide is intended for developers new to the Dashboard and Rancher who wish to contribute.
 
-First read through the [README](../README.md). This covers a lot of useful information that this page references and supplements. It's helpful reviewing the README again once more experience is gained.
+First read through the [README](../README.md). This covers a lot of useful information that this page references and supplements. It's helpful reviewing the `README` again once more experience is gained and concepts are more familiar.
 
 ## Terminology
+
 | Term | Description | 
 |-------|--------------|
-| Dashboard / Cluster Explorer / Vue UI | TODO |
-| Manager / Cluster Manager / Ember UI | TODO |
-| Norman | TODO |
-| Steve | TODO |
-| Rancher Product | TODO |
-| RKE | TODO |
-| SSR | Server Side Rendering. Enabled by default when developing |
+| Dashboard / Cluster Explorer / Vue UI | This new application which will slowly replace the Ember UI (includes porting over Cluster Manager functionality as a product) |
+| Manager / Cluster Manager / Ember UI | The old [Ember based UI](https://github.com/rancher/ui) |
+| Norman | Old Rancher API which has been mostly superseded by Steve  |
+| Steve | New Rancher API |
+| Rancher (Product) | A [Kubernetes Management Platform](https://rancher.com/products/rancher/) (put very simplistically). The UI is included in this product  |
+| RKE | [Rancher Kubernetes Engine](https://rancher.com/products/rke/) - A certified Kubernetes distribution |
+| SSR | Server Side Rendering. Enabled by default when developing the Dashboard |
 | SPA | Single Page Application. Enabled by default in production |
 
 ## Concepts
@@ -75,8 +77,6 @@ As mentioned before the schema's dictact the functionality available to that typ
 
 #### Virtual and Spoofed Resource Types
 
-Much of the side nav menu is determined by the schema's associated with the product. This is explained in more detail in TODO
-
 Virtual Types can be created to add additional menu items to the side nav. These are purely for adding navigation. Examples of virtual types can be found by searching for `virtualType`. For instance the `Users & Authentication` product has a virtual type of 'config' to show the `Auth Providers` page.
 
 Spoofed Types, like virtual types, add menu items but also define a spoofed schema and a `getInstances` function to provide a list of objects of the spoofed type. This allows the app to then make use of the generic list, detail, edit, etc pages used for standard types.
@@ -100,7 +100,7 @@ Common functionality provided by `resource-instance` includes information on how
 
 ```
 
-> Note `toString` in `resource-instance`, this will change how the object is representing via console.log, etc. More on this later TODO
+> Note `toString` in `resource-instance`, this will change how the object is representing via console.log, etc. There are ways 
 
 #### Create and Fetching Resource/s
 
@@ -112,18 +112,16 @@ Most of the options to create and fetch resources can be achieved via dispatchin
 | Clone | `$store.$dispatch('<store type>/clone', { resource: <existing object> })` | Performs a deep clone and create a proxy from it |
 | Fetch all of a resource type | `$store.dispatch('<store type>/findAll', { type: <resource type> })` | Fetches all resource of the given type. Also, when applicable will register the type for automatic updates. If the type has already been fetch return the local cached list |
 | Fetch a resource by ID | `$store.dispatch('<store type>/find', { type: <resource type>, id: <resource id> })` | Finds the resource matching the ID. If the type has already been fetched return the local cached instance. |
-| Fetch resources by label | `$store.dispatch('<store type>/findMatching', { type: <resource type>, selector: <label map>TODO: CHECK })` | Fetches resources that have metadata.labels matching that of the name-value properties in the selector |
+| Fetch resources by label | `$store.dispatch('<store type>/findMatching', { type: <resource type>, selector: <label name:value map> })` | Fetches resources that have metadata.labels matching that of the name-value properties in the selector |
 
 > Once objects of most types are fetched they will be automatically updated. See [README#synching-state](../README##synching-state) for more info. For some types this does not happen. For those cases, or when an immediate update is required, adding `force: true` to the `find` style actions will result in a fresh http request.
 
 It's possible to retrieve values from the store synchronously via `getters`. For resources this is not normally advised (they may not yet have been fetched), however for items such as schema's is valid. Some of the core getters are defined in `/plugins/steve/getters.js`
 
 ```
-
 $store.getters['<store type>/byId'](<resource type>, <id>])
 
 $store.getters['<store type>/schemaFor'](<resource type>)`
-
 ```
 
 
@@ -314,6 +312,9 @@ scss
 `text-muted`
 ``
 
+## Plugins
+TODO: 
+
 ## Internationalisation i18n / Localisation i10n
 
 ### i18n
@@ -402,10 +403,13 @@ Shortcuts are implemented via [`vue-shortkey`](https://github.com/iFgR/vue-short
 Configuration for this is in `plugins/shortkey.js` which. At the time of writing this contains options to disable keyboard shortcuts in `input`, `textarea` and `select` elements.
 
 ## Troubleshooting
+
 ### Multiple `Could not freeze errors` in `yarn dev` terminal
 This is most probably due to a correct cache in `/node_modules/.cache`. Exit out of `yarn run` and run `yarn run clean` and then try again.
+
 ### Cannot find new schema
 Ensure that your schema text in `/config/types.js` is singular, not plural
+
 ### Fetching the name of a resource type
 
 Good - Trims the text and respects `.` in path to type's string
@@ -418,23 +422,11 @@ store.getters['i18n/t'](`typeLabel.${ NORMAN.SPOOFED.GROUP_PRINCIPAL }`, { count
 ```
 
 
-# Configuring Authentication Types
-## Keycloak
-1. Bring up a local Keycloak instance in docker using the instructions at [here](https://www.keycloak.org/getting-started/getting-started-docker).
-   > Ensure that the admin user has a first name, last name and email. These fields are referenced in the Keycloak client's mappers which are then referenced in the Rancher's auth provider config.
-1. Using either the Ember or Vue UI set up the Keycloak auth provider by follow the instructions at [here](https://rancher.com/docs/rancher/v2.x/en/admin-settings/authentication/keycloak/)
-   > Double check the client has the correct checkboxes set, specifically the Mappers `group` entry.
-
-   > For the SAML Metadata, export the Client in the Keycloack UI via the `Installation` tab as `SAML Metadata SPSSODescriptor` and then follow the `NOTE` instructions regarding `EntitiesDescriptor` and `EntityDescriptor`. For a better set of instructions see [step 6](https://gist.github.com/PhilipSchmid/506b33cd74ddef4064d30fba50635c5b).
-   
-   > For key and cert files, export the Client in the Keycloak UI via the `Clients` list page and extract & wrap the `saml.signing.certificate` and `saml.signing.private.key` as cert files (see [step 5](https://gist.github.com/PhilipSchmid/506b33cd74ddef4064d30fba50635c5b) for more info). 
 
 
-TODO: 
-Each resource type has 
-Plugins/Nuxt/Styles
 
-
+TODO: Things that shouldn't be public
+TODO: Read through README and link
 
 --------------
 
