@@ -36,7 +36,7 @@ The above, plus other factors, will effect what is shown by the UI
 - Delete resource
 - etc
 
-There are other factors that assist in this, namely values from the `type-map`. More details can be found throughout this document
+There are other factors that assist in this, namely values from the `type-map`. More details can be found throughout this document.
 
 > When catching exceptions thrown by anything that contacts the API use `/utils/error exceptionToErrorsArray` to correctly parse the response into a commonly accepted array of errors
 
@@ -115,8 +115,6 @@ Most of the options to create and fetch resources can be achieved via dispatchin
 | Fetch resources by label | `$store.dispatch('<store type>/findMatching', { type: <resource type>, selector: <label map>TODO: CHECK })` | Fetches resources that have metadata.labels matching that of the name-value properties in the selector |
 
 > Once objects of most types are fetched they will be automatically updated. See [README#synching-state](../README##synching-state) for more info. For some types this does not happen. For those cases, or when an immediate update is required, adding `force: true` to the `find` style actions will result in a fresh http request.
-
-#### Synchronous store values
 
 It's possible to retrieve values from the store synchronously via `getters`. For resources this is not normally advised (they may not yet have been fetched), however for items such as schema's is valid. Some of the core getters are defined in `/plugins/steve/getters.js`
 
@@ -309,6 +307,61 @@ A more compelling edit experience can be created by adding a resource type compo
 
 This customisation should also support the `as=config` param, where the form is displayed and populated but is not editable.
 
+## Styling
+TODO:
+scss
+`hand`
+`text-muted`
+``
+
+## Internationalisation i18n / Localisation i10n
+
+### i18n
+All on screen text should be localised and implemented in the default `en-US` locale. There are different ways to access localised text
+
+> `t` should be exposed via adding the i18n getter as a computed property with `...mapGetters({ t: 'i18n/t' })`
+
+In HTML
+
+```
+<t k="<path to localisation" />
+{{ t("<path to localisation") }}
+```
+
+Many components will also accept a localisation path via a `value-key` property, instead of the translated text in `value`.
+
+In JS
+
+```
+this.t('<path to localisation')
+```
+
+A localisation can be checked with
+
+```
+this.$store.getters['i18n/exists']('<path to localisation')
+
+this.$store.getters['i18n/withFallback']('<path to localisation', null, '<fallback>'))
+```
+
+### i10n 
+
+Localisation files can be found in `./assets/translations/en-us.yaml`.
+
+Please follow precedents in file to determine where new translations should be place.
+
+Form fields are conventionally defined in translations as <some prefix>.<field name>.{label,description,enum options if applicable} e.g.
+
+```
+account:
+  apiKey:
+    description:
+      label: Description
+      placeholder: Optionally enter a description to help you identify this API Key
+```
+
+### Localisation
+Localisation files can be found in `./assets/translations/en-us.yaml`
 
 ## Other UI Features
 ### Icons 
@@ -322,105 +375,68 @@ Icons can be browsed via `assets/fonts/icons/demo.html`
 
 Additional icon styles can be found in via `assets/styles/fonts/_icons.scss`
 
-###  error handling
+### Date
+The Dashboard uses the [dayjs](https://day.js.org/) library to handle dates, times and date algebra. However when showing a date and time they should take into account the date and time format. Therefore it's advised to use a formatter such as `/components/formatter/Date.vue` to display them.
+
+### Loading Indicator
+
+When a component uses `async fetch` it's best practise to gate the component template on it associated boolean `$fetchState.pending`. When the component is page based this should be applied to the `/components/Loading` component
+
+```
+<template>
+  <Loading v-if="$fetchState.pending" />
+  <div v-else>
+    ...
+  </div>
+</template>
+```
+
+### Keyboard shortcuts 
+
+Shortcuts are implemented via [`vue-shortkey`](https://github.com/iFgR/vue-shortkey)
+
+```
+<button v-shortkey.once="['n']" class="hide" @shortkey="focus()" />
+```
+
+Configuration for this is in `plugins/shortkey.js` which. At the time of writing this contains options to disable keyboard shortcuts in `input`, `textarea` and `select` elements.
+
+## Troubleshooting
+### Multiple `Could not freeze errors` in `yarn dev` terminal
+This is most probably due to a correct cache in `/node_modules/.cache`. Exit out of `yarn run` and run `yarn run clean` and then try again.
+### Cannot find new schema
+Ensure that your schema text in `/config/types.js` is singular, not plural
+### Fetching the name of a resource type
+
+Good - Trims the text and respects `.` in path to type's string
+```
+store.getters['type-map/labelFor']({ id: NORMAN.SPOOFED.GROUP_PRINCIPAL }, 2)
+```
+Bad - Does not trim text, issues when resource type contains `.`
+```
+store.getters['i18n/t'](`typeLabel.${ NORMAN.SPOOFED.GROUP_PRINCIPAL }`, { count: 2 })
+```
 
 
+# Configuring Authentication Types
+## Keycloak
+1. Bring up a local Keycloak instance in docker using the instructions at [here](https://www.keycloak.org/getting-started/getting-started-docker).
+   > Ensure that the admin user has a first name, last name and email. These fields are referenced in the Keycloak client's mappers which are then referenced in the Rancher's auth provider config.
+1. Using either the Ember or Vue UI set up the Keycloak auth provider by follow the instructions at [here](https://rancher.com/docs/rancher/v2.x/en/admin-settings/authentication/keycloak/)
+   > Double check the client has the correct checkboxes set, specifically the Mappers `group` entry.
 
-
-
+   > For the SAML Metadata, export the Client in the Keycloack UI via the `Installation` tab as `SAML Metadata SPSSODescriptor` and then follow the `NOTE` instructions regarding `EntitiesDescriptor` and `EntityDescriptor`. For a better set of instructions see [step 6](https://gist.github.com/PhilipSchmid/506b33cd74ddef4064d30fba50635c5b).
+   
+   > For key and cert files, export the Client in the Keycloak UI via the `Clients` list page and extract & wrap the `saml.signing.certificate` and `saml.signing.private.key` as cert files (see [step 5](https://gist.github.com/PhilipSchmid/506b33cd74ddef4064d30fba50635c5b) for more info). 
 
 
 TODO: 
 Each resource type has 
-type-map
+Plugins/Nuxt/Styles
 
 
 
-### Icons TODO
-
-<i class="icon icon-fw icon-gear" /></a>
-assets/fonts/icons/demo.html
-
-### Date
-dayjs
-### Async Fetch & Loading
-TODO: v-if="$fetchState.pending" in loading component
-### global shortcuts
-how/where defined. shouldn't work in forms
-
-## Misc
-### Styling
-scss
-`hand`
-`text-muted`
-``
-### Linting
-
-TODO content of type-map
-
-## Best Practises
-fetchState.pending
-disabling global shortcuts
-
-## i18n / i10n
-<t k="prefs.account.name" />
-<t v-if="labelKey" :k="labelKey" />
-{{ t("prefs.account.change") }}
-form components can take a label-key and placeholder-key
-const exists = this.$store.getters['i18n/exists'];
-this.$rootGetters['i18n/withFallback'](`rbac.displayRole.${ this.name }`, this.name)
-Form fields are conventionally defined in translations as <some prefix>.<field name>.{label,description,enum options if applicable}. So like
-// account:
-//   apiKey:
-//     description:
-//       label: Description
-//       placeholder: Optionally enter a description to help you identify this API Key
-
-
-
-## Authentication
-### Types
-### Configuring Auth Providers
-#### Keycloak
-
-## Troubleshooting
-### `Could not freeze errors` on run
-- corrupt node_modules/.cache. yarn run clean
-### cannot find schema
-term should be singular
-### Getting the name of a resource type
-store.getters['type-map/labelFor']({ id: NORMAN.SPOOFED.GROUP_PRINCIPAL }, 2) GOOD (trims output automatically, respects `.`s in path
-store.getters['i18n/t'](`typeLabel.${ NORMAN.SPOOFED.GROUP_PRINCIPAL }`, { count: 2 }) BAD (does not respect `.` in pathh
-
-
-
-TODO: RC Loading indicator if async fetch
-
-# Team
-## Processes
-### Creating / Reviewing PRs
-### QA 
-### Release
-## Sprint/Issues Tracking
-
-## Github Organisations
-- [Rancher](https://github.com/rancher)
-
-
-## Socials(ish)
-### Rancher Internal Slack - rancher.slack.com
-- #ui-dev, #ui-vue
-### Rancher Public Slack - rancher-users.slack.com
-- #developer
-### SUSE Rocket Chat - chat.suse.de
-- #cap-devel, #suse-uxui
-
-# Links
-- [Rancher Confluence Space](https://confluence.suse.com/pages/viewpage.action?pageId=645075127)
-- [Container UI/UX Confluence Space](https://confluence.suse.com/pages/viewpage.action?pageId=657653829#space-menu-link-content)
-- [Rancher & Other Useful Terms/Acronyms](https://confluence.suse.com/pages/viewpage.action?spaceKey=EN&title=Onboarding+and+New+Hire+Glossary)
-
-
+--------------
 
 divider
 
@@ -428,14 +444,9 @@ divider
 
 divider
 
-
-
 # TOSORT
 
 ## Vue docs/helpers
-
-
-
 
 <!-- |Product| Cluster Specific | Description|
 |-------|-----------|----|
