@@ -180,24 +180,6 @@ We have no concrete plans for this, but can envision several situations where we
 
 To disable it for the whole server for development, add `--spa`.  To disable it for a single page load, add `?spa` (or `&spa`) to the query string.  It is harder, but possible, to write something that works in SSR but breaks in SPA, so these are good for debugging issues.
 
-### Multiple GitHub auth configs
-The auth system supports multiple GitHub auth URLs and using the appropriate one based on the Host header that a request comes in on.  Configuring this is not exposed in the regular UI, but is particularly useful for development against a server that already has GitHub setup.
-
-In `management.cattle.io.authconfig`, edit the `github` entry.  Add a `hostnameToClientId` map of Host header value -> GitHub client ID:
-
-```yaml
-hostnameToClientId:
-  "localhost:8005": <your GitHub Client ID for localhost:8005>
-```
-
-In the `secret`, namespace `cattle-global-data`, edit `githubconfig-clientsecret`.  Add GitHub client ID -> base64-encoded client secret to the `data` section:
-
-```yaml
-data:
-  clientsecret: <the normal client secret already configured>
-  <your client id>: <your base64-encoded client secret for localhost:8005>
- ```
-
 License
 =======
 Copyright (c) 2014-2020 [Rancher Labs, Inc.](http://rancher.com)
