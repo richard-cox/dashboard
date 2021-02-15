@@ -28,7 +28,7 @@ There are other factors that assist in this, namely values from the `type-map`. 
 ## Store
 State is cached locally via [Vuex](https://vuex.vuejs.org/). See the Model section for retrieving information from the store.
 
-See [README#vuex-stores](../../../README#what-is-it) for the basics. The most important concepts are described first i.e. the three store parts `management`, `cluster` and `rancher`. These sections contain schema information for each supported type and, per type, the resource instance and list data. 
+See [README#vuex-stores](../../../README.md#what-is-it) for the basics. The most important concepts are described first i.e. the three store parts `management`, `cluster` and `rancher`. These sections contain schema information for each supported type and, per type, the resource instance and list data. 
 
 Store objects are accessed in different ways, below are common ways they are referenced by models and components
 
@@ -107,7 +107,7 @@ Most of the options to create and fetch resources can be achieved via dispatchin
 | Fetch a resource by ID | `$store.dispatch('<store type>/find', { type: <resource type>, id: <resource id> })` | Finds the resource matching the ID. If the type has already been fetched return the local cached instance. |
 | Fetch resources by label | `$store.dispatch('<store type>/findMatching', { type: <resource type>, selector: <label name:value map> })` | Fetches resources that have `metadata.labels` matching that of the name-value properties in the selector |
 
-> Once objects of most types are fetched they will be automatically updated. See [README#synching-state](../../../README##synching-state) for more info. For some types this does not happen. For those cases, or when an immediate update is required, adding `force: true` to the `find` style actions will result in a fresh http request.
+> Once objects of most types are fetched they will be automatically updated. See [README#synching-state](../../../README.md#synching-state) for more info. For some types this does not happen. For those cases, or when an immediate update is required, adding `force: true` to the `find` style actions will result in a fresh http request.
 
 It's possible to retrieve values from the store synchronously via `getters`. For resources this is not normally advised (they may not yet have been fetched), however for items such as schema's is valid. Some of the core getters are defined in `/plugins/steve/getters.js`
 

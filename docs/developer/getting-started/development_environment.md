@@ -4,7 +4,7 @@ This is part of the developer [getting started guide](./README.md).
 
 ## Stack
 
-See [README#what-is-it](../../../README#what-is-it).
+See [README#what-is-it](../../../README.md#what-is-it).
 
 A good base knowledge of Vue, Vuex and Nuxt should be reached before going through the code. Looking through `nuxt.config.js` is a good way to understand how the Dashboard is glued together, importantly how plugins are brought in and how the frontend proxies requests to Rancher's APIs.
 
@@ -56,7 +56,7 @@ Developers are free to use the IDE and modern browser of their choosing. Here's 
 
 ### Running the Dashboard
 
-See the [Running For Development](../../../README#running-for-development) section on how to bring up the Dashboard locally
+See the [Running For Development](../../../README.md#running-for-development) section on how to bring up the Dashboard locally
 
 > Troubleshooting: Multiple `Could not freeze errors` in `yarn dev` terminal
 >
@@ -65,7 +65,7 @@ See the [Running For Development](../../../README#running-for-development) secti
 ### Debugging the Dashboard
 
 #### SSR vs SPA
-It's important to understand the difference between SSR and SPA modes described in the [Server-Side-Rendering (SSR)](../../../README#server-side-rendering-ssr) section. When running in the default SSR mode you will not be able to step through some methods such as Vue component's `async fetch`. It is therefore advised to switch to SPA mode before attempting to step through the code (see linked guide.. either start with `--spa` or load page with url parm `?spa` / `&spa`).
+It's important to understand the difference between SSR and SPA modes described in the [Server-Side-Rendering (SSR)](../../../README.md#server-side-rendering-ssr) section. When running in the default SSR mode you will not be able to step through some methods such as Vue component's `async fetch`. It is therefore advised to switch to SPA mode before attempting to step through the code (see linked guide.. either start with `--spa` or load page with url parm `?spa` / `&spa`).
 
 #### Breakpoints
 Finding the correct file in Dev Tools and reliably setting a breakpoint can be hit and miss, even in SPA mode. It is advised to manually add a `debugger` statement in code instead. 
