@@ -1,89 +1,126 @@
 # Development
 
-## Stack
+This is part of the developer [getting started guide](./intro.md). 
 
-See [README#what-is-it](../README#what-is-it).
+## API
+See [APIs](../../../README#apis).
 
-A good base knowledge of Vue, Vuex and Nuxt should be reached before going through the code. Looking through `nuxt.config.js` is a good way to understand how the Dashboard is glued together, importantly how plugins are brought in and how the frontend proxies requests to Rancher's APIs.
+The older Norman API is served on `/v3`. The newer Steve API (see [here](https://github.com/rancher/api-spec/blob/master/specification.md) for spec) is served on `/v1` .
 
+In both cases the schema's returned dictate 
+- Which resources are shown
+- What operations (create, update, delete, etc) can be made against resource/s
+- What actions (archive, change password, etc) can be made against resource/s
 
-### Helpful links
-Description | Link
------| ---
-Core Vue Docs | https://vuejs.org/v2/guide
-Vue Template/Directive Shorthands | https://vuejs.org/v2/guide/syntax.html
-Vue Conditional rendering | https://vuejs.org/v2/guide/conditional.html
-Vuex Core Docs | https://vuex.vuejs.org/
-Nuxt Get Started | https://nuxtjs.org/docs/2.x/get-started/installation
-Nuxt Structure | https://nuxtjs.org/docs/2.x/directory-structure
-Axios (HTTP Requests) | https://axios.nuxtjs.org/options
-HTTP Proxy middleware | https://github.com/nuxt-community/proxy-module (https://github.com/chimurai/http-proxy-middleware)
+In addition the resources themselves can dictate 
+- What actions can be made against the collection
 
-## Platform
+The above, plus other factors, will effect what is shown by the UI
+- Resources in the cluster explorer
+- Edit resource buttons
+- Delete resource
+- etc
 
-The Dashboard is shipped with the Rancher package which contains the Rancher API. When developing locally the Dashboard must point to an instance of the Rancher API.
+There are other factors that assist in this, namely values from the `type-map`. More details can be found throughout this document.
 
-### Installing Rancher
-See https://rancher.com/docs/rancher/v2.x/en/installation/. This covers two methods confirmed to work with the Dashboard
-- [Single Docker Container](https://rancher.com/docs/rancher/v2.x/en/installation/other-installation-methods/single-node-docker/)
-- [Kube Cluster (via Helm)](https://rancher.com/docs/rancher/v2.x/en/installation/install-rancher-on-k8s/)
+> When catching exceptions thrown by anything that contacts the API use `utils/error exceptionToErrorsArray` to correctly parse the response into a commonly accepted array of errors
 
-Also for consideration
-- [RKE in a binary (rancherd)](https://rancher.com/docs/rancher/v2.x/en/installation/install-rancher-on-linux/)
+## Store
+State is cached locally via [Vuex](https://vuex.vuejs.org/). See the Model section for retrieving information from the store.
 
-You should be able to reach the older Ember UI by navigating to the Rancher API url. This same API Url will be used later when starting up the Dashboard.
+See [README#vuex-stores](../../../README#what-is-it) for the basics. The most important concepts are described first i.e. the three store parts `management`, `cluster` and `rancher`. These sections contain schema information for each supported type and, per type, the resource instance and list data. 
 
-### Uninstalling Rancher
-- Docker - This should be a simple `docker stop` & `docker rm`
-- Kube Cluster -  Use `helm delete` as usual and then the `remove` command from [System Tools](https://rancher.com/docs/rancher/v2.x/en/system-tools/) client 
+Store objects are accessed in different ways, below are common ways they are referenced by models and components
 
+|Location|type|object|example|
+|----|----|----|----|
+| `/model/<resource type>` | Dispatching Actions | `this.$dispatch` | `this.$dispatch('cluster/find', { type: WORKLOAD_TYPES.JOB, id: relationship.toId }, { root: true })`
+| `/model/<resource type>` | Access getters (store type) | `this.$getters` | `this.$getters['schemaFor'](this.type)`
+| `/model/<resource type>` | Access getters (all) | `this.$rootGetters` | `this.$rootGetters['productId']`
+| component | Dispatching Actions | `this.$store.dispatch` | ``this.$store.dispatch(`${ inStore }/find`, { type: row.type, id: row.id })``
+| component | Access getters | `this.$store.getters` | `this.$store.getters['rancher/byId'](NORMAN.PRINCIPAL, this.value)`
 
-## Environment
+> Prefixing a property in a model with `$`, as per `model` rows above, results in calling properties on the store object directly. For further details on resources, proxy's and types see further below in this doc.
 
-Developers are free to use the IDE and modern browser of their choosing. Here's some tips on some in particular
-
-### VS Code
-- Install the `vetur` extension. This contains syntax highlighting, IntelliSense, snippets, formatting, etc)
-
-### Chrome
-- Install the Chrome `vue-devtools` extension to view the Vuex store.
-  
-  > This can consume a lot of the host's resources. It's recommended to pause Vuex history (nav to Vue tab in DevTools and toggle the `Recording` button top right of the history section)
-
-## Running / Debugging Dashboard
-
-### Running the Dashboard
-
-See the [Running For Development](../README#running-for-development) section on how to bring up the Dashboard locally
-
-> Troubleshooting: Multiple `Could not freeze errors` in `yarn dev` terminal
+> Troubleshooting: Fetching the name of a resource type
 >
-> This is most probably due to a correct cache in `/node_modules/.cache`. Exit out of `yarn run` and run `yarn run clean` and then try again.
-
-### Debugging the Dashboard
-
-#### SSR vs SPA
-It's important to understand the difference between SSR and SPA modes described in the [Server-Side-Rendering (SSR)](../README#server-side-rendering-ssr) section. When running in the default SSR mode you will not be able to step through some methods such as Vue component's `async fetch`. It is therefore advised to switch to SPA mode before attempting to step through the code (see linked guide.. either start with `--spa` or load page with url parm `?spa` / `&spa`).
-
-#### Breakpoints
-Finding the correct file in Dev Tools and reliably setting a breakpoint can be hit and miss, even in SPA mode. It is advised to manually add a `debugger` statement in code instead. 
-
-#### Examining the contents of a Resource
-Due to the way Dashboard resources are constructed examining the contents of one can sometimes provide unexpected results. It's recommended to read the sections covering resource proxy and resource instance before continuing.
-
-- When viewing the object via template `{{ resource }}` the `resource-instance.js` `toString` method will print out a basic interpretation
-- When printing the object via console the resource's [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/Proxy) will be displayed. To make this simpler to view use `JSON.parse(JSON.stringify(<resource>))`.
-
-> Q Why are my resource's `nameDisplay`, `description`, etc missing?
+> Good - Trims the text and respects `.` in path to type's string - `store.getters['type-map/labelFor']({ id: NORMAN.SPOOFED.GROUP_PRINCIPAL }, 2)`
 >
-> A These are part of the common underlying `resource-instance.js` or, if the resource type has it, the type's own `model`.
+> Bad - Does not trim text, issues when resource type contains "`.`" - ``store.getters['i18n/t'](`typeLabel.${ NORMAN.SPOOFED.GROUP_PRINCIPAL }`, { count: 2 })``
 
-### Exploring the API
-The API serves up an interface to [browse both Norman and Steve API's](https://github.com/rancher/api-ui). Both will list supported schema's and allow the user to fetch individual or collections of resources. The schema's will describe the actions executable against individual or collections of resource. For Norman it will also show fields that can be filtered on.
+## Resources
+A resource is an instance of a schema e.g. the `admin` user is an instance of type `management.cattle.io.user` from the `Steve` API. 
 
-The dashboard will proxy requests to the API, so the interfaces are available via `<Dashboard URL>/v3` (Norman) and `<Dashboard URL>/v1` (Steve)
+### Schemas
+Schemas are provided in bulk via the APIs and cached locally in the relevant store (`management`, `rancher`, etc).
+
+A schema can be fetched synchronously via store getter
+
+```
+import { POD } from '@/config/types';
+
+this.$store.getters['cluster/schemaFor'](POD)`
+```
+
+> Troubleshooting: Cannot find new schema
+> 
+> Ensure that your schema text in `/config/types.js` is singular, not plural
+
+As mentioned before a schema dictates the functionality available to that type and what is shown for the type in the UI.
+
+### Virtual and Spoofed Resource Types
+
+The side nav is populated by resource types that have been applied to the current product. Virtual Types are a way to add additional menu items. These are purely for adding navigation and do not support tables or details views. Examples of virtual types can be found by searching for `virtualType`. For instance the `Users & Authentication` product has a virtual type of 'config' to show the `Auth Providers` page.
+
+Spoofed Types, like virtual types, add menu items but also define a spoofed schema and a `getInstances` function. The latter provides a list of objects of the spoofed type. This allows the app to then make use of the generic list, detail, edit, etc pages used for standard types.
+
+> Any resources returned by `getInstances` should have a `kind` matching required type. This results in the tables showing the correct actions, handling create/edit, etc.
+
+### Proxy Object and Common Functionality
+When resources are retrieved from the store they will be wrapped in a Proxy object - `/plugins/steve/resource-proxy.js`. This exposes common properties and functions from `/plugins/steve/resource-instance.js`. These can be overridden per resource type via optional files in `/models`. For example the `nameDisplay` value for the type `management.cattle.io.user` avoids using the `nameDisplay` from `resource-instance` by adding a `nameDisplay` function to `/models/management.cattle.io.user.js`.
+
+> As resources are proxy instances spreading (`{ ...<resource>}`) will not work as expected. In such cases it's normally better to first `clone` (see below) and then make the required changes.
+
+Common functionality provided by `resource-instance` includes information on how to display common properties, capabilities of the resource type and actions to execute such as `save`, `remove`, `goToEdit`
+
+```
+
+<user object>.save();
+
+<project object>.remove();
+
+<role binding object>.goToEdit();
+
+```
+
+> Note the `toString` property in `resource-instance`. This will change how the object is presented via console.log, etc. Read on to understand other ways to view resource properties.
+
+### Create and Fetch Resource/s
+
+Most of the options to create and fetch resources can be achieved via dispatching actions defined in `/plugins/steve/actions.js`
+
+| Action| Example Command | Description |
+|--------|-------|-----|
+| Create | `$store.$dispatch('<store type>/create', <new object>)`| Creates a new Proxy object of the required type (`type` property must be included in the new object) |
+| Clone | `$store.$dispatch('<store type>/clone', { resource: <existing object> })` | Performs a deep clone and creates a proxy from it |
+| Fetch all of a resource type | `$store.dispatch('<store type>/findAll', { type: <resource type> })` | Fetches all resources of the given type. Also, when applicable, will register the type for automatic updates. If the type has already been fetched return the local cached list instead |
+| Fetch a resource by ID | `$store.dispatch('<store type>/find', { type: <resource type>, id: <resource id> })` | Finds the resource matching the ID. If the type has already been fetched return the local cached instance. |
+| Fetch resources by label | `$store.dispatch('<store type>/findMatching', { type: <resource type>, selector: <label name:value map> })` | Fetches resources that have `metadata.labels` matching that of the name-value properties in the selector |
+
+> Once objects of most types are fetched they will be automatically updated. See [README#synching-state](../../../README##synching-state) for more info. For some types this does not happen. For those cases, or when an immediate update is required, adding `force: true` to the `find` style actions will result in a fresh http request.
+
+It's possible to retrieve values from the store synchronously via `getters`. For resources this is not normally advised (they may not yet have been fetched), however for items such as schema's is valid. Some of the core getters are defined in `/plugins/steve/getters.js`
+
+```
+$store.getters['<store type>/byId'](<resource type>, <id>])
+
+$store.getters['<store type>/schemaFor'](<resource type>)`
+```
+
+
 
 ## Menus, Pages and Components
+
 ### Products & Side Nav
 Products are top level features that are reached via the header top left menu. Some are built in (`Cluster Explorer`, `Apps & Marketplace`, `Users & Authentication`) and some are enabled after installing the required helm charts via `Apps & Marketplace` (see 'Rancher' charts in the `Charts` page ).
 

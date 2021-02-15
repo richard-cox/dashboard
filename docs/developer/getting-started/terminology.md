@@ -1,5 +1,7 @@
 # Terminology
 
+This is part of the developer [getting started guide](./intro.md). 
+
 | Term | Description | 
 |-------|--------------|
 | Dashboard / Cluster Explorer / Vue UI | The application in this repository. It will slowly replace the older Ember UI |

@@ -7,5 +7,5 @@ First take some time to understand the [README](../../../README.md). This covers
 ## Contents
 
 1. [Terminology](./terminology.md)
-1. [Concepts](./concepts.md)
-1. [Development](./development)
+1. [Development Environment](./development_environment.md)
+1. [Development](./development.md)

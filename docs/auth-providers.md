@@ -3,7 +3,7 @@
 ## Github
 
 ### Developer Set up
-Follow the in-Dashboard instructions when configuring a Github auth provider.
+Follow the in-dashboard instructions when configuring a Github auth provider.
 
 ### Multiple GitHub auth configs
 The auth system supports multiple GitHub auth URLs and using the appropriate one based on the Host header that a request comes in on.  Configuring this is not exposed in the regular UI, but is particularly useful for development against a server that already has GitHub setup.
