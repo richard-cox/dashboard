@@ -1,9 +1,9 @@
 # Development
 
-This is part of the developer [getting started guide](./intro.md). 
+This is part of the developer [getting started guide](./README.md). 
 
 ## API
-See [APIs](../../../README#apis).
+See [APIs](../../../README.md#apis).
 
 The older Norman API is served on `/v3`. The newer Steve API (see [here](https://github.com/rancher/api-spec/blob/master/specification.md) for spec) is served on `/v1` .
 

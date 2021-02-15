@@ -1,6 +1,6 @@
 # Terminology
 
-This is part of the developer [getting started guide](./intro.md). 
+This is part of the developer [getting started guide](./README.md). 
 
 | Term | Description | 
 |-------|--------------|
