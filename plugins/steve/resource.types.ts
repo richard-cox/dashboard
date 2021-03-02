@@ -235,6 +235,10 @@ export type ProxiedResource<Model = Partial<ProxyResourceInstance>, Resource = B
 
 // interface ProxiedResource2<T extends BaseProxy> extends ProxyOverrides<T>, ProxyResourceInstance, T {}
 
+export type ResourceInstanceForProxy<T extends { [key: string]: any; }> = {
+  [P in keyof T]: (proxy: ProxiedResource) => T[P] // TODO: RC proxy to default to kube type
+};
+
 interface TestResource extends BaseResource {
   a: number,
   b: string,
