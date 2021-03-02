@@ -6,25 +6,25 @@ function stringFor(store, key, args, raw = false) {
 
   let out;
 
-  if ( translation !== undefined ) {
+  if (translation !== undefined) {
     out = translation;
-  } else if ( args && Object.keys(args).length ) {
-    const argStr = Object.keys(args).map(k => `${ k }: ${ args[k] }`).join(', ');
+  } else if (args && Object.keys(args).length) {
+    const argStr = Object.keys(args).map(k => `${k}: ${args[k]}`).join(', ');
 
-    out = `%${ key }(${ argStr })%`;
+    out = `%${key}(${argStr})%`;
     raw = true;
   } else {
-    out = `%${ key }%`;
+    out = `%${key}%`;
   }
 
-  if ( raw ) {
+  if (raw) {
     return out;
   } else {
     return escapeHtml(out);
   }
 }
 
-Vue.prototype.t = function(key, args, raw) {
+Vue.prototype.t = function (key, args, raw) {
   return stringFor(this.$store, key, args, raw);
 };
 
@@ -33,7 +33,7 @@ function directive(el, binding, vnode /*, oldVnode */) {
   const raw = binding.modifiers && binding.modifiers.raw === true;
   const str = stringFor(context.$store, binding.value, {}, raw);
 
-  if ( binding.arg ) {
+  if (binding.arg) {
     el.setAttribute(binding.arg, str);
   } else {
     el.innerHTML = str;
@@ -45,7 +45,7 @@ export function directiveSsr(vnode, binding) {
   const raw = binding.modifiers && binding.modifiers.raw === true;
   const str = stringFor(context.$store, binding.value, {}, raw);
 
-  if ( binding.arg ) {
+  if (binding.arg) {
     vnode.data.attrs[binding.arg] = str;
   } else {
     vnode.data.domProps = { innerHTML: str };
@@ -68,17 +68,17 @@ Vue.directive('t', {
 // With interpolation: <t k="some.key" count="1" :foo="bar" />
 Vue.component('t', {
   inheritAttrs: false,
-  props:        {
+  props: {
     k: {
-      type:     String,
+      type: String,
       required: true,
     },
     raw: {
-      type:    Boolean,
+      type: Boolean,
       default: false,
     },
     tag: {
-      type:    [String, Object],
+      type: [String, Object],
       default: 'span'
     },
   },
@@ -86,7 +86,7 @@ Vue.component('t', {
   render(h) {
     const msg = stringFor(this.$store, this.k, this.$attrs, this.raw);
 
-    if ( this.raw ) {
+    if (this.raw) {
       return h(
         this.tag,
         { domProps: { innerHTML: msg } }

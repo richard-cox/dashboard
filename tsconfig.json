@@ -13,6 +13,8 @@
       "allowJs": true,
       "sourceMap": true,
       "strict": true,
+      "strictNullChecks": false,
+      "noImplicitAny": false,
       "noEmit": true,
       "baseUrl": ".",
       "paths": {
@@ -25,7 +27,8 @@
       },
       "types": [
         "@types/node",
-        "@nuxt/types"
+        "@nuxt/types",
+        "./types/vue-shim.ts"
       ]
     },
     "exclude": [
