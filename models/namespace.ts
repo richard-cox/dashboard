@@ -11,11 +11,11 @@ export interface IDashboardProject {
 
 }
 
-export interface RancherNamespace {
+export interface KubeNamespace {
 
 }
 
-export interface IDashboardNamespace extends ProxyResourceInstance {
+export interface NamespaceModel extends ProxyResourceInstance {
   isSystem: boolean;
   projectId: string;
   project: ProxiedResource<IDashboardProject, RancherProject>;
@@ -27,7 +27,7 @@ export interface IDashboardNamespace extends ProxyResourceInstance {
 }
 
 // TODO: RC
-// export const DashboardNamespace: ResourceInstanceForProxy<IDashboardNamespace> = {
+// export const DashboardNamespace: ResourceInstanceForProxy<NamespaceModel> = {
 //   _availableActions() {
 //     const out = this._standardActions;
 

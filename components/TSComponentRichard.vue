@@ -1,8 +1,8 @@
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
-import { COUNT, NAMESPACE } from "~/config/types";
-import { ProxiedResource } from "~/plugins/steve/resource.types";
-import { IDashboardNamespace, RancherNamespace } from "~/models/namespace";
+import { Component, Vue, Prop } from 'vue-property-decorator';
+import { COUNT, NAMESPACE } from '~/config/types';
+import { ProxiedResource } from '~/plugins/steve/resource.types';
+import { NamespaceModel, KubeNamespace } from '~/models/namespace';
 
 export interface Value {
   label: String;
@@ -14,24 +14,18 @@ class TSComponentRichard extends Vue {
 
   counts: any;
   namespace: any;
-  namespaceTyped: ProxiedResource<IDashboardNamespace, RancherNamespace>;
+  namespaceTyped: ProxiedResource<NamespaceModel, KubeNamespace>;
 
   constructor() {
     super();
 
-    this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[
-      NAMESPACE
-    ];
-    this.namespace = this.$store.getters["cluster/byId"](
-      NAMESPACE,
-      "ds4-4-1-charts"
-    );
-    this.namespaceTyped = this.namespace as ProxiedResource<
-      IDashboardNamespace,
-      RancherNamespace
-    >;
+    this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
+    this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
+    this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
 
- const a = ''
+    // Linting Errors
+    // const a = '';
+    // console.log('HELLO');
   }
 }
 
@@ -41,8 +35,8 @@ export default TSComponentRichard;
 <template>
   <table>
     <tr>
-      <th>Source</th>
-      <th>Outcome</th>
+      <th>Code</th>
+      <th>Output</th>
     </tr>
     <tr>
       <td>this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE]</td>
@@ -57,16 +51,16 @@ export default TSComponentRichard;
       <td>{{ namespace.nameDisplay }}</td>
     </tr>
     <tr>
-      <td>namespace.projectNameSort</td>
-      <td>{{ namespace.projectNameSort }}</td>
+      <td>namespace.injectionEnabled</td>
+      <td>{{ namespace.injectionEnabled }}111</td>
     </tr>
     <tr>
       <td>namespaceTyped.nameDisplay</td>
       <td>{{ namespaceTyped.nameDisplay }}</td>
     </tr>
     <tr>
-      <td>namespaceTyped.projectNameSort</td>
-      <td>{{ namespaceTyped.projectNameSort }}</td>
+      <td>namespaceTyped.injectionEnabled</td>
+      <td>{{ namespaceTyped.injectionEnabled }}</td>
     </tr>
   </table>
 </template>
