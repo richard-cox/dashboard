@@ -4,16 +4,8 @@ module.exports = {
     browser: true,
     node:    true
   },
-  parser:        'vue-eslint-parser',
-  parserOptions: {
-    parser:     'babel-eslint',
-    sourceType: 'module',
-  },
   extends: [
-    'standard',
-    'eslint:recommended',
-    'plugin:vue/recommended',
-    '@nuxtjs',
+    '@nuxtjs/eslint-config-typescript',
     'plugin:nuxt/recommended',
   ],
   // add your custom rules here
@@ -62,7 +54,7 @@ module.exports = {
     'no-eval':                        'warn',
     'no-trailing-spaces':             'warn',
     'no-undef':                       'warn',
-    'no-unused-vars':                 'warn',
+    'no-unused-vars':                 'off',
     'no-whitespace-before-property':  'warn',
     'object-curly-spacing':           ['warn', 'always'],
     'object-property-newline':        'warn',
