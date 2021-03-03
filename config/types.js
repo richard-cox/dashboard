@@ -9,6 +9,8 @@ export const STEVE = {
   CLUSTER:    'cluster',
 };
 
+const HelloWOrld = ""
+
 // Auth (via Norman)
 // Base: /v3
 export const NORMAN = {

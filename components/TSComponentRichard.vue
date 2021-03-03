@@ -4,7 +4,7 @@ import { COUNT, NAMESPACE } from "~/config/types";
 import { ProxiedResource } from "~/plugins/steve/resource.types";
 import { IDashboardNamespace, RancherNamespace } from "~/models/namespace";
 
-export interface Value {
+interface Value {
   label: String;
 }
 
@@ -31,7 +31,7 @@ class TSComponentRichard extends Vue {
       RancherNamespace
     >;
 
- const a = ''
+const a = '';
   }
 }
 
