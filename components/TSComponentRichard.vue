@@ -1,5 +1,6 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
+import acessor from '~/utils/store-accessor';
 import { COUNT, NAMESPACE } from '~/config/types';
 import { ProxiedResource } from '~/plugins/steve/resource.types';
 import { NamespaceModel, KubeNamespace } from '~/models/namespace';
@@ -25,17 +26,23 @@ class TSComponentRichard extends Vue {
 
     this.initModel();
 
-    console.log(this);
-  }
-
-  $fetch() {
-    return {};
+    this.initStore();
   }
 
   private initModel() {
     this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
     this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
     this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
+  }
+
+  private initStore() {
+    console.log('acessor.abc: ', !!acessor.demo);
+    console.log('acessor.abc.axles: ', !!acessor.demo.axles);
+    console.log('acessor.abc.incrWheels: ', !!acessor.demo.incrWheels);
+    console.log('acessor.abc.axles: ', acessor.demo.axles);
+    // console.log('this.$emit: ', this.$emit);
+    acessor.demo.incrWheels(2);
+    console.log(acessor.demo.axles);
   }
 }
 

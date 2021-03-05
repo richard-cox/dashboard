@@ -10,12 +10,15 @@ import { filterBy, findBy } from '@/utils/array';
 import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '@/store/type-map';
 import { NAME as EXPLORER } from '@/config/product/explorer';
 import { TIMED_OUT } from '@/config/query-params';
+import { Store } from 'vuex';
+import accessor from '~/utils/store-accessor';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // becaues it's more efficient to do that sometimes.
 export const strict = false;
 
 export const plugins = [
+  (store: Store<any>) => accessor.init(store),
   Steve({ namespace: 'management', baseUrl: '/v1' }),
   Steve({ namespace: 'cluster', baseUrl: '' }), // url set later
   Steve({ namespace: 'rancher', baseUrl: '/v3' }),
