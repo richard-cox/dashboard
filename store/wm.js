@@ -4,7 +4,7 @@ export const state = function() {
   return {
     tabs:       [],
     active:     null,
-    open:       false,
+    _open:       false,
     userHeight: null,
   };
 };
@@ -24,7 +24,7 @@ export const mutations = {
     }
 
     state.active = tab.id;
-    state.open = true;
+    state._open = true;
   },
 
   removeTab(state, tab) {
@@ -32,7 +32,7 @@ export const mutations = {
   },
 
   setOpen(state, open) {
-    state.open = open;
+    state._open = open;
   },
 
   setActive(state, id) {

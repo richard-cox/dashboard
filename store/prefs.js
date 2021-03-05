@@ -99,8 +99,8 @@ const cookieOptions = {
 
 export const state = function() {
   return {
-    cookiesLoaded: false,
-    data:          {},
+    _cookiesLoaded: false,
+    data:           {},
   };
 };
 
@@ -176,7 +176,7 @@ export const mutations = {
   },
 
   cookiesLoaded(state) {
-    state.cookiesLoaded = true;
+    state._cookiesLoaded = true;
   },
 };
 
@@ -225,7 +225,7 @@ export const actions = {
   },
 
   loadCookies({ state, commit }) {
-    if ( state.cookiesLoaded ) {
+    if ( state._cookiesLoaded ) {
       return;
     }
 

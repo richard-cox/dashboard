@@ -2,7 +2,7 @@ import { isArray, filterBy } from '@/utils/array';
 
 export const state = function() {
   return {
-    show:             false,
+    _show:             false, // TODO: RC
     tableSelected:    [],
     tableAll:         [],
     resources:        [],
@@ -18,7 +18,7 @@ export const state = function() {
 };
 
 export const getters = {
-  showing:       state => state.show,
+  showing:       state => state._show,
   elem:          state => state.elem,
   event:         state => state.event,
   tableSelected: state => state.tableSelected || [],
@@ -63,11 +63,11 @@ export const mutations = {
     state.resources = resources;
     state.elem = elem;
     state.event = event;
-    state.show = true;
+    state._show = true;
   },
 
   hide(state) {
-    state.show = false;
+    state._show = false;
     state.resources = null;
     state.elem = null;
   },

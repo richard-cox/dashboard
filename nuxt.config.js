@@ -77,7 +77,8 @@ module.exports = {
 
   buildModules: [
     '@nuxtjs/style-resources',
-    '@nuxt/typescript-build'
+    '@nuxt/typescript-build',
+    'nuxt-typed-vuex',
   ],
   styleResources: {
     // only import functions, mixins, or variables, NEVER import full styles https://github.com/nuxt-community/style-resources-module#warning

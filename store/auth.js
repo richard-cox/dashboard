@@ -16,7 +16,7 @@ const ERR_SERVER = 'server';
 
 export const state = function() {
   return {
-    hasAuth:     null,
+    _hasAuth:     null, // TODO: RC
     loggedIn:    false,
     principalId: null,
   };
@@ -24,7 +24,7 @@ export const state = function() {
 
 export const getters = {
   enabled(state) {
-    return state.hasAuth;
+    return state._hasAuth;
   },
 
   loggedIn(state) {
@@ -37,12 +37,13 @@ export const getters = {
 
   isGithub(state) {
     return state.principalId && state.principalId.startsWith('github_user://');
-  }
+  },
+
 };
 
 export const mutations = {
   hasAuth(state, hasAuth) {
-    state.hasAuth = !!hasAuth;
+    state._hasAuth = !!hasAuth;
   },
 
   loggedInAs(state, principalId) {
