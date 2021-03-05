@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import acessor from '~/utils/store-accessor';
+import storeAccessor from '~/utils/store-accessor';
 import { COUNT, NAMESPACE } from '~/config/types';
 import { ProxiedResource } from '~/plugins/steve/resource.types';
 import { NamespaceModel, KubeNamespace } from '~/models/namespace';
@@ -16,6 +16,9 @@ class TSComponentRichard extends Vue {
   counts: any;
   namespace: any;
   namespaceTyped: ProxiedResource<NamespaceModel, KubeNamespace>;
+
+  // TODO: RC Cannot access in tempalte without exposing. If this stays it should be in a mixin/super
+  private storeAccessor = storeAccessor;
 
   constructor() {
     super();
@@ -36,13 +39,13 @@ class TSComponentRichard extends Vue {
   }
 
   private initStore() {
-    console.log('acessor.abc: ', !!acessor.demo);
-    console.log('acessor.abc.axles: ', !!acessor.demo.axles);
-    console.log('acessor.abc.incrWheels: ', !!acessor.demo.incrWheels);
-    console.log('acessor.abc.axles: ', acessor.demo.axles);
-    // console.log('this.$emit: ', this.$emit);
-    acessor.demo.incrWheels(2);
-    console.log(acessor.demo.axles);
+    // console.log('storeAccessor.demo: ', !!storeAccessor.demo);
+    // console.log('storeAccessor.demo.axles: ', !!storeAccessor.demo.axles);
+    // console.log('storeAccessor.demo.incrWheels: ', !!storeAccessor.demo.incrWheels);
+    // console.log('storeAccessor.demo.axles: ', storeAccessor.demo.axles);
+    // // console.log('this.$emit: ', this.$emit);
+    // storeAccessor.demo.incrWheels(2);
+    // console.log(storeAccessor.demo.axles);
   }
 }
 
@@ -78,6 +81,14 @@ export default TSComponentRichard;
     <tr>
       <td>namespaceTyped.injectionEnabled</td>
       <td>{{ namespaceTyped.injectionEnabled }}</td>
+    </tr>
+    <tr>
+      <td>storeAccessor.demo.axles</td>
+      <td>
+        {{ storeAccessor.demo.axles }} <button class="btn bg-primary" @click="storeAccessor.demo.incrWheels(2)">
+          demo.incrWheels
+        </button>
+      </td>
     </tr>
   </table>
 </template>
