@@ -39,6 +39,7 @@ class TSComponentRichard extends Vue {
   }
 
   private initStore() {
+
     // console.log('storeAccessor.demo: ', !!storeAccessor.demo);
     // console.log('storeAccessor.demo.axles: ', !!storeAccessor.demo.axles);
     // console.log('storeAccessor.demo.incrWheels: ', !!storeAccessor.demo.incrWheels);
@@ -46,6 +47,7 @@ class TSComponentRichard extends Vue {
     // // console.log('this.$emit: ', this.$emit);
     // storeAccessor.demo.incrWheels(2);
     // console.log(storeAccessor.demo.axles);
+
   }
 }
 

@@ -10,7 +10,8 @@ import { filterBy, findBy } from '@/utils/array';
 import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '@/store/type-map';
 import { NAME as EXPLORER } from '@/config/product/explorer';
 import { TIMED_OUT } from '@/config/query-params';
-import { Store } from 'vuex';
+import Vuex, { Store } from 'vuex';
+
 import storeAccessor from '~/utils/store-accessor';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
@@ -591,3 +592,11 @@ export const actions = {
     router.replace('/fail-whale');
   }
 };
+
+// export default new Vuex.Store({
+//   /*
+//   Ideally if all your modules are dynamic
+//   then your store is registered initially
+//   as a completely empty object
+//   */
+// });
