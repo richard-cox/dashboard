@@ -10,7 +10,7 @@ export interface Value {
 
 @Component
 class TSComponentRichard extends Vue {
-  @Prop(Object) value: Value;
+  @Prop({ default: { label: '' } }) value: Value;
 
   counts: any;
   namespace: any;
@@ -19,13 +19,23 @@ class TSComponentRichard extends Vue {
   constructor() {
     super();
 
-    this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
-    this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
-    this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
-
     // Linting Errors
     // const a = '';
     // console.log('HELLO');
+
+    this.initModel();
+
+    console.log(this);
+  }
+
+  $fetch() {
+    return {};
+  }
+
+  private initModel() {
+    this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
+    this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
+    this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
   }
 }
 
