@@ -9,20 +9,6 @@ import { sortBy } from '@/utils/sort';
 import { filterBy, findBy } from '@/utils/array';
 import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '@/store/type-map';
 import { NAME as EXPLORER } from '@/config/product/explorer';
-import { TIMED_OUT } from '@/config/query-params';
-import { getAccessorType, getterTree, actionTree, mutationTree } from 'nuxt-typed-vuex';
-
-import * as typedVuexTSStore from '~/store/typedVuexTSStore';
-import * as actionMenu from '~/store/action-menu';
-import * as auth from '~/store/auth';
-import * as aws from '~/store/aws';
-import * as catalog from '~/store/catalog';
-import * as github from '~/store/github';
-import * as growl from '~/store/growl';
-import * as i18n from '~/store/i18n';
-import * as prefs from '~/store/prefs';
-import * as typeMap from '~/store/type-map';
-import * as wm from '~/store/wm';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // becaues it's more efficient to do that sometimes.
@@ -51,9 +37,9 @@ export const state = () => {
   };
 };
 
-export type RootState = ReturnType<typeof state>
+// export type RootState = ReturnType<typeof state>
 
-export const getters = getterTree(state, {
+export const getters = {
   clusterReady(state) {
     return state.clusterReady === true;
   },
@@ -329,9 +315,9 @@ export const getters = getterTree(state, {
 
     return '/';
   },
-});
+};
 
-export const mutations = mutationTree(state, {
+export const mutations = {
   managementChanged(state, { ready, isMultiCluster }) {
     state.managementReady = ready;
     state.isMultiCluster = isMultiCluster;
@@ -386,11 +372,9 @@ export const mutations = mutationTree(state, {
   cameFromError(state) {
     state._cameFromError = true;
   }
-});
+};
 
-export const actions = actionTree({
-  state, getters, mutations
-}, {
+export const actions = {
   async loadManagement({
     getters, state, commit, dispatch
   }) {
@@ -480,7 +464,7 @@ export const actions = actionTree({
       commit('clusterChanged', false);
 
       await dispatch('cluster/unsubscribe');
-      (commit as any)('cluster/reset');
+      commit('cluster/reset');
       // this.app.$accessor.cluster.reset(); // TODO: RC Typing
 
       await dispatch('management/watch', {
@@ -488,10 +472,10 @@ export const actions = actionTree({
         namespace: state.clusterId,
         stop:      true
       });
-      (commit as any)('management/forgetType', MANAGEMENT.PROJECT);
+      commit('management/forgetType', MANAGEMENT.PROJECT);
       // this.app.$accessor.management.forgetType(MANAGEMENT.PROJECT); // TODO: RC Typing
 
-      (commit as any)('catalog/reset');
+      commit('catalog/reset');
       // this.app.$accessor.catalog.reset(); // TODO: RC Typing
     }
 
@@ -517,13 +501,13 @@ export const actions = actionTree({
 
     if ( !cluster ) {
       commit('setCluster', null);
-      (commit as any)('cluster/applyConfig', { baseUrl: null });
+      commit('cluster/applyConfig', { baseUrl: null });
       // this.app.$accessor.cluster.applyConfig({ baseUrl: null }); // TODO: RC Typing
       throw new ClusterNotFoundError(id);
     }
 
     // Update the Steve client URLs
-    (commit as any)('cluster/applyConfig', { baseUrl: clusterBase });
+    commit('cluster/applyConfig', { baseUrl: clusterBase });
     // this.app.$accessor.cluster.applyConfig({ baseUrl: clusterBase }); // TODO: RC Typing
 
     await Promise.all([
@@ -564,28 +548,27 @@ export const actions = actionTree({
   async onLogout({ dispatch, commit, state }) {
     await dispatch('management/unsubscribe');
     commit('managementChanged', { ready: false });
-    (commit as any)('management/reset');
+    commit('management/reset');
     // this.app.$accessor.management.reset(); // TODO: RC Typing
 
     await dispatch('cluster/unsubscribe');
     commit('clusterChanged', false);
-    (commit as any)('cluster/reset');
+    commit('cluster/reset');
     // this.app.$accessor.cluster.reset(); // TODO: RC Typing
 
-    (commit as any)('rancher/reset');
+    commit('rancher/reset');
     // this.app.$accessor.rancher.reset(); // TODO: RC Typing
-    (commit as any)('catalog/reset');
+    commit('catalog/reset');
     // this.app.$accessor.catalog.reset(); // TODO: RC Typing
 
-    // TODO: RC
-    // const router = state.$router;
-    // const route = router.currentRoute;
+    const router = state.$router;
+    const route = router.currentRoute;
 
-    // if ( route.name === 'index' ) {
-    //   router.replace('/auth/login');
-    // } else {
-    //   router.replace(`/auth/login?${ TIMED_OUT }`);
-    // }
+    if ( route.name === 'index' ) {
+      router.replace('/auth/login');
+    } else {
+      router.replace(`/auth/login?${ TIMED_OUT }`);
+    }
   },
 
   nuxtServerInit({ dispatch, rootState }, nuxt) {
@@ -611,29 +594,8 @@ export const actions = actionTree({
 
   loadingError({ commit, state }, err) {
     commit('setError', err);
-    // TODO: RC
-    // const router = state.$router;
+    const router = state.$router;
 
-    // router.replace('/fail-whale');
+    router.replace('/fail-whale');
   }
-});
-
-export const accessorType = getAccessorType({
-  state,
-  getters,
-  mutations,
-  actions,
-  modules: {
-    typedVuexTSStore,
-    'action-menu': actionMenu,
-    auth,
-    aws,
-    catalog,
-    github,
-    growl,
-    prefs,
-    'type-map':    typeMap,
-    wm,
-    i18n
-  }
-});
+};

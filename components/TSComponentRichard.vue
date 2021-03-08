@@ -42,9 +42,9 @@ class TSComponentRichard extends Vue {
   }
 
   private initModel() {
-    this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
-    this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
-    this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
+    // this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
+    // this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
+    // this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
   }
 }
 

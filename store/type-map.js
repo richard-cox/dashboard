@@ -81,13 +81,13 @@
 // configureType(            Display options for a particular type
 //   type,                    -- Type to apply to
 //  options                   -- Object of options.  Defaults/Supported: {
-//                               isCreatable: true, -- If false, disable create even if schema says it's allowed
-//                               isEditable: true,  -- Ditto, for edit
-//                               isRemovable: true,  -- Ditto, for remove/delete
-//                               showState: true,  -- If false, hide state in columns and masthead
-//                               showAge: true,    -- If false, hide age in columns and masthead
-//                               canYaml: true,
-//                           }
+ //                               isCreatable: true, -- If false, disable create even if schema says it's allowed
+ //                               isEditable: true,  -- Ditto, for edit
+ //                               isRemovable: true,  -- Ditto, for remove/delete
+ //                               showState: true,  -- If false, hide state in columns and masthead
+ //                               showAge: true,    -- If false, hide age in columns and masthead
+ //                               canYaml: true,
+ //                           }
 // )
 // ignoreGroup(group):        Never show group or any types in it
 // weightGroup(               Set the weight (sorting) of one or more groups
@@ -135,33 +135,33 @@ export function DSL(store, product, module = 'type-map') {
   return {
     product(inOpt) {
       const opt = {
-        name: product,
-        weight: 1,
-        inStore: 'cluster',
-        removable: true,
+        name:                product,
+        weight:              1,
+        inStore:             'cluster',
+        removable:           true,
         showClusterSwitcher: true,
         showNamespaceFilter: false,
-        'public': true,
-        filterMode: 'namespaces',
+        'public':            true,
+        filterMode:          'namespaces',
         ...inOpt
       };
 
-      for (const k of ['ifHaveGroup', 'ifHaveType']) {
-        if (opt[k]) {
+      for ( const k of ['ifHaveGroup','ifHaveType'] ) {
+        if ( opt[k] ) {
           opt[k] = regexToString(ensureRegex(opt[k]));
         }
       }
 
-      store.commit(`${module}/product`, opt);
+      store.commit(`${ module }/product`, opt);
     },
 
     basicType(types, group) {
       // Support passing in a map of types and using just the values
-      if (!isArray(types) && types && isObject(types)) {
+      if ( !isArray(types) && types && isObject(types) ) {
         types = Object.values(types);
       }
 
-      store.commit(`${module}/basicType`, { product, types, group });
+      store.commit(`${ module }/basicType`, {product, types, group});
     },
 
     // Type- and Group-dependent
@@ -170,7 +170,7 @@ export function DSL(store, product, module = 'type-map') {
     },
 
     headers(type, headers) {
-      store.commit(`${module}/headers`, { type, headers });
+      store.commit(`${ module }/headers`, { type, headers });
     },
 
     hideBulkActions(type, field) {
@@ -178,61 +178,61 @@ export function DSL(store, product, module = 'type-map') {
     },
 
     configureType(match, options) {
-      store.commit(`${module}/configureType`, { ...options, match });
+      store.commit(`${ module }/configureType`, {...options, match});
     },
 
     componentForType(match, replace) {
-      store.commit(`${module}/componentForType`, { match, replace });
+      store.commit(`${ module }/componentForType`, { match, replace });
     },
 
     ignoreType(regexOrString) {
-      store.commit(`${module}/ignoreType`, regexOrString);
+      store.commit(`${ module }/ignoreType`, regexOrString);
     },
 
     ignoreGroup(regexOrString) {
-      store.commit(`${module}/ignoreGroup`, regexOrString);
+      store.commit(`${ module }/ignoreGroup`, regexOrString);
     },
 
     weightGroup(input, weight, forBasic) {
-      if (isArray(input)) {
-        store.commit(`${module}/weightGroup`, { groups: input, weight, forBasic });
+      if ( isArray(input) ) {
+        store.commit(`${ module }/weightGroup`, { groups: input, weight, forBasic });
       } else {
-        store.commit(`${module}/weightGroup`, { group: input, weight, forBasic });
+        store.commit(`${ module }/weightGroup`, { group: input, weight, forBasic });
       }
     },
 
     weightType(input, weight, forBasic) {
-      if (isArray(input)) {
-        store.commit(`${module}/weightType`, { types: input, weight, forBasic });
+      if ( isArray(input) ) {
+        store.commit(`${ module }/weightType`, { types: input, weight, forBasic });
       } else {
-        store.commit(`${module}/weightType`, { type: input, weight, forBasic });
+        store.commit(`${ module }/weightType`, { type: input, weight, forBasic });
       }
     },
 
     mapGroup(match, replace, weight = 5, continueOnMatch = false) {
-      store.commit(`${module}/mapGroup`, {
+      store.commit(`${ module }/mapGroup`, {
         match, replace, weight, continueOnMatch
       });
     },
 
     mapType(match, replace, weight = 5, continueOnMatch = false) {
-      store.commit(`${module}/mapType`, {
+      store.commit(`${ module }/mapType`, {
         match, replace, weight, continueOnMatch
       });
     },
 
     moveType(match, group, weight = 5, continueOnMatch = false) {
-      store.commit(`${module}/moveType`, {
+      store.commit(`${ module }/moveType`, {
         match, group, weight,
       });
     },
 
     virtualType(obj) {
-      store.commit(`${module}/virtualType`, { product, obj });
+      store.commit(`${ module }/virtualType`, {product, obj});
     },
 
     spoofedType(obj) {
-      store.commit(`${module}/spoofedType`, { product, obj });
+      store.commit(`${ module }/spoofedType`, {product, obj});
     }
   };
 }
@@ -249,43 +249,43 @@ export async function applyProducts(store) {
 
   const products = ctx.keys().filter(path => !path.endsWith('.js')).map(path => path.substr(2));
 
-  for (const product of products) {
-    const impl = await import(`@/config/product/${product}`);
+  for ( const product of products ) {
+    const impl = await import(`@/config/product/${ product }`);
 
-    if (impl?.init) {
+    if ( impl?.init ) {
       impl.init(store);
     }
   }
 }
 
-export const state = function () {
+export const state = function() {
   return {
-    products: [],
-    virtualTypes: {},
-    spoofedTypes: {},
-    basicTypes: {},
-    groupIgnore: [],
-    groupWeights: {},
-    basicGroupWeights: { [ROOT]: 1000 },
-    groupMappings: [],
-    typeIgnore: [],
-    basicTypeWeights: {},
-    typeWeights: {},
-    typeMappings: [],
-    typeMoveMappings: [],
+    products:                [],
+    virtualTypes:            {},
+    spoofedTypes:            {},
+    basicTypes:              {},
+    groupIgnore:             [],
+    groupWeights:            {},
+    basicGroupWeights:       {[ROOT]: 1000},
+    groupMappings:           [],
+    typeIgnore:              [],
+    basicTypeWeights:        {},
+    typeWeights:             {},
+    typeMappings:            [],
+    typeMoveMappings:        [],
     typeToComponentMappings: [],
-    typeOptions: [],
-    _groupBy: {}, // TODO: RC
-    _headers: {}, // TODO: RC
-    _hideBulkActions: {},// TODO: RC
-    schemaGeneration: 1,
-    cache: {
-      typeMove: {},
-      groupLabel: {},
-      ignore: {},
-      list: {},
-      detail: {},
-      edit: {},
+    typeOptions:             [],
+    _groupBy:                 {},
+    _headers:                 {},
+    _hideBulkActions:         {},
+    schemaGeneration:        1,
+    cache:                   {
+      typeMove:     {},
+      groupLabel:   {},
+      ignore:       {},
+      list:         {},
+      detail:       {},
+      edit:         {},
       componentFor: {},
     },
   };
@@ -297,12 +297,12 @@ export const getters = {
   // ----------------------------------------------------------------------------
   // Turns a type name into a display label (e.g. management.cattle.io.cluster -> Cluster)
   labelFor(state, getters, rootState, rootGetters) {
-    return (schema, count = 1) => {
+    return (schema, count=1) => {
       return _applyMapping(schema, state.typeMappings, 'id', false, () => {
-        const key = `typeLabel."${schema.id}"`;
+        const key = `typeLabel."${ schema.id }"`;
 
-        if (rootGetters['i18n/exists'](key)) {
-          return rootGetters['i18n/t'](key, { count }).trim();
+        if ( rootGetters['i18n/exists'](key) ) {
+          return rootGetters['i18n/t'](key, {count}).trim();
         }
 
         let out = schema?.attributes?.kind || schema.id || '?';
@@ -310,7 +310,7 @@ export const getters = {
         // Add spaces, but breaks typing names into jump menu naturally
         // out = ucFirst(out.replace(/([a-z])([A-Z])/g,'$1 $2'));
 
-        if (count === 1) {
+        if ( count === 1 ) {
           return out;
         }
 
@@ -325,31 +325,31 @@ export const getters = {
     return (schemaOrName) => {
       let group = schemaOrName;
 
-      if (typeof schemaOrName === 'object') {
+      if ( typeof schemaOrName === 'object' ) {
         let moved = false;
 
-        for (const rule of state.typeMoveMappings) {
+        for ( const rule of state.typeMoveMappings ) {
           const re = stringToRegex(rule.match);
 
-          if (schemaOrName.id.match(re)) {
+          if ( schemaOrName.id.match(re) ) {
             moved = true;
             group = rule.replace;
           }
         }
 
-        if (!moved) {
+        if ( !moved ) {
           group = group.attributes.group;
         }
       }
 
-      if (typeof group !== 'string') {
+      if ( typeof group !== 'string' ) {
         return null;
       }
 
       const out = _applyMapping(group, state.groupMappings, null, state.cache.groupLabel, (group) => {
         const match = group.match(/^(.*)\.k8s\.io$/);
 
-        if (match) {
+        if ( match ) {
           return match[1].split(/\./).map(x => ucFirst(x)).join('.');
         }
 
@@ -401,7 +401,7 @@ export const getters = {
     return (type, forBasic) => {
       type = type.toLowerCase();
 
-      if (forBasic) {
+      if ( forBasic ) {
         return state.basicTypeWeights[type] || 0;
       } else {
         return state.typeWeights[type] || 0;
@@ -413,7 +413,7 @@ export const getters = {
     return (group, forBasic) => {
       group = group.toLowerCase();
 
-      if (forBasic) {
+      if ( forBasic ) {
         return state.basicGroupWeights[group] || 0;
       } else {
         return state.groupWeights[group] || 0;
@@ -432,8 +432,8 @@ export const getters = {
 
       let searchRegex;
 
-      if (search) {
-        searchRegex = new RegExp(`^(.*)(${escapeRegex(search)})(.*)$`, 'i');
+      if ( search ) {
+        searchRegex = new RegExp(`^(.*)(${ escapeRegex(search) })(.*)$`, 'i');
       }
 
       const root = { children: [] };
@@ -442,17 +442,17 @@ export const getters = {
       // get added before children
       const keys = Object.keys(allTypes).sort((a, b) => a.length - b.length);
 
-      for (const type of keys) {
+      for ( const type of keys ) {
         const typeObj = allTypes[type];
 
-        if (typeObj.schema && getters.isIgnored(typeObj.schema)) {
+        if ( typeObj.schema && getters.isIgnored(typeObj.schema) ) {
           // Skip ignored groups & types
           continue;
         }
 
         const namespaced = typeObj.namespaced;
 
-        if ((namespaceMode === NAMESPACED && !namespaced) || (namespaceMode === CLUSTER_LEVEL && namespaced)) {
+        if ( (namespaceMode === NAMESPACED && !namespaced ) || (namespaceMode === CLUSTER_LEVEL && namespaced) ) {
           // Skip types that are not the right namespace mode
           continue;
         }
@@ -460,12 +460,12 @@ export const getters = {
         const count = _matchingCounts(typeObj, namespaces);
         const groupForBasicType = getters.groupForBasicType(product, typeObj.name);
 
-        if (typeObj.id === currentType) {
+        if ( typeObj.id === currentType ) {
           // If this is the type currently being shown, always show it
-        } else if (isBasic && !groupForBasicType) {
+        } else if ( isBasic && !groupForBasicType ) {
           // If we want the basic tree only return basic types;
           continue;
-        } else if (mode === USED && count <= 0) {
+        } else if ( mode === USED && count <= 0 ) {
           // If there's none of this type, ignore this entry when viewing only in-use types
           // Note: count is sometimes null, which is <= 0.
           continue;
@@ -475,8 +475,8 @@ export const getters = {
         const virtual = !!typeObj.virtual;
         let icon = typeObj.icon;
 
-        if ((!virtual || typeObj.isSpoofed) && !icon) {
-          if (namespaced) {
+        if ( (!virtual || typeObj.isSpoofed ) && !icon ) {
+          if ( namespaced ) {
             icon = 'folder';
           } else {
             icon = 'globe';
@@ -485,19 +485,19 @@ export const getters = {
 
         const labelDisplay = highlightLabel(label, icon);
 
-        if (!labelDisplay) {
+        if ( !labelDisplay ) {
           // Search happens in highlight and retuns null if not found
           continue;
         }
 
         let group;
 
-        if (isBasic) {
+        if ( isBasic ) {
           group = _ensureGroup(root, groupForBasicType, true);
-        } else if (mode === FAVORITE) {
+        } else if ( mode === FAVORITE ) {
           group = _ensureGroup(root, 'starred');
-        } else if (mode === USED) {
-          group = _ensureGroup(root, `inUse::${getters.groupLabelFor(typeObj.schema)}`);
+        } else if ( mode === USED ) {
+          group = _ensureGroup(root, `inUse::${ getters.groupLabelFor(typeObj.schema) }`);
         } else {
           group = _ensureGroup(root, typeObj.schema || typeObj.group || ROOT);
         }
@@ -505,12 +505,12 @@ export const getters = {
         let route = typeObj.route;
 
         // Make the default route if one isn't set
-        if (!route) {
+        if (!route ) {
           route = {
-            name: 'c-cluster-product-resource',
+            name:   'c-cluster-product-resource',
             params: {
               product,
-              cluster: clusterId,
+              cluster:  clusterId,
               resource: typeObj.name,
             }
           };
@@ -519,7 +519,7 @@ export const getters = {
         }
 
         // Cluster ID and Product should always be set
-        if (route && typeof route === 'object') {
+        if ( route && typeof route === 'object' ) {
           route.params = route.params || {};
           route.params.cluster = clusterId;
           route.params.product = product;
@@ -528,12 +528,12 @@ export const getters = {
         group.children.push({
           label,
           labelDisplay,
-          mode: typeObj.mode,
+          mode:   typeObj.mode,
           count,
-          exact: typeObj.exact || false,
+          exact:  typeObj.exact || false,
           namespaced,
           route,
-          name: typeObj.name,
+          name:   typeObj.name,
           weight: typeObj.weight || getters.typeWeightFor(typeObj.schema?.id || label, isBasic),
         });
       }
@@ -544,11 +544,11 @@ export const getters = {
 
       // ----------------------
 
-      function _ensureGroup(tree, schemaOrName, forBasic = false) {
+      function _ensureGroup(tree, schemaOrName, forBasic=false) {
         let name = getters.groupLabelFor(schemaOrName);
-        const isRoot = (name === ROOT || name.startsWith(`${ROOT}::`));
+        const isRoot = ( name === ROOT || name.startsWith(`${ROOT}::`) );
 
-        if (name && name.includes('::')) {
+        if ( name && name.includes('::') ) {
           let parent;
 
           [parent, name] = name.split('::', 2);
@@ -559,13 +559,13 @@ export const getters = {
         let label = name;
         const key = `nav.group."${name}"`;
 
-        if (rootGetters['i18n/exists'](key)) {
+        if ( rootGetters['i18n/exists'](key) ) {
           label = rootGetters['i18n/t'](key);
         }
 
         let group = findBy(tree.children, 'name', name);
 
-        if (!group) {
+        if ( !group ) {
           group = {
             name,
             label,
@@ -575,11 +575,11 @@ export const getters = {
           tree.children.push(group);
         }
 
-        if (isRoot) {
+        if ( isRoot ) {
           group.isRoot = true;
         }
 
-        if (!group.children) {
+        if ( !group.children ) {
           group.children = [];
         }
 
@@ -589,18 +589,18 @@ export const getters = {
       function highlightLabel(original, icon) {
         let label = escapeHtml(original);
 
-        if (searchRegex) {
+        if ( searchRegex ) {
           const match = label.match(searchRegex);
 
-          if (match) {
-            label = `${escapeHtml(match[1])}<span class="highlight">${escapeHtml(match[2])}</span>${escapeHtml(match[3])}`;
+          if ( match ) {
+            label = `${ escapeHtml(match[1]) }<span class="highlight">${ escapeHtml(match[2]) }</span>${ escapeHtml(match[3]) }`;
           } else {
             return null;
           }
         }
 
-        if (icon) {
-          label = `<i class="icon icon-fw icon-${icon}"></i>${label}`;
+        if ( icon ) {
+          label = `<i class="icon icon-fw icon-${ icon }"></i>${ label }`;
         }
 
         return label;
@@ -621,7 +621,7 @@ export const getters = {
       product = product || rootGetters['productId'];
       const getInstances = instanceMethods[product]?.[type] || (() => []);
       const instances = await getInstances();
-
+      
       instances.forEach((instance) => {
         const type = instance.type;
         const id = instance.id;
@@ -634,6 +634,7 @@ export const getters = {
           update: instance.links?.update || link,
           view: instance.links?.view || apiLink,
         };
+        instance.isSpoofed = true;
       });
       return instances;
     };
@@ -642,7 +643,7 @@ export const getters = {
   getSpoofedInstance(state, getters, rootState, rootGetters) {
     return async (type, id, product) => {
       const productInstances = await getters.getSpoofedInstances(type, product);
-      return productInstances.find(instance => instance.id === id);
+      return productInstances.find( instance => instance.id === id);
     };
   },
 
@@ -669,20 +670,20 @@ export const getters = {
       const isBasic = mode === BASIC;
 
       const out = {};
-      for (const schema of schemas) {
+      for ( const schema of schemas ) {
         const attrs = schema.attributes || {};
         const count = counts[schema.id];
         const label = getters.labelFor(schema, count);
         const weight = getters.typeWeightFor(schema?.id || label, isBasic);
 
-        if (isBasic) {
+        if ( isBasic ) {
           // These are separate ifs so that things with no kind can still be basic
-          if (!getters.groupForBasicType(product, schema.id)) {
+          if ( !getters.groupForBasicType(product, schema.id) ) {
             continue;
           }
-        } else if (mode === FAVORITE && !getters.isFavorite(schema.id)) {
+        } else if ( mode === FAVORITE && !getters.isFavorite(schema.id) ) {
           continue;
-        } else if (!attrs.kind) {
+        } else if ( !attrs.kind ) {
           // Skip the schemas that aren't top-level types
           continue;
         }
@@ -692,45 +693,45 @@ export const getters = {
           mode,
           weight,
           schema,
-          name: schema.id,
-          namespaced: attrs.namespaced,
-          count: count ? count.summary.count || 0 : null,
+          name:        schema.id,
+          namespaced:  attrs.namespaced,
+          count:       count ? count.summary.count || 0 : null,
           byNamespace: count ? count.namespaces : {},
-          revision: count ? count.revision : null,
+          revision:    count ? count.revision : null,
         };
       }
 
       // Add virtual and spoofed types
-      if (mode !== USED) {
+      if ( mode !== USED ) {
         const virtualTypes = state.virtualTypes[product] || [];
         const spoofedTypes = state.spoofedTypes[product] || [];
         const allTypes = [...virtualTypes, ...spoofedTypes];
 
-        for (const type of allTypes) {
+        for ( const type of allTypes ) {
           const item = clone(type);
           const id = item.name;
           const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
 
-          if (item['public'] === false && !isDev) {
+          if ( item['public'] === false && !isDev ) {
             continue;
           }
 
-          if (item.ifHaveType && !findBy(schemas, 'id', normalizeType(item.ifHaveType))) {
+          if ( item.ifHaveType && !findBy(schemas, 'id', normalizeType(item.ifHaveType)) ) {
             continue;
           }
 
-          if (item.ifHaveSubTypes) {
-            const hasSome = (item.ifHaveSubTypes || []).some(type => {
-              return !!findBy(schemas, 'id', normalizeType(type));
-            });
-            if (!hasSome) {
-              continue;
+          if ( item.ifHaveSubTypes ) {
+            const hasSome = (item.ifHaveSubTypes||[]).some(type=>{
+              return !!findBy(schemas, 'id', normalizeType(type))
+            })
+            if(!hasSome){
+              continue
             }
           }
 
-          if (isBasic && !getters.groupForBasicType(product, id)) {
+          if ( isBasic && !getters.groupForBasicType(product, id) ) {
             continue;
-          } else if (mode === FAVORITE && !getters.isFavorite(id)) {
+          } else if ( mode === FAVORITE && !getters.isFavorite(id) ) {
             continue;
           }
 
@@ -748,7 +749,7 @@ export const getters = {
 
   groupByFor(state) {
     return (schema) => {
-      return state._groupBy[schema.id];
+      return state.groupBy[schema.id];
     };
   },
 
@@ -765,11 +766,11 @@ export const getters = {
       const typeOptions = getters['optionsFor'](schema);
 
       // A specific list has been provided
-      if (state._headers[schema.id]) {
+      if ( state._headers[schema.id] ) {
         return state._headers[schema.id].map((entry) => {
-          if (typeof entry === 'string') {
+          if ( typeof entry === 'string' ) {
             const col = findBy(columns, 'name', entry);
-            if (col) {
+            if ( col ) {
               return fromSchema(col, rootGetters);
             } else {
               return null;
@@ -785,11 +786,11 @@ export const getters = {
       const namespaced = attributes.namespaced || false;
       let hasName = false;
 
-      for (const col of columns) {
-        if (col.format === 'name') {
+      for ( const col of columns ) {
+        if ( col.format === 'name' ) {
           hasName = true;
           out.push(NAME);
-          if (namespaced) {
+          if ( namespaced ) {
             out.push(NAMESPACE);
           }
         } else {
@@ -797,17 +798,17 @@ export const getters = {
         }
       }
 
-      if (!hasName) {
+      if ( !hasName ) {
         insertAt(out, 1, NAME);
-        if (namespaced) {
+        if ( namespaced ) {
           insertAt(out, 2, NAMESPACE);
         }
       }
 
       // Age always goes last
-      if (out.includes(AGE)) {
+      if ( out.includes(AGE) ) {
         removeObject(out, AGE);
-        if (typeOptions.showAge) {
+        if ( typeOptions.showAge ) {
           out.push(AGE);
         }
       }
@@ -817,29 +818,29 @@ export const getters = {
       function fromSchema(col, rootGetters) {
         let formatter, width, formatterOpts;
 
-        if ((col.format === '' || col.format == 'date') && col.name === 'Age') {
+        if ( (col.format === '' || col.format == 'date') && col.name === 'Age' ) {
           return AGE;
         }
 
-        if (col.format === 'date' || col.type === 'date') {
+        if ( col.format === 'date' || col.type === 'date' ) {
           formatter = 'Date';
           width = 120;
           formatterOpts = { multiline: true };
         }
 
-        if (col.type === 'number' || col.type === 'int') {
+        if ( col.type === 'number' || col.type === 'int' ) {
           formatter = 'Number';
         }
 
-        const exists = rootGetters['i18n/exists'];
-        const t = rootGetters['i18n/t'];
-        const labelKey = `tableHeaders.${col.name}`;
+        const exists = rootGetters['i18n/exists']
+        const t = rootGetters['i18n/t']
+        const labelKey = `tableHeaders.${col.name}`
 
         return {
-          name: col.name.toLowerCase(),
+          name:  col.name.toLowerCase(),
           label: exists(labelKey) ? t(labelKey) : col.name,
-          value: col.field.startsWith('.') ? `$${col.field}` : col.field,
-          sort: [col.field],
+          value: col.field.startsWith('.') ? `$${ col.field }` : col.field,
+          sort:  [col.field],
           formatter,
           formatterOpts,
           width,
@@ -861,12 +862,12 @@ export const getters = {
       const type = getters.componentFor(rawType);
       const cache = state.cache.list;
 
-      if (cache[type] !== undefined) {
+      if ( cache[type] !== undefined ) {
         return cache[type];
       }
 
       try {
-        require.resolve(`@/list/${type}`);
+        require.resolve(`@/list/${ type }`);
         cache[type] = true;
       } catch (e) {
         cache[type] = false;
@@ -881,12 +882,12 @@ export const getters = {
       const key = getters.componentFor(rawType, subType);
       const cache = state.cache.detail;
 
-      if (cache[key] !== undefined) {
+      if ( cache[key] !== undefined ) {
         return cache[key];
       }
 
       try {
-        require.resolve(`@/detail/${key}`);
+        require.resolve(`@/detail/${ key }`);
         cache[key] = true;
       } catch (e) {
         cache[key] = false;
@@ -902,12 +903,12 @@ export const getters = {
 
       const cache = state.cache.edit;
 
-      if (cache[key] !== undefined) {
+      if ( cache[key] !== undefined ) {
         return cache[key];
       }
 
       try {
-        require.resolve(`@/edit/${key}`);
+        require.resolve(`@/edit/${ key }`);
         cache[key] = true;
       } catch (e) {
         cache[key] = false;
@@ -921,7 +922,7 @@ export const getters = {
     return (rawType) => {
       const type = getters.componentFor(rawType);
 
-      return () => import(`@/list/${type}`);
+      return () => import(`@/list/${ type }`);
     };
   },
 
@@ -929,7 +930,7 @@ export const getters = {
     return (rawType, subType) => {
       const key = getters.componentFor(rawType, subType);
 
-      return () => import(`@/detail/${key}`);
+      return () => import(`@/detail/${ key }`);
     };
   },
 
@@ -937,7 +938,7 @@ export const getters = {
     return (rawType, subType) => {
       const key = getters.componentFor(rawType, subType);
 
-      return () => import(`@/edit/${key}`);
+      return () => import(`@/edit/${ key }`);
     };
   },
 
@@ -945,11 +946,11 @@ export const getters = {
     return (type, subType) => {
       let key = type;
 
-      if (subType) {
+      if ( subType ) {
         key = `${type}/${subType}`;
       }
 
-      if (state.cache.componentFor[key] !== undefined) {
+      if ( state.cache.componentFor[key] !== undefined ) {
         return state.cache.componentFor[key];
       }
 
@@ -961,9 +962,9 @@ export const getters = {
         return re.test(key);
       });
 
-      if (mapping) {
+      if ( mapping ) {
         out = mapping.replace;
-      } else if (subType) {
+      } else if ( subType ) {
         // Try again without the subType
         out = getters.componentFor(type);
       }
@@ -976,24 +977,24 @@ export const getters = {
 
   isIgnored(state) {
     return (schema) => {
-      if (state.cache.ignore[schema.id] !== undefined) {
+      if ( state.cache.ignore[schema.id] !== undefined ) {
         return state.cache.ignore[schema.id];
       }
 
       let out = false;
 
-      for (const rule of state.groupIgnore) {
+      for ( const rule of state.groupIgnore ) {
         const group = schema?.attributes?.group;
 
-        if (group && group.match(stringToRegex(rule))) {
+        if ( group && group.match(stringToRegex(rule)) ) {
           out = true;
           break;
         }
       }
 
-      if (!out) {
-        for (const rule of state.typeIgnore) {
-          if (schema.id.match(stringToRegex(rule))) {
+      if ( !out ) {
+        for ( const rule of state.typeIgnore ) {
+          if ( schema.id.match(stringToRegex(rule)) ) {
             out = true;
             break;
           }
@@ -1011,7 +1012,7 @@ export const getters = {
     const knownGroups = {};
     const isDev = rootGetters['prefs/get'](DEV);
 
-    if (state.schemaGeneration < 0) {
+    if ( state.schemaGeneration < 0 ) {
       // This does nothing, but makes activeProducts depend on schemaGeneration
       // so that it can be used to update the product list on schema change.
       return;
@@ -1021,34 +1022,34 @@ export const getters = {
     return state.products.filter((p) => {
       const module = p.inStore;
 
-      if (p['public'] === false && !isDev) {
+      if ( p['public'] === false && !isDev ) {
         return false;
       }
 
-      if (p.ifGetter && !rootGetters[p.ifGetter]) {
+      if ( p.ifGetter && !rootGetters[p.ifGetter] ) {
         return false;
       }
 
-      if (!knownTypes[module]) {
+      if ( !knownTypes[module] ) {
         const schemas = rootGetters[`${module}/all`](SCHEMA);
 
         knownTypes[module] = [];
         knownGroups[module] = [];
 
-        for (const s of schemas) {
+        for ( const s of schemas ) {
           knownTypes[module].push(s._id);
 
-          if (s._group) {
+          if ( s._group ) {
             addObject(knownGroups[module], s._group);
           }
         }
       }
 
-      if (p.ifHaveType && !knownTypes[module].find((t) => t.match(stringToRegex(p.ifHaveType)))) {
+      if ( p.ifHaveType && !knownTypes[module].find((t) => t.match(stringToRegex(p.ifHaveType)) ) ) {
         return false;
       }
 
-      if (p.ifHaveGroup && !knownGroups[module].find((t) => t.match(stringToRegex(p.ifHaveGroup)))) {
+      if ( p.ifHaveGroup && !knownGroups[module].find((t) => t.match(stringToRegex(p.ifHaveGroup)) ) ) {
         return false;
       }
 
@@ -1058,7 +1059,7 @@ export const getters = {
 
   isProductActive(state, getters) {
     return (name) => {
-      if (findBy(getters['activeProducts'], 'name', name)) {
+      if ( findBy(getters['activeProducts'], 'name', name) ) {
         return true;
       }
 
@@ -1075,15 +1076,15 @@ export const mutations = {
   product(state, obj) {
     const existing = findBy(state.products, 'name', obj.name);
 
-    if (existing) {
+    if ( existing ) {
       Object.assign(existing, obj);
     } else {
       addObject(state.products, obj);
     }
   },
 
-  virtualType(state, { product, obj }) {
-    if (!state.virtualTypes[product]) {
+  virtualType(state, {product, obj}) {
+    if ( !state.virtualTypes[product] ) {
       state.virtualTypes[product] = [];
     }
 
@@ -1093,15 +1094,15 @@ export const mutations = {
 
     const existing = findBy(state.virtualTypes[product], 'name', copy.name);
 
-    if (existing) {
+    if ( existing ) {
       Object.assign(existing, copy);
     } else {
       addObject(state.virtualTypes[product], copy);
     }
   },
 
-  spoofedType(state, { product, obj }) {
-    if (!state.spoofedTypes[product]) {
+  spoofedType(state, {product, obj}) {
+    if ( !state.spoofedTypes[product] ) {
       state.spoofedTypes[product] = [];
     }
 
@@ -1118,35 +1119,35 @@ export const mutations = {
       schema.links = {
         collection: `/${SPOOFED_PREFIX}/${schema.id}`,
         ...(schema.links || {})
-      };
+      } 
     });
 
     const existing = findBy(state.spoofedTypes[product], 'type', copy.type);
-    if (existing) {
+    if ( existing ) {
       Object.assign(existing, copy);
     } else {
       addObject(state.spoofedTypes[product], copy);
     }
   },
 
-  basicType(state, { product, group, types }) {
-    if (!product) {
+  basicType(state, {product, group, types}) {
+    if ( !product ) {
       product === EXPLORER;
     }
 
-    if (!group) {
+    if ( !group ) {
       group = ROOT;
     }
 
-    if (!isArray(types)) {
+    if ( !isArray(types) ) {
       types = [types];
     }
 
-    if (!state.basicTypes[product]) {
+    if ( !state.basicTypes[product] ) {
       state.basicTypes[product] = {};
     }
 
-    for (const t of types) {
+    for ( const t of types ) {
       state.basicTypes[product][t] = group;
     }
   },
@@ -1162,7 +1163,7 @@ export const mutations = {
     state.typeIgnore.push(regexToString(match));
   },
 
-  groupBy(state, { type, field }) {
+  groupBy(state, {type, field}) {
     state._groupBy[type] = field;
   },
 
@@ -1170,24 +1171,24 @@ export const mutations = {
     state._headers[type] = headers;
   },
 
-  hideBulkActions(state, { type, field }) {
+  hideBulkActions(state, {type, field}) {
     state._hideBulkActions[type] = field;
   },
 
   // weightGroup({group: 'core', weight: 99}); -- higher groups are shown first
   // These operate on group names *after* mapping but *before* translation
   weightGroup(state, { group, groups, weight, forBasic }) {
-    if (!groups) {
+    if ( !groups ) {
       groups = [];
     }
 
-    if (group) {
+    if ( group ) {
       groups.push(group);
     }
 
     const map = forBasic ? state.basicGroupWeights : state.groupWeights;
 
-    for (const g of groups) {
+    for ( const g of groups ) {
       map[g.toLowerCase()] = weight;
     }
   },
@@ -1195,17 +1196,17 @@ export const mutations = {
   // weightType('Cluster' 99); -- higher groups are shown first
   // These operate on *schema* type names, before mapping
   weightType(state, { type, types, weight, forBasic }) {
-    if (!types) {
+    if ( !types ) {
       types = [];
     }
 
-    if (type) {
+    if ( type ) {
       types.push(type);
     }
 
     const map = forBasic ? state.basicTypeWeights : state.typeWeights;
 
-    for (const t of types) {
+    for ( const t of types ) {
       map[t.toLowerCase()] = weight;
     }
   },
@@ -1242,11 +1243,11 @@ export const mutations = {
     let idx = state.typeOptions.findIndex((obj) => obj.match === match);
     let obj = { ...options, match };
 
-    if (idx >= 0) {
+    if ( idx >= 0 ) {
       obj = Object.assign(obj, state.typeOptions[idx]);
       state.typeOptions.splice(idx, 1, obj);
     } else {
-      const obj = Object.assign({}, options, { match });
+      const obj = Object.assign({}, options, {match});
       state.typeOptions.push(obj);
     }
   },
@@ -1273,7 +1274,7 @@ export const actions = {
   toggleGroup({ dispatch, rootGetters }, { group, expanded }) {
     const groups = rootGetters['prefs/get'](EXPANDED_GROUPS);
 
-    if (expanded) {
+    if ( expanded ) {
       addObject(groups, group);
     } else {
       removeObject(groups, group);
@@ -1282,7 +1283,7 @@ export const actions = {
     dispatch('prefs/set', { key: EXPANDED_GROUPS, value: groups }, { root: true });
   },
 
-  configureType({ commit }, options) {
+  configureType({commit}, options) {
     commit('configureType', options);
   }
 };
@@ -1292,8 +1293,8 @@ function _sortGroup(tree, mode) {
 
   tree.children = sortBy(tree.children, by);
 
-  for (const entry of tree.children) {
-    if (entry.children) {
+  for (const entry of tree.children ) {
+    if ( entry.children ) {
       _sortGroup(entry, mode);
     }
   }
@@ -1301,14 +1302,14 @@ function _sortGroup(tree, mode) {
 
 function _matchingCounts(typeObj, namespaces) {
   // That was easy
-  if (!typeObj.namespaced || !typeObj.byNamespace || namespaces === null || typeObj.count === null) {
+  if ( !typeObj.namespaced || !typeObj.byNamespace || namespaces === null || typeObj.count === null) {
     return typeObj.count;
   }
 
   let out = 0;
 
   // Otherwise start with 0 and count up
-  for (const namespace of namespaces) {
+  for ( const namespace of namespaces ) {
     out += typeObj.byNamespace[namespace]?.count || 0;
   }
 
@@ -1319,43 +1320,43 @@ function _applyMapping(objOrValue, mappings, keyField, cache, defaultFn) {
   let key = objOrValue;
   let found = false;
 
-  if (keyField) {
-    if (typeof objOrValue !== 'object') {
+  if ( keyField ) {
+    if ( typeof objOrValue !== 'object' ) {
       return objOrValue;
     }
 
     key = get(objOrValue, keyField);
 
-    if (typeof key !== 'string') {
+    if ( typeof key !== 'string' ) {
       return null;
     }
   }
 
-  if (key && cache && cache[key]) {
+  if ( key && cache && cache[key] ) {
     return cache[key];
   }
 
-  let out = `${key}`;
+  let out = `${ key }`;
 
-  for (const rule of mappings) {
+  for ( const rule of mappings ) {
     const re = stringToRegex(rule.match);
     const captured = out.match(re);
 
-    if (captured && rule.replace) {
+    if ( captured && rule.replace ) {
       out = out.replace(re, rule.replace);
 
       found = true;
-      if (!rule.continueOnMatch) {
+      if ( !rule.continueOnMatch ) {
         break;
       }
     }
   }
 
-  if (!found && defaultFn) {
+  if ( !found && defaultFn ) {
     out = defaultFn(out, objOrValue);
   }
 
-  if (cache) {
+  if ( cache ) {
     cache[key] = out;
   }
 
@@ -1377,7 +1378,7 @@ function _addMapping(mappings, match, replace, weight, continueOnMatch) {
   mappings.sort((a, b) => {
     const pri = b.weight - a.weight;
 
-    if (pri) {
+    if ( pri ) {
       return pri;
     }
 
@@ -1395,7 +1396,7 @@ function regexToString(regex) {
 function stringToRegex(str) {
   let out = regexCache[str];
 
-  if (!out) {
+  if ( !out ) {
     out = new RegExp(str);
     regexCache[str] = out;
   }

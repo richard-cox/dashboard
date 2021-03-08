@@ -307,7 +307,7 @@ export const actions = {
   },
 
   'ws.resource.start'({ getters, commit }, msg) {
-    // console.info(`Resource start: [${ getters.storeName }]`, msg); // eslint-disable-line no-console
+    console.info(`Resource start: [${ getters.storeName }]`, msg); // eslint-disable-line no-console
     commit('setWatchStarted', {
       type:      msg.resourceType,
       namespace: msg.namespace,
@@ -360,7 +360,7 @@ export const actions = {
       return;
     }
 
-    // console.log(`Create Event [${ state.config.namespace }]`, data.type, data.id); // eslint-disable-line no-console
+    console.log(`Create Event [${ state.config.namespace }]`, data.type, data.id); // eslint-disable-line no-console
 
     state.queue.push({
       action: 'dispatch',

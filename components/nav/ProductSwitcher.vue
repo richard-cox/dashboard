@@ -209,7 +209,7 @@ export default {
   <div class="filter">
     <Select
       ref="select"
-      key="product"
+      key="label"
       :value="value"
       :selectable="option => !option.disabled"
       :options="options"
@@ -219,7 +219,7 @@ export default {
       placement="bottom"
       @input="change"
     >
-      <template v-slot:option="opt">
+      <template #option="opt">
         <template v-if="opt.kind === 'divider'">
           <hr />
         </template>

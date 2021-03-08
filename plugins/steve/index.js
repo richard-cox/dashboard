@@ -7,6 +7,7 @@ import mutations from './mutations';
 import { mutations as subscribeMutations, actions as subscribeActions } from './subscribe';
 import { proxyFor } from './resource-proxy';
 import { keyFieldFor } from './normalize';
+import { SCHEMA } from '~/config/types';
 
 function SteveFactory(namespace, baseUrl) {
   return {
@@ -78,8 +79,10 @@ export default (config = {}) => {
     // Turn all the objects in the store from the server into proxies
     const state = fromServer?.state?.[namespace];
 
+    console.error('STEVE INDEX, state', namespace, state);
     if ( state ) {
       Object.keys(state.types).forEach((type) => {
+        console.error('STEVE INDEX, state', type);
         const keyField = keyFieldFor(type);
         const cache = state.types[type];
         const map = new Map();
@@ -93,6 +96,7 @@ export default (config = {}) => {
 
         Vue.set(cache, 'map', map);
         Vue.set(state.types, type, state.types[type]);
+        console.error('STEVE INDEX, state', state.types);
       });
     }
 
