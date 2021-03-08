@@ -224,7 +224,7 @@ export const actions = {
     }
   },
 
-  loadCookies({ state, commit }) {
+  loadCookies({ state, commit, ...ress }) {
     if ( state.cookiesLoaded ) {
       return;
     }
@@ -366,4 +366,5 @@ export default {
   getters,
   mutations,
   actions,
+  namespaced: true
 };

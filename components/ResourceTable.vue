@@ -1,6 +1,6 @@
 <script>
 import { get } from '@/utils/object';
-import { mapPref, GROUP_RESOURCES } from '@/store/prefs';
+import { mapPref, GROUP_RESOURCES } from '@/typed-store/prefs';
 import ButtonGroup from '@/components/ButtonGroup';
 import SortableTable from '@/components/SortableTable';
 import { NAMESPACE } from '@/config/table-headers';
@@ -200,7 +200,7 @@ export default {
     </template>
 
     <!-- Pass down templates provided by the caller -->
-    <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+    <template v-for="(_, slot) of $scopedSlots" #[slot]="scope">
       <slot :name="slot" v-bind="scope" />
     </template>
   </SortableTable>

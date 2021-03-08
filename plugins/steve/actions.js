@@ -2,10 +2,10 @@ import https from 'https';
 import cloneDeep from 'lodash/cloneDeep';
 import { SCHEMA } from '@/config/types';
 import { createYaml } from '@/utils/create-yaml';
-import { SPOOFED_API_PREFIX, SPOOFED_PREFIX } from '@/store/type-map';
 import { addParam } from '@/utils/url';
 import { normalizeType } from './normalize';
 import { proxyFor, SELF } from './resource-proxy';
+import { SPOOFED_API_PREFIX, SPOOFED_PREFIX } from '~/store/type-map2';
 
 export default {
   async request({ dispatch, rootGetters }, opt) {

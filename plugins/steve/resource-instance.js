@@ -14,7 +14,6 @@ import CustomValidators from '@/utils/custom-validators';
 import { downloadFile, generateZip } from '@/utils/download';
 import { eachLimit } from '@/utils/promise';
 import { get } from '@/utils/object';
-import { DEV } from '@/store/prefs';
 import { sortableNumericSuffix } from '@/utils/sort';
 import {
   coerceStringTypeToScalarType,
@@ -36,6 +35,7 @@ import {
 } from '@/config/query-params';
 
 import { cleanForNew, normalizeType } from './normalize';
+import { DEV } from '~/store/prefs2';
 
 const STRING_LIKE_TYPES = [
   'string',

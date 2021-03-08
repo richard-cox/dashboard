@@ -1,7 +1,7 @@
 <script>
 import debounce from 'lodash/debounce';
 import { mapState, mapGetters } from 'vuex';
-import { mapPref, DEV, EXPANDED_GROUPS, FAVORITE_TYPES } from '@/store/prefs';
+import { mapPref, DEV, EXPANDED_GROUPS, FAVORITE_TYPES } from '@/typed-store/prefs';
 import ActionMenu from '@/components/ActionMenu';
 import Jump from '@/components/nav/Jump';
 import WindowManager from '@/components/nav/WindowManager';
@@ -11,10 +11,10 @@ import Group from '@/components/nav/Group';
 import Header from '@/components/nav/Header';
 import Footer from '@/components/nav/Footer';
 import { COUNT, SCHEMA, MANAGEMENT } from '@/config/types';
-import { BASIC, FAVORITE, USED } from '@/store/type-map';
 import { addObjects, replaceWith, clear } from '@/utils/array';
 import { NAME as EXPLORER } from '@/config/product/explorer';
 import isEqual from 'lodash/isEqual';
+import { BASIC, FAVORITE, USED } from '~/store/type-map2';
 
 export default {
 
@@ -29,11 +29,11 @@ export default {
     WindowManager
   },
 
+  middleware: ['authenticated'],
+
   data() {
     return { groups: [] };
   },
-
-  middleware: ['authenticated'],
 
   computed: {
     ...mapState(['managementReady', 'clusterReady']),

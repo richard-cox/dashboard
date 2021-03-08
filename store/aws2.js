@@ -3,9 +3,9 @@ import { randomStr } from '@/utils/string';
 import { parseSi } from '@/utils/units';
 import { FetchHttpHandler } from '@aws-sdk/fetch-http-handler';
 
-export const state = () => {
-  return {};
-};
+// export const state = () => {
+//   return {};
+// };
 
 class Handler {
   constructor(cloudCredentialId) {
@@ -50,47 +50,47 @@ function credentialDefaultProvider() {
   return out;
 }
 
-export const actions = {
-  ec2Lib() {
-    return import(/* webpackChunkName: "aws-ec2" */ '@aws-sdk/client-ec2');
-  },
+// export const actions = {
+//   ec2Lib() {
+//     return import(/* webpackChunkName: "aws-ec2" */ '@aws-sdk/client-ec2');
+//   },
 
-  eksLib() {
-    return import(/* webpackChunkName: "aws-eks" */ '@aws-sdk/client-eks');
-  },
+//   eksLib() {
+//     return import(/* webpackChunkName: "aws-eks" */ '@aws-sdk/client-eks');
+//   },
 
-  async ec2({ dispatch }, { region, cloudCredentialId }) {
-    const lib = await dispatch('ec2Lib');
+//   async ec2({ dispatch }, { region, cloudCredentialId }) {
+//     const lib = await dispatch('ec2Lib');
 
-    const client = new lib.EC2({
-      region,
-      credentialDefaultProvider,
-      requestHandler: new Handler(cloudCredentialId.replace('/', ':')), // IDs use / but API wants :
-    });
+//     const client = new lib.EC2({
+//       region,
+//       credentialDefaultProvider,
+//       requestHandler: new Handler(cloudCredentialId.replace('/', ':')), // IDs use / but API wants :
+//     });
 
-    return client;
-  },
+//     return client;
+//   },
 
-  async eks({ dispatch }, { region, cloudCredentialId }) {
-    const lib = await dispatch('eksLib');
+//   async eks({ dispatch }, { region, cloudCredentialId }) {
+//     const lib = await dispatch('eksLib');
 
-    const client = new lib.EKS({
-      region,
-      credentialDefaultProvider,
-      requestHandler: new Handler(cloudCredentialId),
-    });
+//     const client = new lib.EKS({
+//       region,
+//       credentialDefaultProvider,
+//       requestHandler: new Handler(cloudCredentialId),
+//     });
 
-    return client;
-  },
+//     return client;
+//   },
 
-  async instanceInfo() {
-    const data = (await import(/* webpackChunkName: "aws-data" */'@/assets/ec2instances.csv')).default;
+//   async instanceInfo() {
+//     const data = (await import(/* webpackChunkName: "aws-data" */'@/assets/ec2instances.csv')).default;
 
-    data.forEach((row) => {
-      row.instanceClass = row['API Name'].split('.')[0].toLowerCase();
-      row.memoryBytes = parseSi(row['Memory']);
-    });
+//     data.forEach((row) => {
+//       row.instanceClass = row['API Name'].split('.')[0].toLowerCase();
+//       row.memoryBytes = parseSi(row['Memory']);
+//     });
 
-    return sortBy(data, ['instanceClass', 'memoryBytes', 'API Name']);
-  },
-};
+//     return sortBy(data, ['instanceClass', 'memoryBytes', 'API Name']);
+//   },
+// };

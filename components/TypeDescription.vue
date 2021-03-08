@@ -1,7 +1,7 @@
 <script>
 import Banner from '@/components/Banner';
 import { mapGetters } from 'vuex';
-import { HIDE_DESC, mapPref } from '@/store/prefs';
+import { HIDE_DESC, mapPref } from '@/typed-store/prefs';
 import { addObject } from '@/utils/array';
 
 export default {

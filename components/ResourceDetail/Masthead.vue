@@ -6,7 +6,7 @@ import BadgeState from '@/components/BadgeState';
 import Banner from '@/components/Banner';
 import { get } from '@/utils/object';
 import { NAME as FLEET_NAME } from '@/config/product/fleet';
-import { HIDE_SENSITIVE } from '@/store/prefs';
+import { HIDE_SENSITIVE } from '@/typed-store/prefs';
 import {
   AS, _DETAIL, _CONFIG, _YAML, MODE, _CREATE, _EDIT, _VIEW, _UNFLAG
 } from '@/config/query-params';

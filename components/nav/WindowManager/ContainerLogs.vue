@@ -5,7 +5,7 @@ import { addParams } from '@/utils/url';
 import { base64Decode } from '@/utils/crypto';
 import {
   LOGS_RANGE, LOGS_TIME, LOGS_WRAP, DATE_FORMAT, TIME_FORMAT
-} from '@/store/prefs';
+} from '@/typed-store/prefs';
 import LabeledSelect from '@/components/form/LabeledSelect';
 import Checkbox from '@/components/form/Checkbox';
 import AsyncButton from '@/components/AsyncButton';

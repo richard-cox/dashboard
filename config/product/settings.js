@@ -1,4 +1,3 @@
-import { DSL } from '@/store/type-map';
 import { MANAGEMENT } from '@/config/types';
 import {
   STATE,
@@ -6,6 +5,7 @@ import {
   FEATURE_DESCRIPTION,
   RESTART,
 } from '@/config/table-headers';
+import { DSL } from '~/store/type-map2';
 export const NAME = 'settings';
 
 export function init(store) {

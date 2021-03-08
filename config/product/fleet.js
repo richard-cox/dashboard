@@ -1,6 +1,6 @@
-import { DSL } from '@/store/type-map';
 import { FLEET } from '@/config/types';
 import { STATE, NAME as NAME_COL, AGE } from '@/config/table-headers';
+import { DSL } from '~/store/type-map2';
 
 export const NAME = 'fleet';
 export const CHART_NAME = 'fleet';

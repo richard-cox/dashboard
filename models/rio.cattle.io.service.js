@@ -4,11 +4,11 @@ import {
   ADD_SIDECAR, _FLAGGED, MODE, _CREATE, _CLONE, _STAGE
 } from '@/config/query-params';
 import { escapeHtml } from '@/utils/string';
-import { DATE_FORMAT, TIME_FORMAT } from '@/store/prefs';
 import { PRIVATE } from '@/plugins/steve/resource-proxy';
 import { RIO } from '@/config/types';
 import { formatSi } from '@/utils/units';
 import { get, set } from '@/utils/object';
+import { DATE_FORMAT, TIME_FORMAT } from '~/store/prefs2';
 
 const EMPTY = {};
 

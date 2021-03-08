@@ -4,6 +4,8 @@ import { get } from '@/utils/object';
 import en from '@/assets/translations/en-us.yaml';
 import { getProduct, getVendor } from '@/config/private-label';
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
+import store from '@/typed-store';
+
 // import Vuex from 'vuex';
 // import store from '@/store';
 
@@ -22,10 +24,14 @@ const intlCache = {};
 // dynamic: true,
 // store,
 
+console.error('!!!!!!!!!', !!store);
+
 @Module({
   name: 'i18n',
-  stateFactory: true,
+  // stateFactory: true,
   namespaced: true,
+  dynamic: true,
+  store
 })
 export default class i18n extends VuexModule {
   // wheels = 2
@@ -183,60 +189,62 @@ export default class i18n extends VuexModule {
     let selected;
 
     if ( !selected ) {
-      // selected = this.context.getters.default;
+      selected = this.default;
     }
 
-    return this.context.commit('switchTo', selected);
+    return this.context.dispatch('switchTo', selected);
   }
 
-  // @Action
-  // async load(locale) {
-  //   const translations = await translationContext(`./${ locale }.yaml`);
+  @Action
+  async load(locale) {
+    const translations = await translationContext(`./${ locale }.yaml`);
 
-  //   this.context.commit('loadTranslations', { locale, translations });
+    this.context.commit('loadTranslations', { locale, translations });
 
-  //   return true;
-  // }
+    return true;
+  }
 
-  // async switchTo(locale) {
-  //   if ( locale === NONE ) {
-  //     this.context.commit('setSelected', locale);
+  @Action
+  async switchTo(locale) {
+    if ( locale === NONE ) {
+      this.context.commit('setSelected', locale);
 
-  //     // Don't remember into cookie
-  //     return;
-  //   }
+      // Don't remember into cookie
+      return;
+    }
 
-  //   if ( !this.translations[locale] ) {
-  //     try {
-  //       await this.context.commit('load', locale);
-  //     } catch (e) {
-  //       if ( locale !== 'en-us' ) {
-  //         // Try to show something...
+    if ( !this.translations[locale] ) {
+      try {
+        await this.context.dispatch('load', locale);
+      } catch (e) {
+        if ( locale !== 'en-us' ) {
+          // Try to show something...
 
-  //         this.context.commit('setSelected', 'en-us');
+          this.context.commit('setSelected', 'en-us');
 
-  //         return;
-  //       }
-  //     }
-  //   }
+          return;
+        }
+      }
+    }
 
-  //   this.context.commit('setSelected', locale);
-  //   // TODO: RC how to access $cookies
-  //   // this.$cookies.set(LOCALE, locale, {
-  //   //   encode: x => x,
-  //   //   maxAge: 86400 * 365,
-  //   //   secure: true,
-  //   //   path:   '/',
-  //   // });
-  // }
+    this.context.commit('setSelected', locale);
+    // TODO: RC how to access $cookies
+    // this.$cookies.set(LOCALE, locale, {
+    //   encode: x => x,
+    //   maxAge: 86400 * 365,
+    //   secure: true,selectedLocaleLabel
+    //   path:   '/',
+    // });
+  }
 
-  // toggleNone() {
-  //   if ( this.selected === NONE ) {
-  //     return this.context.commit('this.previous || this.default');
-  //   } else {
-  //     return this.context.commit('NONE');
-  //   }
-  // }
+  @Action
+  toggleNone() {
+    if ( this.selected === NONE ) {
+      return this.context.dispatch(this.previous || this.default);
+    } else {
+      return this.context.dispatch('NONE');
+    }
+  }
 }
 
 // export const state = function() {

@@ -1,7 +1,9 @@
 import { Store } from 'vuex';
 import { getModule } from 'vuex-module-decorators';
-import DemoVuexModuleDecorator from '~/store/DemoVuexModuleDecorator';
-import i18n from '~/store/i18n';
+import store from '@/typed-store';
+import DemoVuexModuleDecorator from '~/typed-store/DemoVuexModuleDecorator';
+
+import i18n from '~/typed-store/i18n';
 
 interface StoreAccessor {
   init: (store: Store<any>) => void;
@@ -10,10 +12,28 @@ interface StoreAccessor {
 }
 
 function initialiseStores(store: Store<any>): void {
+  // const files = (require as any).context('.', false, '/\.ts$');
+
+  // const modules = {};
+  // console.error('registerStore');
+
+  // files.keys().forEach((key) => {
+  //   if (key === './index.ts') {
+  //     return;
+  //   }
+  //   // modules[key.replace(/(\.\/|\.js)/g, '')] = files(key).default;
+
+  //   const namespace = key.replace(/(\.\/|\.ts)/g, '');
+
+  //   console.error(key, namespace);
+
+  //   store.registerModule(namespace, files(key).default);
+  // });
+
   storeAccessor.demo = getModule(DemoVuexModuleDecorator, store);
-  console.error('initialiseStores: ', store);
+  console.error('initialiseStores: ', !!store);
   storeAccessor.i18n = getModule(i18n, store);
-  store.registerModule('i18n', storeAccessor.i18n);
+  store.registerModule('i18n', storeAccessor.i18n, { preserveState: true });
 }
 
 const storeAccessor: StoreAccessor = {
@@ -21,5 +41,8 @@ const storeAccessor: StoreAccessor = {
   demo:  null,
   i18n: null
 };
+
+console.error('[!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+// storeAccessor.init(store);
 
 export default storeAccessor;

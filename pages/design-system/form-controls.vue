@@ -7,11 +7,10 @@ import SecretSelector from '@/components/form/SecretSelector';
 import InputWithSelect from '@/components/form/InputWithSelect';
 import Checkbox from '@/components/form/Checkbox';
 import ButtonGroup from '@/components/ButtonGroup';
-import { mapPref, THEME } from '@/store/prefs';
+import { mapPref, THEME } from '@/typed-store/prefs';
 import { ucFirst } from '@/utils/string';
 
 export default {
-  layout:     'unauthenticated',
   components: {
     ButtonGroup,
     Checkbox,
@@ -22,6 +21,7 @@ export default {
     SecretSelector,
     InputWithSelect
   },
+  layout: 'unauthenticated',
 
   data() {
     return {

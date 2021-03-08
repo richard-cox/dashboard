@@ -1,4 +1,4 @@
-import { DSL } from '@/store/type-map';
+import { DSL } from '~/store/type-map2';
 // import { LONGHORN } from '@/config/types';
 
 export const NAME = 'longhorn';

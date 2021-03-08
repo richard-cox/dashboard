@@ -14,4 +14,5 @@ export const actions = {
 export default {
   state,
   actions,
+  namespaced: true
 };

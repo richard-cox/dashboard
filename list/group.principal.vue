@@ -4,9 +4,9 @@ import Loading from '@/components/Loading';
 import Masthead from '@/components/ResourceList/Masthead';
 import { NORMAN } from '@/config/types';
 import AsyncButton from '@/components/AsyncButton';
-import { applyProducts } from '@/store/type-map';
 import { NAME } from '@/config/product/auth';
 import { MODE, _EDIT } from '@/config/query-params';
+import { applyProducts } from '~/store/type-map2';
 
 export default {
   components: {
@@ -23,16 +23,6 @@ export default {
       required: true,
     },
   },
-  async fetch() {
-    this.rows = await this.$store.dispatch('cluster/findAll', { type: NORMAN.SPOOFED.GROUP_PRINCIPAL }, { root: true }); // See PromptRemove.vue
-
-    const principals = await this.$store.dispatch('rancher/findAll', { type: NORMAN.PRINCIPAL, opt: { url: '/v3/principals' } });
-
-    this.hasGroups = principals.filter(principal => principal.principalType === 'group')?.length;
-
-    this.canRefresh = await this.$store.dispatch('rancher/request', { url: '/v3/users?limit=0' })
-      .then(res => !!res?.actions?.refreshauthprovideraccess);
-  },
   data() {
     return {
       rows:           null,
@@ -43,6 +33,16 @@ export default {
         query: { [MODE]: _EDIT }
       }
     };
+  },
+  async fetch() {
+    this.rows = await this.$store.dispatch('cluster/findAll', { type: NORMAN.SPOOFED.GROUP_PRINCIPAL }, { root: true }); // See PromptRemove.vue
+
+    const principals = await this.$store.dispatch('rancher/findAll', { type: NORMAN.PRINCIPAL, opt: { url: '/v3/principals' } });
+
+    this.hasGroups = principals.filter(principal => principal.principalType === 'group')?.length;
+
+    this.canRefresh = await this.$store.dispatch('rancher/request', { url: '/v3/users?limit=0' })
+      .then(res => !!res?.actions?.refreshauthprovideraccess);
   },
   methods: {
     async refreshGroupMemberships(buttonDone) {

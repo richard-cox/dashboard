@@ -1,4 +1,3 @@
-import { DSL } from '@/store/type-map';
 import { RIO } from '@/config/types';
 import {
   STATE,
@@ -8,6 +7,7 @@ import {
   MATCHES, DESTINATION,
   TARGET, TARGET_KIND,
 } from '@/config/table-headers';
+import { DSL } from '~/store/type-map2';
 
 export const NAME = 'rio';
 export const CHART_NAME = 'rio';

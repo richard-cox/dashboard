@@ -1,7 +1,7 @@
 import { _CREATE, _EDIT, _VIEW } from '@/config/query-params';
-import { LAST_NAMESPACE } from '@/store/prefs';
 import { exceptionToErrorsArray } from '@/utils/error';
 import ChildHook, { BEFORE_SAVE_HOOKS, AFTER_SAVE_HOOKS } from '@/mixins/child-hook';
+import { LAST_NAMESPACE } from '~/store/prefs2';
 
 export default {
   mixins: [ChildHook],

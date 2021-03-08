@@ -1,5 +1,5 @@
 <script>
-import { NAMESPACE_FILTERS } from '@/store/prefs';
+import { NAMESPACE_FILTERS } from '@/typed-store/prefs';
 import { NAMESPACE, MANAGEMENT } from '@/config/types';
 import { sortBy } from '@/utils/sort';
 import { isArray, addObjects, findBy, filterBy } from '@/utils/array';
@@ -325,7 +325,7 @@ export default {
       :close-on-select="false"
       @on-blur="focusHandler('selectBlurred')"
     >
-      <template v-slot:option="opt">
+      <template #option="opt">
         <template v-if="opt.kind === 'namespace'">
           <i class="mr-5 icon icon-fw icon-folder" /> {{ opt.label }}
         </template>

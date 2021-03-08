@@ -19,10 +19,10 @@ import * as growl from './growl';
 import * as prefs from './prefs';
 import * as typeMap from './type-map';
 import * as wm from './wm';
-import { CLUSTER as CLUSTER_PREF, NAMESPACE_FILTERS, LAST_NAMESPACE, WORKSPACE } from '~/typed-store/prefs';
-import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '~/typed-store/type-map';
+import { CLUSTER as CLUSTER_PREF, NAMESPACE_FILTERS, LAST_NAMESPACE, WORKSPACE } from './prefs';
+import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '~/store/type-map2';
 
-import storeAccessor from '~/utils/store-accessor';
+// import storeAccessor from '~/utils/store-accessor';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // becaues it's more efficient to do that sometimes.
@@ -30,54 +30,73 @@ export const strict = false;
 
 Vue.use(Vuex);
 
-const wip = {
-  'action-menu': {
-    state:     actionMenu.state,
-    getters:   actionMenu.getters,
-    mutations: actionMenu.mutations,
-    actions:   actionMenu.actions,
-  },
-  auth: {
-    state:     auth.state,
-    getters:   auth.getters,
-    mutations: auth.mutations,
-    actions:   auth.actions,
-  },
-  catalog: {
-    state:     catalog.state,
-    getters:   catalog.getters,
-    mutations: catalog.mutations,
-    actions:   catalog.actions,
-  },
-  growl: { actions: growl.actions },
-  prefs: {
-    state:     prefs.state,
-    getters:   prefs.getters,
-    mutations: prefs.mutations,
-    actions:   prefs.actions,
-  },
-  'type-map': {
-    state:     typeMap.state,
-    getters:   typeMap.getters,
-    mutations: typeMap.mutations,
-    actions:   typeMap.actions,
-  },
-  wm: {
-    state:     wm.state,
-    getters:   wm.getters,
-    mutations: wm.mutations,
-    actions:   wm.actions,
-  }
-};
+// const wip = {
+//   'action-menu': {
+//     state:     actionMenu.state,
+//     getters:   actionMenu.getters,
+//     mutations: actionMenu.mutations,
+//     actions:   actionMenu.actions,
+//   },
+//   auth: {
+//     state:     auth.state,
+//     getters:   auth.getters,
+//     mutations: auth.mutations,
+//     actions:   auth.actions,
+//   },
+//   catalog: {
+//     state:     catalog.state,
+//     getters:   catalog.getters,
+//     mutations: catalog.mutations,
+//     actions:   catalog.actions,
+//   },
+//   growl: { actions: growl.actions },
+//   prefs: {
+//     state:     prefs.state,
+//     getters:   prefs.getters,
+//     mutations: prefs.mutations,
+//     actions:   prefs.actions,
+//   },
+//   'type-map': {
+//     state:     typeMap.state,
+//     getters:   typeMap.getters,
+//     mutations: typeMap.mutations,
+//     actions:   typeMap.actions,
+//   },
+//   wm: {
+//     state:     wm.state,
+//     getters:   wm.getters,
+//     mutations: wm.mutations,
+//     actions:   wm.actions,
+//   }
+// };
 
 const registerStore = (store: Store<any>) => {
-  store.registerModule('action-menu', actionMenu);
-  store.registerModule('auth', auth);
-  store.registerModule('catalog', catalog);
-  store.registerModule('growl', growl);
-  store.registerModule('prefs', prefs);
-  store.registerModule('typ-map', typeMap);
-  store.registerModule('wm', wm);
+  // const files = (require as any).context('.', false, '/\.js$');
+
+  // // const modules = {};
+  // console.error('registerStore');
+
+  // files.keys().forEach((key) => {
+  //   if (key === './autoloader.js') {
+  //     return;
+  //   }
+  //   // modules[key.replace(/(\.\/|\.js)/g, '')] = files(key).default;
+
+  //   const namespace = key.replace(/(\.\/|\.js)/g, '');
+
+  //   console.error(key, namespace);
+
+  //   store.registerModule(namespace, files(key).default);
+  // });
+
+  // store.registerModule('action-menu', actionMenu, { preserveState: true });
+  // store.registerModule('auth', auth, { preserveState: true });
+  // store.registerModule('catalog', catalog, { preserveState: true });
+  // store.registerModule('growl', growl, { preserveState: true });
+  // store.registerModule('prefs', prefs, { preserveState: true });
+  // store.registerModule('type-map', typeMap, { preserveState: true });
+  // store.registerModule('wm', wm, { preserveState: true });
+
   // Object.entries(wip).forEach(([namespace, inst]) => {
   //   store.registerModule(namespace, inst);
   // });
@@ -85,13 +104,17 @@ const registerStore = (store: Store<any>) => {
 
 const plugins = [
   registerStore,
-  (store: Store<any>) => storeAccessor.init(store),
+  // (store: Store<any>) => storeAccessor.init(store),
   Steve({ namespace: 'management', baseUrl: '/v1' }),
   Steve({ namespace: 'cluster', baseUrl: '' }), // url set later
   Steve({ namespace: 'rancher', baseUrl: '/v3' }),
 ];
 
-const state = () => {
+interface RootState {
+
+}
+
+const state: RootState = () => {
   return {
     managementReady:  false,
     clusterReady:     false,
@@ -659,7 +682,7 @@ const actions = {
   }
 };
 
-const store = new Vuex.Store({
+const store = new Vuex.Store<RootState>({
   /*
   Ideally if all your modules are dynamic
   then your store is registered initially
@@ -670,4 +693,28 @@ const store = new Vuex.Store({
   getters,
   mutations,
   actions,
+  // modules: {
+  //   'action-menu': actionMenu,
+  //   auth,
+  //   catalog,
+  //   growl,
+  //   // prefs,
+  //   'type-map':    typeMap,
+  //   wm
+  // }
 });
+
+store.registerModule('action-menu', actionMenu.default);
+store.registerModule('auth', auth.default);
+store.registerModule('catalog', catalog.default);
+store.registerModule('growl', growl.default);
+store.registerModule('prefs', prefs.default);
+
+store.registerModule('type-map', typeMap.default);
+store.registerModule('wm', wm.default);
+
+export const createStore = (): Store<RootState> => {
+  return store;
+};
+
+export default store;

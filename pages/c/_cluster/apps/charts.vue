@@ -11,7 +11,7 @@ import { sortBy } from '@/utils/sort';
 import { mapGetters } from 'vuex';
 import Checkbox from '@/components/form/Checkbox';
 import Select from '@/components/form/Select';
-import { mapPref, HIDE_REPOS } from '@/store/prefs';
+import { mapPref, HIDE_REPOS } from '@/typed-store/prefs';
 import { removeObject, addObject, findBy } from '@/utils/array';
 import { CATALOG } from '@/config/labels-annotations';
 
@@ -27,6 +27,17 @@ export default {
     SelectIconGrid,
   },
 
+  data() {
+    return {
+      allRepos:            null,
+      catalogOSAnnotation: CATALOG.SUPPORTED_OS,
+      category:            null,
+      searchQuery:         null,
+      showDeprecated:      null,
+      showHidden:          null,
+    };
+  },
+
   async fetch() {
     await this.$store.dispatch('catalog/load');
 
@@ -37,17 +48,6 @@ export default {
     this.showHidden = query['hidden'] === _FLAGGED;
     this.category = query[CATEGORY] || '';
     this.allRepos = this.areAllEnabled();
-  },
-
-  data() {
-    return {
-      allRepos:            null,
-      catalogOSAnnotation: CATALOG.SUPPORTED_OS,
-      category:            null,
-      searchQuery:         null,
-      showDeprecated:      null,
-      showHidden:          null,
-    };
   },
 
   computed: {

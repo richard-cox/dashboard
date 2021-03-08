@@ -1,6 +1,6 @@
 <script>
 import day from 'dayjs';
-import { DATE_FORMAT, TIME_FORMAT } from '@/store/prefs';
+import { DATE_FORMAT, TIME_FORMAT } from '@/typed-store/prefs';
 import { escapeHtml } from '@/utils/string';
 
 export default {

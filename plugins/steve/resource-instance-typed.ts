@@ -2,7 +2,7 @@
 // import Vue from '*.vue';
 // import { ANNOTATIONS_TO_IGNORE_REGEX, DESCRIPTION, LABELS_TO_IGNORE_REGEX, NORMAN_NAME } from '@/config/labels-annotations';
 // import { _CLONE, _CONFIG, _EDIT, _UNFLAG, _VIEW, _YAML, AS, MODE } from '@/config/query-params';
-// import { DEV } from '@/store/prefs';
+// import { DEV } from '@/typed-store/prefs';
 // import { addObject, addObjects, findBy, removeAt } from '@/utils/array';
 // import CustomValidators from '@/utils/custom-validators';
 // import { downloadFile, generateZip } from '@/utils/download';

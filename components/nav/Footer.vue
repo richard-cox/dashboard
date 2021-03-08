@@ -1,7 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { options } from '@/config/footer';
-import { mapPref, DEV } from '@/store/prefs';
+import { mapPref, DEV } from '@/typed-store/prefs';
 import { MANAGEMENT } from '@/config/types';
 
 const UNKNOWN = 'unknown';

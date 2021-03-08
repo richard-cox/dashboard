@@ -4,10 +4,14 @@ import { MANAGEMENT } from '@/config/types';
 import { ALLOWED_SETTINGS } from '@/config/settings';
 import Banner from '@/components/Banner';
 import Loading from '@/components/Loading';
-import { DEV } from '@/store/prefs';
+import { DEV } from '@/typed-store/prefs';
 
 export default {
   components: { Banner, Loading },
+
+  data() {
+    return { settings: null };
+  },
 
   async fetch() {
     const isDev = this.$store.getters['prefs/get'](DEV);
@@ -46,10 +50,6 @@ export default {
       settings.push(s);
     });
     this.settings = settings;
-  },
-
-  data() {
-    return { settings: null };
   },
 
   computed: { ...mapGetters({ t: 'i18n/t' }) },

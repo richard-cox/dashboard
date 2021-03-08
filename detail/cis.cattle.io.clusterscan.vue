@@ -5,7 +5,7 @@ import Banner from '@/components/Banner';
 import LabeledSelect from '@/components/form/LabeledSelect';
 import Loading from '@/components/Loading';
 import day from 'dayjs';
-import { DATE_FORMAT, TIME_FORMAT } from '@/store/prefs';
+import { DATE_FORMAT, TIME_FORMAT } from '@/typed-store/prefs';
 import { escapeHtml, randomStr } from '@/utils/string';
 import { CIS } from '@/config/types';
 import { STATE } from '@/config/table-headers';
@@ -29,12 +29,12 @@ export default {
     }
   },
 
-  async fetch() {
-    this.clusterReports = await this.value.getReports();
-  },
-
   data() {
     return { clusterReports: [], clusterReport: null };
+  },
+
+  async fetch() {
+    this.clusterReports = await this.value.getReports();
   },
 
   computed: {

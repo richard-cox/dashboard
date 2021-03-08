@@ -13,7 +13,7 @@ import { _CREATE } from '@/config/query-params';
 import Tabbed from '@/components/Tabbed';
 import Tab from '@/components/Tabbed/Tab';
 import Labels from '@/components/form/Labels';
-import { HIDE_SENSITIVE } from '@/store/prefs';
+import { HIDE_SENSITIVE } from '@/typed-store/prefs';
 
 const types = [
   TYPES.OPAQUE,

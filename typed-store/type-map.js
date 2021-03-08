@@ -1153,7 +1153,7 @@ export const mutations = {
 
   basicType(state, { product, group, types }) {
     if ( !product ) {
-      product === EXPLORER;
+      product = EXPLORER;
     }
 
     if ( !group ) {
@@ -1435,4 +1435,5 @@ export default {
   getters,
   mutations,
   actions,
+  namespaced: true
 };

@@ -1,5 +1,5 @@
 <script>
-import { KEYMAP } from '@/store/prefs';
+import { KEYMAP } from '@/typed-store/prefs';
 
 export default {
   name:  'CodeMirror',

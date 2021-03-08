@@ -10,6 +10,7 @@ module.exports = {
   ],
   // add your custom rules here
   rules: {
+    'vue/no-mutating-props':    'off', // TODO: RC
     'dot-notation':             'off',
     'generator-star-spacing':   'off',
     'guard-for-in':             'off',

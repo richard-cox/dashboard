@@ -4,7 +4,7 @@ import ButtonGroup from '@/components/ButtonGroup';
 import Checkbox from '@/components/form/Checkbox';
 import {
   mapPref, THEME, LANDING, KEYMAP, DEV, DATE_FORMAT, TIME_FORMAT, ROWS_PER_PAGE, HIDE_DESC
-} from '@/store/prefs';
+} from '@/typed-store/prefs';
 import LabeledSelect from '@/components/form/LabeledSelect';
 import { addObject } from '@/utils/array';
 
