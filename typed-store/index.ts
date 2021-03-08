@@ -693,25 +693,24 @@ const store = new Vuex.Store<RootState>({
   getters,
   mutations,
   actions,
-  // modules: {
-  //   'action-menu': actionMenu,
-  //   auth,
-  //   catalog,
-  //   growl,
-  //   // prefs,
-  //   'type-map':    typeMap,
-  //   wm
-  // }
+  modules: {
+    'action-menu': actionMenu.default,
+    auth:          auth.default,
+    catalog:       catalog.default,
+    growl:         growl.default,
+    prefs:         prefs.default,
+    'type-map':    typeMap.default,
+    wm:            wm.default
+  }
 });
 
-store.registerModule('action-menu', actionMenu.default);
-store.registerModule('auth', auth.default);
-store.registerModule('catalog', catalog.default);
-store.registerModule('growl', growl.default);
-store.registerModule('prefs', prefs.default);
-
-store.registerModule('type-map', typeMap.default);
-store.registerModule('wm', wm.default);
+// store.registerModule('action-menu', actionMenu.default);
+// store.registerModule('auth', auth.default);
+// store.registerModule('catalog', catalog.default);
+// store.registerModule('growl', growl.default);
+// store.registerModule('prefs', prefs.default);
+// store.registerModule('type-map', typeMap.default);
+// store.registerModule('wm', wm.default);
 
 export const createStore = (): Store<RootState> => {
   return store;

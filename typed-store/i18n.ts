@@ -28,7 +28,7 @@ console.error('!!!!!!!!!', !!store);
 
 @Module({
   name: 'i18n',
-  // stateFactory: true,
+  stateFactory: true,
   namespaced: true,
   dynamic: true,
   store
