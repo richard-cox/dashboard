@@ -34,6 +34,7 @@ class TSComponentRichard extends Vue {
     console.log(this.$accessor.typedVuexTSStore.count);
 
     console.log(this.$accessor.i18n.t('generic.add'));
+    // this.$accessor.
   }
 
   $fetch() {

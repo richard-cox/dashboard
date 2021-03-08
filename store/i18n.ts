@@ -1,20 +1,30 @@
 import IntlMessageFormat from 'intl-messageformat';
 import { LOCALE } from '@/config/cookies';
 import { get } from '@/utils/object';
-import en from '@/assets/translations/en-us.yaml';
 import { getProduct, getVendor } from '@/config/private-label';
+import { getterTree, mutationTree, actionTree, useAccessor } from 'nuxt-typed-vuex';
+import en from '@/assets/translations/en-us.yaml';
 
-const translationContext = require.context('@/assets/translations', true, /.*/);
+// @nuxt/typescript-runtime TODO: RC remove?
+const translationContext = (require as any).context('@/assets/translations', true, /.*/);
 
 const NONE = 'none';
 
 // Formatters can't be serialized into state
 const intlCache = {};
 
+interface State {
+  default: 'en-us',
+  selected: string,
+  previous: null,
+  available: any,
+  translations: { 'en-us': en },
+}
+
 export const state = function() {
   const available = translationContext.keys().map(path => path.replace(/^.*\/([^\/]+)\.[^.]+$/, '$1'));
 
-  const out = {
+  const out: State = {
     default:      'en-us',
     selected:     null,
     previous:     null,
@@ -25,7 +35,7 @@ export const state = function() {
   return out;
 };
 
-export const getters = {
+export const getters = getterTree(state, {
   selectedLocaleLabel(state) {
     const key = `locale.${ state.selected }`;
 
@@ -52,7 +62,7 @@ export const getters = {
     return out;
   },
 
-  t: state => (key, args) => {
+  t: state => (key, args?) => {
     if (state.selected === NONE ) {
       return `%${ key }%`;
     }
@@ -134,9 +144,9 @@ export const getters = {
       return fallback;
     }
   }
-};
+});
 
-export const mutations = {
+export const mutations = mutationTree(state, {
   loadTranslations(state, { locale, translations }) {
     state.translations[locale] = translations;
   },
@@ -144,63 +154,71 @@ export const mutations = {
   setSelected(state, locale) {
     state.selected = locale;
   },
-};
+});
 
-export const actions = {
-  init({ state, commit, dispatch }) {
-    let selected = this.$cookies.get(LOCALE, { parseJSON: false });
-
-    if ( !selected ) {
-      selected = state.default;
-    }
-
-    return dispatch('switchTo', selected);
+export const actions = actionTree(
+  {
+    state, getters, mutations
   },
+  {
+    // NOTE - Must have a return type to avoid below error in vue-shim
+    // `'$accessor' is referenced directly or indirectly in its own type annotation`
+    init({ state }): Promise<void> {
+      let selected = null;// this.$cookies.get(LOCALE, { parseJSON: false }); // TODO: RC
 
-  async load({ commit }, locale) {
-    const translations = await translationContext(`./${ locale }.yaml`);
+      if ( !selected ) {
+        selected = state.default;
+      }
 
-    commit('loadTranslations', { locale, translations });
+      return this.app.$accessor.i18n.switchTo(selected);
+    },
 
-    return true;
-  },
+    async load({ commit }, locale) {
+      const translations = await translationContext(`./${ locale }.yaml`);
 
-  async switchTo({ state, commit, dispatch }, locale) {
-    if ( locale === NONE ) {
-      commit('setSelected', locale);
+      // this is typed!
+      commit('loadTranslations', { locale, translations });
 
-      // Don't remember into cookie
-      return;
-    }
+      return true;
+    },
 
-    if ( !state.translations[locale] ) {
-      try {
-        await dispatch('load', locale);
-      } catch (e) {
-        if ( locale !== 'en-us' ) {
+    async switchTo({ state, commit, dispatch }, locale) {
+      if ( locale === NONE ) {
+        commit('setSelected', locale);
+
+        // Don't remember into cookie
+        return;
+      }
+
+      if ( !state.translations[locale] ) {
+        try {
+          await dispatch('load', locale);
+        } catch (e) {
+          if ( locale !== 'en-us' ) {
           // Try to show something...
 
-          commit('setSelected', 'en-us');
+            commit('setSelected', 'en-us');
 
-          return;
+            return;
+          }
         }
       }
-    }
 
-    commit('setSelected', locale);
-    this.$cookies.set(LOCALE, locale, {
-      encode: x => x,
-      maxAge: 86400 * 365,
-      secure: true,
-      path:   '/',
-    });
-  },
+      commit('setSelected', locale);
+    // TODO: RC
+    // this.$cookies.set(LOCALE, locale, {
+    //   encode: x => x,
+    //   maxAge: 86400 * 365,
+    //   secure: true,
+    //   path:   '/',
+    // });
+    },
 
-  toggleNone({ state, dispatch }) {
-    if ( state.selected === NONE ) {
-      return dispatch('switchTo', state.previous || state.default);
-    } else {
-      return dispatch('switchTo', NONE);
+    toggleNone({ state, dispatch }) {
+      if ( state.selected === NONE ) {
+        return dispatch('switchTo', state.previous || state.default);
+      } else {
+        return dispatch('switchTo', NONE);
+      }
     }
-  }
-};
+  });
