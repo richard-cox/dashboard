@@ -9,7 +9,7 @@ import {
 } from '@/config/table-headers';
 
 import { CATALOG } from '@/config/types';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'apps';
 

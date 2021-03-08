@@ -2,7 +2,7 @@ import { LOGGING } from '@/config/types';
 import {
   LOGGING_OUTPUT_PROVIDERS, STATE, NAME as NAME_COL, NAMESPACE as NAMESPACE_COL, AGE, OUTPUT, CLUSTER_OUTPUT, CONFIGURED_PROVIDERS
 } from '@/config/table-headers';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'logging';
 export const CHART_NAME = 'rancher-logging';

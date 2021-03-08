@@ -6,7 +6,7 @@ import { NORMAN } from '@/config/types';
 import AsyncButton from '@/components/AsyncButton';
 import { NAME } from '@/config/product/auth';
 import { MODE, _EDIT } from '@/config/query-params';
-import { applyProducts } from '~/store/type-map2';
+import { applyProducts } from '~/typed-store/prefs';
 
 export default {
   components: {

@@ -3,7 +3,7 @@ import {
   STATE, NAME as NAME_COL, AGE, RECEIVER_PROVIDERS, CONFIGURED_RECEIVER
 } from '@/config/table-headers';
 import { getAllReceivers, getAllRoutes } from '@/utils/alertmanagerconfig';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'monitoring';
 export const CHART_NAME = 'rancher-monitoring';

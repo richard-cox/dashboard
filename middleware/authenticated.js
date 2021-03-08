@@ -4,7 +4,7 @@ import { SETUP, TIMED_OUT } from '@/config/query-params';
 import { get } from '@/utils/object';
 import { ClusterNotFoundError } from '@/utils/error';
 import { NAME as EXPLORER } from '@/config/product/explorer';
-import { applyProducts } from '~/store/type-map2';
+import { applyProducts } from '~/typed-store/type-map';
 
 let beforeEachSetup = false;
 

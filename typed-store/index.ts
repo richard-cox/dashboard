@@ -10,6 +10,7 @@ import { NAME as EXPLORER } from '@/config/product/explorer';
 import { TIMED_OUT } from '@/config/query-params';
 import Vuex, { Store } from 'vuex';
 import Vue from 'vue';
+import { getModule, config } from 'vuex-module-decorators';
 import * as actionMenu from './action-menu';
 import * as auth from './auth';
 // import * as aws from './aws';
@@ -20,8 +21,13 @@ import * as prefs from './prefs';
 import * as typeMap from './type-map';
 import * as wm from './wm';
 import { CLUSTER as CLUSTER_PREF, NAMESPACE_FILTERS, LAST_NAMESPACE, WORKSPACE } from './prefs';
-import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '~/store/type-map2';
+import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '~/typed-store/type-map';
+import storeAccessor from '~/utils/store-accessor';
+import DemoVuexModuleDecorator from '~/typed-store/DemoVuexModuleDecorator';
+// import { II18n } from '~/typed-store/i18n';
 
+// Set rawError to true by default on all @Action decorators
+config.rawError = true;
 // import storeAccessor from '~/utils/store-accessor';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
@@ -70,7 +76,20 @@ Vue.use(Vuex);
 //   }
 // };
 
-const registerStore = (store: Store<any>) => {
+const initialiseStores = (store: Store<any>) => {
+  // store.registerModule('demo', );
+  getModule(DemoVuexModuleDecorator, store);
+  console.error('initialiseStores: ', !!store);
+  // gets around chicken / egg scenario. i18n needs store... store needs i18n. This ensures we have the store
+  // when we need i818n
+  const i18n = require('~/typed-store/i18n').default;
+
+  console.error('initialiseStores: ', Object.keys(i18n));
+
+  getModule(i18n, store);
+
+  // store.registerModule('i18n', );
+
   // const files = (require as any).context('.', false, '/\.js$');
 
   // // const modules = {};
@@ -103,7 +122,7 @@ const registerStore = (store: Store<any>) => {
 };
 
 const plugins = [
-  registerStore,
+  // initialiseStores,
   // (store: Store<any>) => storeAccessor.init(store),
   Steve({ namespace: 'management', baseUrl: '/v1' }),
   Steve({ namespace: 'cluster', baseUrl: '' }), // url set later
@@ -111,10 +130,10 @@ const plugins = [
 ];
 
 interface RootState {
-
+  // i18n: II18n
 }
 
-const state: RootState = () => {
+const state: () => RootState = () => {
   return {
     managementReady:  false,
     clusterReady:     false,
@@ -127,6 +146,7 @@ const state: RootState = () => {
     workspace:        null,
     error:            null,
     cameFromError:    false,
+    // i18n:             null,
   };
 };
 
@@ -653,14 +673,27 @@ const actions = {
     }
   },
 
-  nuxtServerInit({ dispatch, rootState }, nuxt) {
+  nuxtServerInit(store, nuxt) {
+    const { dispatch, rootState } = store;
+
+    debugger;
+    console.error('nuxtServerInit', Object.keys(nuxt.store));
+    initialiseStores(nuxt.store);
+
     // Models in SSR server mode have no way to get to the route or router, so hack one in...
     Object.defineProperty(rootState, '$router', { value: nuxt.app.router });
     Object.defineProperty(rootState, '$route', { value: nuxt.route });
     dispatch('prefs/loadCookies');
   },
 
-  nuxtClientInit({ dispatch, rootState }, nuxt) {
+  nuxtClientInit(store, nuxt) {
+    const { dispatch, rootState } = store;
+
+    console.error('nuxtClientInit', Object.keys(store), Object.keys(nuxt.store));
+    initialiseStores(nuxt.store);
+
+    debugger;
+
     Object.defineProperty(rootState, '$router', { value: nuxt.app.router });
     Object.defineProperty(rootState, '$route', { value: nuxt.route });
 

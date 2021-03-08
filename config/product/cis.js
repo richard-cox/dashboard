@@ -1,6 +1,6 @@
 import { CIS } from '@/config/types';
 import { STATE, NAME as NAME_HEADER, AGE } from '@/config/table-headers';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'cis';
 export const CHART_NAME = 'rancher-cis-benchmark';

@@ -3,7 +3,9 @@ import IntlMessageFormat from 'intl-messageformat';
 import { get } from '@/utils/object';
 import en from '@/assets/translations/en-us.yaml';
 import { getProduct, getVendor } from '@/config/private-label';
-import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
+import {
+  Module, VuexModule, Mutation, Action, getModule
+} from 'vuex-module-decorators';
 import store from '@/typed-store';
 
 // import Vuex from 'vuex';
@@ -23,6 +25,9 @@ const intlCache = {};
 // store: window.$nuxt.$store
 // dynamic: true,
 // store,
+
+export interface II18n {
+}
 
 console.error('!!!!!!!!!', !!store);
 
@@ -54,7 +59,7 @@ export default class i18n extends VuexModule {
   // Getters
 
   get selectedLocaleLabel() {
-    console.log('selectedLocaleLabel: this.state', this.state);
+    console.log('selectedLocaleLabel: this.selected', this.selected);
     const key = `locale.${ this.selected }`;
 
     if ( this.selected === NONE ) {
@@ -188,6 +193,7 @@ export default class i18n extends VuexModule {
     // let selected = this.$cookies.get(LOCALE, { parseJSON: false });// TODO: RC how to access cookies?
     let selected;
 
+    console.error('i18n: init', this.default);
     if ( !selected ) {
       selected = this.default;
     }
@@ -206,6 +212,8 @@ export default class i18n extends VuexModule {
 
   @Action
   async switchTo(locale) {
+    console.error('i18nL switchTo', Object.keys(this.context));
+    console.error('i18nL switchTo', locale);
     if ( locale === NONE ) {
       this.context.commit('setSelected', locale);
 
@@ -246,6 +254,8 @@ export default class i18n extends VuexModule {
     }
   }
 }
+
+// getModule(i18n, store);
 
 // export const state = function() {
 //   const available = translationContext.keys().map(path => path.replace(/^.*\/([^\/]+)\.[^.]+$/, '$1'));

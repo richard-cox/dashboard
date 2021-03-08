@@ -4,6 +4,7 @@ import storeAccessor from '~/utils/store-accessor';
 import { COUNT, NAMESPACE } from '~/config/types';
 import { ProxiedResource } from '~/plugins/steve/resource.types';
 import { NamespaceModel, KubeNamespace } from '~/models/namespace';
+import i18n from '~/typed-store/i18n';
 
 export interface Value {
   label: String;
@@ -19,6 +20,7 @@ class TSComponentRichard extends Vue {
 
   // TODO: RC Cannot access in tempalte without exposing. If this stays it should be in a mixin/super
   private storeAccessor = storeAccessor;
+  private a = i18n;
 
   constructor() {
     super();

@@ -1,6 +1,6 @@
 <script>
 import Favorite from '@/components/nav/Favorite';
-import { FAVORITE, USED } from '~/store/type-map2';
+import { FAVORITE, USED } from '~/typed-store/prefs';
 
 const showFavoritesFor = [FAVORITE, USED];
 

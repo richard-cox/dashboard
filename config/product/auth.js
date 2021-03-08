@@ -1,7 +1,7 @@
 // import { STATE, NAME as NAME_COL, AGE } from '@/config/table-headers';
 import { MANAGEMENT, NORMAN, RBAC } from '@/config/types';
 import { GROUP_NAME, GROUP_ROLE_NAME } from '@/config/table-headers';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'auth';
 

@@ -1,7 +1,7 @@
 import { GATEKEEPER, OBJECT_META } from '@/config/types';
 import { AGE, NAME as NAME_COL, STATE } from '@/config/table-headers';
 import { findAllConstraints } from '@/utils/gatekeeper/util';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'gatekeeper';
 export const CHART_NAME = 'rancher-gatekeeper';

@@ -1,7 +1,7 @@
 // import { STATE, NAME as NAME_COL, AGE } from '@/config/table-headers';
 import { CAPI, MANAGEMENT } from '@/config/types';
 import { REGISTER, _FLAGGED } from '@/config/query-params';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'manager';
 

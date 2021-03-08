@@ -7,7 +7,7 @@ import {
   MATCHES, DESTINATION,
   TARGET, TARGET_KIND,
 } from '@/config/table-headers';
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'rio';
 export const CHART_NAME = 'rio';

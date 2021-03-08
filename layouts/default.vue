@@ -14,7 +14,7 @@ import { COUNT, SCHEMA, MANAGEMENT } from '@/config/types';
 import { addObjects, replaceWith, clear } from '@/utils/array';
 import { NAME as EXPLORER } from '@/config/product/explorer';
 import isEqual from 'lodash/isEqual';
-import { BASIC, FAVORITE, USED } from '~/store/type-map2';
+import { BASIC, FAVORITE, USED } from '~/typed-store/prefs';
 
 export default {
 
@@ -38,7 +38,7 @@ export default {
   computed: {
     ...mapState(['managementReady', 'clusterReady']),
     ...mapGetters(['productId', 'namespaceMode']),
-    ...mapGetters({ locale: 'i18n/selectedLocaleLabel' }),
+    // ...mapGetters({ locale: 'i18n/selectedLocaleLabel' }),
 
     namespaces() {
       return this.$store.getters['namespaces']();

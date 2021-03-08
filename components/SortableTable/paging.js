@@ -1,5 +1,5 @@
 import { PAGE } from '@/config/query-params';
-import { ROWS_PER_PAGE } from '~/store/prefs2';
+import { ROWS_PER_PAGE } from '~/typed-store/prefs';
 
 export default {
   computed: {

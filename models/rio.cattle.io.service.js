@@ -8,7 +8,7 @@ import { PRIVATE } from '@/plugins/steve/resource-proxy';
 import { RIO } from '@/config/types';
 import { formatSi } from '@/utils/units';
 import { get, set } from '@/utils/object';
-import { DATE_FORMAT, TIME_FORMAT } from '~/store/prefs2';
+import { DATE_FORMAT, TIME_FORMAT } from '~/typed-store/prefs';
 
 const EMPTY = {};
 

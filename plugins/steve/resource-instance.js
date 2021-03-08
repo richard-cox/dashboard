@@ -35,7 +35,7 @@ import {
 } from '@/config/query-params';
 
 import { cleanForNew, normalizeType } from './normalize';
-import { DEV } from '~/store/prefs2';
+import { DEV } from '~/typed-store/prefs';
 
 const STRING_LIKE_TYPES = [
   'string',

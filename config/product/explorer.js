@@ -18,7 +18,7 @@ import {
 
 import { copyResourceValues, SUBTYPES } from '@/models/rbac.authorization.k8s.io.roletemplate';
 
-import { DSL } from '~/store/type-map2';
+import { DSL } from '~/typed-store/type-map';
 
 export const NAME = 'explorer';
 
