@@ -765,8 +765,8 @@ export const getters = {
       const typeOptions = getters['optionsFor'](schema);
 
       // A specific list has been provided
-      if (state.headers[schema.id]) {
-        return state.headers[schema.id].map((entry) => {
+      if (state._headers[schema.id]) {
+        return state._headers[schema.id].map((entry) => {
           if (typeof entry === 'string') {
             const col = findBy(columns, 'name', entry);
             if (col) {

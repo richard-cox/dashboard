@@ -3,7 +3,7 @@ import { LOCALE } from '@/config/cookies';
 import { get } from '@/utils/object';
 import { getProduct, getVendor } from '@/config/private-label';
 import { getterTree, mutationTree, actionTree, useAccessor } from 'nuxt-typed-vuex';
-import en from '@/assets/translations/en-us.yaml';
+const en = require('~/assets/translations/en-us.yaml');
 
 // @nuxt/typescript-runtime TODO: RC remove?
 const translationContext = (require as any).context('@/assets/translations', true, /.*/);
@@ -18,7 +18,7 @@ interface State {
   selected: string,
   previous: null,
   available: any,
-  translations: { 'en-us': en },
+  translations: { 'en-us': any },
 }
 
 export const state = function() {

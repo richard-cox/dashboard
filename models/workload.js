@@ -22,11 +22,7 @@ export default {
 
     const toFilter = ['cloneYaml'];
 
-    out = out.filter((action) => {
-      if (!toFilter.includes(action.action)) {
-        return action;
-      }
-    });
+    out = out.filter(action => !toFilter.includes(action.action));
 
     return out;
   },

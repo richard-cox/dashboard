@@ -28,7 +28,7 @@
       "types": [
         "@types/node",
         "@nuxt/types",
-        "./types/vue-shim.d.ts"
+        "./types/*"
       ]
     },
     "exclude": [

@@ -2,7 +2,7 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { COUNT, NAMESPACE } from '~/config/types';
 import { ProxiedResource } from '~/plugins/steve/resource.types';
-import { NamespaceModel, KubeNamespace } from '~/models/namespace';
+import { NamespaceModel, KubeNamespace } from '~/types/namespace';
 
 export interface Value {
   label: String;

@@ -12,11 +12,7 @@ export default {
 
     const toFilter = ['cloneYaml', 'goToEditYaml', 'download'];
 
-    out = out.filter((action) => {
-      if (!toFilter.includes(action.action)) {
-        return action;
-      }
-    });
+    out = out.filter(action => !toFilter.includes(action.action));
 
     const t = this.$rootGetters['i18n/t'];
 
