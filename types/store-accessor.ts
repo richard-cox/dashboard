@@ -14,22 +14,23 @@ import * as typedVuexTSStore from '@/store/typedVuexTSStore';
 // import * as wm from '@/store/wm';
 // import { state, getters, mutations, actions } from '@/store';
 
-export default getAccessorType({
-  // state,
-  // getters,
-  // mutations,
-  // actions,
-  modules: {
-    typedVuexTSStore,
-    // 'action-menu': actionMenu,
-    // auth,
-    // aws,
-    // catalog,
-    // github,
-    // growl,
-    // prefs,
-    // 'type-map':    typeMap,
-    // wm,
-    // i18n
-  }
-});
+export default {};
+// getAccessorType({
+//   // state,
+//   // getters,
+//   // mutations,
+//   // actions,
+//   modules: {
+//     typedVuexTSStore,
+//     // 'action-menu': actionMenu,
+//     // auth,
+//     // aws,
+//     // catalog,
+//     // github,
+//     // growl,
+//     // prefs,
+//     // 'type-map':    typeMap,
+//     // wm,
+//     // i18n
+//   }
+// });

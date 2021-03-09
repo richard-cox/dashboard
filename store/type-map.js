@@ -275,9 +275,9 @@ export const state = function() {
     typeMoveMappings:        [],
     typeToComponentMappings: [],
     typeOptions:             [],
-    _groupBy:                 {},
-    _headers:                 {},
-    _hideBulkActions:         {},
+    groupBy:                 {},
+    headers:                 {},
+    hideBulkActions:         {},
     schemaGeneration:        1,
     cache:                   {
       typeMove:     {},
@@ -755,7 +755,7 @@ export const getters = {
 
   hideBulkActionsFor(state) {
     return (schema) => {
-      return state._hideBulkActions[schema.id];
+      return state.hideBulkActions[schema.id];
     };
   },
 
@@ -766,8 +766,8 @@ export const getters = {
       const typeOptions = getters['optionsFor'](schema);
 
       // A specific list has been provided
-      if ( state._headers[schema.id] ) {
-        return state._headers[schema.id].map((entry) => {
+      if ( state.headers[schema.id] ) {
+        return state.headers[schema.id].map((entry) => {
           if ( typeof entry === 'string' ) {
             const col = findBy(columns, 'name', entry);
             if ( col ) {
@@ -1164,15 +1164,15 @@ export const mutations = {
   },
 
   groupBy(state, {type, field}) {
-    state._groupBy[type] = field;
+    state.groupBy[type] = field;
   },
 
   headers(state, { type, headers }) {
-    state._headers[type] = headers;
+    state.headers[type] = headers;
   },
 
   hideBulkActions(state, {type, field}) {
-    state._hideBulkActions[type] = field;
+    state.hideBulkActions[type] = field;
   },
 
   // weightGroup({group: 'core', weight: 99}); -- higher groups are shown first

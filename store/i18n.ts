@@ -163,14 +163,15 @@ export const actions = actionTree(
   {
     // NOTE - Must have a return type to avoid below error in vue-shim
     // `'$accessor' is referenced directly or indirectly in its own type annotation`
-    init({ state }): Promise<void> {
+    init({ state, dispatch }): Promise<void> {
       let selected = null;// this.$cookies.get(LOCALE, { parseJSON: false }); // TODO: RC
 
       if ( !selected ) {
         selected = state.default;
       }
 
-      return this.app.$accessor.i18n.switchTo(selected);
+      return dispatch('switchTo', selected);
+      // return this.app.$accessor.i18n.switchTo(selected);
     },
 
     async load({ commit }, locale) {

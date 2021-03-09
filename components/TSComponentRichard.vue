@@ -25,15 +25,15 @@ class TSComponentRichard extends Vue {
 
     this.initModel();
 
-    console.log(Object.keys(this.$accessor));
-    console.log(Object.keys(this.$accessor['type-map']));
-    console.log(this.$accessor.typedVuexTSStore.count);
-    console.log(this.$accessor.typedVuexTSStore.evenMore);
-    console.log(this.$accessor.typedVuexTSStore.nameAndMore);
-    this.$accessor.typedVuexTSStore.SET_COUNT(10000);
-    console.log(this.$accessor.typedVuexTSStore.count);
+    // console.log(Object.keys(this.$accessor));
+    // console.log(Object.keys(this.$accessor['type-map']));
+    // console.log(this.$accessor.typedVuexTSStore.count);
+    // console.log(this.$accessor.typedVuexTSStore.evenMore);
+    // console.log(this.$accessor.typedVuexTSStore.nameAndMore);
+    // this.$accessor.typedVuexTSStore.SET_COUNT(10000);
+    // console.log(this.$accessor.typedVuexTSStore.count);
 
-    console.log(this.$accessor.i18n.t('generic.add'));
+    // console.log(this.$accessor.i18n.t('generic.add'));
     // this.$accessor.
   }
 
