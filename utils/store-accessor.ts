@@ -1,9 +1,7 @@
 import { Store } from 'vuex';
 import DemoVuexModuleDecorator from '~/typed-store/DemoVuexModuleDecorator';
-// import i18n from '~/typed-store/i18n';
 
-// TODO: RC Apply / clal in demo code
-
+// TODO: RC Shouldn't need this interface at all?
 interface StoreAccessor {
   init: (store: Store<any>) => void;
   demo: DemoVuexModuleDecorator;

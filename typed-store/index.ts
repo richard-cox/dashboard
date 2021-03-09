@@ -26,55 +26,14 @@ import storeAccessor from '~/utils/store-accessor';
 import DemoVuexModuleDecorator from '~/typed-store/DemoVuexModuleDecorator';
 // import { II18n } from '~/typed-store/i18n';
 
-// Set rawError to true by default on all @Action decorators
+// Set rawError to true by default on all @Action decorators // TODO: RC remove
 config.rawError = true;
-// import storeAccessor from '~/utils/store-accessor';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // becaues it's more efficient to do that sometimes.
 export const strict = false;
 
 Vue.use(Vuex);
-
-// const wip = {
-//   'action-menu': {
-//     state:     actionMenu.state,
-//     getters:   actionMenu.getters,
-//     mutations: actionMenu.mutations,
-//     actions:   actionMenu.actions,
-//   },
-//   auth: {
-//     state:     auth.state,
-//     getters:   auth.getters,
-//     mutations: auth.mutations,
-//     actions:   auth.actions,
-//   },
-//   catalog: {
-//     state:     catalog.state,
-//     getters:   catalog.getters,
-//     mutations: catalog.mutations,
-//     actions:   catalog.actions,
-//   },
-//   growl: { actions: growl.actions },
-//   prefs: {
-//     state:     prefs.state,
-//     getters:   prefs.getters,
-//     mutations: prefs.mutations,
-//     actions:   prefs.actions,
-//   },
-//   'type-map': {
-//     state:     typeMap.state,
-//     getters:   typeMap.getters,
-//     mutations: typeMap.mutations,
-//     actions:   typeMap.actions,
-//   },
-//   wm: {
-//     state:     wm.state,
-//     getters:   wm.getters,
-//     mutations: wm.mutations,
-//     actions:   wm.actions,
-//   }
-// };
 
 const initialiseStores = (store: Store<any>) => {
   // store.registerModule('demo', );
@@ -699,14 +658,6 @@ const store = new Vuex.Store<RootState>({
     wm:            wm.default
   }
 });
-
-// store.registerModule('action-menu', actionMenu.default);
-// store.registerModule('auth', auth.default);
-// store.registerModule('catalog', catalog.default);
-// store.registerModule('growl', growl.default);
-// store.registerModule('prefs', prefs.default);
-// store.registerModule('type-map', typeMap.default);
-// store.registerModule('wm', wm.default);
 
 export const createStore = (): Store<RootState> => {
   return store;

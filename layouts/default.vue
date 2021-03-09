@@ -38,7 +38,7 @@ export default {
   computed: {
     ...mapState(['managementReady', 'clusterReady']),
     ...mapGetters(['productId', 'namespaceMode']),
-    // ...mapGetters({ locale: 'i18n/selectedLocaleLabel' }),
+    ...mapGetters({ locale: 'i18n/selectedLocaleLabel' }),
 
     namespaces() {
       return this.$store.getters['namespaces']();
