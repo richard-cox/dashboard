@@ -1,17 +1,20 @@
-// import { PROJECT, SYSTEM_NAMESPACE, ISTIO as ISTIO_LABELS } from '@/config/labels-annotations';
-// import { ISTIO } from '~/config/types';
+import { PROJECT, SYSTEM_NAMESPACE, ISTIO as ISTIO_LABELS } from '@/config/labels-annotations';
+import SYSTEM_NAMESPACES from '@/config/system-namespaces';
+import { ISTIO, MANAGEMENT } from '~/config/types';
 // ResourceInstanceForProxy
-import { ProxiedResource, ProxyResourceInstance } from '~/plugins/steve/resource.types';
+import { BaseResource, ProxiedResource, ProxyResourceInstance, ResourceInstanceForProxy } from '~/plugins/steve/resource.types';
+import { insertAt, isArray } from '~/utils/array';
+import { escapeHtml } from '~/utils/string';
 
 export interface RancherProject {
 
 }
 
 export interface IDashboardProject {
-
+  isSystem: boolean;
 }
 
-export interface KubeNamespace {
+export interface KubeNamespace extends BaseResource {
 
 }
 
@@ -26,10 +29,12 @@ export interface NamespaceModel extends ProxyResourceInstance {
   disableAutoInjection: (namespaces: any | any[]) => void;
 }
 
-// TODO: RC
-// export const DashboardNamespace: ResourceInstanceForProxy<NamespaceModel> = {
-//   _availableActions() {
-//     const out = this._standardActions;
+export type DashboardNamespaceType = ProxiedResource<NamespaceModel, KubeNamespace>
+
+// KEEP! Commented out to avoid build failures in remaining areas to fix
+// export const dashboardNamespace: ResourceInstanceForProxy<ProxiedResource<NamespaceModel, KubeNamespace>> = {
+//   _availableActions(proxy) {
+//     const out = this._standardActions(proxy);
 
 //     insertAt(out, 0, { divider: true });
 //     if (this.istioInstalled) {
@@ -117,11 +122,10 @@ export interface NamespaceModel extends ProxyResourceInstance {
 //   },
 
 //   enableAutoInjection() {
-//     return (namespaces = this, enable = true) => {
-//       if (!isArray(namespaces)) {
-//         namespaces = [namespaces];
-//       }
-//       namespaces.forEach((ns) => {
+//     return (namespaces: DashboardNamespaceType | DashboardNamespaceType[], enable = true) => {
+//       const safeNamespaces: DashboardNamespaceType[] = isArray(namespaces) ? namespaces as DashboardNamespaceType[] : [namespaces as DashboardNamespaceType];
+
+//       safeNamespaces.forEach((ns) => {
 //         if (!enable && ns?.metadata?.labels) {
 //           delete ns.metadata.labels[ISTIO_LABELS.AUTO_INJECTION];
 //         } else {
@@ -135,9 +139,9 @@ export interface NamespaceModel extends ProxyResourceInstance {
 //     };
 //   },
 
-//   disableAutoInjection() {
-//     return (namespaces = this) => {
-//       this.enableAutoInjection(namespaces, false);
+//   disableAutoInjection(proxy) {
+//     return (namespaces: DashboardNamespaceType | DashboardNamespaceType[]) => {
+//       this.enableAutoInjection(proxy)(namespaces, false);
 //     };
 //   },
 // };

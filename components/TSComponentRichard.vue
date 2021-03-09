@@ -3,7 +3,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 import storeAccessor from '~/utils/store-accessor';
 import { COUNT, NAMESPACE } from '~/config/types';
 import { ProxiedResource } from '~/plugins/steve/resource.types';
-import { NamespaceModel, KubeNamespace } from '~/models/namespace';
+import { NamespaceModel, KubeNamespace, DashboardNamespaceType } from '~/models/namespace';
 import i18n from '~/typed-store/i18n';
 
 export interface Value {
@@ -37,7 +37,9 @@ class TSComponentRichard extends Vue {
   private initModel() {
     this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
     this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
-    this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
+    this.namespaceTyped = this.namespace as DashboardNamespaceType;
+    console.log(this.namespaceTyped.isSystem);
+    console.log(this.namespaceTyped.availableActions);
   }
 
   private initStore() {

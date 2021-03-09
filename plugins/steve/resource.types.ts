@@ -1,20 +1,11 @@
 
 import { ALREADY_A_PROXY, SELF, PRIVATE } from './resource-proxy';
 
-type BaseResource = {
-  type: string;
-  id?: string;
-  // name?: string;
-  // _name?: string;
-  // metadata?: {
-  //   name: string;
-  // };
-};
-
 interface ProxyOverrides<T> {
   [ALREADY_A_PROXY]: true;
   [SELF]: T,
-  [Symbol.toStringTag]: string,
+  // [Symbol.toStringTag]: string,
+  ['toString']: string,
   ['constructor']: () => void,
   [PRIVATE]: Object,
 
@@ -25,6 +16,21 @@ interface ProxyOverrides<T> {
 
 type Labels = { [key: string]: string; };
 type Annotations = { [key: string]: string; };
+
+export type BaseResource = {
+  type: string;
+  id?: string;
+  name?: string;
+  _name?: string;
+    // TODO: RC this is kube specific but base.... as they're refered to directly in the resource instance
+  metadata?: {
+    name: string;
+    annotations: Annotations;
+    labels: Labels;
+    state: any;
+  };
+};
+
 type AxiosOpt = { // TODO: RC check & typing
   url?: string;
   urlSuffix?: string;
@@ -152,7 +158,7 @@ export interface ProxyResourceInstance {
 
   patch: (data, opt: AxiosOpt) => Promise<any>; // TODO: RC typing
 
-  save: (opt: AxiosOpt) => Promise<any>; // TODO: RC typing
+  save: (opt?: AxiosOpt) => Promise<any>; // TODO: RC typing
 
   remove: (opt: AxiosOpt) => Promise<any>; // TODO: RC typing
 
@@ -231,28 +237,25 @@ export interface ProxyResourceInstance {
  * Model - ./model/<type> definition
  * Resource - actual underlying object (e.g. a KubeResource)
  */
-export type ProxiedResource<Model = Partial<ProxyResourceInstance>, Resource = BaseResource> = ProxyOverrides<Resource> & Model & ProxyResourceInstance & Resource;
-
-// interface ProxiedResource2<T extends BaseProxy> extends ProxyOverrides<T>, ProxyResourceInstance, T {}
+export type ProxiedResource<Model = Partial<ProxyResourceInstance>, Resource = BaseResource> = Model & ProxyOverrides<Resource> & ProxyResourceInstance & Resource;
 
 export type ResourceInstanceForProxy<T extends { [key: string]: any; }> = {
-  [P in keyof T]: (proxy: ProxiedResource) => T[P] // TODO: RC proxy to default to kube type
+  [P in keyof T]: (proxy: ProxiedResource) => T[P]
 };
 
-interface TestResource extends BaseResource {
-  a: number,
-  b: string,
-};
-const testobj: TestResource = {
-  type: 'My Type',
-  a:    1,
-  b:    '2'
-};
+// interface TestResource extends BaseResource {
+//   a: number,
+//   b: string,
+// };
+// const testobj: TestResource = {
+//   type: 'My Type',
+//   a:    1,
+//   b:    '2'
+// };
 
-interface TestModel extends Partial<ProxyResourceInstance> {
-  nameDisplay: string;
-  nameDisplay2: string;
-};
+// interface TestModel extends Partial<ProxyResourceInstance> {
+//   nameDisplay: string;
+//   nameDisplay2: string;
+// };
 
-const test2 = {} as ProxiedResource<TestModel, TestResource>;
-
+// const test2 = {} as ProxiedResource<TestModel, TestResource>;
