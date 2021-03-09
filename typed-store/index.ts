@@ -78,47 +78,13 @@ Vue.use(Vuex);
 
 const initialiseStores = (store: Store<any>) => {
   // store.registerModule('demo', );
-  getModule(DemoVuexModuleDecorator, store);
-  console.error('initialiseStores: ', !!store);
+  storeAccessor.demo = getModule(DemoVuexModuleDecorator, store);
+
   // gets around chicken / egg scenario. i18n needs store... store needs i18n. This ensures we have the store
   // when we need i818n
   const i18n = require('~/typed-store/i18n').default;
 
-  console.error('initialiseStores: ', Object.keys(i18n));
-
-  getModule(i18n, store);
-
-  // store.registerModule('i18n', );
-
-  // const files = (require as any).context('.', false, '/\.js$');
-
-  // // const modules = {};
-  // console.error('registerStore');
-
-  // files.keys().forEach((key) => {
-  //   if (key === './autoloader.js') {
-  //     return;
-  //   }
-  //   // modules[key.replace(/(\.\/|\.js)/g, '')] = files(key).default;
-
-  //   const namespace = key.replace(/(\.\/|\.js)/g, '');
-
-  //   console.error(key, namespace);
-
-  //   store.registerModule(namespace, files(key).default);
-  // });
-
-  // store.registerModule('action-menu', actionMenu, { preserveState: true });
-  // store.registerModule('auth', auth, { preserveState: true });
-  // store.registerModule('catalog', catalog, { preserveState: true });
-  // store.registerModule('growl', growl, { preserveState: true });
-  // store.registerModule('prefs', prefs, { preserveState: true });
-  // store.registerModule('type-map', typeMap, { preserveState: true });
-  // store.registerModule('wm', wm, { preserveState: true });
-
-  // Object.entries(wip).forEach(([namespace, inst]) => {
-  //   store.registerModule(namespace, inst);
-  // });
+  storeAccessor.i18n = getModule(i18n, store);
 };
 
 const plugins = [
@@ -676,8 +642,7 @@ const actions = {
   nuxtServerInit(store, nuxt) {
     const { dispatch, rootState } = store;
 
-    debugger;
-    console.error('nuxtServerInit', Object.keys(nuxt.store));
+    console.error('nuxtServerInit', Object.keys(store), Object.keys(nuxt.store));
     initialiseStores(nuxt.store);
 
     // Models in SSR server mode have no way to get to the route or router, so hack one in...
@@ -691,8 +656,6 @@ const actions = {
 
     console.error('nuxtClientInit', Object.keys(store), Object.keys(nuxt.store));
     initialiseStores(nuxt.store);
-
-    debugger;
 
     Object.defineProperty(rootState, '$router', { value: nuxt.app.router });
     Object.defineProperty(rootState, '$route', { value: nuxt.route });

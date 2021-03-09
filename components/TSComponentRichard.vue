@@ -18,7 +18,7 @@ class TSComponentRichard extends Vue {
   namespace: any;
   namespaceTyped: ProxiedResource<NamespaceModel, KubeNamespace>;
 
-  // TODO: RC Cannot access in tempalte without exposing. If this stays it should be in a mixin/super
+  // TODO: RC Cannot access in template without exposing. If this stays it should be in a mixin/super
   private storeAccessor = storeAccessor;
   private a = i18n;
 
@@ -41,15 +41,17 @@ class TSComponentRichard extends Vue {
   }
 
   private initStore() {
+    // DemoVuexModuleDecorator currently does not work now for some reason...
+    console.log('storeAccessor.demo: ', !!storeAccessor.demo);
+    console.log(Object.keys(storeAccessor.demo));
+    console.log('storeAccessor.demo.axles: ', !!storeAccessor.demo.axles);
+    console.log('storeAccessor.demo.incrWheels: ', !!storeAccessor.demo.incrWheels);
+    console.log('storeAccessor.demo.axles: ', storeAccessor.demo.axles);
+    storeAccessor.demo.incrWheels(2);
+    console.log(storeAccessor.demo);
 
-    // console.log('storeAccessor.demo: ', !!storeAccessor.demo);
-    // console.log('storeAccessor.demo.axles: ', !!storeAccessor.demo.axles);
-    // console.log('storeAccessor.demo.incrWheels: ', !!storeAccessor.demo.incrWheels);
-    // console.log('storeAccessor.demo.axles: ', storeAccessor.demo.axles);
-    // // console.log('this.$emit: ', this.$emit);
-    // storeAccessor.demo.incrWheels(2);
-    // console.log(storeAccessor.demo.axles);
-
+    // This works fine
+    console.log(`storeAccessor.i18n.t('generic.add'): `, storeAccessor.i18n.t('generic.add'));
   }
 }
 

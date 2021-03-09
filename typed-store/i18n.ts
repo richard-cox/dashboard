@@ -86,7 +86,7 @@ export default class i18n extends VuexModule {
   }
 
   get t() {
-    return (key, args) => {
+    return (key, args?) => {
       if (this.selected === NONE ) {
         return `%${ key }%`;
       }
