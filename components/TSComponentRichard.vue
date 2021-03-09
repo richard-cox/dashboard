@@ -25,16 +25,7 @@ class TSComponentRichard extends Vue {
 
     this.initModel();
 
-    console.log(Object.keys(this.$accessor));
-    console.log(Object.keys(this.$accessor['type-map']));
-    console.log(this.$accessor.typedVuexTSStore.count);
-    console.log(this.$accessor.typedVuexTSStore.evenMore);
-    console.log(this.$accessor.typedVuexTSStore.nameAndMore);
-    this.$accessor.typedVuexTSStore.SET_COUNT(10000);
-    console.log(this.$accessor.typedVuexTSStore.count);
-
-    console.log(this.$accessor.i18n.t('generic.add'));
-    // this.$accessor.
+    this.initStore();
   }
 
   $fetch() {
@@ -42,9 +33,23 @@ class TSComponentRichard extends Vue {
   }
 
   private initModel() {
+    // Use store normally, get normal objects back
     this.counts = this.$store.getters[`cluster/all`](COUNT)[0].counts[NAMESPACE];
     this.namespace = this.$store.getters['cluster/byId'](NAMESPACE, 'ds4-4-1-charts');
+    // Normal object can be typed using new interfaces
     this.namespaceTyped = this.namespace as ProxiedResource<NamespaceModel, KubeNamespace>;
+  }
+
+  private initStore() {
+    // Some examples of typed access
+    console.log(Object.keys(this.$accessor));
+    console.log(Object.keys(this.$accessor['type-map']));
+    console.log(this.$accessor.typedVuexTSStore.count);
+    console.log(this.$accessor.typedVuexTSStore.evenMore);
+    console.log(this.$accessor.typedVuexTSStore.nameAndMore);
+    this.$accessor.typedVuexTSStore.SET_COUNT(10000);
+    console.log(this.$accessor.typedVuexTSStore.count);
+    console.log(this.$accessor.i18n.t('generic.add'));
   }
 }
 

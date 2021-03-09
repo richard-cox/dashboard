@@ -569,13 +569,13 @@ export const actions = actionTree({
 
     await dispatch('cluster/unsubscribe');
     commit('clusterChanged', false);
-    (commit as any)('cluster/reset');
-    // this.app.$accessor.cluster.reset(); // TODO: RC Typing
+    // (commit as any)('cluster/reset');
+    this.app.$accessor.cluster.reset(); // TODO: RC Typing
 
-    (commit as any)('rancher/reset');
-    // this.app.$accessor.rancher.reset(); // TODO: RC Typing
-    (commit as any)('catalog/reset');
-    // this.app.$accessor.catalog.reset(); // TODO: RC Typing
+    // (commit as any)('rancher/reset');
+    this.app.$accessor.rancher.reset(); // TODO: RC Typing
+    // (commit as any)('catalog/reset');
+    this.app.$accessor.catalog.reset(); // TODO: RC Typing
 
     // TODO: RC
     // const router = state.$router;
