@@ -142,6 +142,7 @@ export const MANAGEMENT = {
   SETTING:                       'management.cattle.io.setting',
   USER:                          'management.cattle.io.user',
   TOKEN:                         'management.cattle.io.token',
+  SPOOFED:                       { PROJECT: 'management.cattle.io.clusterproject' }
 };
 
 export const CAPI = {

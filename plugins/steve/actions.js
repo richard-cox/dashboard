@@ -13,6 +13,9 @@ export default {
     // Spoofing is handled here to ensure it's done for both yaml and form editing.
     // It became apparent that this was the only place that both intersected
     if (opt.url.includes(SPOOFED_PREFIX) || opt.url.includes(SPOOFED_API_PREFIX)) {
+      // NOTE - In resource-instance detailLocation strips out the `<cluster>/` from the id. ResourceDetails then attempts to find the
+      // spoofed type with the truncated id and fails. There's a couple of places where we override the spoofed detailLocation to work
+      // around this.
       const [empty, scheme, type, ...rest] = opt.url.split('/'); // eslint-disable-line no-unused-vars
       const id = rest.join('/'); // Cover case where id contains '/'
       const isApi = scheme === SPOOFED_API_PREFIX;

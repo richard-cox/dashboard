@@ -1494,8 +1494,6 @@ monitoringReceiver:
       label: Bearer Token File
       placeholder: e.g. ./user_token
 
-
-
 monitoringRoute:
   groups:
     label: Group By
@@ -1701,7 +1699,6 @@ persistentVolume:
     readOnly:
       label: Read Only
 
-
 persistentVolumeClaim:
   accessModes: Access Modes
   capacity: Capacity
@@ -1726,6 +1723,7 @@ persistentVolumeClaim:
       readWriteMany: Many Nodes Read-Write
   status:
     label: Status
+
 prefs:
   title: Preferences
   theme:
@@ -1861,6 +1859,17 @@ promptRemove:
     }
   attemptingToRemove: "You are attempting to delete the {type}"
   protip: "Tip: Hold the {alternateLabel} key while clicking delete to bypass this confirmation"
+
+project:
+  detail:
+  edit:
+    tabs:
+      members:
+        label: Members
+        add: Add Member
+      quotes: Resource Quotas
+      limits: Container Default Resource Limit
+  list:
 
 rbac:
   roleBinding:
@@ -2425,6 +2434,7 @@ tableHeaders:
   name: Name
   nameUnlinked: Name
   namespace: Namespace
+  namespaces: Namespaces
   namespaceName: Name
   namespaceNameUnlinked: Name
   node: Node
@@ -3254,6 +3264,11 @@ typeLabel:
     {count, plural,
       one { Feature Flag }
       other { Feature Flags }
+    }
+  management.cattle.io.clusterproject: |-
+    {count, plural,
+      one { Project }
+      other { Projects }
     }
   management.cattle.io.setting: |-
     {count, plural,

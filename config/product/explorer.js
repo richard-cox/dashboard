@@ -14,7 +14,7 @@ import {
   USER_ID, USERNAME, USER_DISPLAY_NAME, USER_PROVIDER, WORKLOAD_ENDPOINTS, STORAGE_CLASS_DEFAULT,
   STORAGE_CLASS_PROVISIONER, PERSISTENT_VOLUME_SOURCE,
   HPA_REFERENCE, MIN_REPLICA, MAX_REPLICA, CURRENT_REPLICA,
-  ACCESS_KEY, DESCRIPTION, EXPIRES, EXPIRY_STATE, SUB_TYPE, AGE_NORMAN, SCOPE_NORMAN,
+  ACCESS_KEY, DESCRIPTION, EXPIRES, EXPIRY_STATE, SUB_TYPE, AGE_NORMAN, SCOPE_NORMAN, NAME as LIST_NAME
 } from '@/config/table-headers';
 
 // import { copyResourceValues, SUBTYPES } from '@/models/rbac.authorization.k8s.io.roletemplate';
@@ -29,14 +29,14 @@ export function init(store) {
     basicType,
     ignoreType,
     mapGroup,
-    // mapType,
+    mapType,
     weightGroup,
     weightType,
     headers,
     virtualType,
     componentForType,
     configureType,
-    // spoofedType
+    spoofedType
   } = DSL(store, NAME);
 
   product({
@@ -50,6 +50,7 @@ export function init(store) {
   basicType([
     NAMESPACE,
     NODE,
+    MANAGEMENT.SPOOFED.PROJECT
   ], 'cluster');
   basicType([
     SERVICE,
@@ -219,6 +220,53 @@ export function init(store) {
       params:   { resource: WORKLOAD }
     },
   });
+
+  spoofedType({
+    label:             store.getters['type-map/labelFor']({ id: MANAGEMENT.SPOOFED.PROJECT }, 2),
+    type:              MANAGEMENT.SPOOFED.PROJECT,
+    collectionMethods: [],
+    schemas:           [
+      {
+        id:                MANAGEMENT.SPOOFED.PROJECT,
+        type:              'schema',
+        collectionMethods: ['post'],
+        resourceFields:    {},
+      }
+    ],
+    getInstances: () => {
+      const cluster = store.getters['currentCluster'];
+      const projects = store.getters['management/all'](
+        MANAGEMENT.PROJECT
+      );
+
+      return projects
+        .filter(project => project.spec.clusterName === cluster.id)
+        .map(project => ({
+          ...project,
+          type: MANAGEMENT.SPOOFED.PROJECT
+        }));
+    }
+  });
+  // Use labelFor... so lookup succeeds with .'s in path.... and end result is 'trimmed' as per other entries
+  mapType(MANAGEMENT.SPOOFED.PROJECT, store.getters['type-map/labelFor']({ id: MANAGEMENT.SPOOFED.PROJECT }, 2));
+  headers(MANAGEMENT.SPOOFED.PROJECT, [
+    STATE,
+    LIST_NAME, { // TODO: RC move to table-headers
+      name:             'namespaces',
+      labelKey:         'tableHeaders.namespaces',
+      value:            'namespaces',
+      formatter:        'ListLinkDetail',
+      dashIfEmpty:      true,
+    },
+    AGE
+  ]);
+  // configureType(MANAGEMENT.SPOOFED.PROJECT, {
+  //   isCreatable:      true,
+  //   showAge:          true,
+  //   showState:        true,
+  //   isRemovable:      true,
+  //   showListMasthead: true,
+  // });
 
   // Ignore these types as they are managed through the settings product
   ignoreType(MANAGEMENT.FEATURE);

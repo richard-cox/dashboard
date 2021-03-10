@@ -25,6 +25,10 @@ export default {
 
       return this.row?.detailLocation;
     },
+
+    label() {
+      return this.value || this.row?.nameDisplay;
+    }
   }
 };
 </script>
@@ -32,7 +36,7 @@ export default {
 <template>
   <span>
     <n-link v-if="to" :to="to">
-      {{ value }}
+      {{ label }}
     </n-link>
   </span>
 </template>
