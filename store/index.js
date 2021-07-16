@@ -1,4 +1,5 @@
 import Steve from '@/plugins/steve';
+import EpinioStore from '@/plugins/app-extension/epinio/store';
 import {
   COUNT, NAMESPACE, NORMAN, MANAGEMENT, FLEET, UI, VIRTUAL_HARVESTER_PROVIDER, HCI
 } from '@/config/types';
@@ -17,6 +18,7 @@ import { SETTING } from '@/config/settings';
 import semver from 'semver';
 import { BY_TYPE, NORMAN as NORMAN_CLASS } from '@/plugins/steve/resource-proxy';
 import { NAME as VIRTUAL } from '@/config/product/harvester';
+import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/config/product/epinio';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // becaues it's more efficient to do that sometimes.
@@ -475,6 +477,7 @@ export const actions = {
       mgmtSubscribe:  dispatch('management/subscribe'),
       mgmtSchemas:    dispatch('management/loadSchemas', true),
       rancherSchemas: dispatch('rancher/loadSchemas', true),
+      epinioSchemas:  dispatch(`${ EPINIO_PRODUCT_NAME }/loadSchemas`), // TODO: RC FIX Need a hook/plugin equivalent
     });
 
     const promises = {
@@ -550,7 +553,7 @@ export const actions = {
 
   async loadCluster({
     state, commit, dispatch, getters
-  }, { id, oldProduct }) {
+  }, { id, oldProduct, isExt }) {
     const isMultiCluster = getters['isMultiCluster'];
     const isRancher = getters['isRancher'];
 
@@ -594,7 +597,7 @@ export const actions = {
 
     console.log(`Loading ${ isMultiCluster ? 'ECM ' : '' }cluster...`); // eslint-disable-line no-console
 
-    if (id === BLANK_CLUSTER) {
+    if (id === BLANK_CLUSTER || isExt) {
       commit('clusterChanged', true);
 
       return;

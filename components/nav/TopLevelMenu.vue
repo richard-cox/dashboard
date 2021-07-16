@@ -12,6 +12,7 @@ import { getVersionInfo } from '@/utils/version';
 import { LEGACY } from '@/store/features';
 import { SETTING } from '@/config/settings';
 import { filterOnlyKubernetesClusters } from '@/utils/cluster';
+import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/config/product/epinio';
 
 const UNKNOWN = 'unknown';
 const UI_VERSION = process.env.VERSION || UNKNOWN;
@@ -96,7 +97,8 @@ export default {
     multiClusterApps() {
       const options = this.options;
 
-      return options.filter(opt => opt.inStore === 'management' && opt.category !== 'configuration' && opt.category !== 'legacy');
+      // TODO: RC Q: How does a plugin decided where it appears in the side nav? Currently hardcoded with epinio
+      return options.filter(opt => (opt.inStore === 'management' || opt.category === EPINIO_PRODUCT_NAME) && opt.category !== 'configuration' && opt.category !== 'legacy');
     },
 
     legacyApps() {
@@ -115,8 +117,9 @@ export default {
       const cluster = this.clusterId || this.$store.getters['defaultClusterId'];
 
       const entries = this.activeProducts.map((p) => {
+        // TODO: RC Comment: Allow product to define it's own route
         // Try product-specific index first
-        const to = {
+        const to = p.to || {
           name:   `c-cluster-${ p.name }`,
           params: { cluster }
         };

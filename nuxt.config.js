@@ -108,6 +108,36 @@ module.exports = {
   router: {
     base:       routerBasePath,
     middleware: ['i18n'],
+    extendRoutes(routes, resolve) {
+      // TODO: RC DISCUSS
+      const epinio = [{
+        name:      'ext-epinio',
+        path:      '/ext/epinio',
+        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/index.vue'),
+      }, {
+        name:      'ext-epinio-c',
+        path:      '/ext/epinio/c',
+        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/index.vue'),
+      }, {
+        name:      'ext-epinio-c-cluster',
+        path:      '/ext/epinio/c/:cluster',
+        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/index.vue')
+      }, {
+        name:      'ext-epinio-c-cluster-resource',
+        path:      '/ext/epinio/c/:cluster/:resource',
+        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/index.vue')
+      }, {
+        name:      'ext-epinio-c-cluster-resource-create',
+        path:      '/ext/epinio/c/:cluster/:resource/create',
+        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/create.vue')
+      }, {
+        name:      'ext-epinio-c-cluster-resource-id',
+        path:      '/ext/epinio/c/:cluster/:resource/:id',
+        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/_id.vue')
+      }];
+
+      routes.push(...epinio);
+    }
   },
 
   build: {
@@ -289,6 +319,8 @@ module.exports = {
 
   // Vue plugins
   plugins: [
+    '~/plugins/app-extension/epinio',
+
     // Third-party
     '~/plugins/axios',
     '~/plugins/tooltip',
@@ -320,6 +352,7 @@ module.exports = {
     '/apis':         proxyWsOpts(api), // Management k8s API
     '/v1':           proxyWsOpts(api), // Management Steve API
     '/v3':           proxyWsOpts(api), // Rancher API
+    '/proxy':        genericProxy(api), // api can be anything
     '/v3-public':    proxyOpts(api), // Rancher Unauthed API
     '/api-ui':       proxyOpts(api), // Browser API UI
     '/meta':         proxyOpts(api), // Browser API UI
@@ -355,6 +388,19 @@ module.exports = {
 
   typescript: { typeCheck: { eslint: { files: './**/*.{ts,js,vue}' } } }
 };
+
+function genericProxy(target) {
+  return {
+    target,
+    secure:       !dev,
+    pathRewrite:  { '^/proxy': '' },
+    changeOrigin: true,
+    router(req) {
+      return req.headers['x-api-host'];
+    },
+    onError
+  };
+}
 
 function proxyOpts(target) {
   return {
