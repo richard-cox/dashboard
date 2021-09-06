@@ -1,5 +1,5 @@
 import coreStore, { coreStoreModule, coreStoreState } from '@/plugins/core-store/index';
-import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/config/product/epinio';
+import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/types';
 
 import getters from './getters';
 import mutations from './mutations';
@@ -12,16 +12,7 @@ function EpinioFactory(namespace, baseUrl) {
     ...coreStoreModule,
 
     state() {
-      return {
-        ...coreStoreState(namespace, baseUrl),
-        // socket:       null,
-        // queue:        [],
-        // wantSocket:   false,
-        // debugSocket:  false,
-        // pendingSends: [],
-        // started:      [],
-        // inError:      {},
-      };
+      return { ...coreStoreState(namespace, baseUrl) };
     },
 
     getters: {
@@ -45,7 +36,5 @@ export default () => {
   return coreStore(
     EpinioFactory({ namespace: EPINIO_PRODUCT_NAME }),
     EPINIO_PRODUCT_NAME,
-    undefined,
-    () => 'id'
   );
 };

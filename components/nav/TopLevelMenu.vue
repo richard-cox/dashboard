@@ -12,7 +12,7 @@ import { getVersionInfo } from '@/utils/version';
 import { LEGACY } from '@/store/features';
 import { SETTING } from '@/config/settings';
 import { filterOnlyKubernetesClusters } from '@/utils/cluster';
-import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/config/product/epinio';
+import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/types';
 
 const UNKNOWN = 'unknown';
 const UI_VERSION = process.env.VERSION || UNKNOWN;

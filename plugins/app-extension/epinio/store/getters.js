@@ -1,11 +1,11 @@
-import { EPINIO_TYPES } from '~/plugins/app-extension/epinio/config/product/epinio';
+import { EPINIO_TYPES } from '@/plugins/app-extension/epinio/types';
 
 export default {
 
-  // TODO: RC tie in namespace selector with org
+  // TODO: RC DISCUSS tie in namespace selector with org
 
   urlOptions: () => (url, opt) => {
-    // TODO: RC EPINIO handle filter, limit, sort
+    // TODO: RC API determine handle filter, limit, sort
     return url;
   },
 

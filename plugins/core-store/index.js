@@ -67,7 +67,7 @@ export default (vuexModule, namespace = '', baseUrl = `/${ namespace }`) => {
 
     if ( state ) {
       Object.keys(state.types).forEach((type) => {
-        const keyField = store.getters.keyFieldForType(type);
+        const keyField = store.getters[`${ namespace }/keyFieldForType`](type);
         const cache = state.types[type];
         const map = new Map();
 
@@ -127,7 +127,7 @@ export default (vuexModule, namespace = '', baseUrl = `/${ namespace }`) => {
 
           if ( cache && !obj.__clone ) {
             const map = cache.map;
-            const keyField = store.getters.keyFieldForType(type);
+            const keyField = store.getters[`${ namespace }/keyFieldForType`](type);
             const entry = map.get(obj[keyField]);
 
             // Map the object to the same instance in the store if possible

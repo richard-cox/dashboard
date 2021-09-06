@@ -2,10 +2,10 @@ import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 
 import { SCHEMA } from '@/config/types';
+import { SPOOFED_API_PREFIX, SPOOFED_PREFIX } from '@/store/type-map';
+import { createYaml } from '@/utils/create-yaml';
 import { proxyFor, SELF } from './resource-proxy';
 import { normalizeType } from './normalize';
-import { SPOOFED_API_PREFIX, SPOOFED_PREFIX } from '~/store/type-map';
-import { createYaml } from '~/utils/create-yaml';
 
 export const _ALL = 'all';
 export const _MULTI = 'multi';

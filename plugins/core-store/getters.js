@@ -229,7 +229,7 @@ export default {
         throw new Error(`Unknown schema for type: ${ type }`);
       }
 
-      url = schema.links.collection; // TODO: RC EPINIO SCHEMA create epinio schema shizzle
+      url = schema.links.collection;
       if ( id ) {
         url += `/${ id }`;
       }

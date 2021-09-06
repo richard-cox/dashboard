@@ -17,7 +17,7 @@ import { SETTING } from '@/config/settings';
 import semver from 'semver';
 import { BY_TYPE, NORMAN as NORMAN_CLASS } from '@/plugins/steve/resource-proxy';
 import { NAME as VIRTUAL } from '@/config/product/harvester';
-import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/config/product/epinio';
+import extensions from '@/plugins/app-extension/extensions';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // becaues it's more efficient to do that sometimes.
@@ -31,9 +31,10 @@ export const plugins = [
   }),
   Steve({ namespace: 'cluster', baseUrl: '' }), // URL dynamically set for the selected cluster
   Steve({
-    namespace: 'rancher', baseUrl: '/v3', modelBaseClass: NORMAN_CLASS
+    namespace: 'rancher', baseUrl: '/v3', modelBaseClass: NORMAN_CLASS // TODO: RC MODELS
   }),
   Steve({ namespace: 'harvester', baseUrl: '' }),
+  ...extensions.stores(),
 ];
 
 export const state = () => {
@@ -476,7 +477,6 @@ export const actions = {
       mgmtSubscribe:  dispatch('management/subscribe'),
       mgmtSchemas:    dispatch('management/loadSchemas', true),
       rancherSchemas: dispatch('rancher/loadSchemas', true),
-      epinioSchemas:  dispatch(`${ EPINIO_PRODUCT_NAME }/loadSchemas`), // TODO: RC FIX Need a hook/plugin equivalent
     });
 
     const promises = {

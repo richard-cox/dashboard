@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
+import extensionRoutes from './plugins/app-extension/extension-routes';
 import { STANDARD } from './config/private-label';
 import { directiveSsr as t } from './plugins/i18n';
 import { trimWhitespaceSsr as trimWhitespace } from './plugins/trim-whitespace';
-import { EXTENSION_PREFIX } from './utils/extensions';
 
 require('events').EventEmitter.defaultMaxListeners = 20;
 require('dotenv').config();
@@ -110,34 +110,7 @@ module.exports = {
     base:       routerBasePath,
     middleware: ['i18n'],
     extendRoutes(routes, resolve) {
-      // TODO: RC DISCUSS
-      const epinio = [{
-        name:      `${ EXTENSION_PREFIX }-epinio`,
-        path:      `/${ EXTENSION_PREFIX }/epinio`,
-        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/index.vue'),
-      }, {
-        name:      `${ EXTENSION_PREFIX }-epinio-c`,
-        path:      `/${ EXTENSION_PREFIX }/epinio/c`,
-        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/index.vue'),
-      }, {
-        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster`,
-        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster`,
-        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/index.vue')
-      }, {
-        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster-resource`,
-        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource`,
-        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/index.vue')
-      }, {
-        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster-resource-create`,
-        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource/create`,
-        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/create.vue')
-      }, {
-        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster-resource-id`,
-        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource/:id`,
-        component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/_id.vue')
-      }];
-
-      routes.push(...epinio);
+      routes.push(...extensionRoutes.routes(resolve));
     }
   },
 

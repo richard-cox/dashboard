@@ -13,10 +13,10 @@ import { get } from '@/utils/object';
 import { AFTER_LOGIN_ROUTE } from '@/store/prefs';
 import { NAME as VIRTUAL } from '@/config/product/harvester';
 
-import epinio from '@/plugins/app-extension/epinio';
-
 import { rcWarn } from '@/utils/rc-logs';
 import { EXTENSION_PREFIX } from '@/utils/extensions';
+
+import extensions from '@/plugins/app-extension/extensions';
 
 let beforeEachSetup = false;
 
@@ -226,7 +226,7 @@ export default async function({
 
   // Load stuff
   await applyProducts(store);
-  epinio.init(store); // TODO: RC FIX better hook
+  extensions.applyProducts(store);
 
   // Setup a beforeEach hook once to keep track of the current product
   if ( !beforeEachSetup ) {

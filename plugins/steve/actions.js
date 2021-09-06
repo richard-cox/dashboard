@@ -1,6 +1,6 @@
 import https from 'https';
 import { addParam } from '@/utils/url';
-import { handleSpoofedRequest } from '~/plugins/core-store/actions';
+import { handleSpoofedRequest } from '@/plugins/core-store/actions';
 
 export default {
   async request({ dispatch, rootGetters }, { opt }) {

@@ -2,7 +2,7 @@
 
 import Loading from '@/components/Loading';
 import ResourceTable from '@/components/ResourceTable';
-import { EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/plugins/app-extension/epinio/config/product/epinio';
+import { EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/plugins/app-extension/epinio/types';
 
 export default {
   components: { Loading, ResourceTable },

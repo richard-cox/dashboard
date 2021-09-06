@@ -1,15 +1,12 @@
 import https from 'https';
 
 import { SCHEMA } from '@/config/types';
-import { EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/plugins/app-extension/epinio/config/product/epinio';
+import { EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/plugins/app-extension/epinio/types';
 import { normalizeType } from '@/plugins/core-store/normalize';
-import { handleSpoofedRequest } from '~/plugins/core-store/actions';
-
-// TODO: RC EPINIO Review all epinio mutations/actions/gettters
+import { handleSpoofedRequest } from '@/plugins/core-store/actions';
 
 export default {
-  async request({ dispatch, rootGetters }, { opt, type }) {
-    // TODO: RC FIX now that the requests work these are an odd type of spoof ()
+  async request({ rootGetters }, { opt, type }) {
     const spoofedRes = await handleSpoofedRequest(rootGetters, EPINIO_PRODUCT_NAME, opt);
 
     if (spoofedRes) {
@@ -22,11 +19,11 @@ export default {
 
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     opt.httpsAgent = new https.Agent({ rejectUnauthorized: false });
-    // opt.headers = { 'x-api-host': 'https://epinio.10.86.1.49.omg.howdoi.website' }; // TODO: RC fetch from cluster
+    // opt.headers = { 'x-api-host': 'https://epinio.10.86.1.49.omg.howdoi.website' };
     opt.headers = {
-      'x-api-host':    'https://epinio.172.27.0.2.omg.howdoi.website',
-      Authorization: 'Basic <snip>'
-    }; // TODO: RC EPINIO AUTH fetch from cluster
+      'x-api-host':    'https://epinio.172.27.0.2.omg.howdoi.website', // TODO: RC FIX fetch from cluster
+      Authorization: 'Basic NzJlYmY5YWJlZjliZTExMTpiNDI2ZmZhZDQxYTgxZGQz' // TODO: RC AUTH fetch from cluster
+    };
 
     return this.$axios(opt).then((res) => {
       if ( opt.depaginate ) {
@@ -55,10 +52,11 @@ export default {
 
       const res = err.response;
 
-      // TODO: RC evaluate
       // Go to the logout page for 401s, unless redirectUnauthorized specifically disables (for the login page)
       if ( opt.redirectUnauthorized !== false && process.client && res.status === 401 ) {
-        dispatch('auth/logout', opt.logoutOnError, { root: true });
+        return Promise.reject(err);
+        // TODO: RC DISCUSS Handle unauthed epinio calls
+        // dispatch('auth/logout', opt.logoutOnError, { root: true });
       }
 
       if ( typeof res.data !== 'undefined' ) {
@@ -71,19 +69,11 @@ export default {
     function responseObject(res) {
       let out = res.data;
 
-      // TODO: RC evaluate
-
-      const fromHeader = res.headers['x-api-cattle-auth'];
-
-      if ( fromHeader && fromHeader !== rootGetters['auth/fromHeader'] ) {
-        dispatch('auth/gotHeader', fromHeader, { root: true });
-      }
-
       if ( res.status === 204 || out === null ) {
         out = {};
       }
 
-      // TODO: EPINIO - BE - orgs call returns array of strings!
+      // TODO: API - orgs call returns array of strings!
       if (Array.isArray(out)) {
         out = {
           data: out.map((o) => {
@@ -99,7 +89,7 @@ export default {
           })
         };
       } else {
-        // `find` turns this into `{data: out}`
+        // `find` action turns this into `{data: out}`
         out = {
           ...out,
           id: out.name,
@@ -131,7 +121,7 @@ export default {
         product:           EPINIO_PRODUCT_NAME,
         id:                EPINIO_TYPES.APP,
         type:              'schema',
-        // TODO: RC BE v1/apps available?
+        // TODO: RC API v1/apps available?
         links:             { collection: '/proxy/api/v1/orgs/workspace/applications' },
         collectionMethods: ['post'],
       }, {
