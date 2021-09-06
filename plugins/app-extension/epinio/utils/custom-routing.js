@@ -16,5 +16,4 @@ export const createEpinioRoute = (name, params) => ({
   }
 });
 
-// TODO: RC FIX what can be TS?
 // TODO: RC handle on log out

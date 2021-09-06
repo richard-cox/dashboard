@@ -1,7 +1,6 @@
-<script>
-
-import Loading from '@/components/Loading';
-import ResourceTable from '@/components/ResourceTable';
+<script lang="ts">
+import Loading from '@/components/Loading.vue';
+import ResourceTable from '@/components/ResourceTable/index.vue';
 import { EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/plugins/app-extension/epinio/types';
 
 export default {

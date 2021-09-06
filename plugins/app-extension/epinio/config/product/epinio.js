@@ -18,6 +18,7 @@ export function init(store) {
     // ifHaveType:          CAPI.RANCHER_CLUSTER,
     // ifFeature:           MULTI_CLUSTER,
     category:            EPINIO_PRODUCT_NAME,
+    isMultiClusterApp:   true,
     inStore:             EPINIO_PRODUCT_NAME,
     icon:                'cluster-management',
     removable:           false,

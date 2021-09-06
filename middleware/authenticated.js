@@ -13,7 +13,6 @@ import { get } from '@/utils/object';
 import { AFTER_LOGIN_ROUTE } from '@/store/prefs';
 import { NAME as VIRTUAL } from '@/config/product/harvester';
 
-import { rcWarn } from '@/utils/rc-logs';
 import { EXTENSION_PREFIX } from '@/utils/extensions';
 
 import extensions from '@/plugins/app-extension/extensions';
@@ -233,7 +232,6 @@ export default async function({
     beforeEachSetup = true;
 
     store.app.router.beforeEach((to, from, next) => {
-      rcWarn('auth router beforeEach', to);
       setProduct(store, to);
       next();
     });

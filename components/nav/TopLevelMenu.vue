@@ -12,7 +12,6 @@ import { getVersionInfo } from '@/utils/version';
 import { LEGACY } from '@/store/features';
 import { SETTING } from '@/config/settings';
 import { filterOnlyKubernetesClusters } from '@/utils/cluster';
-import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/types';
 
 const UNKNOWN = 'unknown';
 const UI_VERSION = process.env.VERSION || UNKNOWN;
@@ -97,8 +96,7 @@ export default {
     multiClusterApps() {
       const options = this.options;
 
-      // TODO: RC FIX Q: How does a plugin decided where it appears in the side nav? Currently hardcoded with epinio
-      return options.filter(opt => (opt.inStore === 'management' || opt.category === EPINIO_PRODUCT_NAME) && opt.category !== 'configuration' && opt.category !== 'legacy');
+      return options.filter(opt => (opt.inStore === 'management' || opt.isMultiClusterApp) && opt.category !== 'configuration' && opt.category !== 'legacy');
     },
 
     legacyApps() {
