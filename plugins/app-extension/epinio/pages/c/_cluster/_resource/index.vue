@@ -1,5 +1,5 @@
-<script>
-import ResourceList from '@/components/ResourceList';
+<script lang="ts">
+import ResourceList from '@/components/ResourceList/index.vue';
 
 export default {
   name:       'EpinioResourcedList',

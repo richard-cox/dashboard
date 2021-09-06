@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
 import CreateEditView from '@/mixins/create-edit-view';
-import Loading from '@/components/Loading';
+import Loading from '@/components/Loading.vue';
 
 export default {
   components: { Loading },

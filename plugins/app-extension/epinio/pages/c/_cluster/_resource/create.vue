@@ -1,5 +1,5 @@
-<script>
-import ResourceDetail from '@/components/ResourceDetail';
+<script lang="ts">
+import ResourceDetail from '@/components/ResourceDetail/index.vue';
 
 export default {
   name:       'EpinioResourceCreate',
