@@ -126,13 +126,14 @@ export default {
         }
 
         return {
-          label:     this.$store.getters['i18n/withFallback'](`product."${ p.name }"`, null, ucFirst(p.name)),
-          icon:      `icon-${ p.icon || 'copy' }`,
-          value:     p.name,
-          removable: p.removable !== false,
-          inStore:   p.inStore || 'cluster',
-          weight:    p.weight || 1,
-          category:  p.category || 'none',
+          label:             this.$store.getters['i18n/withFallback'](`product."${ p.name }"`, null, ucFirst(p.name)),
+          icon:              `icon-${ p.icon || 'copy' }`,
+          value:             p.name,
+          removable:         p.removable !== false,
+          inStore:           p.inStore || 'cluster',
+          weight:            p.weight || 1,
+          category:          p.category || 'none',
+          isMultiClusterApp: p.isMultiClusterApp,
           to,
         };
       });
