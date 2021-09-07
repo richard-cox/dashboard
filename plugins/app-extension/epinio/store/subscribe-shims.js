@@ -1,5 +1,7 @@
+import { rcWarn } from '@/utils/rc-logs';
+
 export const actions = {
   watch({ state, dispatch, getters }, { type, revision }) {
-    console.debug('Epinio: Watch: ', type, revision);
+    rcWarn('Epinio: Watch: ', type, revision);
   }
 };

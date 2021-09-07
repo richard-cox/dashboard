@@ -11,6 +11,7 @@ export default {
     if (applied) {
       return;
     }
+
     applied = true;
     productInit(store);
 

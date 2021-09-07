@@ -21,7 +21,7 @@ export default {
     opt.httpsAgent = new https.Agent({ rejectUnauthorized: false });
     opt.headers = {
       'x-api-host':    'https://epinio.172.27.0.2.omg.howdoi.website', // TODO: RC FIX fetch from cluster
-      Authorization: '<snip>' // TODO: RC AUTH fetch from cluster
+      Authorization: 'Basic <snip>' // TODO: RC AUTH fetch from cluster
     };
 
     return this.$axios(opt).then((res) => {
@@ -122,13 +122,14 @@ export default {
         type:              'schema',
         // TODO: RC API v1/apps available?
         links:             { collection: '/proxy/api/v1/orgs/workspace/applications' },
-        collectionMethods: ['post'],
+        collectionMethods: ['get', 'post'],
+        resourceFields:    {}
       }, {
         product:           EPINIO_PRODUCT_NAME,
         id:                EPINIO_TYPES.ORG,
         type:              'schema',
         links:             { collection: '/proxy/api/v1/orgs' },
-        collectionMethods: ['POST'],
+        collectionMethods: ['get'],
       }]
     };
 
