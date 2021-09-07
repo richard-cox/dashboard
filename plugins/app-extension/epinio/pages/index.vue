@@ -1,9 +1,11 @@
 <script lang="ts">
+import Vue from 'vue';
+
 import Loading from '@/components/Loading.vue';
-import ResourceTable from '@/components/ResourceTable/index.vue';
+import ResourceTable from '@/components/ResourceTable.vue';
 import { EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/plugins/app-extension/epinio/types';
 
-export default {
+export default Vue.extend({
   components: { Loading, ResourceTable },
 
   layout: 'plain',
@@ -20,15 +22,15 @@ export default {
   },
 
   computed: {
-    cluster() {
+    cluster(): string {
       return this.$route.params.cluster;
     },
 
-    product() {
+    product(): string {
       return this.$route.params.product;
     }
   }
-};
+});
 </script>
 
 <template>
