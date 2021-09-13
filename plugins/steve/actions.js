@@ -3,7 +3,9 @@ import { addParam } from '@/utils/url';
 import { handleSpoofedRequest } from '@/plugins/core-store/actions';
 
 export default {
-  async request({ dispatch, rootGetters }, { opt }) {
+  async request({ dispatch, rootGetters }, pOpt ) {
+    const opt = pOpt.opt || pOpt;
+
     const spoofedRes = await handleSpoofedRequest(rootGetters, 'cluster', opt);
 
     if (spoofedRes) {
@@ -109,7 +111,7 @@ export default {
     opt.method = 'post';
     opt.data = body;
 
-    const res = await dispatch('request', opt);
+    const res = await dispatch('request', { opt });
 
     if ( opt.load !== false && res.type === 'collection' ) {
       await dispatch('loadMulti', res.data);
@@ -141,7 +143,7 @@ export default {
     opt.method = 'post';
     opt.data = body;
 
-    const res = await dispatch('request', opt);
+    const res = await dispatch('request', { opt });
 
     if ( opt.load !== false && res.type === 'collection' ) {
       await dispatch('loadMulti', res.data);

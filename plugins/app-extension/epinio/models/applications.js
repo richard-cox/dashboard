@@ -117,7 +117,7 @@ export default {
 
       opt.method = 'delete';
 
-      const res = await this.$dispatch('request', opt, { opt, type: this.type });
+      const res = await this.$dispatch('request', { opt, type: this.type });
 
       console.log('### Resource Remove', this.type, this.id, res);// eslint-disable-line no-console
       // if ( res?._status === 204 ) {
