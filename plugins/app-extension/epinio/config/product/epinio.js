@@ -56,34 +56,34 @@ export function init(store) {
     // STATE,
     NAME, {
       name:     'active',
-      labelKey: 'Active', // TODO: RC i10n
+      labelKey: 'epinio.tableHeaders.active',
       value:    'active',
       sort:     ['active'],
     }, {
       name:          'org',
-      labelKey:      'Organization', // TODO: RC i10n
+      labelKey:      'epinio.tableHeaders.organization',
       value:         'organization',
       sort:          ['organization'],
       formatter:     'LinkDetail',
       formatterOpts: { reference: 'orgLocation' }
     }, {
       name:     'username',
-      labelKey: 'username', // TODO: RC i10n
+      labelKey: 'epinio.tableHeaders.username',
       value:    'username',
       sort:     ['username'],
     }, {
       name:     'status',
-      labelKey: 'status', // TODO: RC i10n
+      labelKey: 'epinio.tableHeaders.status',
       value:    'status',
       sort:     ['status'],
     }, {
       name:     'route',
-      labelKey: 'route', // TODO: RC i10n
+      labelKey: 'epinio.tableHeaders.route',
       value:    'route',
       sort:     ['route'],
     }, {
       name:      'services',
-      labelKey:  'Bound Services', // TODO: RC i10n
+      labelKey:  'epinio.tableHeaders.boundServices',
       value:     'bound_services',
       sort:      ['bound_services'],
       formatter:     'List',
