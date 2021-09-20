@@ -7,7 +7,7 @@ let applied = false;
 export default {
   init(store) {
     if (applied) {
-      // TODO: RC called on page change, better solution?
+      // TODO: RC FIX called on page change, better solution?
       return;
     }
     applied = true;
@@ -18,14 +18,15 @@ export default {
     // [{"name":"sample","organization":"workspace","status":"Inactive, without workload. Launch via \"epinio app push\""}]
     // [{"active":true,"stage_id":"9814a9f9e6dc6922","name":"sample","organization":"workspace","status":"0/1","route":"sample.172.27.0.2.omg.howdoi.website"}]
     // curl -k -H 'Authorization: Basic <snip>' https://epinio.172.27.0.2.omg.howdoi.website/api/v1/orgs/workspace/applications
-    store.dispatch('epinio/loadAll', {
-      type: EPINIO_TYPES.APP,
-      data: [{
-        id:   'app1',
-        name:     'app1',
-        type: EPINIO_TYPES.APP
-      }]
-    });
+    // TODO: RC current format is api/v1/orgs/workspace/applications
+    // store.dispatch('epinio/loadAll', {
+    //   type: EPINIO_TYPES.APP,
+    //   data: [{
+    //     id:   'app1',
+    //     name:     'app1',
+    //     type: EPINIO_TYPES.APP
+    //   }]
+    // });
 
     // Sample Org
     // ["workspace"]

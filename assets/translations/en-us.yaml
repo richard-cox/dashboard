@@ -5528,6 +5528,17 @@ typeLabel:
       other { Cloud Config Templates }
     }
   
+  # TODO: RC how should these work?
+  orgs: |-
+    {count, plural,
+      one { Organisation }
+      other { Organisations }
+    }
+  applications: |-
+    {count, plural,
+      one { Application }
+      other { Applications }
+    }
 
 action:
   clone: Clone

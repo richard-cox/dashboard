@@ -1,13 +1,14 @@
 import { NAME, SIMPLE_NAME } from '@/config/table-headers';
 import { DSL } from '@/store/type-map';
+import { EXTENSION_PREFIX } from '~/utils/extensions';
 
 export const EPINIO_PRODUCT_NAME = 'epinio';
 
-// TODO: RC Comment routing is <extension>-c-<epinio instance>-<epinio resource>
-// TODO: RC Comment Handle localisation in plugins
+// TODO: RC DISCUSS Comment routing is <extension>-c-<epinio instance>-<epinio resource>
+// TODO: RC DISCUSS Handle localisation in plugins
 
 const rootRoute = {
-  name:    'ext-epinio',
+  name:    `${ EXTENSION_PREFIX }-epinio`,
   params:  { e: EPINIO_PRODUCT_NAME },
 };
 
@@ -31,9 +32,6 @@ export function init(store) {
     basicType,
     headers,
     configureType,
-    virtualType,
-    weightType,
-    spoofedType,
     componentForType
   } = DSL(store, EPINIO_PRODUCT_NAME);
 
@@ -48,57 +46,18 @@ export function init(store) {
     to:                  rootRoute
   });
 
-  spoofedType({
-    label:      'Instances', // TODO: RC i10n
-    type:       EPINIO_TYPES.INSTANCE,
-    route:      createRoute('c-cluster-resource', { resource: EPINIO_TYPES.INSTANCE }),
-    schemas: [
-      {
-        product:           EPINIO_PRODUCT_NAME,
-        id:                EPINIO_TYPES.INSTANCE,
-        type:              'schema',
-        collectionMethods: ['post'],
-      },
-    ],
-  });
+  configureType(EPINIO_TYPES.INSTANCE, { customRoute: createRoute('c-cluster-resource', { resource: EPINIO_TYPES.INSTANCE }) });
 
-  spoofedType({
-
-    type:       EPINIO_TYPES.APP,
-    route:      createRoute('c-cluster-resource', { resource: EPINIO_TYPES.APP }),
-    schemas: [
-      {
-        label:             'Applications', // TODO: RC i10n
-        product:           EPINIO_PRODUCT_NAME,
-        id:                EPINIO_TYPES.APP,
-        type:              'schema',
-        collectionMethods: ['post'],
-      },
-    ],
-  });
-
-  componentForType(EPINIO_TYPES.APP, undefined, EPINIO_PRODUCT_NAME); // TODO: RC should probably store plugin (which is store) in state
+  componentForType(EPINIO_TYPES.APP, undefined, EPINIO_PRODUCT_NAME);
   configureType(EPINIO_TYPES.APP, {
     isCreatable: true,
     showState:   false,
     showAge:     false,
     canYaml:     false,
+    customRoute: createRoute('c-cluster-resource', { resource: EPINIO_TYPES.APP })
   });
 
-  spoofedType({
-
-    type:       EPINIO_TYPES.ORG,
-    route:      createRoute('c-cluster-resource', { resource: EPINIO_TYPES.ORG }),
-    schemas: [
-      {
-        label:             'Organisations', // TODO: RC i10n
-        product:           EPINIO_PRODUCT_NAME, // TODO: RC from store instead of product (should be available when called <store>loadSchemas -->loadAll)
-        id:                EPINIO_TYPES.ORG,
-        type:              'schema',
-        collectionMethods: ['POST'],
-      },
-    ],
-  });
+  configureType(EPINIO_TYPES.ORG, { customRoute: createRoute('c-cluster-resource', { resource: EPINIO_TYPES.ORG }) });
 
   basicType([
     EPINIO_TYPES.APP,

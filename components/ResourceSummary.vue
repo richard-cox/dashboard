@@ -1,7 +1,7 @@
 <script>
 import SimpleBox from '@/components/SimpleBox';
 import { COUNT } from '@/config/types';
-import { colorForState } from '@/plugins/steve/resource-instance';
+import { colorForState } from '@/plugins/core-store/resource-instance';
 
 export function colorToCountName(color) {
   switch (color) {

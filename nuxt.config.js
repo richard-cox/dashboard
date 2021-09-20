@@ -4,6 +4,7 @@ import path from 'path';
 import { STANDARD } from './config/private-label';
 import { directiveSsr as t } from './plugins/i18n';
 import { trimWhitespaceSsr as trimWhitespace } from './plugins/trim-whitespace';
+import { EXTENSION_PREFIX } from './utils/extensions';
 
 require('events').EventEmitter.defaultMaxListeners = 20;
 require('dotenv').config();
@@ -111,28 +112,28 @@ module.exports = {
     extendRoutes(routes, resolve) {
       // TODO: RC DISCUSS
       const epinio = [{
-        name:      'ext-epinio',
-        path:      '/ext/epinio',
+        name:      `${ EXTENSION_PREFIX }-epinio`,
+        path:      `/${ EXTENSION_PREFIX }/epinio`,
         component: resolve(__dirname, 'plugins/app-extension/epinio/pages/index.vue'),
       }, {
-        name:      'ext-epinio-c',
-        path:      '/ext/epinio/c',
+        name:      `${ EXTENSION_PREFIX }-epinio-c`,
+        path:      `/${ EXTENSION_PREFIX }/epinio/c`,
         component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/index.vue'),
       }, {
-        name:      'ext-epinio-c-cluster',
-        path:      '/ext/epinio/c/:cluster',
+        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster`,
+        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster`,
         component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/index.vue')
       }, {
-        name:      'ext-epinio-c-cluster-resource',
-        path:      '/ext/epinio/c/:cluster/:resource',
+        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster-resource`,
+        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource`,
         component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/index.vue')
       }, {
-        name:      'ext-epinio-c-cluster-resource-create',
-        path:      '/ext/epinio/c/:cluster/:resource/create',
+        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster-resource-create`,
+        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource/create`,
         component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/create.vue')
       }, {
-        name:      'ext-epinio-c-cluster-resource-id',
-        path:      '/ext/epinio/c/:cluster/:resource/:id',
+        name:      `${ EXTENSION_PREFIX }-epinio-c-cluster-resource-id`,
+        path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource/:id`,
         component: resolve(__dirname, 'plugins/app-extension/epinio/pages/c/_cluster/_resource/_id.vue')
       }];
 
@@ -313,7 +314,7 @@ module.exports = {
     '@nuxtjs/webpack-profile',
     'cookie-universal-nuxt',
     'portal-vue/nuxt',
-    '~/plugins/steve/rehydrate-all',
+    '~/plugins/core-store/rehydrate-all',
     '@nuxt/content',
   ],
 

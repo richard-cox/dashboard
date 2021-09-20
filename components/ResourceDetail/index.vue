@@ -160,7 +160,7 @@ export default {
     }
 
     // Ensure labels & annotations exists, since lots of things need them
-    // TODO: RC rancher only thing
+    // TODO: RC FIX rancher only thing
     if ( !model.metadata ) {
       set(model, 'metadata', {});
     }

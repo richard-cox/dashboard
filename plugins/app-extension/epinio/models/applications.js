@@ -1,13 +1,11 @@
+import { EXTENSION_PREFIX } from '@/utils/extensions';
 
 export default {
-  name() {
-    return this.id;
-  },
-
+// TODO: RC FIXME <x>Location should use optionsFor.customRoute in a base epinio resource-instance
   detailLocation() {
     return {
       ...this._detailLocation,
-      name: `ext-epinio-c-cluster-resource-id`,
+      name: `${ EXTENSION_PREFIX }-epinio-c-cluster-resource-id`,
     };
   },
 };

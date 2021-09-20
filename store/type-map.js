@@ -94,6 +94,7 @@
 //                               resource: undefined       -- Use this resource in ResourceDetails instead
 //                               resourceDetail: undefined -- Use this resource specifically for ResourceDetail's detail component
 //                               resourceEdit: undefined   -- Use this resource specifically for ResourceDetail's edit component
+//                               customRoute: undefined,
 //                           }
 // )
 // ignoreGroup(group):        Never show group or any types in it
@@ -127,7 +128,7 @@ import {
 
 import { NAME as EXPLORER } from '@/config/product/explorer';
 import isObject from 'lodash/isObject';
-import { normalizeType } from '@/plugins/steve/normalize';
+import { normalizeType } from '@/plugins/core-store/normalize';
 import { sortBy } from '@/utils/sort';
 import { haveV1Monitoring, haveV2Monitoring } from '@/utils/monitoring';
 
@@ -424,6 +425,7 @@ export const getters = {
       showAge:     true,
       canYaml:     true,
       namespaced:  null,
+      customRoute: undefined,
     };
 
     return (schemaOrType) => {
@@ -769,6 +771,7 @@ export const getters = {
           count:       count ? count.summary.count || 0 : null,
           byNamespace: count ? count.namespaces : {},
           revision:    count ? count.revision : null,
+          route:       typeOptions.customRoute
         };
       }
 
@@ -1285,10 +1288,6 @@ export const mutations = {
     if ( !state.spoofedTypes[product] ) {
       state.spoofedTypes[product] = [];
     }
-
-    // if (obj.type === 'app') {
-    //   debugger;
-    // }
 
     const copy = clone(obj);
 

@@ -1,5 +1,4 @@
 import Steve from '@/plugins/steve';
-import EpinioStore from '@/plugins/app-extension/epinio/store';
 import {
   COUNT, NAMESPACE, NORMAN, MANAGEMENT, FLEET, UI, VIRTUAL_HARVESTER_PROVIDER, HCI
 } from '@/config/types';
@@ -602,6 +601,8 @@ export const actions = {
 
       return;
     }
+
+    // Rancher `cluster` store specific, only applies to kube clusters
 
     // See if it really exists
     try {

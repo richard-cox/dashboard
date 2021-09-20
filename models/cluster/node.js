@@ -5,6 +5,7 @@ import {
 } from '@/config/types';
 import { parseSi } from '@/utils/units';
 import findLast from 'lodash/findLast';
+import { PRIVATE } from '@/plugins/core-store/resource-proxy';
 
 export const listNodeRoles = (isControlPlane, isWorker, isEtcd, allString) => {
   const res = [];

@@ -97,7 +97,7 @@ export default {
     multiClusterApps() {
       const options = this.options;
 
-      // TODO: RC Q: How does a plugin decided where it appears in the side nav? Currently hardcoded with epinio
+      // TODO: RC FIX Q: How does a plugin decided where it appears in the side nav? Currently hardcoded with epinio
       return options.filter(opt => (opt.inStore === 'management' || opt.category === EPINIO_PRODUCT_NAME) && opt.category !== 'configuration' && opt.category !== 'legacy');
     },
 
@@ -117,8 +117,6 @@ export default {
       const cluster = this.clusterId || this.$store.getters['defaultClusterId'];
 
       const entries = this.activeProducts.map((p) => {
-        // TODO: RC Comment: Allow product to define it's own route
-        // Try product-specific index first
         const to = p.to || {
           name:   `c-cluster-${ p.name }`,
           params: { cluster }

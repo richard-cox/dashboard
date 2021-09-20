@@ -16,17 +16,19 @@ import { NAME as VIRTUAL } from '@/config/product/harvester';
 import epinio from '@/plugins/app-extension/epinio';
 
 import { rcWarn } from '@/utils/rc-logs';
+import { EXTENSION_PREFIX } from '@/utils/extensions';
 
 let beforeEachSetup = false;
+
+const extRegEx = new RegExp(`\/${ EXTENSION_PREFIX }\/([^\/]+)`);
 
 function setProduct(store, to) {
   let product = to.params?.product;
 
   // Product is the extensions
-  // TODO: RC Comment - When switching products to an extensions the format is different
-  if (to.path.startsWith('/ext')) { // TODO: RC const 'ext' {
-    // const match = to.name?.match(/^ext-([^-]+)/);
-    const match = to.path?.match(/\/ext\/([^\/]+)/);
+  // When switching products to an extensions the format is different
+  if (to.path.startsWith(`/${ EXTENSION_PREFIX }`)) {
+    const match = extRegEx.exec(to.path);
 
     if ( match ) {
       product = match[1];
@@ -224,7 +226,7 @@ export default async function({
 
   // Load stuff
   await applyProducts(store);
-  epinio.init(store);
+  epinio.init(store); // TODO: RC FIX better hook
 
   // Setup a beforeEach hook once to keep track of the current product
   if ( !beforeEachSetup ) {
@@ -253,7 +255,7 @@ export default async function({
     let clusterId = get(route, 'params.cluster');
     const product = get(route, 'params.product');
     const oldProduct = from?.params?.product;
-    const isExt = route.name.startsWith('ext');
+    const isExt = route.name.startsWith(EXTENSION_PREFIX);
 
     if (product === VIRTUAL || route.name === `c-cluster-${ VIRTUAL }` || route.name.startsWith(`c-cluster-${ VIRTUAL }-`)) {
       const res = [
