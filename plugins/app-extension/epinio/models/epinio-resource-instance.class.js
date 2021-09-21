@@ -1,13 +1,13 @@
 import { createEpinioRoute } from '@/plugins/app-extension/epinio/utils/custom-routing';
+import { Resource } from '@/plugins/core-store/resource-class';
 
-export default {
-
-  listLocation() {
+export default class EpinioResource extends Resource {
+  get listLocation() {
     return this.$rootGetters['type-map/optionsFor'](this.type).customRoute || createEpinioRoute(`c-cluster-resource`, {
       cluster:   this.$rootGetters['clusterId'],
       resource:  this.type,
     });
-  },
+  }
 
   // TODO: RC DISCUSS tie in namespace selector with org
   // _detailLocation() {
@@ -27,12 +27,11 @@ export default {
   //   };
   // },
 
-  detailLocation() {
+  get detailLocation() {
     return createEpinioRoute(`c-cluster-resource-id`, {
       cluster:   this.$rootGetters['clusterId'],
       resource:  this.type,
       id:       this.id
     });
-  },
-
-};
+  }
+}
