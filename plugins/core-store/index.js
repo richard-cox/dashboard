@@ -28,16 +28,14 @@ export const coreStoreState = (namespace, baseUrl) => ({
   types: {},
 });
 
-export default (vuexModule, namespace = '', baseUrl = `/${ namespace }`) => {
-  // const namespace = config.namespace || '';
-
-  // config.baseUrl = config.baseUrl || `/${ namespace }`;
+export default (vuexModule, config) => {
+  const namespace = config.namespace || '';
 
   return function(store) {
     // const inst = SteveFactory(namespace, config.baseUrl);
 
     store.registerModule(namespace, vuexModule);
-    store.commit(`${ namespace }/applyConfig`, { namespace, baseUrl });
+    store.commit(`${ namespace }/applyConfig`, config);
 
     if ( !process.client || !window.__NUXT__ ) {
       return;

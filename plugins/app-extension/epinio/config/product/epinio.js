@@ -1,4 +1,4 @@
-import { NAME, SIMPLE_NAME, STATE } from '@/config/table-headers';
+import { NAME, SIMPLE_NAME } from '@/config/table-headers';
 import { DSL } from '@/store/type-map';
 import { createEpinioRoute, rootEpinioRoute } from '@/plugins/app-extension/epinio/utils/custom-routing';
 import { EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/plugins/app-extension/epinio/types';

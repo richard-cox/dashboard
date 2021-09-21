@@ -83,7 +83,7 @@ export default {
     type = getters.normalizeType(type);
     const schemas = state.types[SCHEMA];
     const keyField = getters.keyFieldForType(SCHEMA);
-    const entry = schemas.list.find((x) => {
+    const entries = schemas.list.find((x) => {
       const thisOne = getters.normalizeType(x[keyField]);
 
       return thisOne === type || thisOne.endsWith(`.${ type }`);
@@ -252,6 +252,10 @@ export default {
 
   storeName: (state) => {
     return state.config.namespace;
+  },
+
+  defaultModel: () => () => {
+    return undefined;
   }
 
 };

@@ -12,8 +12,6 @@ function find(cache, base, type) {
   }
 
   try {
-    const model = { ...base.default };
-
     // New Class models
     if ( base?.default?.prototype ) {
       cache[type] = base.default;
@@ -51,19 +49,28 @@ export function lookup(store, type) {
   ];
 
   for ( const t of tries ) {
-    out = find(cache, require(`@/plugins/app-extension/${ store }/models/${ t }`), type);
-    if ( out ) {
-      return out;
+    try {
+      out = find(cache, require(`@/plugins/app-extension/${ store }/models/${ t }`), type);
+      if ( out ) {
+        return out;
+      }
+    } catch (e) {
     }
 
-    out = find(cache, require(`@/models/${ store }/${ t }`), type);
-    if ( out ) {
-      return out;
+    try {
+      out = find(cache, require(`@/models/${ store }/${ t }`), type);
+      if ( out ) {
+        return out;
+      }
+    } catch (e) {
     }
 
-    out = find(cache, require(`@/models/${ t }`), type);
-    if ( out ) {
-      return out;
+    try {
+      out = find(cache, require(`@/models/${ t }`), type);
+      if ( out ) {
+        return out;
+      }
+    } catch (e) {
     }
   }
 

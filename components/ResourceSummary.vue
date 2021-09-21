@@ -17,8 +17,8 @@ export function colorToCountName(color) {
 
 export function resourceCounts(store, resource) {
   const inStore = store.getters['currentStore'](COUNT);
-  const clusterCounts = store.getters[`${ inStore }/all`](COUNT)[0].counts;
-  const summary = clusterCounts[resource]?.summary || {};
+  const clusterCounts = store.getters[`${ inStore }/all`](COUNT)?.[0]?.counts;
+  const summary = clusterCounts?.[resource]?.summary || {};
 
   const counts = {
     total:        summary.count || 0,

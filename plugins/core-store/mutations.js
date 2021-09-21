@@ -201,7 +201,7 @@ export default {
     console.log('Reset', state.config.namespace);
 
     for ( const type of Object.keys(state.types) ) {
-      state.commit('forgetType', type);
+      this.commit(`${ state.config.namespace }/forgetType`, type);
     }
 
     clear(state.started);

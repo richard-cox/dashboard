@@ -1,5 +1,13 @@
 import { isArray } from '@/utils/array';
 
+import SteveModel from './steve-class';
+import HybridModel from './hybrid-class';
+import NormanModel from './norman-class';
+
+export const NORMAN = 'norman';// TODO: RC rename
+export const STEVE = 'steve';
+export const BY_TYPE = 'byType';
+
 export default {
   urlOptions: () => (url, opt) => {
     opt = opt || {};
@@ -45,5 +53,21 @@ export default {
     // End: Sort
 
     return url;
+  },
+
+  defaultModel: state => (obj) => {
+    const which = state.config.modelBaseClass || STEVE;
+
+    if ( which === BY_TYPE ) {
+      if ( obj?.type?.startsWith('management.cattle.io.') || obj?.type?.startsWith('project.cattle.io.')) {
+        return HybridModel;
+      } else {
+        return SteveModel;
+      }
+    } else if ( which === NORMAN ) {
+      return NormanModel;
+    } else {
+      return SteveModel;
+    }
   },
 };

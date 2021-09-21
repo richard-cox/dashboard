@@ -4,7 +4,7 @@ import merge from 'lodash/merge';
 import { SCHEMA } from '@/config/types';
 import { SPOOFED_API_PREFIX, SPOOFED_PREFIX } from '@/store/type-map';
 import { createYaml } from '@/utils/create-yaml';
-import { proxyFor, SELF } from './resource-proxy';
+import { proxyFor } from './resource-proxy';
 import { normalizeType } from './normalize';
 
 export const _ALL = 'all';
@@ -43,9 +43,9 @@ export default {
     const res = await dispatch('findAll', { type: SCHEMA, opt: { url: 'schemas', load: false } });
     const spoofedTypes = rootGetters['type-map/allSpoofedSchemas'] ;
 
-    if (isArray(res.data)) {
+    if (Array.isArray(res.data)) {
       res.data = res.data.concat(spoofedTypes);
-    } else if (isArray(res)) {
+    } else if (Array.isArray(res)) {
       res.data = res.concat(spoofedTypes);
     }
 

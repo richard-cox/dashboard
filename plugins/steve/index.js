@@ -1,11 +1,13 @@
 import coreStore, { coreStoreModule, coreStoreState } from '@/plugins/core-store/index';
+import { BY_TYPE } from '@/plugins/core-store/resource-proxy';
+
 import {
   mutations as subscribeMutations,
   actions as subscribeActions,
   getters as subscribeGetters
 } from './subscribe';
 
-import getters from './getters';
+import getters, { NORMAN } from './getters';
 import mutations from './mutations';
 import actions from './actions';
 
@@ -37,6 +39,7 @@ function SteveFactory(namespace, baseUrl) {
       ...mutations,
       ...subscribeMutations,
     },
+
     actions: {
       ...coreStoreModule.actions,
       ...actions,
@@ -46,10 +49,21 @@ function SteveFactory(namespace, baseUrl) {
 }
 
 export default (config) => {
-  // { namespace: 'management', baseUrl: '/v1' }
+  config.namespace = config.namespace || '';
+
+  config.baseUrl = config.baseUrl || `/${ config.namespace }`;
+
+  switch (config.namespace) {
+  case 'management':
+    config.modelBaseClass = BY_TYPE;
+    break;
+  case 'rancher':
+    config.modelBaseClass = NORMAN;
+    break;
+  }
+
   return coreStore(
     SteveFactory(config),
-    config.namespace,
-    config.baseUrl,
+    config,
   );
 };
