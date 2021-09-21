@@ -1,5 +1,4 @@
 import coreStore, { coreStoreModule, coreStoreState } from '@/plugins/core-store/index';
-import { BY_TYPE } from '@/plugins/core-store/resource-proxy';
 
 import {
   mutations as subscribeMutations,
@@ -7,7 +6,7 @@ import {
   getters as subscribeGetters
 } from './subscribe';
 
-import getters, { NORMAN } from './getters';
+import getters, { STEVE_MODEL_TYPES } from './getters';
 import mutations from './mutations';
 import actions from './actions';
 
@@ -55,10 +54,10 @@ export default (config) => {
 
   switch (config.namespace) {
   case 'management':
-    config.modelBaseClass = BY_TYPE;
+    config.modelBaseClass = STEVE_MODEL_TYPES.BY_TYPE;
     break;
   case 'rancher':
-    config.modelBaseClass = NORMAN;
+    config.modelBaseClass = STEVE_MODEL_TYPES.NORMAN;
     break;
   }
 

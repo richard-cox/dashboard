@@ -29,7 +29,7 @@ export const plugins = [
   Steve({ namespace: 'cluster', baseUrl: '' }), // URL dynamically set for the selected cluster
   Steve({ namespace: 'rancher', baseUrl: '/v3' }),
   Steve({ namespace: 'harvester', baseUrl: '' }),
-  ...extensions.stores(),
+  ...extensions.createStores(),
 ];
 
 export const state = () => {
@@ -781,6 +781,8 @@ export const actions = {
     await dispatch('rancher/unsubscribe');
     commit('rancher/reset');
     commit('catalog/reset');
+
+    extensions.stores().forEach(store => commit(`${ store }/reset`));
 
     const router = state.$router;
     const route = router.currentRoute;

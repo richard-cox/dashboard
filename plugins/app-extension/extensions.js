@@ -1,23 +1,22 @@
+import { EPINIO_PRODUCT_NAME } from '@/plugins/app-extension/epinio/types';
 import epinio from './epinio/index';
 
-// TODO: RC DISCUSS extensions & extension-routes
-// TODO: RC DISCUSS Registering this within epinio files doesn't happen before store/index plugins is initialised....
-const extensions = [
-  epinio
-];
+// Note - Extensions need to be directly imported here rather than importing this file and applying themselves to this file
+// (extensions are required by `store/index`, which executes after anything imported here)
+const extensions = { [EPINIO_PRODUCT_NAME]: epinio };
 
 export default {
 
-  // registerExtension(ext) {
-  //   extensions.push(ext);
-  // },
-
   applyProducts(store) {
-    return extensions.forEach(ext => ext.product(store));
+    return Object.values(extensions).forEach(ext => ext.product(store));
+  },
+
+  createStores() {
+    return [].concat.apply([], Object.values(extensions).map(ext => ext.store()));
   },
 
   stores() {
-    return [].concat.apply([], extensions.map(ext => ext.store()));
-  },
+    return Object.keys(extensions);
+  }
 
 };

@@ -1,4 +1,4 @@
-import { addObject, removeObject } from '@/utils/array';
+import { addObject, clear, removeObject } from '@/utils/array';
 import { get } from '@/utils/object';
 import Socket, {
   EVENT_CONNECTED,
@@ -552,6 +552,14 @@ export const mutations = {
 
   debug(state, on) {
     state.debugSocket = on !== false;
+  },
+
+  resetSubscriptions(state) {
+    clear(state.started);
+    clear(state.pendingSends);
+    clear(state.queue);
+    clearInterval(state.queueTimer);
+    state.queueTimer = null;
   }
 };
 

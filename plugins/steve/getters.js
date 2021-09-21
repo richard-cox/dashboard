@@ -4,9 +4,11 @@ import SteveModel from './steve-class';
 import HybridModel from './hybrid-class';
 import NormanModel from './norman-class';
 
-export const NORMAN = 'norman';// TODO: RC rename
-export const STEVE = 'steve';
-export const BY_TYPE = 'byType';
+export const STEVE_MODEL_TYPES = {
+  NORMAN:  'norman',
+  STEVE:   'steve',
+  BY_TYPE: 'byType'
+};
 
 export default {
   urlOptions: () => (url, opt) => {
@@ -56,15 +58,15 @@ export default {
   },
 
   defaultModel: state => (obj) => {
-    const which = state.config.modelBaseClass || STEVE;
+    const which = state.config.modelBaseClass || STEVE_MODEL_TYPES.BY_TYPE.STEVE;
 
-    if ( which === BY_TYPE ) {
+    if ( which === STEVE_MODEL_TYPES.BY_TYPE ) {
       if ( obj?.type?.startsWith('management.cattle.io.') || obj?.type?.startsWith('project.cattle.io.')) {
         return HybridModel;
       } else {
         return SteveModel;
       }
-    } else if ( which === NORMAN ) {
+    } else if ( which === STEVE_MODEL_TYPES.NORMAN ) {
       return NormanModel;
     } else {
       return SteveModel;

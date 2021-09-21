@@ -20,7 +20,7 @@ export function proxyFor(ctx, obj, isClone = false) {
   }
 
   const mappedType = ctx.rootGetters['type-map/componentFor'](obj.type);
-  let customModel = lookup(ctx.state.config.namespace, mappedType.type || mappedType, obj?.metadata?.name); // TODO: RC
+  let customModel = lookup(ctx.state.config.namespace, mappedType.type || mappedType, obj?.metadata?.name);
 
   // Uncomment this to make everything a class by default instead of a proxy
   if ( !customModel ) {

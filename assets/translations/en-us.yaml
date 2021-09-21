@@ -5527,8 +5527,6 @@ typeLabel:
       one { Cloud Config Template }
       other { Cloud Config Templates }
     }
-  
-  # TODO: RC how should these work?
   orgs: |-
     {count, plural,
       one { Organisation }

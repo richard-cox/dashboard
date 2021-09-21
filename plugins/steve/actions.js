@@ -1,6 +1,7 @@
 import https from 'https';
 import { addParam } from '@/utils/url';
 import { handleSpoofedRequest } from '@/plugins/core-store/actions';
+import { set } from '@/utils/object';
 
 export default {
   async request({ dispatch, rootGetters }, pOpt ) {
@@ -183,7 +184,24 @@ export default {
     }
 
     return obj;
-  }
+  },
+
+  cleanForDetail(ctx, resource) {
+    // Ensure labels & annotations exists, since lots of things need them
+    if ( !resource.metadata ) {
+      set(resource, 'metadata', {});
+    }
+
+    if ( !resource.metadata.annotations ) {
+      set(resource, 'metadata.annotations', {});
+    }
+
+    if ( !resource.metadata.labels ) {
+      set(resource, 'metadata.labels', {});
+    }
+
+    return resource;
+  },
 };
 
 function dropKeys(obj) {

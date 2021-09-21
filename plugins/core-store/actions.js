@@ -339,5 +339,11 @@ export default {
 
   cleanForNew(ctx, resource) {
     throw new Error('Not Implemented');
-  }
+  },
+
+  // Clean a resource for the ResourceDetail page
+  // This can ensure common, required properties exists that might have been removed
+  cleanForDetail(ctx, resource) {
+    return resource;
+  },
 };

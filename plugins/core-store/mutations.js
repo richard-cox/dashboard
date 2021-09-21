@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { addObject, addObjects, clear } from '@/utils/array';
+import { addObject, addObjects, clear, removeObject } from '@/utils/array';
 import { SCHEMA } from '@/config/types';
 import { normalizeType } from '@/plugins/core-store/normalize';
 import { proxyFor, remapSpecialKeys } from '@/plugins/core-store/resource-proxy';
@@ -114,6 +114,15 @@ export function forgetType(state, type) {
   }
 }
 
+export function resetStore(state, commit) {
+  // eslint-disable-next-line no-console
+  console.log('Reset', state.config.namespace);
+
+  for ( const type of Object.keys(state.types) ) {
+    commit(`${ state.config.namespace }/forgetType`, type);
+  }
+}
+
 export default {
   registerType,
   load,
@@ -169,49 +178,32 @@ export default {
     cache.haveAll = true;
   },
 
-  remove(state, { obj, ctx }) {
-    debugger;
-    throw new Error('WHERE AM I USED???'); // TODO: RC FIX --> apply remove({obj, ctx}) to where called
-    // const { getters } = ctx;
+  remove(state, obj) {
+    let type = normalizeType(obj.type);
+    const keyField = this.getters[`${ state.config.namespace }/keyFieldForType`](type);
+    const id = obj[keyField];
 
-    // let type = normalizeType(obj.type);
-    // const keyField = getters.keyFieldForType(type);
-    // const id = obj[keyField];
+    let entry = state.types[type];
 
-    // let entry = state.types[type];
+    if ( entry ) {
+      removeObject(entry.list, obj);
+      entry.map.delete(id);
+    }
 
-    // if ( entry ) {
-    //   removeObject(entry.list, obj);
-    //   entry.map.delete(id);
-    // }
+    if ( obj.baseType ) {
+      type = normalizeType(obj.baseType);
+      entry = state.types[type];
 
-    // if ( obj.baseType ) {
-    //   type = normalizeType(obj.baseType);
-    //   entry = state.types[type];
-
-    //   if ( entry ) {
-    //     removeObject(entry.list, obj);
-    //     entry.map.delete(id);
-    //   }
-    // }
+      if ( entry ) {
+        removeObject(entry.list, obj);
+        entry.map.delete(id);
+      }
+    }
   },
 
   reset(state) {
-    // eslint-disable-next-line no-console
-    console.log('Reset', state.config.namespace);
-
-    for ( const type of Object.keys(state.types) ) {
-      this.commit(`${ state.config.namespace }/forgetType`, type);
-    }
-
-    clear(state.started);
-    clear(state.pendingSends);
-    clear(state.queue);
-    clearInterval(state.queueTimer);
-    state.queueTimer = null;
+    resetStore(state, this.commit);
   },
 
-  forgetType(state, type) {
-    forgetType(state, type);
-  },
+  forgetType,
 };
