@@ -3,7 +3,7 @@ import { addObject, addObjects, clear, removeObject } from '@/utils/array';
 import { SCHEMA } from '@/config/types';
 import { normalizeType } from '@/plugins/core-store/normalize';
 import { proxyFor, remapSpecialKeys } from '@/plugins/core-store/resource-proxy';
-import { Resource } from '~/plugins/steve/resource-class';
+import { Resource } from '@/plugins/core-store/resource-class';
 
 function registerType(state, type) {
   let cache = state.types[type];
