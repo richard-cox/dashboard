@@ -83,7 +83,7 @@ export default {
             return {
               ...o,
               id: o.name,
-              type
+              type // TODO: RC get from url
             };
           })
         };
@@ -121,14 +121,14 @@ export default {
         id:                EPINIO_TYPES.APP,
         type:              'schema',
         // TODO: RC API v1/apps available?
-        links:             { collection: '/proxy/api/v1/orgs/workspace/applications' },
+        links:             { collection: 'api/v1/orgs/workspace/applications' },
         collectionMethods: ['get', 'post'],
         resourceFields:    {}
       }, {
         product:           EPINIO_PRODUCT_NAME,
         id:                EPINIO_TYPES.ORG,
         type:              'schema',
-        links:             { collection: '/proxy/api/v1/orgs' },
+        links:             { collection: 'api/v1/orgs' },
         collectionMethods: ['get'],
       }]
     };
