@@ -30,10 +30,18 @@ export default {
       }
     }
 
+    debugger;
+
     if ( !url.startsWith('/') && !url.startsWith('http') ) {
       const baseUrl = state.config.baseUrl.replace(/\/$/, '');
 
-      url = `${ baseUrl }/${ url }`;
+      // `/k8s/clusters/<id>`     | Proxy straight to the native k8s API for the given downstream cluster
+      // http://localhost:8001/api/v1/namespaces/wwwnginx/services/http:my-nginx-clusterip:80/proxy/
+      // /k8s/clusters/<id>/api/v1/namespaces/epinio/services/http:epinio-service:80/proxy/
+
+      // url = `${ baseUrl }/${ url }`;
+      // url = `/k8s/clusters/c-m-qrg6z8zz/api/v1/namespaces/epinio/services/http:epinio-server:80/proxy/${ url }`;
+      // url = `/k8s/clusters/c-m-qrg6z8zz/v1/namespaces/`;
     }
 
     url = getters.urlOptions(url, opt);

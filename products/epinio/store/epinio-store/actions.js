@@ -34,19 +34,32 @@ export default {
     opt.depaginate = opt.depaginate !== false;
     opt.url = opt.url.replace(/\/*$/g, '');
 
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    opt.httpsAgent = new https.Agent({ rejectUnauthorized: false });
+    // TODO: RC FIX
+    // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    opt.httpsAgent = 'JUNK';// new https.Agent({ rejectUnauthorized: false });
+    // opt.httpsAgent.options.rejectUnauthorized = false;
+    // const instance = this.$axios.create({ httpsAgent: new https.Agent({ rejectUnauthorized: false }) });
 
     return await dispatch(`${ EPINIO_MGMT_STORE }/findAll`, { type: EPINIO_TYPES.INSTANCE }, { root: true })
       .then(() => {
+        debugger;
         const currentClusterId = rootGetters['clusterId'];
         const currentCluster = rootGetters[`${ EPINIO_MGMT_STORE }/byId`](EPINIO_TYPES.INSTANCE, currentClusterId);
 
         opt.headers = {
           ...opt.headers,
-          'x-api-host':  currentCluster.api,
+          // 'x-api-host':        currentCluster.api,
+          // 'x-api-auth-header': `Basic ${ base64Encode(`${ currentCluster.username }:${ currentCluster.password }`) }`,
           Authorization: `Basic ${ base64Encode(`${ currentCluster.username }:${ currentCluster.password }`) }`
         };
+        // var username = config.auth.username || '';
+        //   var password = config.auth.password || '';
+        //   requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+        opt.url = `${ currentCluster.api }/${ opt.url }`;
+        // opt.url = `/meta/proxy/epinio.159.65.213.73.omg.howdoi.website/api/v1/applications`; 502 bad gatway
+        opt.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+        opt.rejectUnauthorized = false;
+        // return instance(opt);
 
         return this.$axios(opt);
       })
@@ -91,6 +104,7 @@ export default {
           return responseObject(res);
         }
       }).catch((err) => {
+        console.warn('RAW FAILURE: ', err);
         if ( !err || !err.response ) {
           return Promise.reject(err);
         }
