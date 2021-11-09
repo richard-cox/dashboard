@@ -330,7 +330,7 @@ module.exports = {
     '/apis':         proxyWsOpts(api), // Management k8s API
     '/v1':           proxyWsOpts(api), // Management Steve API
     '/v3':           proxyWsOpts(api), // Rancher API
-    '/proxy':        genericProxy(api), // api can be anything
+    // '/proxy':        genericProxy(api), // api can be anything
     '/v3-public':    proxyOpts(api), // Rancher Unauthed API
     '/api-ui':       proxyOpts(api), // Browser API UI
     '/meta':         proxyOpts(api), // Browser API UI
@@ -367,18 +367,18 @@ module.exports = {
   typescript: { typeCheck: { eslint: { files: './**/*.{ts,js,vue}' } } }
 };
 
-function genericProxy(target) {
-  return {
-    target,
-    secure:       !dev,
-    pathRewrite:  { '^/proxy': '' },
-    changeOrigin: true,
-    router(req) {
-      return req.headers['x-api-host'];
-    },
-    onError
-  };
-}
+// function genericProxy(target) {
+//   return {
+//     target,
+//     secure:       !dev,
+//     pathRewrite:  { '^/proxy': '' },
+//     changeOrigin: true,
+//     router(req) {
+//       return req.headers['x-api-host'];
+//     },
+//     onError
+//   };
+// }
 
 function proxyOpts(target) {
   return {

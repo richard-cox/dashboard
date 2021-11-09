@@ -57,9 +57,10 @@ export default {
 
         opt.headers = {
           ...opt.headers,
-          'x-api-host':  `${ currentCluster.api }`,
+          // 'x-api-host':  `${ currentCluster.api }`,
           Authorization: `Basic ${ base64Encode(`${ currentCluster.username }:${ currentCluster.password }`) }`
         };
+        opt.url = `${ currentCluster.api }${ opt.url }`;
 
         return this.$axios(opt);
       })
@@ -157,7 +158,7 @@ export default {
         product:           EPINIO_PRODUCT_NAME,
         id:                EPINIO_TYPES.APP,
         type:              'schema',
-        links:             { collection: 'api/v1/applications' },
+        links:             { collection: '/api/v1/applications' },
         collectionMethods: ['get', 'post'],
         resourceFields:    { },
         attributes:        { namespaced: true }
@@ -165,13 +166,13 @@ export default {
         product:           EPINIO_PRODUCT_NAME,
         id:                EPINIO_TYPES.NAMESPACE,
         type:              'schema',
-        links:             { collection: '/proxy/api/v1/namespaces' },
+        links:             { collection: '/api/v1/namespaces' },
         collectionMethods: ['get', 'post'],
       }, {
         product:           EPINIO_PRODUCT_NAME,
         id:                EPINIO_TYPES.SERVICE,
         type:              'schema',
-        links:             { collection: 'api/v1/services' },
+        links:             { collection: '/api/v1/services' },
         collectionMethods: ['get', 'post'],
         resourceFields:    { },
         attributes:        { namespaced: true }

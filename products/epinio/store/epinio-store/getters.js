@@ -1,3 +1,5 @@
+// import { lookup } from '@/plugins/core-store/model-loader';
+// import EpinioResource from '@/products/epinio/models/epinio-resource';
 
 export default {
 
@@ -31,9 +33,10 @@ export default {
     }
 
     if ( !url.startsWith('/') && !url.startsWith('http') ) {
-      const baseUrl = state.config.baseUrl.replace(/\/$/, '');
+      // const baseUrl = state.config.baseUrl.replace(/\/$/, '');
 
-      url = `${ baseUrl }/${ url }`;
+      // url = `${ baseUrl }/${ url }`;
+      // url = `${ baseUrl }/${ url }`;
     }
 
     url = getters.urlOptions(url, opt);
@@ -45,5 +48,9 @@ export default {
     // This is where Epinio API filter, limit, sort will be applied
     return url;
   },
+
+  // classify: state => (obj) => {
+  //   return lookup(state.config.namespace, obj?.type, obj?.metadata?.name) || EpinioResource;
+  // },
 
 };

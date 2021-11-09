@@ -37,7 +37,7 @@ export default () => {
     EpinioFactory({ namespace: EPINIO_PRODUCT_NAME }),
     {
       namespace: EPINIO_PRODUCT_NAME,
-      baseUrl:   `/proxy`
+      // baseUrl:   `/proxy`
     },
   );
 };
