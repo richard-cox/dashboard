@@ -219,6 +219,7 @@ export default {
 
     await this.initAddons();
     await this.initRegistry();
+    this.initChartValues();
 
     this.loadedOnce = true;
   },
@@ -674,9 +675,16 @@ export default {
       return !!this.serverArgs.cni;
     },
 
+    showCloudProvider() {
+      return this.agentArgs['cloud-provider-name'];
+    },
+
     addonNames() {
       const names = [];
       const cni = this.serverConfig.cni;
+      // console.warn('addonNames (computed): serverConfig.cni: ',cni) 
+      // console.warn('addonNames (computed): this.agentArgs[cloud-provider-name]: ', this.agentArgs['cloud-provider-name']) 
+      // console.warn('addonNames (computed): this.agentConfig[cloud-provider-name]: ', this.agentConfig['cloud-provider-name']) 
 
       if ( cni ) {
         const parts = cni.split('+').map(x => `rke2-${ x }`);
@@ -684,14 +692,17 @@ export default {
         names.push(...parts);
       }
 
-      if ( this.agentConfig['cloud-provider-name'] === 'rancher-vsphere' ) {
-        names.push('rancher-vsphere-cpi', 'rancher-vsphere-csi');
+      if (this.showCloudProvider) { // Shouldn't be removed such that changes to it will re-trigger this watch
+        if ( this.agentConfig['cloud-provider-name'] === 'rancher-vsphere' ) {
+          names.push('rancher-vsphere-cpi', 'rancher-vsphere-csi');
+        }
+
+        if ( this.agentConfig['cloud-provider-name'] === HARVESTER ) {
+          names.push(HARVESTER_CLOUD_PROVIDER);
+        }
       }
 
-      if ( this.agentConfig['cloud-provider-name'] === HARVESTER ) {
-        names.push(HARVESTER_CLOUD_PROVIDER);
-      }
-
+      // console.warn('addonNames (computed): names: ',names) 
       return names;
     },
 
@@ -742,11 +753,43 @@ export default {
 
     addonNames(neu, old) {
       const diff = difference(neu, old);
+      console.warn('addonNames (watch): ', old, neu, diff)
 
-      if (!this.$fetchState.pending && diff.length ) {
+      // TODO: RC Improve / Document
+      // const a = [1,2,3];
+      // const b = [3,2,1];
+      // const c = [];
+      // console.warn('1', difference(a, b)); // []
+      // console.warn('2', difference(b, a)); // []
+
+      // console.warn('4', difference(a, c)); // [1, 2, 3]
+      // console.warn('5', difference(b, c)); // [3, 2, 1]
+      // console.warn('6', difference(c, a)); // []
+      // console.warn('7', difference(c, b)); // []
+
+      if (!this.$fetchState.pending && (diff.length || old.length !== neu.length)) {
+        console.warn('addonNames (watch): ', 'fetching')
         this.$fetch();
       }
     },
+
+    showCni(neu, old) {
+      console.warn('showCni: ', neu, old)
+      if (neu) {
+        if (!this.serverConfig.cni) {
+          const def = this.serverArgs.cni.default;
+          set(this.serverConfig, 'cni', def);
+        }
+      } else {
+        set(this.serverConfig, 'cni', undefined); // Recalculate addonNames, which will eventually update `value.spec.rkeConfig.chartValues`
+      }
+    },
+
+    showCloudProvider(neu) {
+      if (!neu) {
+        set(this.agentConfig, 'cloud-provider-name', undefined); // Clear the agentConfig, as we're clearing the chartValues
+      }
+    }
   },
 
   mounted() {
@@ -1069,25 +1112,43 @@ export default {
     },
 
     updateValues(name, values) {
-      set(this.chartValues, name, values);
+      set(this.chartValues, name, values); // TODO: RC h
       this.syncChartValues();
+    },
+
+    initChartValues() {
+      // TODO: RC doc
+      // This initialises but also cleans out any old chartValues that aren't listed in addonNames
+      const out = {};
+      for ( const k of this.addonNames ) {
+        out[k] = this.chartValues[k] || this.versionInfo[k]?.values;
+      }
+      set(this.value.spec.rkeConfig, 'chartValues', out);
+
+      // console.error('cleanChartValues: OLD: ', this.chartValues)
+      // console.error('cleanChartValues: NEW: ', out)
+      // set(this.value.spec.rkeConfig, 'chartValues', out);
     },
 
     syncChartValues: throttle(function() {
       const out = {};
 
       for ( const k of this.addonNames ) {
-        const fromChart = this.versionInfo[k].values;
+        const fromChart = this.versionInfo[k]?.values;
         const fromUser = this.chartValues[k];
+
         const different = diff(fromChart, fromUser);
 
         if ( isEmpty(different) ) {
-          out[k] = {};
+          out[k] = {}; // ensure there's always content, helpful if addon is just yaml TODO: RC NOTE - switching container network or provider now syncs with charts... so if there's no diff then content is cleared
         } else {
           out[k] = different;
         }
       }
-
+      // console.error('syncChartValues: this.versionInfo: ', this.versionInfo);
+      // console.error('syncChartValues: this.chartValues: ', this.chartValues);
+      // console.error('syncChartValues: BEFORE: ', this.value.spec.rkeConfig.chartValues);
+      // console.error('syncChartValues: AFTER:  ', out);
       set(this.value.spec.rkeConfig, 'chartValues', out);
     }, 250, { leading: true }),
 
@@ -1326,6 +1387,15 @@ export default {
         <Tab name="basic" label-key="cluster.tabs.basic" :weight="11" @active="refreshYamls">
           <Banner v-if="!haveArgInfo" color="warning" label="Configuration information is not available for the selected Kubernetes version.  The options available in this screen will be limited, you may want to use the YAML editor." />
           <Banner v-if="showk8s21LegacyWarning" color="warning" :label="t('cluster.legacyWarning')" />
+          <br>
+          serverConfig.cni:{{serverConfig.cni}}
+          <br>
+          showCni:{{showCni}}
+          <br>
+          agentArgs['cloud-provider-name']:{{agentArgs['cloud-provider-name']}}
+            <br>
+          value.spec.rkeConfig.chartValues: {{ chartValues}}
+            <br><br>
           <div class="row">
             <div class="col" :class="{'span-4': showCni, 'span-6': !showCni}">
               <LabeledSelect
@@ -1343,7 +1413,7 @@ export default {
                 :label="t('cluster.rke2.cni.label')"
               />
             </div>
-            <div v-if="agentArgs['cloud-provider-name']" class="col" :class="{'span-4': showCni, 'span-6': !showCni}">
+            <div v-if="showCloudProvider" class="col" :class="{'span-4': showCni, 'span-6': !showCni}">
               <LabeledSelect
                 v-model="agentConfig['cloud-provider-name']"
                 :mode="mode"
@@ -1662,14 +1732,16 @@ export default {
               <YamlEditor
                 v-else
                 ref="yaml-values"
-                :value="chartValues[v.name]"
+                :value="value.spec.rkeConfig.chartValues[v.name] || versionInfo[v.name] ? versionInfo[v.name].values : ''"
                 :scrolling="true"
-                :initial-yaml-values="versionInfo[v.name] ? versionInfo[v.name].values : ''"
                 :as-object="true"
                 :editor-mode="mode === 'view' ? 'VIEW_CODE' : 'EDIT_CODE'"
                 :hide-preview-buttons="true"
                 @input="data => updateValues(v.name, data)"
               />
+              <br>!!{{chartValues[v.name]}}
+              <br>!!{{versionInfo[v.name].values}}!!
+              <br>!!{{v.name}}
               <div class="spacer" />
             </div>
           </div>
