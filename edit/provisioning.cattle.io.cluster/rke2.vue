@@ -217,6 +217,7 @@ export default {
       this.agentConfig['cloud-provider-name'] = HARVESTER;
     }
 
+    debugger;
     await this.initAddons();
     await this.initRegistry();
     // Ensures chartValues is up to date with addonNames (remove any config for addonNames that has been removed)
@@ -748,10 +749,18 @@ export default {
     },
 
     addonNames(neu, old) {
+      debugger;
       // To catch the 'some addons' --> 'no addons' case also check array length (`difference([], [1,2,3]) === []`)
       const diff = old.length !== neu.length || difference(neu, old).length ;
 
       if (!this.$fetchState.pending && diff) {
+        this.$fetch();
+      }
+    },
+
+    selectedVersion() {
+      if (!this.$fetchState.pending) {
+        this.versionInfo = {}; // Invalidate cache such that version info relevent to kube version is set
         this.$fetch();
       }
     },
@@ -1060,9 +1069,9 @@ export default {
 
     async initAddons() {
       for ( const v of this.addonVersions ) {
-        if ( this.versionInfo[v.name] ) {
-          continue;
-        }
+        // if ( this.versionInfo[v.name] ) {
+        //   continue;
+        // }
 
         const res = await this.$store.dispatch('catalog/getVersionInfo', {
           repoType:    'cluster',
@@ -1111,7 +1120,8 @@ export default {
       const out = {};
 
       for (const k of this.addonNames) {
-        out[k] = this.chartValues[k] || this.versionInfo[k]?.values;
+        out[k] = this.versionInfo[k]?.values;
+        // out[k] = this.chartValues[k] || this.versionInfo[k]?.values;
       }
       set(this.value.spec.rkeConfig, 'chartValues', out);
     },
@@ -1395,7 +1405,9 @@ export default {
               />
             </div>
           </div>
-
+  <br><br>
+            {{value.spec.rkeConfig}}
+            <br><br>
           <template v-if="showVsphereNote">
             <Banner color="warning" label-key="cluster.cloudProvider.rancher-vsphere.note" />
           </template>
@@ -1690,7 +1702,7 @@ export default {
         </Tab>
 
         <Tab name="addons" label-key="cluster.tabs.addons" @active="refreshYamls">
-          <div v-if="addonVersions.length">
+          <div v-if="versionInfo && addonVersions.length">
             <div v-for="v in addonVersions" :key="v._key">
               <h3>{{ labelForAddon(v.name) }}</h3>
               <Questions
@@ -1705,7 +1717,7 @@ export default {
               <YamlEditor
                 v-else
                 ref="yaml-values"
-                :value="value.spec.rkeConfig.chartValues[v.name] || versionInfo[v.name] ? versionInfo[v.name].values : ''"
+                :value="value.spec.rkeConfig.chartValues[v.name] || (versionInfo[v.name] ? versionInfo[v.name].values : '')"
                 :scrolling="true"
                 :as-object="true"
                 :editor-mode="mode === 'view' ? 'VIEW_CODE' : 'EDIT_CODE'"
