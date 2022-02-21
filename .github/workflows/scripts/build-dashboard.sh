@@ -17,8 +17,8 @@ echo "OUTPUT_DIR: $OUTPUT_DIR"
 
 # /dashboard
 
-mkdir ${{ RELEASE_DIR }}
+mkdir $RELEASE_DIR
 yarn install --frozen-lockfile
-NUXT_ENV_commit=${GITHUB_SHA} NUXT_ENV_version=${GITHUB_REF_NAME} OUTPUT_DIR=ARTIFACT_LOCATION ROUTER_BASE="$ROUTER_BASE" RANCHER_ENV=desktop yarn run build --spa
+NUXT_ENV_commit=$GITHUB_SHA NUXT_ENV_version=$GITHUB_REF_NAME OUTPUT_DIR=ARTIFACT_LOCATION ROUTER_BASE="$ROUTER_BASE" RANCHER_ENV=desktop yarn run build --spa
 tar -czf RELEASE_LOCATION.tar.gz -C ARTIFACT_LOCATION .
 sha512sum RELEASE_LOCATION.tar.gz > RELEASE_LOCATION.tar.gz.sha512sum
