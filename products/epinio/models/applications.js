@@ -1,4 +1,4 @@
-import { APPLICATION_MANIFEST_SOURCE_TYPE, EPINIO_TYPES } from '@/products/epinio/types';
+import { APPLICATION_MANIFEST_SOURCE_TYPE, EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '@/products/epinio/types';
 import { createEpinioRoute } from '@/products/epinio/utils/custom-routing';
 import { formatSi } from '@/utils/units';
 import { classify } from '@/plugins/core-store/classify';
@@ -100,13 +100,13 @@ export default class EpinioApplication extends EpinioResource {
       //   icon:       'icon icon-fw icon-chevron-right',
       //   enabled:    this.active,
       // },
-      // {
-      //   action:     'showAppLog',
-      //   label:      this.t('epinio.applications.actions.viewAppLogs.label'),
-      //   icon:       'icon icon-fw icon-chevron-right',
-      //   enabled:    this.active,
-      // },
-      // { divider: true },
+      {
+        action:     'showAppLog',
+        label:      this.t('epinio.applications.actions.viewAppLogs.label'),
+        icon:       'icon icon-fw icon-chevron-right',
+        enabled:    this.active,
+      },
+      { divider: true },
       {
         action:     'restage',
         label:      this.t('epinio.applications.actions.restage.label'),
@@ -433,14 +433,14 @@ export default class EpinioApplication extends EpinioResource {
   showAppLog() {
     // Streaming logs over socket isn't supported at the moment (requires auth changes to backend or un-CORS-ing)
     // https://github.com/epinio/ui/issues/3
-    // this.$dispatch('wm/open', {
-    //   id:        `epinio-${ this.id }-app-logs`,
-    //   label:     `${ this.meta.name }`,
-    //   product:   EPINIO_PRODUCT_NAME,
-    //   icon:      'file',
-    //   component: 'ContainerShell',
-    //   attrs:     { application: this }
-    // }, { root: true });
+    this.$dispatch('wm/open', {
+      id:        `epinio-${ this.id }-app-logs`,
+      label:     `${ this.meta.name }`,
+      product:   EPINIO_PRODUCT_NAME,
+      icon:      'file',
+      component: 'ApplicationLogs',
+      attrs:     { application: this }
+    }, { root: true });
   }
 
   showStagingLog(stageId) {

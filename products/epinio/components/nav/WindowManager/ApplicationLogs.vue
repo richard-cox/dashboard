@@ -23,6 +23,7 @@ import Socket, {
 } from '@/utils/socket';
 import Window from '@/components/nav/WindowManager/Window';
 import { EPINIO_MGMT_STORE, EPINIO_PRODUCT_NAME, EPINIO_STANDALONE_CLUSTER_ID, EPINIO_TYPES } from '@/products/epinio/types';
+import { downloadFile } from '@/utils/download';
 
 let lastId = 1;
 const ansiup = new AnsiUp();
@@ -166,22 +167,13 @@ export default {
         this.lines = [];
       }
 
-      // TODO: RC TIDY
-      this.lines = [{
-        id:     '1',
-        time:   '',
-        rawMsg: 'HELLOW WORLD',
-        msg:    'Application Logs ...'
-      }];
-
-      // https://github.com/epinio/epinio/blob/6ef5cc0044f71c01cf90ed83bcdda18251c594a7/internal/cli/usercmd/client.go
+      this.lines = [];
 
       const { token } = await this.$store.dispatch(`epinio/request`, { opt: { url: '/api/v1/authtoken' } });
 
       const url = this.getSocketUrl(token);
 
-      // this.socket = new Socket(url, false, 0, 'base64.binary.k8s.io');
-      this.socket = new Socket(url, false, 0);
+      this.socket = new Socket(url, true, 0);
       this.socket.addEventListener(EVENT_CONNECTED, (e) => {
         this.isOpen = true;
       });
@@ -196,28 +188,21 @@ export default {
       });
 
       this.socket.addEventListener(EVENT_MESSAGE, (e) => {
-        const line = base64Decode(e.detail.data);
+        const {
+          PodName, Namespace, ContainerName, Message
+        } = JSON.parse(e.detail.data); // TODO: RC catch
 
-        let msg = line;
-        let time = null;
-
-        const idx = line.indexOf(' ');
-
-        if ( idx > 0 ) {
-          const timeStr = line.substr(0, idx);
-          const date = new Date(timeStr);
-
-          if ( !isNaN(date.getSeconds()) ) {
-            time = date.toISOString();
-            msg = line.substr(idx + 1);
-          }
-        }
+        console.warn(EVENT_MESSAGE, e);
+        const line = `[${ PodName }] ${ ContainerName }: ${ Message }`;
 
         this.backlog.push({
           id:     lastId++,
-          msg:    ansiup.ansi_to_html(msg),
-          rawMsg: msg,
-          time,
+          msg:    line,
+          rawMsg: e.detail.data,
+
+          // msg:    ansiup.ansi_to_html(msg), // TODO: RC Request colour coding
+          // rawMsg: msg,
+          // time,
         });
       });
 
@@ -248,7 +233,12 @@ export default {
     },
 
     download(btnCb) {
-      throw new Error('Not Implemented');
+      const date = new Date().toISOString().split('.')[0];
+      const fileName = `${ this.application.nameDisplay }-${ date }`;
+
+      downloadFile(fileName, this.lines.map(l => `${ l.msg }`).join('\n'))
+        .then(() => btnCb(true))
+        .catch(() => btnCb(false));
     },
 
     follow() {
