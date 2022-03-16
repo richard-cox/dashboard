@@ -18,6 +18,7 @@ const dev = (process.env.NODE_ENV !== 'production');
 const devPorts = dev || process.env.DEV_PORTS === 'true';
 const pl = process.env.PL || STANDARD;
 const commit = process.env.COMMIT || 'head';
+const rancherEnv = process.env.RANCHER_ENV || 'web';
 
 let api = process.env.API || 'http://localhost:8989';
 
@@ -63,6 +64,10 @@ if ( pl !== STANDARD ) {
   console.log(`PL: ${ pl }`); // eslint-disable-line no-console
 }
 
+if ( rancherEnv ) {
+  console.log(`Rancher Env: ${ rancherEnv }`); // eslint-disable-line no-console
+}
+
 console.log(`API: ${ api }`); // eslint-disable-line no-console
 
 module.exports = {
@@ -74,7 +79,10 @@ module.exports = {
     version,
     dev,
     pl,
+    rancherEnv // Ensure this is available where `$config` is not available
   },
+
+  publicRuntimeConfig: { rancherEnv },
 
   buildDir: dev ? '.nuxt' : '.nuxt-prod',
 
@@ -172,7 +180,7 @@ module.exports = {
         }
       }
 
-      // And substitue our own
+      // And substitute our own
       config.module.rules.unshift({
         test:    /\.(png|jpe?g|gif|svg|webp)$/,
         use:  [
@@ -322,13 +330,14 @@ module.exports = {
   // Proxy: https://github.com/nuxt-community/proxy-module#options
   proxy: {
     '/k8s':          proxyWsOpts(api), // Straight to a remote cluster (/k8s/clusters/<id>/)
+    '/pp':           proxyWsOpts(api), // For (epinio) standalone API
     '/api':          proxyWsOpts(api), // Management k8s API
     '/apis':         proxyWsOpts(api), // Management k8s API
     '/v1':           proxyWsOpts(api), // Management Steve API
     '/v3':           proxyWsOpts(api), // Rancher API
     '/v3-public':    proxyOpts(api), // Rancher Unauthed API
     '/api-ui':       proxyOpts(api), // Browser API UI
-    '/meta':         proxyOpts(api), // Browser API UI
+    '/meta':         proxyMetaOpts(api), // Browser API UI
     '/v1-*':         proxyOpts(api), // SAML, KDM, etc
     // These are for Ember embedding
     '/c/*/edit':     proxyOpts('https://127.0.0.1:8000'), // Can't proxy all of /c because that's used by Vue too
@@ -362,6 +371,18 @@ module.exports = {
   typescript: { typeCheck: { eslint: { files: './**/*.{ts,js,vue}' } } }
 };
 
+function proxyMetaOpts(target) {
+  return {
+    target,
+    followRedirects: true,
+    secure:          !dev,
+    onProxyReq,
+    onProxyReqWs,
+    onError,
+    onProxyRes,
+  };
+}
+
 function proxyOpts(target) {
   return {
     target,
@@ -388,9 +409,11 @@ function proxyWsOpts(target) {
 }
 
 function onProxyReq(proxyReq, req) {
-  proxyReq.setHeader('x-api-host', req.headers['host']);
-  proxyReq.setHeader('x-forwarded-proto', 'https');
-  // console.log(proxyReq.getHeaders());
+  if (!(proxyReq._currentRequest && proxyReq._currentRequest._headerSent)) {
+    proxyReq.setHeader('x-api-host', req.headers['host']);
+    proxyReq.setHeader('x-forwarded-proto', 'https');
+    // console.log(proxyReq.getHeaders());
+  }
 }
 
 function onProxyReqWs(proxyReq, req, socket, options, head) {

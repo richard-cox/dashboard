@@ -108,6 +108,7 @@ export default class ApplicationActionResource extends Resource {
   createDeployOrigin(source) {
     switch (source.type) {
     case APPLICATION_SOURCE_TYPE.ARCHIVE:
+    case APPLICATION_SOURCE_TYPE.FOLDER:
       return {
         kind: APPLICATION_MANIFEST_SOURCE_TYPE.PATH,
         path: source.archive.fileName
@@ -121,8 +122,8 @@ export default class ApplicationActionResource extends Resource {
       return {
         kind: APPLICATION_MANIFEST_SOURCE_TYPE.GIT,
         git:       {
-          revision: source.gitUrl.branch,
-          url:      source.gitUrl.url
+          revision:   source.gitUrl.branch,
+          repository:      source.gitUrl.url
         },
       };
     }

@@ -105,6 +105,10 @@ export default {
       return null;
     },
 
+    shouldHifenize() {
+      return (this.mode === 'view' || this.mode === 'edit') && this.resourceSubtype?.length && this.value?.nameDisplay?.length;
+    },
+
     namespaceLocation() {
       if (!this.isNamespace) {
         return this.value.namespaceLocation || {
@@ -331,7 +335,7 @@ export default {
             </nuxt-link>
             <span v-else>{{ parent.displayName }}:</span>
             <span v-if="value.detailPageHeaderActionOverride && value.detailPageHeaderActionOverride(realMode)">{{ value.detailPageHeaderActionOverride(realMode) }}</span>
-            <t v-else :k="'resourceDetail.header.' + realMode" :subtype="resourceSubtype" :name="value.nameDisplay" />
+            <t v-else :k="'resourceDetail.header.' + realMode" :subtype="resourceSubtype" :name="shouldHifenize ? ` - ${ value.nameDisplay }` : value.nameDisplay" />
             <BadgeState v-if="!isCreate && parent.showState" class="masthead-state" :value="value" />
           </h1>
         </div>

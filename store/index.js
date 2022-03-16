@@ -31,7 +31,7 @@ import {
 } from '@/utils/namespace-filter';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
-// becaues it's more efficient to do that sometimes.
+// because it's more efficient to do that sometimes.
 export const strict = false;
 
 export const BLANK_CLUSTER = '_';
@@ -78,7 +78,8 @@ export const state = () => {
     cameFromError:       false,
     pageActions:         [],
     serverVersion:       null,
-    systemNamespaces:    []
+    systemNamespaces:    [],
+    isSingleProduct:     undefined,
   };
 };
 
@@ -400,6 +401,34 @@ export const getters = {
     return '/';
   },
 
+  isSingleProduct(state, rootGetters) {
+    if (state.isSingleProduct !== undefined) {
+      return state.isSingleProduct;
+    }
+
+    if (state.isSingleVirtualCluster) {
+      // TODO: RC move out like epinio & test
+      return {
+        logo:            '~/assets/images/providers/harvester.svg',
+        productNameKey:  'product.harvester',
+        version:         rootGetters['harvester/byId'](HCI.SETTING, 'server-version')?.value, // TODO: RC TEST
+        afterLoginRoute: {
+          name:   'c-cluster-product',
+          params: { product: VIRTUAL },
+        },
+        logoRoute: {
+          name:   'c-cluster-product-resource',
+          params: {
+            product:  VIRTUAL,
+            resource: HCI.DASHBOARD,
+          }
+        },
+      };
+    }
+
+    return false;
+  },
+
   isSingleVirtualCluster(state, getters, rootState, rootGetters) {
     const clusterId = getters.defaultClusterId;
     const cluster = rootGetters['management/byId'](MANAGEMENT.CLUSTER, clusterId);
@@ -468,11 +497,13 @@ export const mutations = {
     state.productId = neu;
   },
 
-  setError(state, obj) {
+  setError(state, { error: obj, locationError }) {
     const err = new ApiError(obj);
 
     console.log('Loading error', err); // eslint-disable-line no-console
-    console.log('(actual error)', obj); // eslint-disable-line no-console
+    // Location of error, with description and stack trace
+    console.log('Loading error location', locationError); // eslint-disable-line no-console
+    console.log('Loading original error', obj); // eslint-disable-line no-console
 
     state.error = err;
     state.cameFromError = true;
@@ -488,6 +519,10 @@ export const mutations = {
 
   setSystemNamespaces(state, namespaces) {
     state.systemNamespaces = namespaces;
+  },
+
+  setIsSingleProduct(state, isSingleProduct) {
+    state.isSingleProduct = isSingleProduct;
   }
 };
 
@@ -595,11 +630,14 @@ export const actions = {
   async loadCluster({
     state, commit, dispatch, getters
   }, {
-    id, product, oldProduct, isExt
+    id, product, isExt, oldProduct, oldIsExt
   }) {
     const isMultiCluster = getters['isMultiCluster'];
 
-    if ( state.clusterId && state.clusterId === id) {
+    const sameCluster = state.clusterId && state.clusterId === id;
+    const sameExt = isExt || oldIsExt ? oldProduct === product : true; // Covers case where we're going from extension cluster 'a' to explorer cluster 'a'
+
+    if ( sameCluster && sameExt) {
       // Do nothing, we're already connected/connecting to this cluster
       return;
     }
@@ -627,7 +665,7 @@ export const actions = {
       commit('management/forgetType', MANAGEMENT.PROJECT);
       commit('catalog/reset');
 
-      if (isExt && product) {
+      if (isExt && product && oldIsExt && oldProduct) {
         // If we've left a cluster of a product ensure we reset it
         await dispatch(`${ oldProduct }/unsubscribe`);
         await commit(`${ oldProduct }/reset`);
@@ -651,6 +689,10 @@ export const actions = {
       return;
     }
 
+    // This is a workaround for a timing issue where the mgmt cluster schema may not be available
+    // Try and wait until the schema exists before proceeding
+    await dispatch('management/waitForSchema', { type: MANAGEMENT.CLUSTER });
+
     if (isExt && product) {
       commit('clusterChanged', true);
       dispatch(`${ product }/loadSchemas`, true);
@@ -663,11 +705,18 @@ export const actions = {
 
     // See if it really exists
     try {
-      await dispatch('management/find', {
+      const cluster = await dispatch('management/find', {
         type: MANAGEMENT.CLUSTER,
         id,
         opt:  { url: `${ MANAGEMENT.CLUSTER }s/${ escape(id) }` }
       });
+
+      if (!cluster.isReady) {
+        // Treat an unready cluster the same as a missing one. This ensures that we safely take user to the home page instead of showing
+        // an error page (useful if they've set the cluster as their home page and don't want to change their landing location)
+        console.warn('Cluster is not ready, cannot load it:', cluster.nameDisplay); // eslint-disable-line no-console
+        throw new Error('Unready cluster');
+      }
     } catch {
       commit('setCluster', null);
       commit('cluster/applyConfig', { baseUrl: null });
@@ -823,12 +872,18 @@ export const actions = {
       isRancher = true;
     }
 
-    await allHash({
+    const hash = {
       projects:          isRancher && dispatch('management/findAll', projectArgs),
       virtualCount:      dispatch('harvester/findAll', { type: COUNT }),
       virtualNamespaces: dispatch('harvester/findAll', { type: NAMESPACE }),
       settings:          dispatch('harvester/findAll', { type: HCI.SETTING }),
-    });
+    };
+
+    if (getters['harvester/schemaFor'](HCI.UPGRADE)) {
+      hash.upgrades = dispatch('harvester/findAll', { type: HCI.UPGRADE });
+    }
+
+    await allHash(hash);
 
     commit('clusterChanged', true);
 
@@ -884,7 +939,7 @@ export const actions = {
     commit('rancher/reset');
     commit('catalog/reset');
 
-    extensions.stores().forEach(store => commit(`${ store }/onLogout`));
+    await Promise.all(extensions.stores().map(store => dispatch(`${ store }/onLogout`)));
 
     const router = state.$router;
     const route = router.currentRoute;
@@ -934,7 +989,8 @@ export const actions = {
   },
 
   loadingError({ commit, state }, err) {
-    commit('setError', err);
+    commit('setError', { error: err, locationError: new Error('loadingError') });
+
     const router = state.$router;
 
     router.replace('/fail-whale');
@@ -973,5 +1029,9 @@ export const actions = {
 
       window.location.replace(url);
     }
+  },
+
+  setIsSingleProduct({ commit }, isSingleProduct) {
+    commit(`setIsSingleProduct`, isSingleProduct);
   }
 };

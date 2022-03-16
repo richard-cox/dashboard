@@ -83,8 +83,13 @@ function queueChange({ getters, state }, { data, revision }, load, label) {
 export const actions = {
   subscribe(ctx, opt) {
     const {
-      state, commit, dispatch, getters
+      state, commit, dispatch, getters, rootGetters
     } = ctx;
+
+    if (rootGetters['isSingleProduct']?.disableSteveSockets) {
+      return;
+    }
+
     let socket = state.socket;
 
     commit('setWantSocket', true);
@@ -164,7 +169,7 @@ export const actions = {
         // Group loads into one loadMulti when possible
         toLoad.push(body);
       } else {
-        // When we hit a differet kind of event, process all the previous loads, then the other event.
+        // When we hit a different kind of event, process all the previous loads, then the other event.
         if ( toLoad.length ) {
           await dispatch('loadMulti', toLoad);
           toLoad = [];

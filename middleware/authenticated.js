@@ -70,6 +70,15 @@ function extensionProduct(routeName) {
   return hyphen >= 1 ? newName.substring(0, hyphen) : newName;
 }
 
+function productFromRoute(route) {
+  // Some places hardcode the explorer product directly in the name and don't include the correct param
+  if (route?.name === `c-cluster-${ EXPLORER }`) {
+    return EXPLORER;
+  }
+
+  return route?.params?.product || EXPLORER; // Default to explorer, as is the norm
+}
+
 export default async function({
   route, app, store, redirect, $cookies, req, isDev, from
 }) {
@@ -222,7 +231,7 @@ export default async function({
           if ( status === 401 ) {
             notLoggedIn();
           } else {
-            store.commit('setError', e);
+            store.commit('setError', { error: e, locationError: new Error('Auth Middleware') });
             if ( process.server ) {
               redirect(302, '/fail-whale');
             }
@@ -233,6 +242,7 @@ export default async function({
       }
     }
   }
+
   if (!process.server) {
     const backTo = window.localStorage.getItem(BACK_TO);
 
@@ -273,10 +283,10 @@ export default async function({
     let clusterId = get(route, 'params.cluster');
 
     const isExt = route.name.startsWith(EXTENSION_PREFIX);
-    const product = isExt ? extensionProduct(route.name) : get(route, 'params.product');
+    const product = isExt ? extensionProduct(route.name) : productFromRoute(route);
 
     const oldIsExt = from.name.startsWith(EXTENSION_PREFIX);
-    const oldProduct = oldIsExt ? extensionProduct(from.name) : from?.params?.product;
+    const oldProduct = oldIsExt ? extensionProduct(from.name) : productFromRoute(from);
 
     if (oldIsExt && oldProduct && oldProduct !== product) {
       // If we've left a product ensure we reset it
@@ -284,7 +294,7 @@ export default async function({
       await store.commit(`${ oldProduct }/reset`);
     }
 
-    if (product === VIRTUAL || route.name === `c-cluster-${ VIRTUAL }` || route.name.startsWith(`c-cluster-${ VIRTUAL }-`)) {
+    if (product === VIRTUAL || route.name === `c-cluster-${ VIRTUAL }` || route.name?.startsWith(`c-cluster-${ VIRTUAL }-`)) {
       const res = [
         store.dispatch('loadManagement'),
         store.dispatch('loadVirtual', {
@@ -299,6 +309,23 @@ export default async function({
         store.dispatch('loadManagement'),
         store.dispatch(`${ product }/loadManagement`),
       ]);
+      const isSingleProduct = store.getters['isSingleProduct'];
+
+      if (isSingleProduct?.afterLoginRoute) {
+        const value = {
+          name:   'c-cluster-product',
+          ...isSingleProduct.afterLoginRoute,
+          params: {
+            cluster: clusterId,
+            ...isSingleProduct.afterLoginRoute?.params
+          },
+        };
+
+        await store.dispatch('prefs/set', {
+          key: AFTER_LOGIN_ROUTE,
+          value,
+        });
+      }
       if (clusterId) {
         await store.dispatch('loadCluster', {
           id: clusterId,
@@ -326,14 +353,15 @@ export default async function({
       await store.dispatch('loadManagement');
 
       clusterId = store.getters['defaultClusterId']; // This needs the cluster list, so no parallel
-      const isSingleVirtualCluster = store.getters['isSingleVirtualCluster'];
+      const isSingleProduct = store.getters['isSingleProduct'];
 
-      if (isSingleVirtualCluster) {
+      if (isSingleProduct?.afterLoginRoute) {
         const value = {
           name:   'c-cluster-product',
+          ...isSingleProduct.afterLoginRoute,
           params: {
             cluster: clusterId,
-            product: VIRTUAL,
+            ...isSingleProduct.afterLoginRoute?.params
           },
         };
 
@@ -354,7 +382,7 @@ export default async function({
     if ( e instanceof ClusterNotFoundError ) {
       return redirect(302, '/home');
     } else {
-      store.commit('setError', e);
+      store.commit('setError', { error: e, locationError: new Error('Auth Middleware') });
 
       return redirect(302, '/fail-whale');
     }

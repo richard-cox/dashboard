@@ -66,6 +66,11 @@ export default {
       type:    Number,
       default: null,
     },
+
+    hideArrows: {
+      type:    Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -193,10 +198,9 @@ export default {
 </script>
 
 <template>
-  <div
-    :style="{'min-height': minHeight}"
-  >
+  <div>
     <div
+      :style="{'min-height': minHeight}"
       :class="{
         'labeled-input': true,
         focused,
@@ -204,6 +208,7 @@ export default {
         disabled: isDisabled,
         [status]: status,
         suffix: hasSuffix,
+        hideArrows
       }"
     >
       <slot name="label">
@@ -276,8 +281,26 @@ export default {
   </div>
 </template>
 
-<style>
+<style lang="scss" scoped>
 .validation-message {
   padding: 5px;
 }
+
+.hideArrows {
+  /* Hide arrows on number input
+when it overlaps with the unit */
+
+  /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+}
+
 </style>
