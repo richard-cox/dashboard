@@ -14,9 +14,9 @@ import { setBrand, setVendor } from '@shell/config/private-label';
 import { addParam } from '@shell/utils/url';
 import { SETTING } from '@shell/config/settings';
 import semver from 'semver';
-import { BY_TYPE, NORMAN as NORMAN_CLASS } from '@shell/plugins/steve/classify';
 import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
+import { STEVE_MODEL_TYPES } from '~/shell/plugins/steve/getters';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // because it's more efficient to do that sometimes.
@@ -47,7 +47,7 @@ export const plugins = [
     namespace:      'rancher',
     baseUrl:        '/v3',
     supportsStream: false, // The norman API doesn't support streaming
-    modelBaseClass: NORMAN_CLASS,
+    modelBaseClass: STEVE_MODEL_TYPES.NORMAN,
   }),
   Steve({
     namespace:      'harvester',
@@ -466,6 +466,7 @@ export const mutations = {
     const err = new ApiError(obj);
 
     console.log('Loading error', err); // eslint-disable-line no-console
+    console.log('(actual error)', obj); // eslint-disable-line no-console
     // Location of error, with description and stack trace
     console.log('Loading error location', locationError); // eslint-disable-line no-console
     console.log('Loading original error', obj); // eslint-disable-line no-console
@@ -590,7 +591,9 @@ export const actions = {
 
   async loadCluster({
     state, commit, dispatch, getters
-  }, { id, oldProduct }) {
+  }, {
+    id, product, oldProduct, isExt
+  }) {
     const isMultiCluster = getters['isMultiCluster'];
 
     if ( state.clusterId && state.clusterId === id) {
@@ -620,6 +623,13 @@ export const actions = {
 
       commit('management/forgetType', MANAGEMENT.PROJECT);
       commit('catalog/reset');
+
+      // TODO: RC Plugin: Navigation
+      if (isExt && product) {
+        // If we've left a cluster of a product ensure we reset it
+        await dispatch(`${ oldProduct }/unsubscribe`);
+        await commit(`${ oldProduct }/reset`);
+      }
     }
 
     if ( id ) {
@@ -635,6 +645,14 @@ export const actions = {
 
     if (id === BLANK_CLUSTER) {
       commit('clusterChanged', true);
+
+      return;
+    }
+
+    // TODO: RC Plugin: Navigation
+    if (isExt && product) {
+      commit('clusterChanged', true);
+      dispatch(`${ product }/loadSchemas`, true);
 
       return;
     }
@@ -877,6 +895,9 @@ export const actions = {
     await dispatch('rancher/unsubscribe');
     commit('rancher/reset');
     commit('catalog/reset');
+
+    // TODO: RC Plugin: store on logout
+    extensions.stores().forEach(store => commit(`${ store }/onLogout`));
 
     const router = state.$router;
     const route = router.currentRoute;

@@ -123,7 +123,8 @@ export default {
     // If they are resolved, return a false-y value
     // Else they can't be resolved, return an array of errors to show to the user.
     conflict() {
-      return handleConflict(this.initialValue.cleanForDiff, this.value, this.liveValue, this.$store.getters);
+      // TODO: RC TEST
+      return handleConflict(this.initialValue.toJSON(), this.value, this.liveValue, this.$store.getters);
     },
 
     async save(buttonDone, url, depth = 0) {

@@ -92,7 +92,7 @@ export default class CapiMachineDeployment extends SteveModel {
       return;
     }
 
-    const initialValueCleanForDiff = this.cluster.cleanForDiff();
+    const initialValue = this.cluster.toJSON();
 
     clustersMachinePool.quantity += delta;
 
@@ -112,7 +112,7 @@ export default class CapiMachineDeployment extends SteveModel {
         let errors = exceptionToErrorsArray(err);
 
         if ( err.status === 409 && depth < 2 ) {
-          const conflicts = handleConflict(initialValueCleanForDiff, value, liveModel, this.$rootGetters);
+          const conflicts = handleConflict(initialValue, value, liveModel, this.$rootGetters);
 
           if ( conflicts === false ) {
             // It was automatically figured out, save again
