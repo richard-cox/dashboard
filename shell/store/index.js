@@ -16,7 +16,8 @@ import { SETTING } from '@shell/config/settings';
 import semver from 'semver';
 import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
-import { STEVE_MODEL_TYPES } from '~/shell/plugins/steve/getters';
+import { STEVE_MODEL_TYPES } from '@shell/plugins/steve/getters';
+import { BY_TYPE } from '@shell/plugins/core-store/classify';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // because it's more efficient to do that sometimes.

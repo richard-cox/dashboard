@@ -130,7 +130,7 @@ import {
 
 import { NAME as EXPLORER } from '@shell/config/product/explorer';
 import isObject from 'lodash/isObject';
-import { normalizeType } from '@shell/plugins/steve/normalize';
+import { normalizeType } from '@shell/plugins/core-store/normalize';
 import { sortBy } from '@shell/utils/sort';
 import { haveV1Monitoring, haveV2Monitoring } from '@shell/utils/monitoring';
 

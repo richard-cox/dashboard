@@ -1,5 +1,5 @@
 import { productsLoaded } from '@shell/store/type-map';
-import { clearModelCache } from '@shell/plugins/steve/model-loader';
+import { clearModelCache } from '@shell/plugins/core-store/model-loader';
 import { Plugin } from './plugin';
 import { PluginRoutes } from './plugin-routes';
 

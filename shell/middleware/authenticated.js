@@ -14,7 +14,7 @@ import { AFTER_LOGIN_ROUTE } from '@shell/store/prefs';
 import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
 
-import { EXTENSION_PREFIX } from '@/utils/extensions';
+import { EXTENSION_PREFIX } from '@shell/utils/extensions';
 
 // TODO: RC Plugin: Extensions/Routes: This whole process is broken
 import extensions from '@/product-extension/extensions';
