@@ -14,10 +14,34 @@ import { AFTER_LOGIN_ROUTE } from '@shell/store/prefs';
 import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
 
+import { EXTENSION_PREFIX } from '@/utils/extensions';
+
+// TODO: RC Plugin: Extensions/Routes: This whole process is broken
+import extensions from '@/product-extension/extensions';
+
+const extRegEx = new RegExp(`\/${ EXTENSION_PREFIX }\/([^\/]+)`);
+
+function extensionProduct(routeName) {
+  const newName = routeName.replace(`${ EXTENSION_PREFIX }-`, '');
+  const hyphen = newName.indexOf('-');
+
+  return hyphen >= 1 ? newName.substring(0, hyphen) : newName;
+}
+
 let beforeEachSetup = false;
 
 function setProduct(store, to) {
   let product = to.params?.product;
+
+  // Product is the extensions
+  // When switching products to an extensions the format is different
+  if (to.path.startsWith(`/${ EXTENSION_PREFIX }`)) {
+    const match = extRegEx.exec(to.path);
+
+    if ( match ) {
+      product = match[1];
+    }
+  }
 
   if ( !product ) {
     const match = to.name?.match(/^c-cluster-([^-]+)/);
@@ -223,6 +247,7 @@ export default async function({
 
   // Load stuff
   await applyProducts(store, $plugin);
+  // extensions.applyProducts(store); // TODO: RC this happens somewhere else now.....
 
   // Setup a beforeEach hook once to keep track of the current product
   if ( !beforeEachSetup ) {
@@ -248,8 +273,20 @@ export default async function({
 
   try {
     let clusterId = get(route, 'params.cluster');
-    const product = get(route, 'params.product');
-    const oldProduct = from?.params?.product;
+
+    // TODO: RC Plugin - How to tell app that we're left their world?
+    const isExt = route.name.startsWith(EXTENSION_PREFIX);
+    const product = isExt ? extensionProduct(route.name) : get(route, 'params.product');
+
+    const oldIsExt = from.name.startsWith(EXTENSION_PREFIX);
+    const oldProduct = oldIsExt ? extensionProduct(from.name) : from?.params?.product;
+
+    if (oldIsExt && oldProduct && oldProduct !== product) {
+      // If we've left a product ensure we reset it
+      await store.dispatch(`${ oldProduct }/unsubscribe`);
+      await store.commit(`${ oldProduct }/reset`);
+    }
+    // -------------------------------------------------------------------
 
     if (product === VIRTUAL || route.name === `c-cluster-${ VIRTUAL }` || route.name?.startsWith(`c-cluster-${ VIRTUAL }-`)) {
       const res = [
@@ -261,6 +298,22 @@ export default async function({
       ];
 
       await Promise.all(res);
+    // TODO: RC Plugin - How to tell app that we're entering their world... and that their cluster is now current?
+    } else if (isExt && product) {
+      await Promise.all([
+        store.dispatch('loadManagement'),
+        store.dispatch(`${ product }/loadManagement`),
+      ]);
+      if (clusterId) {
+        await store.dispatch('loadCluster', {
+          id: clusterId,
+          product,
+          oldProduct,
+          isExt,
+          oldIsExt
+        });
+      }
+    // -------------------------------------------------------------------
     } else if ( clusterId ) {
       // Run them in parallel
       const res = [
@@ -269,6 +322,8 @@ export default async function({
           id: clusterId,
           product,
           oldProduct,
+          isExt,
+          oldIsExt
         }),
       ];
 
@@ -297,6 +352,7 @@ export default async function({
           id: clusterId,
           product,
           oldProduct,
+          oldIsExt
         });
       }
     }

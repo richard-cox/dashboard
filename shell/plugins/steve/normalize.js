@@ -119,10 +119,11 @@ function dropCattleKeys(obj) {
 // Detect and resolve conflicts from a 409 response.
 // If they are resolved, return a false-y value
 // Else they can't be resolved, return an array of errors to show to the user.
-export function handleConflict(initialValueJSON, value, liveValue, rootGetters) {
-  const orig = cleanForDiff(initialValueJSON);
-  const user = cleanForDiff(value.toJSON());
-  const cur = cleanForDiff(liveValue.toJSON());
+export function handleConflict(initialValueCleanForDiff, value, liveValue, rootGetters) {
+  // TODO: RC TEST
+  const orig = initialValueCleanForDiff;
+  const user = value.cleanForDiff();
+  const cur = liveValue.cleanForDiff();
 
   const bgChange = changeset(orig, cur);
   const userChange = changeset(orig, user);

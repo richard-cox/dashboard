@@ -157,6 +157,11 @@ export default {
     },
 
     componentFor(tab) {
+      // TODO: RC Plugin: Component location: update with new way
+      if (tab.product) {
+        return require(`@/products/${ tab.product }/components/nav/WindowManager/${ tab.component }`).default;
+      }
+
       return require(`@shell/components/nav/WindowManager/${ tab.component }`).default;
     }
   }

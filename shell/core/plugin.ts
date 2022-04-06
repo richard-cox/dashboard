@@ -52,6 +52,10 @@ export class Plugin implements IPlugin {
     this.locales.push({ locale, label });
   }
 
+  addI18n(locale: string, fn: Function) {
+    this.register('i18n', locale, fn);
+  }
+
   addRoute(parentOrRoute: any, route?: any): void {
     if (typeof (parentOrRoute) === 'string') {
       this.routes.push({ parent: parentOrRoute as string, route });
@@ -64,7 +68,7 @@ export class Plugin implements IPlugin {
     this.uninstallHooks.push(hook);
   }
 
-  register(type: string, name: string, fn: Function) {
+  private register(type: string, name: string, fn: Function) {
     // Accumulate i18n resources rather than replace
     if (type === 'i18n') {
       if (!this.i18n[name]) {

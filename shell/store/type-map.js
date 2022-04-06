@@ -94,6 +94,8 @@
 //                               resource: undefined       -- Use this resource in ResourceDetails instead
 //                               resourceDetail: undefined -- Use this resource specifically for ResourceDetail's detail component
 //                               resourceEdit: undefined   -- Use this resource specifically for ResourceDetail's edit component
+//                               resourceEditMasthead: true   -- Show the Masthead in the edit resource component
+//                               customRoute: undefined,
 //                           }
 // )
 // ignoreGroup(group):        Never show group or any types in it
@@ -421,14 +423,15 @@ export const getters = {
 
   optionsFor(state) {
     const def = {
-      isCreatable: true,
-      isEditable:  true,
-      isRemovable: true,
-      showState:   true,
-      showAge:     true,
-      canYaml:     true,
-      namespaced:  null,
-      listGroups:  [],
+      isCreatable:          true,
+      isEditable:           true,
+      isRemovable:          true,
+      showState:            true,
+      showAge:              true,
+      canYaml:              true,
+      namespaced:           null,
+      customRoute:          undefined,
+      resourceEditMasthead: true,
     };
 
     return (schemaOrType) => {
@@ -726,6 +729,21 @@ export const getters = {
 
   allSpoofedTypes(state, getters, rootState, rootGetters) {
     return Object.values(state.spoofedTypes).flat();
+  },
+
+  spoofedSchemas(state, getters, rootState, rootGetters) {
+    return (product) => {
+      const types = state.spoofedTypes[product] || [];
+
+      return types.flatMap((type) => {
+        const schemas = type.schemas || [];
+
+        return schemas.map(schema => ({
+          ...schema,
+          isSpoofed: true
+        }));
+      });
+    };
   },
 
   allSpoofedSchemas(state, getters, rootState, rootGetters) {

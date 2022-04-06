@@ -38,6 +38,11 @@ export interface IPlugin {
   metadata: PackageMetadata;
 
   /**
+   * TODO: RC
+   */
+  addI18n(locale: string, fn: Function): void;
+
+  /**
    * Add a route to the Vue Router
    */
   addRoute(route: RouteConfig): void;

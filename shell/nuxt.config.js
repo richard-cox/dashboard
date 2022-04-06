@@ -453,6 +453,8 @@ export default function(dir, _appConfig) {
             }
           ]
         });
+
+        config.node = { fs: 'empty' }; // TODO: RC pkg will barf without, can pkg specific webpack config exist?
       },
 
       // extractCSS:   true,
@@ -526,7 +528,7 @@ export default function(dir, _appConfig) {
       '@nuxtjs/webpack-profile',
       'cookie-universal-nuxt',
       'portal-vue/nuxt',
-      path.join(NUXT_SHELL, 'plugins/steve/rehydrate-all'),
+      path.join(NUXT_SHELL, 'plugins/steve/rehydrate-all'), // TODO: RC Plugin: Store: UPDATE
     ],
 
     // Vue plugins
