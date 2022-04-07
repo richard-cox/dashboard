@@ -5,7 +5,7 @@ import {
 } from '@shell/config/query-params';
 import { SETTING } from '@shell/config/settings';
 import { MANAGEMENT, NORMAN } from '@shell/config/types';
-import { _ALL_IF_AUTHED } from '@shell/plugins/steve/actions';
+import { _ALL_IF_AUTHED } from '@shell/plugins/core-store/actions';
 import { applyProducts } from '@shell/store/type-map';
 import { findBy } from '@shell/utils/array';
 import { ClusterNotFoundError } from '@shell/utils/error';
@@ -15,6 +15,8 @@ import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
 
 import { EXTENSION_PREFIX } from '@shell/utils/extensions';
+
+// TODO: RC Tech Debt: Search for `steve`. shouldn't exist outside of store (ish)
 
 // TODO: RC Plugin: Extensions/Routes: This whole process is broken
 // import extensions from '@/product-extension/extensions';

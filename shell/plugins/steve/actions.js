@@ -6,11 +6,6 @@ import { deferred } from '@shell/utils/promise';
 import { streamJson, streamingSupported } from '@shell/utils/stream';
 import isObject from 'lodash/isObject';
 
-export const _ALL = 'all';
-export const _MULTI = 'multi';
-export const _ALL_IF_AUTHED = 'allIfAuthed';
-export const _NONE = 'none';
-
 export default {
   async request({ state, dispatch, rootGetters }, pOpt ) {
     const opt = pOpt.opt || pOpt;

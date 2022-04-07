@@ -75,8 +75,8 @@ export default {
     }
   },
 
-  classify: state => (obj) => {
-    const customModel = lookup(state.config.namespace, obj?.type, obj?.metadata?.name);
+  classify: (state, getters, rootState) => (obj) => {
+    const customModel = lookup(state.config.namespace, obj?.type, obj?.metadata?.name, rootState);
 
     if (customModel) {
       return customModel;
