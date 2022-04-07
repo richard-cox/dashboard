@@ -898,7 +898,7 @@ export const actions = {
     commit('catalog/reset');
 
     // TODO: RC Plugin: store on logout
-    extensions.stores().forEach(store => commit(`${ store }/onLogout`));
+    // extensions.stores().forEach(store => commit(`${ store }/onLogout`));
 
     const router = state.$router;
     const route = router.currentRoute;

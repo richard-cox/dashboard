@@ -17,31 +17,38 @@ import { BACK_TO } from '@shell/config/local-storage';
 import { EXTENSION_PREFIX } from '@shell/utils/extensions';
 
 // TODO: RC Plugin: Extensions/Routes: This whole process is broken
-import extensions from '@/product-extension/extensions';
+// import extensions from '@/product-extension/extensions';
 
-const extRegEx = new RegExp(`\/${ EXTENSION_PREFIX }\/([^\/]+)`);
+// const extRegEx = new RegExp(`\/${ EXTENSION_PREFIX }\/([^\/]+)`);
 
 function extensionProduct(routeName) {
-  const newName = routeName.replace(`${ EXTENSION_PREFIX }-`, '');
-  const hyphen = newName.indexOf('-');
-
-  return hyphen >= 1 ? newName.substring(0, hyphen) : newName;
+  return false;
 }
+
+// function extensionProduct(routeName) {
+//   const newName = routeName.replace(`${ EXTENSION_PREFIX }-`, '');
+//   const hyphen = newName.indexOf('-');
+
+//   return hyphen >= 1 ? newName.substring(0, hyphen) : newName;
+// }
+// ----------
 
 let beforeEachSetup = false;
 
 function setProduct(store, to) {
   let product = to.params?.product;
 
+  // TODO: RC Plugin: Extensions/Routes: This whole process is broken
   // Product is the extensions
   // When switching products to an extensions the format is different
-  if (to.path.startsWith(`/${ EXTENSION_PREFIX }`)) {
-    const match = extRegEx.exec(to.path);
+  // if (to.path.startsWith(`/${ EXTENSION_PREFIX }`)) {
+  //   const match = extRegEx.exec(to.path);
 
-    if ( match ) {
-      product = match[1];
-    }
-  }
+  //   if ( match ) {
+  //     product = match[1];
+  //   }
+  // }
+  // ------------
 
   if ( !product ) {
     const match = to.name?.match(/^c-cluster-([^-]+)/);
@@ -274,7 +281,7 @@ export default async function({
   try {
     let clusterId = get(route, 'params.cluster');
 
-    // TODO: RC Plugin - How to tell app that we're left their world?
+    // TODO: RC Plugin: Extensions/Routes: How to tell app that we're left their world?
     const isExt = route.name.startsWith(EXTENSION_PREFIX);
     const product = isExt ? extensionProduct(route.name) : get(route, 'params.product');
 
@@ -298,7 +305,7 @@ export default async function({
       ];
 
       await Promise.all(res);
-    // TODO: RC Plugin - How to tell app that we're entering their world... and that their cluster is now current?
+    // TODO: RC Plugin: Extensions/Routes: - How to tell app that we're entering their world... and that their cluster is now current?
     } else if (isExt && product) {
       await Promise.all([
         store.dispatch('loadManagement'),

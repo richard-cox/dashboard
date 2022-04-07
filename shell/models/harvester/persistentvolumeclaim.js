@@ -5,7 +5,6 @@ import { HCI } from '@shell/config/types';
 import { HCI as HCI_ANNOTATIONS, DESCRIPTION } from '@shell/config/labels-annotations';
 import { findBy } from '@shell/utils/array';
 import { get, clone } from '@shell/utils/object';
-import { cleanForNew } from '@shell/plugins/core-store/normalize';
 import SteveModel from '@shell/plugins/steve/steve-class';
 import { colorForState } from '@shell//plugins/core-store/resource-class';
 
@@ -52,7 +51,7 @@ export default class HciPv extends SteveModel {
   }
 
   cleanForNew() {
-    cleanForNew(this);
+    this.cleanForNew();
 
     delete this.metadata.finalizers;
     const keys = [HCI_ANNOTATIONS.IMAGE_ID, DESCRIPTION];
