@@ -33,19 +33,30 @@
       "@shell/store/*": [
         "../../shell/store/*"
       ],
+      "@shell/plugins/*": [
+        "../../shell/plugins/*"
+      ],
+      "@shell/utils/*": [
+        "../../shell/utils/*"
+      ],
+      "@shell/models/*": [
+        "../../shell/models/*"
+      ],
       "@pkg/*": [
-        "../../pkg/*"
+        "./*"
       ]
     }
   },
   "include": [
     "**/*.ts",
+    "**/*.d.ts", // TODO: RC This stil fails to load (/types --> fails for types.d.ts but works for types.ts)
     "**/*.tsx",
     "**/*.vue",
     "../../shell/types/*.d.ts",
     "../../shell/core/*.ts",
     "../../shell/config/**/*.js",
     "**/*.yaml",
+    "../../vue-shim.d.ts",
   ],
   "exclude": [
     "node_modules"

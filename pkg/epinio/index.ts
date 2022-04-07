@@ -1,7 +1,10 @@
 import { importTypes } from '@rancher/auto-import';
 import { IPlugin } from '@shell/core/types';
+import epinioStore from './store/epinio-store';
+import epinioMgmtStore from './store/epinio-mgmt-store';
+import epinioRoutes from './routing/epinio-routing';
 
-import enUS from '@pkg/translations/en-us.yaml'; // TODO: RC doubles up on epinio
+import enUS from './translations/en-us.yaml'; // TODO: RC doubles up on epinio
 
 // TODO: RC REMOVE
 // import { load } from 'js-yaml';
@@ -30,13 +33,18 @@ export default function(plugin: IPlugin) {
   // Provide plugin metadata from package.json
   plugin.metadata = require('./package.json');
 
-  plugin.metadata.description = 'Epinio';
+  plugin.metadata.description = 'Application Development Engine for Kubernetes';
   plugin.metadata.name = 'Epinio';
-  plugin.metadata.version = '0.6.2';
+  plugin.metadata.version = '0.6.2'; // TODO: RC take from package.json
 
   // plugin.addI18n('en-us', loadI10n('en-us'));
   plugin.addI18n('en-us', enUS);
 
   // Load a product
-  // plugin.addProduct(require('./product'));
+  plugin.addProduct(require('./config/epinio'));
+
+  plugin.addCoreStore(epinioMgmtStore.config.namespace, epinioMgmtStore.specifics, epinioMgmtStore.config);
+  plugin.addCoreStore(epinioStore.config.namespace, epinioStore.specifics, epinioStore.config);
+
+  epinioRoutes.forEach(route => plugin.addRoute(route));
 }

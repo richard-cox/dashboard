@@ -133,8 +133,8 @@ export default function($plugin) {
 Next, create a new file `pkg/testplugin/product.js` with this content:
 
 ```
-export function init($plugin, pluginName) {
-  const { product } = $plugin.DSL(pluginName);
+export function init($plugin, store) {
+  const { product } = $plugin.DSL(store, $plugin.name);
 
   product({
     icon:                  'gear',

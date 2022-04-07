@@ -18,19 +18,21 @@ import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
 import { STEVE_MODEL_TYPES } from '@shell/plugins/steve/getters';
 import { BY_TYPE } from '@shell/plugins/core-store/classify';
+import {
+  NAMESPACE_FILTER_ALL_USER as ALL_USER,
+  NAMESPACE_FILTER_ALL_SYSTEM as ALL_SYSTEM,
+  NAMESPACE_FILTER_ALL_ORPHANS as ALL_ORPHANS,
+  NAMESPACE_FILTER_NAMESPACED_YES as NAMESPACED_YES,
+  NAMESPACE_FILTER_NAMESPACED_NO as NAMESPACED_NO,
+  NAMESPACE_FILTER_NAMESPACED_PREFIX as NAMESPACED_PREFIX,
+  splitNamespaceFilterKey,
+} from '@shell/utils/namespace-filter';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // because it's more efficient to do that sometimes.
 export const strict = false;
 
 export const BLANK_CLUSTER = '_';
-export const ALL = 'all';
-export const ALL_SYSTEM = 'all://system';
-export const ALL_USER = 'all://user';
-export const ALL_ORPHANS = 'all://orphans';
-export const NAMESPACED_PREFIX = 'namespaced://';
-export const NAMESPACED_YES = 'namespaced://true';
-export const NAMESPACED_NO = 'namespaced://false';
 
 export const plugins = [
   Steve({
@@ -55,6 +57,7 @@ export const plugins = [
     baseUrl:        '', // URL is dynamically set for the selected cluster
     supportsStream: false, // true, -- Disabled due to report that it's sometimes much slower in Chrome
   }),
+
 ];
 
 export const state = () => {
@@ -868,7 +871,9 @@ export const actions = {
     const cleanFilters = {};
 
     for ( const id in filters ) {
-      if ( getters['management/byId'](MANAGEMENT.CLUSTER, id) ) {
+      const { clusterId } = splitNamespaceFilterKey(id);
+
+      if ( getters['management/byId'](MANAGEMENT.CLUSTER, clusterId) ) {
         cleanFilters[id] = filters[id];
       }
     }

@@ -1,6 +1,8 @@
 import { RouteConfig } from 'vue-router';
 import { DSL as STORE_DSL } from '@shell/store/type-map';
 import { IPlugin } from './types';
+import coreStore, { coreStoreModule, coreStoreState } from '@/shell/plugins/core-store';
+import { RegisterStore, CoreStoreSpecifics, CoreStoreConfig } from '@/shell/core/types';
 
 export class Plugin implements IPlugin {
   public id: string;
@@ -11,6 +13,7 @@ export class Plugin implements IPlugin {
   public products: Function[] = [];
   public productNames: string[] = [];
   public routes: { parent?: string, route: RouteConfig }[] = [];
+  public stores: { storeName: string, register: RegisterStore }[] = [];
 
   // Plugin metadata (plugin package.json)
   public _metadata: any = {};
@@ -66,6 +69,50 @@ export class Plugin implements IPlugin {
 
   addUninstallHook(hook: Function) {
     this.uninstallHooks.push(hook);
+  }
+
+  addStore(storeName: string, register: RegisterStore) {
+    this.stores.push({ storeName, register });
+  }
+
+  addCoreStore(storeName: string, storeSpecifics: CoreStoreSpecifics, config: CoreStoreConfig) {
+    this.stores.push({
+      storeName,
+      register: () => {
+        return coreStore(
+          this.storeFactory(storeSpecifics, config),
+          config,
+        );
+      }
+    });
+  }
+
+  private storeFactory(storeSpecifics: CoreStoreSpecifics, config: CoreStoreConfig) {
+    return {
+      ...coreStoreModule,
+
+      state() {
+        return {
+          ...coreStoreState(config.namespace, config.baseUrl),
+          ...storeSpecifics.state()
+        };
+      },
+
+      getters: {
+        ...coreStoreModule.getters,
+        ...storeSpecifics.getters
+      },
+
+      mutations: {
+        ...coreStoreModule.mutations,
+        ...storeSpecifics.actions
+      },
+
+      actions: {
+        ...coreStoreModule.actions,
+        ...storeSpecifics.actions
+      },
+    };
   }
 
   private register(type: string, name: string, fn: Function) {

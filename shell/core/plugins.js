@@ -156,6 +156,8 @@ export default function({
       // Remove the plugin itself
       store.dispatch('uiplugins/removePlugin', name);
 
+      // TODO: RC REMOVE STORES
+
       // Update last load since we removed a plugin
       _lastLoaded = new Date().getTime();
     },
@@ -186,6 +188,10 @@ export default function({
       if (productsLoaded()) {
         this.loadProducts([plugin]);
       }
+
+      plugin.stores.forEach((pStore) => {
+        pStore.register()(store);
+      });
 
       // Locales
       plugin.locales.forEach((localeObj) => {

@@ -15,6 +15,11 @@ export interface PackageMetadata {
 //   children: Route[];
 // }
 
+export type VuexStoreObject = { [key: string]: any }
+export type CoreStoreSpecifics = { state: () => VuexStoreObject, getters: VuexStoreObject, mutations: VuexStoreObject, actions: VuexStoreObject }
+export type CoreStoreConfig = { namespace: string, baseUrl?: string, modelBaseClass?: string, supportsStream?: boolean }
+export type RegisterStore = () => (store: any) => void
+
 /**
  * Interface for a Dashboard plugin
  */
@@ -53,5 +58,17 @@ export interface IPlugin {
     * @param hook Function to call when the plugin is uninstalled
     */
   addUninstallHook(hook: Function): void;
+
+  /**
+   * Add a generic Vuex Store
+   */
+  addStore(storeName: string, register: RegisterStore): void;
+  /**
+   * Add a Vuex `Core`. This will be automatically populated with required getters/mutations/actions to support Dashboard components
+   *
+   * The core store should container override getters/mutations/actions (in storeSpecifics) that executes plugin specific code, for instead
+   * to exercise the `requests` action to make plugin specific https requests
+   */
+  addCoreStore(storeName: string, storeSpecifics: CoreStoreSpecifics, config: CoreStoreConfig): void;
 
 }
