@@ -4,7 +4,7 @@ import epinioStore from './store/epinio-store';
 import epinioMgmtStore from './store/epinio-mgmt-store';
 import epinioRoutes from './routing/epinio-routing';
 
-import enUS from './translations/en-us.yaml'; // TODO: RC doubles up on epinio
+import enUS from './translations/en-us.yaml';
 
 // TODO: RC REMOVE
 // import { load } from 'js-yaml';

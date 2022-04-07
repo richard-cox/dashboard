@@ -17,7 +17,7 @@ export const _NONE = 'none';
 const SCHEMA_CHECK_RETRIES = 15;
 const SCHEMA_CHECK_RETRY_LOG = 10;
 
-export async function handleSpoofedRequest(rootGetters, schemaStore, opt) {
+export async function handleSpoofedRequest(rootGetters, schemaStore, opt, product) {
   // Handle spoofed types instead of making an actual request
   // Spoofing is handled here to ensure it's done for both yaml and form editing.
   // It became apparent that this was the only place that both intersected
@@ -29,7 +29,7 @@ export async function handleSpoofedRequest(rootGetters, schemaStore, opt) {
 
     const schemas = rootGetters[`${ schemaStore }/all`](SCHEMA);
     // getters return async getSpoofedInstance/getSpoofedInstances fn
-    const instance = await rootGetters[`type-map/${ typemapGetter }`](type, id);
+    const instance = await rootGetters[`type-map/${ typemapGetter }`](type, product, id);
     const data = isApi ? createYaml(schemas, type, instance) : instance;
 
     return id && !isApi ? data : { data };

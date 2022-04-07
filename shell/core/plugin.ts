@@ -105,7 +105,7 @@ export class Plugin implements IPlugin {
 
       mutations: {
         ...coreStoreModule.mutations,
-        ...storeSpecifics.actions
+        ...storeSpecifics.mutations
       },
 
       actions: {

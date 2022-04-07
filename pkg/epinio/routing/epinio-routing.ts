@@ -13,43 +13,53 @@ import CreateEpinioResource from '../pages/c/_cluster/_resource/create.vue';
 import ViewEpinioResource from '../pages/c/_cluster/_resource/_id.vue';
 import ViewEpinioNsResource from '../pages/c/_cluster/_resource/_namespace/_id.vue';
 
+const meta = { pkg: EPINIO_PRODUCT_NAME };
+
 const routes: RouteConfig[] = [{
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c-cluster-applications-createapp`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/applications/createapp`,
-  component: CreateApp
+  component: CreateApp,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c-cluster-applications`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/applications`,
-  component: ListApp
+  component: ListApp,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }`,
   path:      `/${ EXTENSION_PREFIX }/epinio`,
-  component: ListEpinio
+  component: ListEpinio,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c`,
-  component: ViewEpinioBase
+  component: ViewEpinioBase,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c-cluster`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster`,
-  component: ViewEpinio
+  component: ViewEpinio,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c-cluster-resource`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource`,
-  component: ListEpinioResource
+  component: ListEpinioResource,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c-cluster-resource-create`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource/create`,
-  component: CreateEpinioResource
+  component: CreateEpinioResource,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c-cluster-resource-id`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource/:id`,
-  component: ViewEpinioResource
+  component: ViewEpinioResource,
+  meta
 }, {
   name:      `${ EXTENSION_PREFIX }-${ EPINIO_PRODUCT_NAME }-c-cluster-resource-namespace-id`,
   path:      `/${ EXTENSION_PREFIX }/epinio/c/:cluster/:resource/:namespace/:id`,
-  component: ViewEpinioNsResource
-}
-];
+  component: ViewEpinioNsResource,
+  meta
+}];
 
 export default routes;

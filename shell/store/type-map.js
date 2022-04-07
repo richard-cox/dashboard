@@ -720,7 +720,7 @@ export const getters = {
   },
 
   getSpoofedInstance(state, getters, rootState, rootGetters) {
-    return async(type, id, product) => {
+    return async(type, product, id) => {
       const productInstances = await getters.getSpoofedInstances(type, product);
 
       return productInstances.find( instance => instance.id === id);

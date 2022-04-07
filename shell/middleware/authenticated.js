@@ -256,7 +256,7 @@ export default async function({
 
   // Load stuff
   await applyProducts(store, $plugin);
-  // extensions.applyProducts(store); // TODO: RC this happens somewhere else now.....
+  // extensions.applyProducts(store); // TODO: RC REMOVE. this happens somewhere else now.....
 
   // Setup a beforeEach hook once to keep track of the current product
   if ( !beforeEachSetup ) {
@@ -283,14 +283,20 @@ export default async function({
   try {
     let clusterId = get(route, 'params.cluster');
 
+    const pkg = route.meta?.find(m => !!m.pkg)?.pkg;
+    const product = pkg || get(route, 'params.product');
+
+    console.error('route: ', route, pkg);
     // TODO: RC Plugin: Extensions/Routes: How to tell app that we're left their world?
-    const isExt = route.name.startsWith(EXTENSION_PREFIX);
-    const product = isExt ? extensionProduct(route.name) : get(route, 'params.product');
+    // const isExt = route.name.startsWith(EXTENSION_PREFIX);
+    // const product = isExt ? extensionProduct(route.name) : get(route, 'params.product');
 
-    const oldIsExt = from.name.startsWith(EXTENSION_PREFIX);
-    const oldProduct = oldIsExt ? extensionProduct(from.name) : from?.params?.product;
+    const oldPkg = from.meta?.find(m => !!m.pkg)?.pkg;
+    const oldProduct = oldPkg || from?.params?.product;
+    // const oldIsExt = from.name.startsWith(EXTENSION_PREFIX);
+    // const oldProduct = oldIsExt ? extensionProduct(from.name) : from?.params?.product;
 
-    if (oldIsExt && oldProduct && oldProduct !== product) {
+    if (oldPkg && oldProduct && oldProduct !== product) {
       // If we've left a product ensure we reset it
       await store.dispatch(`${ oldProduct }/unsubscribe`);
       await store.commit(`${ oldProduct }/reset`);
@@ -308,18 +314,18 @@ export default async function({
 
       await Promise.all(res);
     // TODO: RC Plugin: Extensions/Routes: - How to tell app that we're entering their world... and that their cluster is now current?
-    } else if (isExt && product) {
+    } else if (pkg && product) {
       await Promise.all([
         store.dispatch('loadManagement'),
         store.dispatch(`${ product }/loadManagement`),
       ]);
       if (clusterId) {
         await store.dispatch('loadCluster', {
-          id: clusterId,
+          id:       clusterId,
           product,
           oldProduct,
-          isExt,
-          oldIsExt
+          isExt:    pkg,
+          oldIsExt: oldPkg
         });
       }
     // -------------------------------------------------------------------
@@ -328,11 +334,11 @@ export default async function({
       const res = [
         store.dispatch('loadManagement'),
         store.dispatch('loadCluster', {
-          id: clusterId,
+          id:       clusterId,
           product,
           oldProduct,
-          isExt,
-          oldIsExt
+          isExt:    pkg,
+          oldIsExt: oldPkg
         }),
       ];
 
@@ -358,10 +364,10 @@ export default async function({
         });
       } else if ( clusterId) {
         await store.dispatch('loadCluster', {
-          id: clusterId,
+          id:       clusterId,
           product,
           oldProduct,
-          oldIsExt
+          oldIsExt: oldPkg
         });
       }
     }

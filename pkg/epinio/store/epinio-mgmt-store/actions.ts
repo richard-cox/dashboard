@@ -6,7 +6,7 @@ import { EPINIO_MGMT_STORE, EPINIO_PRODUCT_NAME, EPINIO_TYPES } from '../../type
 export default {
 
   async request({ rootGetters }: any, { opt }: any) {
-    const spoofedRes = await handleSpoofedRequest(rootGetters, EPINIO_MGMT_STORE, opt);
+    const spoofedRes = await handleSpoofedRequest(rootGetters, EPINIO_MGMT_STORE, opt, EPINIO_PRODUCT_NAME);
 
     if (spoofedRes) {
       return spoofedRes;
