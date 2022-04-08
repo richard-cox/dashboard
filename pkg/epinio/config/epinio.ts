@@ -21,7 +21,7 @@ export function init($plugin: any, store: any) {
 
   if (isEpinioSingleProduct) {
     store.dispatch('setIsSingleProduct', {
-      // logo:                require(`../../assets/logo-epinio.svg`), // TODO: RC Asset
+      logo:                require(`../assets/logo-epinio.svg`),
       productNameKey:      'epinio.label',
       afterLoginRoute:     createEpinioRoute('c-cluster-applications', { cluster: EPINIO_STANDALONE_CLUSTER_NAME }),
       logoRoute:           createEpinioRoute('c-cluster-applications', { cluster: EPINIO_STANDALONE_CLUSTER_NAME }),
@@ -36,7 +36,7 @@ export function init($plugin: any, store: any) {
     isMultiClusterApp:     true,
     inStore:               EPINIO_PRODUCT_NAME,
     icon:                  'epinio',
-    // iconHeader:            isEpinioSingleProduct ? undefined : require(`../../assets/logo-epinio.svg`), //TODO: RC Asset
+    iconHeader:            isEpinioSingleProduct ? undefined : require(`../assets/logo-epinio.svg`),
     removable:             false,
     showClusterSwitcher:   false,
     to:                    rootEpinioRoute(),
@@ -69,11 +69,11 @@ export function init($plugin: any, store: any) {
     canYaml:              false,
   });
   configureType(EPINIO_TYPES.INSTANCE, { customRoute: createEpinioRoute('c-cluster-resource', { resource: EPINIO_TYPES.INSTANCE }) });
-  componentForType(EPINIO_TYPES.APP_ACTION, undefined, EPINIO_PRODUCT_NAME);
+  // componentForType(EPINIO_TYPES.APP_ACTION, undefined, EPINIO_PRODUCT_NAME);
 
   // App resource
   weightType(EPINIO_TYPES.APP, 300, true);
-  componentForType(EPINIO_TYPES.APP, undefined, EPINIO_PRODUCT_NAME);
+  // componentForType(EPINIO_TYPES.APP, undefined, EPINIO_PRODUCT_NAME);
   configureType(EPINIO_TYPES.APP, {
     isCreatable:          true,
     isEditable:           true,
@@ -86,7 +86,7 @@ export function init($plugin: any, store: any) {
 
   // Configuration resource
   weightType(EPINIO_TYPES.CONFIGURATION, 200, true);
-  componentForType(EPINIO_TYPES.CONFIGURATION, undefined, EPINIO_PRODUCT_NAME);
+  // componentForType(EPINIO_TYPES.CONFIGURATION, undefined, EPINIO_PRODUCT_NAME);
   configureType(EPINIO_TYPES.CONFIGURATION, {
     isCreatable: true,
     isEditable:  true,
@@ -99,7 +99,7 @@ export function init($plugin: any, store: any) {
 
   // Namespace resource
   weightType(EPINIO_TYPES.NAMESPACE, 100, true);
-  componentForType(EPINIO_TYPES.NAMESPACE, undefined, EPINIO_PRODUCT_NAME);
+  // componentForType(EPINIO_TYPES.NAMESPACE, undefined, EPINIO_PRODUCT_NAME);
   configureType(EPINIO_TYPES.NAMESPACE, {
     isCreatable:      true,
     isEditable:       true,
@@ -137,6 +137,7 @@ export function init($plugin: any, store: any) {
     {
       name:      'route',
       labelKey:  'epinio.applications.tableHeaders.route',
+      value:    'configuration.route',
       search:      ['configuration.route'],
     },
     {

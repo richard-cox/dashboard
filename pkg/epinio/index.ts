@@ -6,25 +6,6 @@ import epinioRoutes from './routing/epinio-routing';
 
 import enUS from './translations/en-us.yaml';
 
-// TODO: RC REMOVE
-// import { load } from 'js-yaml';
-// import fs from 'fs';
-// const loadI10n = (locale: string): () => Promise<any> => {
-//   return () => {
-//     debugger;
-//     try {
-//       const file = fs.readFileSync(`./translations/${ locale }.yaml`, 'utf8');
-//       const phrases = load(file);
-
-//       return Promise.resolve(phrases);
-//     } catch (e) {
-//       console.error(e);
-
-//       return Promise.reject(e);
-//     }
-//   };
-// };
-
 // Init the package
 export default function(plugin: IPlugin) {
   // Auto-import model, detail, edit from the folders
@@ -35,7 +16,7 @@ export default function(plugin: IPlugin) {
 
   plugin.metadata.description = 'Application Development Engine for Kubernetes';
   plugin.metadata.name = 'Epinio';
-  plugin.metadata.version = '0.6.2'; // TODO: RC take from package.json
+  plugin.metadata.version = '0.6.2'; // TODO: RC Q take from package.json?
 
   // plugin.addI18n('en-us', loadI10n('en-us'));
   plugin.addI18n('en-us', enUS);

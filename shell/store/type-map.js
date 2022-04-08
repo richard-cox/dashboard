@@ -1474,6 +1474,8 @@ export const mutations = {
   },
 
   componentForType(state, { match, replace }) {
+    // TODO: RC Q Neil - I'd had products manually specifcy the pkg... so we would look in <pkg>/x/<type>
+    // In new way, how do we handle collisions (epinio namespaces and cluster(kube) namespaces)
     match = ensureRegex(match);
     match = regexToString(match);
     state.typeToComponentMappings.push({ match, replace });
