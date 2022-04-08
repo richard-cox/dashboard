@@ -14,7 +14,13 @@ typeLabel:
       one { Services }
       other { Services }
     }
+  configurations: |-
+    {count, plural,
+      one { Configurations }
+      other { Configurations }
+    }
 epinio:
+  label: Epinio
   tableHeaders:
     namespace: Namespace
   instances:
@@ -24,22 +30,25 @@ epinio:
       description: To view an Epinio cluster be sure to import a Cluster where one is installed
     tableHeaders:
       api: URL
+      version: Version
       explore: Explore
+      cluster: Rancher Cluster
   applications:
     tableHeaders:
       route: Routes
-      boundServices: Bound Services
+      boundConfigs: Bound Configs
       deployedBy: Last Deployed By
     detail:
       counts:
         label: Counts
-        service: Services
+        config: Configs
         routes: Routes
         envVars: Environment Vars
       routes:
         label: Routes
       deployment:
         label: Deployment
+        summary: Summary
         instances: Instances
         memory: Memory
         cpu: CPU
@@ -62,6 +71,12 @@ epinio:
       source:
         label: Source
         subtext: Provide the source
+        folder:
+          label: Folder
+          file:
+            label: Folder
+            inputLabel: Folder
+            tooltip: This should contain your application files
         archive:
           label: Archive
           file:
@@ -89,12 +104,12 @@ epinio:
             label: Branch
             inputLabel: Branch
             tooltip: Branch to deploy
-      services:
-        label: Service
-        subtext: Bind a service
+      configurations:
+        label: Configurations
+        subtext: Bind a config
         select:
-          placeholderWithOptions: Select services to bind app to
-          placeholderNoOptions: There are no services in this namespace
+          placeholderWithOptions: Select configs to bind app to
+          placeholderNoOptions: There are no configs in this namespace
         next: Create
       progress:
         label: Progress
@@ -123,17 +138,35 @@ epinio:
         label: Deploy
         description: Deploy and start the Application
     actions:
+      shell:
+        label: App Shell
+      onlyShell:
+        label: Shell
       viewAppLogs:
-        label: View Logs
+        label: App Logs
+      viewStagingLogs:
+        label: Last Build Logs
+      restage:
+        label: Rebuild
+      restart:
+        label: Restart
+    wm:
+      containerName: 'Instance: {label}'
   namespace:
+    tableHeaders:
+      appCount: Applications
+      configCount: Configs
     name: Name
     create: Create a Namespace
-    deleteWarning: All applications and services in a namespace will be deleted.
-  services:
+    deleteWarning: All applications and configs in a namespace will be deleted.
+  configurations:
     pairs:
-      label: Service Data
-      tooltip: Data made available to bound applications via the path <code>/services/&lt;service name&gt;/&lt;data name&gt;/</code>
+      label: Config Data
+      tooltip: Data made available to bound applications via the path <code>/configurations/&lt;configuration name&gt;/&lt;data name&gt;/</code>
     tableHeaders:
       boundApps: Bound Applications
+      variableCount: No. of variables
+      createBy: Created By
     promptRemove:
       unbind: Unbind from applications before deleting
+    

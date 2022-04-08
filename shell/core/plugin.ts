@@ -60,6 +60,7 @@ export class Plugin implements IPlugin {
   }
 
   addRoute(parentOrRoute: any, route?: any): void {
+    // TODO: RC add
     if (typeof (parentOrRoute) === 'string') {
       this.routes.push({ parent: parentOrRoute as string, route });
     } else {

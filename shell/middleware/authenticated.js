@@ -14,7 +14,7 @@ import { AFTER_LOGIN_ROUTE } from '@shell/store/prefs';
 import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
 
-import { EXTENSION_PREFIX } from '@shell/utils/extensions';
+// import { EXTENSION_PREFIX } from '@shell/utils/extensions';
 
 // TODO: RC Tech Debt: Search for `steve`. shouldn't exist outside of store (ish)
 
@@ -23,9 +23,9 @@ import { EXTENSION_PREFIX } from '@shell/utils/extensions';
 
 // const extRegEx = new RegExp(`\/${ EXTENSION_PREFIX }\/([^\/]+)`);
 
-function extensionProduct(routeName) {
-  return false;
-}
+// function extensionProduct(routeName) {
+//   return false;
+// }
 
 // function extensionProduct(routeName) {
 //   const newName = routeName.replace(`${ EXTENSION_PREFIX }-`, '');
@@ -35,10 +35,20 @@ function extensionProduct(routeName) {
 // }
 // ----------
 
+const getProductFromRoute = (route) => {
+  if (!route?.meta) {
+    return;
+  }
+  // Sometimes meta is an array... sometimes not
+  const arraySafe = Array.isArray(route.meta) ? route.meta : [route.meta];
+
+  return arraySafe.find(m => !!m.pkg)?.pkg;
+};
+
 let beforeEachSetup = false;
 
 function setProduct(store, to) {
-  let product = to.params?.product;
+  let product = getProductFromRoute(to) || to.params?.product;
 
   // TODO: RC Plugin: Extensions/Routes: This whole process is broken
   // Product is the extensions
@@ -283,15 +293,14 @@ export default async function({
   try {
     let clusterId = get(route, 'params.cluster');
 
-    const pkg = route.meta?.find(m => !!m.pkg)?.pkg;
+    const pkg = getProductFromRoute(route);
     const product = pkg || get(route, 'params.product');
 
-    console.error('route: ', route, pkg);
     // TODO: RC Plugin: Extensions/Routes: How to tell app that we're left their world?
     // const isExt = route.name.startsWith(EXTENSION_PREFIX);
     // const product = isExt ? extensionProduct(route.name) : get(route, 'params.product');
 
-    const oldPkg = from.meta?.find(m => !!m.pkg)?.pkg;
+    const oldPkg = getProductFromRoute(from);
     const oldProduct = oldPkg || from?.params?.product;
     // const oldIsExt = from.name.startsWith(EXTENSION_PREFIX);
     // const oldProduct = oldIsExt ? extensionProduct(from.name) : from?.params?.product;
