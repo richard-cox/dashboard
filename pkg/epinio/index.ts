@@ -31,17 +31,29 @@ export default function(plugin: IPlugin) {
 
   const onEnter: OnEnterPackage = async(store, config) => {
     await store.dispatch(`${ epinioStore.config.namespace }/loadManagement`);
-    if (config.clusterId) {
-      await store.dispatch('loadCluster', {
-        id:         config.clusterId,
-        product:    config.product,
-        oldProduct: config.oldProduct,
-        isExt:      true,
-        oldIsExt:   config.oldIsExt,
-      });
-    }
   };
   const onLeave: OnLeavePackage = () => Promise.resolve();
 
   plugin.addOnEnterLeaveHooks(onEnter, onLeave);
 }
+
+// TODO: RC JUNK
+// await store.dispatch(`${ epinioMgmtStore.config.namespace }/loadSchemas`, true)
+
+// if (config.clusterId) {
+
+//   await store.dispatch('loadCluster', {
+//     id:              config.clusterId,
+//     product:         config.product,
+//     pkgClusterStore: epinioStore.config.namespace,
+//     // oldProduct: config.oldProduct,
+//     // isExt:      true,
+//     // oldIsExt:   config.oldIsExt,
+//   });
+// }
+
+// // dispatch(`${ product }/loadSchemas`, true);
+// await Promise.all([
+//   ,
+//   store.dispatch(`${ epinioStore.config.namespace }/loadSchemas`, true),
+// ]);

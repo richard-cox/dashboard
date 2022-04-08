@@ -21,6 +21,9 @@ const epinioMgmtFactory = (): CoreStoreSpecifics => {
 };
 const config: CoreStoreConfig = { namespace: EPINIO_MGMT_STORE };
 
+/**
+ * `epiniomgmt` store contains resources that aren't epinio instance specific, for example the list of epinio instances
+ */
 export default {
   specifics: epinioMgmtFactory(),
   config

@@ -262,19 +262,22 @@ export default async function({
     let clusterId = get(route, 'params.cluster');
 
     const pkg = getProductFromRoute(route);
-    const product = pkg || get(route, 'params.product');
+    const product = get(route, 'params.product');
 
     const oldPkg = getProductFromRoute(from);
-    const oldProduct = oldPkg || from?.params?.product;
+    const oldProduct = from?.params?.product;
 
     // -------------------------------------------------------------------
     debugger;
 
+    // Leave an old pkg where we weren't before?
+    const oldPlugin = oldPkg ? Object.values($plugin.getPlugins()).find(p => p.name === oldPkg) : null;
+
     if (oldPkg && oldPkg !== pkg ) {
-      const oldPlugin = Object.values($plugin.getPlugins()).find(p => p.name === oldPkg);
+      // TODO: RC TEST
 
       // Execute anything optional the plugin wants to
-      oldPlugin.onLeave(store, {
+      await oldPlugin.onLeave(store, {
         clusterId,
         product,
         oldProduct,
@@ -292,16 +295,17 @@ export default async function({
       );
     }
 
+    // Sometimes this needs to happen before or alongside other things... but is always needed
     const always = [
       store.dispatch('loadManagement')
     ];
 
-    // Entering a new package where we weren't before
-    // Note - We can't block on oldPkg !== newPkg because on a fresh load the `from` route equals the to `route`
-    if (pkg && (oldPkg !== pkg || from.fullPath === route.fullPath)) {
-      const newPlugin = Object.values($plugin.getPlugins()).find(p => p.name === pkg);
+    // Entering a new package where we weren't before?
+    const newPlugin = pkg ? Object.values($plugin.getPlugins()).find(p => p.name === pkg) : null;
 
-      // Execute anything optional the plugin wants to
+    // Note - We can't block on oldPkg !== newPkg because on a fresh load the `from` route equals the to `route`
+    if (pkg && (oldPkg !== pkg || from.fullPath === route.fullPath)) { // fails on
+      // Execute mandatory store actions
       await Promise.all(always);
 
       // Execute anything optional the plugin wants to
@@ -311,8 +315,6 @@ export default async function({
         oldProduct,
         oldIsExt: !!oldPkg
       });
-
-      return;
     }
 
     if (product === VIRTUAL || route.name === `c-cluster-${ VIRTUAL }` || route.name?.startsWith(`c-cluster-${ VIRTUAL }-`)) {
@@ -330,11 +332,10 @@ export default async function({
       await Promise.all([
         ...always,
         store.dispatch('loadCluster', {
-          id:       clusterId,
-          product,
+          id:     clusterId,
+          oldPkg: oldPlugin,
+          newPkg: newPlugin,
           oldProduct,
-          isExt:    pkg,
-          oldIsExt: oldPkg
         })]);
     } else {
       await Promise.all(always);
@@ -355,13 +356,14 @@ export default async function({
           key: AFTER_LOGIN_ROUTE,
           value,
         });
-      } else if ( clusterId) {
-        await store.dispatch('loadCluster', {
-          id:       clusterId,
-          product,
-          oldProduct,
-          oldIsExt: oldPkg
-        });
+        // TODO: RC not needed given if above
+      // } else if ( clusterId) {
+      //   await store.dispatch('loadCluster', {
+      //     id:       clusterId,
+      //     product,
+      //     oldProduct,
+      //     oldIsExt: oldPkg
+      //   });
       }
     }
   } catch (e) {

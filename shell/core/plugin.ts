@@ -98,7 +98,7 @@ export class Plugin implements IPlugin {
 
       state() {
         return {
-          ...coreStoreState(config.namespace, config.baseUrl),
+          ...coreStoreState(config.namespace, config.baseUrl, config.isClusterStore),
           ...storeSpecifics.state()
         };
       },

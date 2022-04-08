@@ -494,7 +494,7 @@ export const mutations = {
 
 export const actions = {
   async loadManagement({
-    getters, state, commit, dispatch
+    getters, state, commit, dispatch, rootGetters
   }) {
     if ( state.managementReady) {
       // Do nothing, it's already loaded
@@ -596,7 +596,7 @@ export const actions = {
   async loadCluster({
     state, commit, dispatch, getters
   }, {
-    id, product, oldProduct, isExt
+    id, oldProduct, oldPkg, newPkg
   }) {
     const isMultiCluster = getters['isMultiCluster'];
 
@@ -609,6 +609,14 @@ export const actions = {
       await dispatch('harvester/unsubscribe');
       commit('harvester/reset');
     }
+
+    const oldPkgClusterStore = oldPkg?.stores.find(
+      s => getters[`${ s.storeName }/isClusterStore`]
+    )?.storeName;
+
+    const newPkgClusterStore = newPkg?.stores.find(
+      s => getters[`${ s.storeName }/isClusterStore`]
+    )?.storeName;
 
     if ( state.clusterId && id ) {
       // Clear the old cluster state out if switching to a new one.
@@ -628,11 +636,10 @@ export const actions = {
       commit('management/forgetType', MANAGEMENT.PROJECT);
       commit('catalog/reset');
 
-      // TODO: RC Plugin: Navigation
-      if (isExt && product) {
-        // If we've left a cluster of a product ensure we reset it
-        await dispatch(`${ oldProduct }/unsubscribe`);
-        await commit(`${ oldProduct }/reset`);
+      if (oldPkg) {
+        // Mirror actions on the 'cluster' store for our specific pkg `cluster` store
+        await dispatch(`${ oldPkgClusterStore }/unsubscribe`);
+        await commit(`${ oldPkgClusterStore }/reset`);
       }
     }
 
@@ -653,11 +660,15 @@ export const actions = {
       return;
     }
 
-    // TODO: RC Plugin: Navigation
-    if (isExt && product) {
-      commit('clusterChanged', true);
-      dispatch(`${ product }/loadSchemas`, true);
+    if (newPkg) {
+      // Mirror actions on the 'cluster' store for our specific pkg `cluster` store
+      dispatch(`${ newPkgClusterStore }/loadSchemas`, true);
+      await dispatch(`${ newPkgClusterStore }/loadCluster`, { id });
 
+      commit('clusterChanged', true);
+      console.log('Done loading pkg cluster.'); // eslint-disable-line no-console
+
+      // Everything below here is rancher/kube cluster specific
       return;
     }
 

@@ -17,7 +17,7 @@ export interface PackageMetadata {
 
 export type VuexStoreObject = { [key: string]: any }
 export type CoreStoreSpecifics = { state: () => VuexStoreObject, getters: VuexStoreObject, mutations: VuexStoreObject, actions: VuexStoreObject }
-export type CoreStoreConfig = { namespace: string, baseUrl?: string, modelBaseClass?: string, supportsStream?: boolean }
+export type CoreStoreConfig = { namespace: string, baseUrl?: string, modelBaseClass?: string, supportsStream?: boolean, isClusterStore?: boolean }
 export type RegisterStore = () => (store: any) => void
 
 export type OnEnterLeavePackageConfig = {
