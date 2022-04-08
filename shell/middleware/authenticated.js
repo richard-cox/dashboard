@@ -14,27 +14,6 @@ import { AFTER_LOGIN_ROUTE } from '@shell/store/prefs';
 import { NAME as VIRTUAL } from '@shell/config/product/harvester';
 import { BACK_TO } from '@shell/config/local-storage';
 
-// import { EXTENSION_PREFIX } from '@shell/utils/extensions';
-
-// TODO: RC Tech Debt: Search for `steve`. shouldn't exist outside of store (ish)
-
-// TODO: RC Plugin: Extensions/Routes: This whole process is broken
-// import extensions from '@/product-extension/extensions';
-
-// const extRegEx = new RegExp(`\/${ EXTENSION_PREFIX }\/([^\/]+)`);
-
-// function extensionProduct(routeName) {
-//   return false;
-// }
-
-// function extensionProduct(routeName) {
-//   const newName = routeName.replace(`${ EXTENSION_PREFIX }-`, '');
-//   const hyphen = newName.indexOf('-');
-
-//   return hyphen >= 1 ? newName.substring(0, hyphen) : newName;
-// }
-// ----------
-
 const getProductFromRoute = (route) => {
   if (!route?.meta) {
     return;
@@ -49,18 +28,6 @@ let beforeEachSetup = false;
 
 function setProduct(store, to) {
   let product = getProductFromRoute(to) || to.params?.product;
-
-  // TODO: RC Plugin: Extensions/Routes: This whole process is broken
-  // Product is the extensions
-  // When switching products to an extensions the format is different
-  // if (to.path.startsWith(`/${ EXTENSION_PREFIX }`)) {
-  //   const match = extRegEx.exec(to.path);
-
-  //   if ( match ) {
-  //     product = match[1];
-  //   }
-  // }
-  // ------------
 
   if ( !product ) {
     const match = to.name?.match(/^c-cluster-([^-]+)/);
@@ -93,6 +60,8 @@ function setProduct(store, to) {
 export default async function({
   route, app, store, redirect, $cookies, req, isDev, from, $plugin
 }) {
+  console.warn('from: ', from);
+  console.warn('to: ', route);
   if ( route.path && typeof route.path === 'string') {
     // Ignore webpack hot module reload requests
     if ( route.path.startsWith('/__webpack_hmr/') ) {
@@ -266,7 +235,6 @@ export default async function({
 
   // Load stuff
   await applyProducts(store, $plugin);
-  // extensions.applyProducts(store); // TODO: RC REMOVE. this happens somewhere else now.....
 
   // Setup a beforeEach hook once to keep track of the current product
   if ( !beforeEachSetup ) {
@@ -296,25 +264,60 @@ export default async function({
     const pkg = getProductFromRoute(route);
     const product = pkg || get(route, 'params.product');
 
-    // TODO: RC Plugin: Extensions/Routes: How to tell app that we're left their world?
-    // const isExt = route.name.startsWith(EXTENSION_PREFIX);
-    // const product = isExt ? extensionProduct(route.name) : get(route, 'params.product');
-
     const oldPkg = getProductFromRoute(from);
     const oldProduct = oldPkg || from?.params?.product;
-    // const oldIsExt = from.name.startsWith(EXTENSION_PREFIX);
-    // const oldProduct = oldIsExt ? extensionProduct(from.name) : from?.params?.product;
 
-    if (oldPkg && oldProduct && oldProduct !== product) {
-      // If we've left a product ensure we reset it
-      await store.dispatch(`${ oldProduct }/unsubscribe`);
-      await store.commit(`${ oldProduct }/reset`);
-    }
     // -------------------------------------------------------------------
+    debugger;
+
+    if (oldPkg && oldPkg !== pkg ) {
+      const oldPlugin = Object.values($plugin.getPlugins()).find(p => p.name === oldPkg);
+
+      // Execute anything optional the plugin wants to
+      oldPlugin.onLeave(store, {
+        clusterId,
+        product,
+        oldProduct,
+        oldIsExt: !!oldPkg
+      });
+
+      // Execute mandatory store actions
+      await Promise.all(
+        Object.values(oldPlugin.stores)
+          .map(({ storeName }) => ([
+            store.dispatch(`${ storeName }/unsubscribe`),
+            store.commit(`${ storeName }/reset`),
+          ]))
+          .flat()
+      );
+    }
+
+    const always = [
+      store.dispatch('loadManagement')
+    ];
+
+    // Entering a new package where we weren't before
+    // Note - We can't block on oldPkg !== newPkg because on a fresh load the `from` route equals the to `route`
+    if (pkg && (oldPkg !== pkg || from.fullPath === route.fullPath)) {
+      const newPlugin = Object.values($plugin.getPlugins()).find(p => p.name === pkg);
+
+      // Execute anything optional the plugin wants to
+      await Promise.all(always);
+
+      // Execute anything optional the plugin wants to
+      await newPlugin.onEnter(store, {
+        clusterId,
+        product,
+        oldProduct,
+        oldIsExt: !!oldPkg
+      });
+
+      return;
+    }
 
     if (product === VIRTUAL || route.name === `c-cluster-${ VIRTUAL }` || route.name?.startsWith(`c-cluster-${ VIRTUAL }-`)) {
       const res = [
-        store.dispatch('loadManagement'),
+        ...always,
         store.dispatch('loadVirtual', {
           id: clusterId,
           oldProduct,
@@ -322,38 +325,19 @@ export default async function({
       ];
 
       await Promise.all(res);
-    // TODO: RC Plugin: Extensions/Routes: - How to tell app that we're entering their world... and that their cluster is now current?
-    } else if (pkg && product) {
-      await Promise.all([
-        store.dispatch('loadManagement'),
-        store.dispatch(`${ product }/loadManagement`),
-      ]);
-      if (clusterId) {
-        await store.dispatch('loadCluster', {
-          id:       clusterId,
-          product,
-          oldProduct,
-          isExt:    pkg,
-          oldIsExt: oldPkg
-        });
-      }
-    // -------------------------------------------------------------------
     } else if ( clusterId ) {
       // Run them in parallel
-      const res = [
-        store.dispatch('loadManagement'),
+      await Promise.all([
+        ...always,
         store.dispatch('loadCluster', {
           id:       clusterId,
           product,
           oldProduct,
           isExt:    pkg,
           oldIsExt: oldPkg
-        }),
-      ];
-
-      await Promise.all(res);
+        })]);
     } else {
-      await store.dispatch('loadManagement');
+      await Promise.all(always);
 
       clusterId = store.getters['defaultClusterId']; // This needs the cluster list, so no parallel
       const isSingleVirtualCluster = store.getters['isSingleVirtualCluster'];

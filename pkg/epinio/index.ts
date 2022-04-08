@@ -1,5 +1,5 @@
 import { importTypes } from '@rancher/auto-import';
-import { IPlugin } from '@shell/core/types';
+import { IPlugin, OnEnterPackage, OnLeavePackage } from '@shell/core/types';
 import epinioStore from './store/epinio-store';
 import epinioMgmtStore from './store/epinio-mgmt-store';
 import epinioRoutes from './routing/epinio-routing';
@@ -28,4 +28,20 @@ export default function(plugin: IPlugin) {
   plugin.addCoreStore(epinioStore.config.namespace, epinioStore.specifics, epinioStore.config);
 
   epinioRoutes.forEach(route => plugin.addRoute(route));
+
+  const onEnter: OnEnterPackage = async(store, config) => {
+    await store.dispatch(`${ epinioStore.config.namespace }/loadManagement`);
+    if (config.clusterId) {
+      await store.dispatch('loadCluster', {
+        id:         config.clusterId,
+        product:    config.product,
+        oldProduct: config.oldProduct,
+        isExt:      true,
+        oldIsExt:   config.oldIsExt,
+      });
+    }
+  };
+  const onLeave: OnLeavePackage = () => Promise.resolve();
+
+  plugin.addOnEnterLeaveHooks(onEnter, onLeave);
 }

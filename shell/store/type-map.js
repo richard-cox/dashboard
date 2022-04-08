@@ -430,6 +430,7 @@ export const getters = {
       showAge:              true,
       canYaml:              true,
       namespaced:           null,
+      listGroups:           [],
       customRoute:          undefined,
       resourceEditMasthead: true,
     };
@@ -798,6 +799,7 @@ export const getters = {
           count:       count ? count.summary.count || 0 : null,
           byNamespace: count ? count.namespaces : {},
           revision:    count ? count.revision : null,
+          route:       typeOptions.customRoute
         };
       }
 

@@ -2,7 +2,9 @@ import { RouteConfig } from 'vue-router';
 import { DSL as STORE_DSL } from '@shell/store/type-map';
 import { IPlugin } from './types';
 import coreStore, { coreStoreModule, coreStoreState } from '@/shell/plugins/core-store';
-import { RegisterStore, CoreStoreSpecifics, CoreStoreConfig } from '@/shell/core/types';
+import {
+  RegisterStore, CoreStoreSpecifics, CoreStoreConfig, OnEnterPackage, OnLeavePackage
+} from '@/shell/core/types';
 
 export class Plugin implements IPlugin {
   public id: string;
@@ -14,6 +16,8 @@ export class Plugin implements IPlugin {
   public productNames: string[] = [];
   public routes: { parent?: string, route: RouteConfig }[] = [];
   public stores: { storeName: string, register: RegisterStore }[] = [];
+  public onEnter: OnEnterPackage = () => {};
+  public onLeave: OnLeavePackage = () => {};
 
   // Plugin metadata (plugin package.json)
   public _metadata: any = {};
@@ -114,6 +118,11 @@ export class Plugin implements IPlugin {
         ...storeSpecifics.actions
       },
     };
+  }
+
+  public addOnEnterLeaveHooks(onEnter: OnEnterPackage, onLeave: OnLeavePackage) {
+    this.onEnter = onEnter;
+    this.onLeave = onLeave;
   }
 
   private register(type: string, name: string, fn: Function) {

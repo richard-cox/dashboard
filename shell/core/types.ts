@@ -20,6 +20,16 @@ export type CoreStoreSpecifics = { state: () => VuexStoreObject, getters: VuexSt
 export type CoreStoreConfig = { namespace: string, baseUrl?: string, modelBaseClass?: string, supportsStream?: boolean }
 export type RegisterStore = () => (store: any) => void
 
+export type OnEnterLeavePackageConfig = {
+  clusterId: string,
+  product: string,
+  oldProduct: string,
+  isExt: string,
+  oldIsExt: string
+}
+export type OnEnterPackage = (store: any, config: OnEnterLeavePackageConfig) => Promise<void>;
+export type OnLeavePackage = (store: any, config: OnEnterLeavePackageConfig) => Promise<void>;
+
 /**
  * Interface for a Dashboard plugin
  */
@@ -71,4 +81,8 @@ export interface IPlugin {
    */
   addCoreStore(storeName: string, storeSpecifics: CoreStoreSpecifics, config: CoreStoreConfig): void;
 
+  /**
+   * TODO: RC
+   */
+  addOnEnterLeaveHooks(onEnter: OnEnterPackage, onLeave: OnLeavePackage): void
 }
