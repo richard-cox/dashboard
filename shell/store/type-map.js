@@ -124,7 +124,7 @@ import {
   ensureRegex, escapeHtml, escapeRegex, ucFirst, pluralize
 } from '@shell/utils/string';
 import {
-  importList, importDetail, importEdit, listProducts, loadProduct, importCustomPromptRemove, resolveList, resolveEdit, resolveDetail
+  importList, importDetail, importEdit, listProducts, loadProduct, importCustomPromptRemove, resolveList, resolveEdit, resolveDetail, resolveWindowComponent, importWindowComponent
 
 } from '@shell/utils/dynamic-importer';
 
@@ -334,14 +334,15 @@ export const state = function() {
     hideBulkActions:         {},
     schemaGeneration:        1,
     cache:                   {
-      typeMove:     {},
-      groupLabel:   {},
-      ignore:       {},
-      list:         {},
-      detail:       {},
-      edit:         {},
-      componentFor: {},
-      promptRemove: {},
+      typeMove:        {},
+      groupLabel:      {},
+      ignore:          {},
+      list:            {},
+      detail:          {},
+      edit:            {},
+      componentFor:    {},
+      promptRemove:    {},
+      windowComponent: {},
     },
   };
 };
@@ -1059,6 +1060,14 @@ export const getters = {
     };
   },
 
+  hasCustomWindowComponent(state, getters, rootState) {
+    return (rawType, subType) => {
+      const key = getters.componentFor(rawType, subType);
+
+      return hasCustom(state, rootState, 'windowComponent', key, key => resolveWindowComponent(key));
+    };
+  },
+
   importComponent(state, getters) {
     return (path) => {
       return importEdit(path);
@@ -1088,6 +1097,12 @@ export const getters = {
       const type = getters.componentFor(rawType);
 
       return importCustomPromptRemove(type);
+    };
+  },
+
+  importWindowComponent(state, getters, rootState) {
+    return (rawType, subType) => {
+      return loadExtension(rootState, 'windowComponent', getters.componentFor(rawType, subType), importWindowComponent);
     };
   },
 

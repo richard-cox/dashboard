@@ -93,5 +93,13 @@ export interface IPlugin {
     onEnter?: OnNavToPackage,
     onLeave?: OnNavAwayFromPackage,
     onLogOut?: OnLogOut
-  ): void
+  ): void;
+
+    /**
+   * Register 'something' that can be dynamically loaded - e.g. model, edit, create, list, i18n
+   * @param {String} type type of thing to register, e.g. 'edit'
+   * @param {String} name unique name of 'something'
+   * @param {Function} fn function that dynamically loads the module for the thing being registered
+   */
+  register(type: string, name: string, fn: Function): void;
 }

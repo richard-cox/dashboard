@@ -42,4 +42,13 @@ export default function(plugin: IPlugin) {
   };
 
   plugin.addNavHooks(onEnter, onLeave, onLogOut);
+
+  // TODO: RC Q Neil couldn't get these to work, had to match dynamic-importer
+  // import appLogs from './components/windowComponent/ApplicationLogs.vue';
+  // import appShell from './components/windowComponent/ApplicationShell.vue';
+
+  /* ?? webpackChunkName: "components/nav/WindowManager" */
+
+  plugin.register('windowComponent', 'ApplicationLogs', () => import(`./components/windowComponent/ApplicationLogs.vue`));
+  plugin.register('windowComponent', 'ApplicationShell', () => import(`./components/windowComponent/ApplicationShell.vue`));
 }

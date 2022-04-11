@@ -140,7 +140,7 @@ export class Plugin implements IPlugin {
     this.onLogOut = onLogOut;
   }
 
-  private register(type: string, name: string, fn: Function) {
+  public register(type: string, name: string, fn: Function) {
     // Accumulate i18n resources rather than replace
     if (type === 'i18n') {
       if (!this.i18n[name]) {

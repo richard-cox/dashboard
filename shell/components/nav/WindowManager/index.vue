@@ -9,6 +9,7 @@ export default {
       dragOffset:     0,
       reportedHeight: this.height,
       firstHeight:    true,
+      component:      { },
     };
   },
 
@@ -157,12 +158,16 @@ export default {
     },
 
     componentFor(tab) {
-      // TODO: RC Plugin: Component location: update with new way
-      // if (tab.product) {
-      //   return require(`@/products/${ tab.product }/components/nav/WindowManager/${ tab.component }`).default;
-      // }
+      if (this.component[tab.component] === undefined) {
+        if (this.$store.getters['type-map/hasCustomWindowComponent'](tab.component)) {
+          this.component[tab.component] = this.$store.getters['type-map/importWindowComponent'](tab.component);
+        } else {
+          console.warn(`Unable to find window component for type '${ tab.component }'`); // eslint-disable-line no-console
+          this.component[tab.component] = null;
+        }
+      }
 
-      return require(`@shell/components/nav/WindowManager/${ tab.component }`).default;
+      return this.component[tab.component];
     }
   }
 };
