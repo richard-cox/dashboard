@@ -4,8 +4,6 @@ import { allHash } from '@shell/utils/promise';
 
 const META_NAME_PREFIX = 'app-autoload-';
 
-// TODO: RC test
-
 export default async(context) => {
   const meta = context.app?.head?.meta || [];
   const hash = {};

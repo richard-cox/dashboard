@@ -453,8 +453,6 @@ export default function(dir, _appConfig) {
             }
           ]
         });
-
-        // config.node = { fs: 'empty' }; // TODO: RC Remove.... pkg will barf without, can pkg specific webpack config exist?
       },
 
       // extractCSS:   true,
