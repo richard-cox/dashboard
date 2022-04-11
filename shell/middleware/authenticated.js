@@ -274,25 +274,13 @@ export default async function({
     const oldPlugin = oldPkg ? Object.values($plugin.getPlugins()).find(p => p.name === oldPkg) : null;
 
     if (oldPkg && oldPkg !== pkg ) {
-      // TODO: RC TEST
-
-      // Execute anything optional the plugin wants to
+      // Execute anything optional the plugin wants to. For example resetting it's store to remove data
       await oldPlugin.onLeave(store, {
         clusterId,
         product,
         oldProduct,
         oldIsExt: !!oldPkg
       });
-
-      // Execute mandatory store actions
-      await Promise.all(
-        Object.values(oldPlugin.stores)
-          .map(({ storeName }) => ([
-            store.dispatch(`${ storeName }/unsubscribe`),
-            store.commit(`${ storeName }/reset`),
-          ]))
-          .flat()
-      );
     }
 
     // Sometimes this needs to happen before or alongside other things... but is always needed

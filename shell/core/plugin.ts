@@ -16,8 +16,8 @@ export class Plugin implements IPlugin {
   public productNames: string[] = [];
   public routes: { parent?: string, route: RouteConfig }[] = [];
   public stores: { storeName: string, register: RegisterStore }[] = [];
-  public onEnter: OnEnterPackage = () => {};
-  public onLeave: OnLeavePackage = () => {};
+  public onEnter: OnEnterPackage = () => Promise.resolve();
+  public onLeave: OnLeavePackage = () => Promise.resolve();
 
   // Plugin metadata (plugin package.json)
   public _metadata: any = {};
