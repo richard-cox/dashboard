@@ -135,7 +135,7 @@ export default Vue.extend<Data, any, any, any>({
 
         <template #cell:name="{row}">
           <div class="epinio-row">
-            <n-link v-if="row.state === 'available'" :to="{name: 'ext-epinio-c-cluster-applications', params: {cluster: row.id}}">
+            <n-link v-if="row.state === 'available'" :to="{name: 'epinio-c-cluster-applications', params: {cluster: row.id}}">
               {{ row.name }}
             </n-link>
             <template v-else>
