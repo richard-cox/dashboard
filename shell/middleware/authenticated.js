@@ -268,8 +268,6 @@ export default async function({
     const oldProduct = from?.params?.product;
 
     // -------------------------------------------------------------------
-    debugger;
-
     // Leave an old pkg where we weren't before?
     const oldPlugin = oldPkg ? Object.values($plugin.getPlugins()).find(p => p.name === oldPkg) : null;
 
@@ -344,14 +342,6 @@ export default async function({
           key: AFTER_LOGIN_ROUTE,
           value,
         });
-        // TODO: RC not needed given if above
-      // } else if ( clusterId) {
-      //   await store.dispatch('loadCluster', {
-      //     id:       clusterId,
-      //     product,
-      //     oldProduct,
-      //     oldIsExt: oldPkg
-      //   });
       }
     }
   } catch (e) {

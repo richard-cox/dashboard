@@ -898,7 +898,15 @@ export const actions = {
     }
   },
 
-  async onLogout({ dispatch, commit, state }) {
+  async onLogout(store) {
+    const { dispatch, commit, state } = store;
+
+    Object.values(this.$plugin.getPlugins()).forEach((p) => {
+      if (p.onLogOut) {
+        p.onLogOut(store);
+      }
+    });
+
     await dispatch('management/unsubscribe');
     commit('managementChanged', { ready: false });
     commit('management/reset');
@@ -912,9 +920,6 @@ export const actions = {
     await dispatch('rancher/unsubscribe');
     commit('rancher/reset');
     commit('catalog/reset');
-
-    // TODO: RC Plugin: store on logout
-    // extensions.stores().forEach(store => commit(`${ store }/onLogout`));
 
     const router = state.$router;
     const route = router.currentRoute;

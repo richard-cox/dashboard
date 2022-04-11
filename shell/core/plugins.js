@@ -156,7 +156,8 @@ export default function({
       // Remove the plugin itself
       store.dispatch('uiplugins/removePlugin', name);
 
-      // TODO: RC REMOVE STORES
+      // Unregister vuex stores
+      plugin.stores.forEach(pStore => pStore.unregister(store));
 
       // Update last load since we removed a plugin
       _lastLoaded = new Date().getTime();

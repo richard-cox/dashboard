@@ -3,7 +3,7 @@ import { DSL as STORE_DSL } from '@shell/store/type-map';
 import { IPlugin } from './types';
 import coreStore, { coreStoreModule, coreStoreState } from '@/shell/plugins/core-store';
 import {
-  RegisterStore, CoreStoreSpecifics, CoreStoreConfig, OnEnterPackage, OnLeavePackage
+  RegisterStore, UnregisterStore, CoreStoreSpecifics, CoreStoreConfig, OnNavToPackage, OnNavAwayFromPackage, OnLogOut
 } from '@/shell/core/types';
 
 export class Plugin implements IPlugin {
@@ -15,9 +15,10 @@ export class Plugin implements IPlugin {
   public products: Function[] = [];
   public productNames: string[] = [];
   public routes: { parent?: string, route: RouteConfig }[] = [];
-  public stores: { storeName: string, register: RegisterStore }[] = [];
-  public onEnter: OnEnterPackage = () => Promise.resolve();
-  public onLeave: OnLeavePackage = () => Promise.resolve();
+  public stores: { storeName: string, register: RegisterStore, unregister: UnregisterStore }[] = [];
+  public onEnter: OnNavToPackage = () => Promise.resolve();
+  public onLeave: OnNavAwayFromPackage = () => Promise.resolve();
+  public onLogOut: OnLogOut = () => Promise.resolve();
 
   // Plugin metadata (plugin package.json)
   public _metadata: any = {};
@@ -63,21 +64,27 @@ export class Plugin implements IPlugin {
     this.register('i18n', locale, fn);
   }
 
-  addRoute(parentOrRoute: any, route?: any): void {
-    // TODO: RC add
-    if (typeof (parentOrRoute) === 'string') {
-      this.routes.push({ parent: parentOrRoute as string, route });
-    } else {
-      this.routes.push({ route: parentOrRoute as RouteConfig });
-    }
+  addRoute(parentOrRoute: RouteConfig | string, optionalRoute?: RouteConfig): void {
+    // Always add the pkg name to the route metadata
+    const parent: string | undefined = typeof (parentOrRoute) === 'string' ? parentOrRoute as string : undefined;
+    const route: RouteConfig = typeof (parentOrRoute) === 'string' ? optionalRoute as RouteConfig : parentOrRoute as RouteConfig;
+
+    route.meta = {
+      ...route?.meta,
+      pkg: this.name,
+    };
+
+    this.routes.push({ parent, route });
   }
 
   addUninstallHook(hook: Function) {
     this.uninstallHooks.push(hook);
   }
 
-  addStore(storeName: string, register: RegisterStore) {
-    this.stores.push({ storeName, register });
+  addStore(storeName: string, register: RegisterStore, unregister: UnregisterStore) {
+    this.stores.push({
+      storeName, register, unregister
+    });
   }
 
   addCoreStore(storeName: string, storeSpecifics: CoreStoreSpecifics, config: CoreStoreConfig) {
@@ -88,6 +95,9 @@ export class Plugin implements IPlugin {
           this.storeFactory(storeSpecifics, config),
           config,
         );
+      },
+      unregister: (store: any) => {
+        store.unregisterModule(storeName);
       }
     });
   }
@@ -120,9 +130,14 @@ export class Plugin implements IPlugin {
     };
   }
 
-  public addOnEnterLeaveHooks(onEnter: OnEnterPackage, onLeave: OnLeavePackage) {
+  public addNavHooks(
+    onEnter: OnNavToPackage = () => Promise.resolve(),
+    onLeave: OnNavAwayFromPackage = () => Promise.resolve(),
+    onLogOut: OnLogOut = () => Promise.resolve(),
+  ): void {
     this.onEnter = onEnter;
     this.onLeave = onLeave;
+    this.onLogOut = onLogOut;
   }
 
   private register(type: string, name: string, fn: Function) {

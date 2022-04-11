@@ -42,7 +42,6 @@ export default (vuexModule, config) => {
       return;
     }
 
-    // TODO: RC on log out??
     // store.subscribe(({ type }, state) => {
     //   if ( type === 'auth/loggedOut' ) {
     //     store.dispatch(`${ namespace }/unsubscribe`);

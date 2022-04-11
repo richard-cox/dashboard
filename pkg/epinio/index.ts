@@ -1,5 +1,5 @@
 import { importTypes } from '@rancher/auto-import';
-import { IPlugin, OnEnterPackage, OnLeavePackage } from '@shell/core/types';
+import { IPlugin, OnNavToPackage, OnNavAwayFromPackage, OnLogOut } from '@shell/core/types';
 import epinioStore from './store/epinio-store';
 import epinioMgmtStore from './store/epinio-mgmt-store';
 import epinioRoutes from './routing/epinio-routing';
@@ -28,13 +28,18 @@ export default function(plugin: IPlugin) {
 
   epinioRoutes.forEach(route => plugin.addRoute(route));
 
-  const onEnter: OnEnterPackage = async(store, config) => {
+  const onEnter: OnNavToPackage = async(store, config) => {
     await store.dispatch(`${ epinioStore.config.namespace }/loadManagement`);
   };
-  const onLeave: OnLeavePackage = async(store, config) => {
+  const onLeave: OnNavAwayFromPackage = async(store, config) => {
     await store.dispatch(`${ epinioStore.config.namespace }/unsubscribe`);
     await store.commit(`${ epinioStore.config.namespace }/reset`);
   };
 
-  plugin.addOnEnterLeaveHooks(onEnter, onLeave);
+  const onLogOut: OnLogOut = async(store) => {
+    await store.dispatch(`${ epinioMgmtStore.config.namespace }/onLogout`);
+    await store.dispatch(`${ epinioStore.config.namespace }/onLogout`);
+  };
+
+  plugin.addNavHooks(onEnter, onLeave, onLogOut);
 }

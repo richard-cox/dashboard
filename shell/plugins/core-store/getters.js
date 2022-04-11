@@ -9,7 +9,6 @@ import Resource from '@shell/plugins/core-store/resource-class';
 import mutations from './mutations';
 import { keyFieldFor, normalizeType } from './normalize';
 import { lookup } from './model-loader';
-import { state } from '~/shell/store/prefs';
 
 export default {
 

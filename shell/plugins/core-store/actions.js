@@ -1,7 +1,5 @@
 import merge from 'lodash/merge';
 
-// TODO: RC FIX imports core core-store and steve
-
 import { SCHEMA } from '@shell/config/types';
 import { SPOOFED_API_PREFIX, SPOOFED_PREFIX } from '@shell/store/type-map';
 import { createYaml } from '@shell/utils/create-yaml';

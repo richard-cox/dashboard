@@ -19,6 +19,7 @@ export type VuexStoreObject = { [key: string]: any }
 export type CoreStoreSpecifics = { state: () => VuexStoreObject, getters: VuexStoreObject, mutations: VuexStoreObject, actions: VuexStoreObject }
 export type CoreStoreConfig = { namespace: string, baseUrl?: string, modelBaseClass?: string, supportsStream?: boolean, isClusterStore?: boolean }
 export type RegisterStore = () => (store: any) => void
+export type UnregisterStore = (store: any) => void
 
 export type OnEnterLeavePackageConfig = {
   clusterId: string,
@@ -27,8 +28,9 @@ export type OnEnterLeavePackageConfig = {
   isExt: string,
   oldIsExt: string
 }
-export type OnEnterPackage = (store: any, config: OnEnterLeavePackageConfig) => Promise<void>;
-export type OnLeavePackage = (store: any, config: OnEnterLeavePackageConfig) => Promise<void>;
+export type OnNavToPackage = (store: any, config: OnEnterLeavePackageConfig) => Promise<void>;
+export type OnNavAwayFromPackage = (store: any, config: OnEnterLeavePackageConfig) => Promise<void>;
+export type OnLogOut = (store: any) => Promise<void>;
 
 /**
  * Interface for a Dashboard plugin
@@ -53,7 +55,8 @@ export interface IPlugin {
   metadata: PackageMetadata;
 
   /**
-   * TODO: RC
+   * Add a module contains localisations for a specific locale
+   * TODO: RC Q Neil - this should eb I10n (adding a specific set of translations)
    */
   addI18n(locale: string, fn: Function): void;
 
@@ -72,7 +75,7 @@ export interface IPlugin {
   /**
    * Add a generic Vuex Store
    */
-  addStore(storeName: string, register: RegisterStore): void;
+  addStore(storeName: string, register: RegisterStore, unregister: UnregisterStore): void;
   /**
    * Add a Vuex `Core`. This will be automatically populated with required getters/mutations/actions to support Dashboard components
    *
@@ -82,7 +85,13 @@ export interface IPlugin {
   addCoreStore(storeName: string, storeSpecifics: CoreStoreSpecifics, config: CoreStoreConfig): void;
 
   /**
-   * TODO: RC
+   * Add hooks that will execute when a user navigates
+   * - to a route owned by this package
+   * - from a route owned by this package
    */
-  addOnEnterLeaveHooks(onEnter: OnEnterPackage, onLeave: OnLeavePackage): void
+  addNavHooks(
+    onEnter?: OnNavToPackage,
+    onLeave?: OnNavAwayFromPackage,
+    onLogOut?: OnLogOut
+  ): void
 }

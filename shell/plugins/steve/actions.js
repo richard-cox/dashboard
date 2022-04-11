@@ -19,7 +19,8 @@ export default {
     opt.depaginate = opt.depaginate !== false;
     opt.url = opt.url.replace(/\/*$/g, '');
 
-    // TODO: RC Tech Debt move this to steve store as prependPath getter
+    // TODO: RC Standalone - Tech Debt move this to steve store get/set prependPath
+    // Cover cases where the steve store isn't actually going out to steve (epinio standalone)
     const prependPath = process.env.rancherEnv === 'epinio' ? `/pp/v1/epinio/rancher` : '';
 
     if (prependPath) {
