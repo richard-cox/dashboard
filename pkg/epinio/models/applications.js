@@ -100,7 +100,7 @@ export default class EpinioApplication extends EpinioResource {
     const isRunning = [STATES.RUNNING].includes(this.status);
     const showAppLog = isRunning;
     const showStagingLog = !!this.stage_id;
-    const showAppShell = isRunning && !isSingleProduct;
+    const showAppShell = true;// isRunning && !isSingleProduct;
 
     if (showAppShell) {
       res.push({
@@ -461,9 +461,9 @@ export default class EpinioApplication extends EpinioResource {
   showAppShell() {
     const isSingleProduct = !!this.$rootGetters['isSingleProduct'];
 
-    if (isSingleProduct) {
-      return;
-    }
+    // if (isSingleProduct) {
+    //   return;
+    // }
     this.$dispatch('wm/open', {
       id:        `epinio-${ this.id }-app-shell`,
       label:     `${ this.meta.name } - App Shell`,

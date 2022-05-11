@@ -120,9 +120,10 @@ export default {
       this.flush();
 
       terminal.onData((input) => {
-        const msg = `0${ base64Encode(input) }`;
+        // TODO: Temp changes
+        // const msg = `0${ base64Encode(input) }`;
 
-        this.write(msg);
+        this.write(input);
       });
 
       this.terminal = terminal;
@@ -162,7 +163,10 @@ export default {
         return;
       }
 
-      this.socket = new Socket(url, false, 0, 'base64.channel.k8s.io');
+      // TODO: Temp changes
+      // this.socket = new Socket(url, false, 0, 'base64.channel.k8s.io');
+      // this.socket = new Socket(url, false, 0, 'channel.k8s.io');
+      this.socket = new Socket(url, true, 0);
 
       this.socket.addEventListener(EVENT_CONNECTING, (e) => {
         this.isOpen = false;
@@ -188,14 +192,16 @@ export default {
       });
 
       this.socket.addEventListener(EVENT_MESSAGE, (e) => {
-        const type = e.detail.data.substr(0, 1);
-        const msg = base64Decode(e.detail.data.substr(1));
+        // TODO: Temp changes
+        // const type = e.detail.data.substr(0, 1);
+        // const msg = base64Decode(e.detail.data.substr(1));
 
-        if (`${ type }` === '1') {
-          this.terminal.write(msg);
-        } else {
-          console.error(msg); // eslint-disable-line no-console
-        }
+        // if (`${ type }` === '1') {
+        //   this.terminal.write(msg);
+        // } else {
+        //   console.error(msg); // eslint-disable-line no-console
+        // }
+        this.terminal.write(e.detail.data);
       });
 
       this.socket.connect();
@@ -222,17 +228,18 @@ export default {
       const { rows, cols } = this.fitAddon.proposeDimensions();
 
       if (!this.isOpen) {
-        return;
+
       }
 
-      const message = `4${ base64Encode(
-        JSON.stringify({
-          Width:  Math.floor(cols),
-          Height: Math.floor(rows),
-        })
-      ) }`;
+      // TODO: Temp changes
+      // const message = `4${ base64Encode(
+      //   JSON.stringify({
+      //     Width:  Math.floor(cols),
+      //     Height: Math.floor(rows),
+      //   })
+      // ) }`;
 
-      this.socket.send(message);
+      // this.socket.send(message);
     },
 
     cleanup() {
