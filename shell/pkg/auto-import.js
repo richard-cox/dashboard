@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const contextFolders = ['chart', 'cloud-credential', 'content', 'detail', 'edit', 'list', 'machine-config', 'models', 'promptRemove', 'l10n', 'windowComponents'];
+const contextFolders = ['chart', 'cloud_credential', 'content', 'detail', 'edit', 'list', 'machine_config', 'models', 'promptRemove', 'l10n', 'windowComponents'];
 const contextMap = contextFolders.reduce((map, obj) => {
   map[obj] = true;
 
