@@ -1,11 +1,13 @@
 <script>
 import compact from 'lodash/compact';
-import { OFF } from '../../models/harvester/kubevirt.io.virtualmachine';
+// import { OFF } from '../../../pkg/harvester/models/harvester/kubevirt.io.virtualmachine';
 import { get } from '@shell/utils/object';
 import { isIpv4 } from '@shell/utils/string';
 import { HCI as HCI_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { HCI } from '@shell/config/types';
 import CopyToClipboard from '@shell/components/CopyToClipboard';
+// todo decide where to put harvester-specific config in shell
+const OFF = 'Off';
 
 export default {
   components: { CopyToClipboard },
