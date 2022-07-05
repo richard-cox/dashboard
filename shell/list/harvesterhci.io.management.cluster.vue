@@ -6,13 +6,15 @@ import Masthead from '@shell/components/ResourceList/Masthead';
 import { HARVESTER_NAME as VIRTUAL } from '@shell/config/product/harvester-manager';
 import { CAPI, HCI, MANAGEMENT } from '@shell/config/types';
 import { isHarvesterCluster } from '@shell/utils/cluster';
+import Loading from '@shell/components/Loading.vue';
 
 export default {
   components: {
     BrandImage,
     ResourceTable,
     Masthead,
-    TypeDescription
+    TypeDescription,
+    Loading
   },
 
   props:      {
@@ -20,6 +22,15 @@ export default {
       type:     Object,
       required: true,
     },
+  },
+
+  async fetch() {
+    const inStore = this.$store.getters['currentProduct'].inStore;
+
+    await Promise.all([
+      this.$store.dispatch(`${ inStore }/findAll`, { type: HCI.CLUSTER }),
+      this.$store.dispatch(`${ inStore }/findAll`, { type: MANAGEMENT.CLUSTER })
+    ]);
   },
 
   data() {
@@ -70,7 +81,8 @@ export default {
 </script>
 
 <template>
-  <div>
+  <Loading v-if="$fetchState.pending" />
+  <div v-else>
     <Masthead
       :schema="realSchema"
       :resource="resource"
@@ -102,18 +114,10 @@ export default {
       <template #col:name="{row}">
         <td>
           <span>
-            <n-link
-              v-if="row.isReady"
-              :to="{
-                name: `${VIRTUAL}-c-cluster`,
-                params: {
-                  cluster: row.status.clusterName,
-                  product: VIRTUAL
-                }
-              }"
-            >
+            <a v-if="row.isReady" class="link" @click="row.goToCluster()">{{ row.nameDisplay }}</a>
+            <span v-else>
               {{ row.nameDisplay }}
-            </n-link>
+            </span>
           </span>
         </td>
       </template>
@@ -171,6 +175,10 @@ export default {
       max-width: 80%;
       text-align: center;
     }
+  }
+
+ .link {
+    cursor: pointer;
   }
 
 </style>
