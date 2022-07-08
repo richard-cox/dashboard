@@ -1,5 +1,4 @@
 import Steve from '@shell/plugins/steve';
-import Vue from 'vue';
 import {
   COUNT, NAMESPACE, NORMAN, MANAGEMENT, FLEET, UI, VIRTUAL_HARVESTER_PROVIDER, HCI, DEFAULT_WORKSPACE
 } from '@shell/config/types';
@@ -691,8 +690,6 @@ export const actions = {
       }
     }
 
-    console.warn('store/index', '30');
-
     if ( id ) {
       // Remember the current cluster
       dispatch('prefs/set', { key: CLUSTER_PREF, value: id });
@@ -800,10 +797,7 @@ export const actions = {
       all:     res.namespaces
     });
 
-    console.warn('store/index', '100');
-    // setTimeout(() => {
     commit('clusterReady', true);
-    // }, 100);
 
     console.log('Done loading cluster.'); // eslint-disable-line no-console
   },
