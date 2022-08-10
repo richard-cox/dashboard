@@ -13,8 +13,8 @@ export default class PagePo extends ComponentPo {
     return PagePo.goTo(this.path);
   }
 
-  waitForPage() {
-    return cy.url().should('include', Cypress.config().baseUrl + this.path);
+  waitForPage(fragment?: string) {
+    return cy.url().should('include', `${ Cypress.config().baseUrl + this.path }${ !!fragment ? `#${ fragment }` : '' }`);
   }
 
   isCurrentPage(): Cypress.Chainable<boolean> {

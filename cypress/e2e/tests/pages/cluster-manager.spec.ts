@@ -1,6 +1,8 @@
 import ClusterManagerListPagePo from '@/cypress/e2e/po/pages/cluster-manager/cluster-manager-list.po';
 import ClusterManagerDetailRke2CustomPagePo from '@/cypress/e2e/po/pages/cluster-manager/types/cluster-manager-detail-rke2-custom.po';
-import ClusterManagerCreateRke2CustomPagePo from '~/cypress/e2e/po/pages/cluster-manager/types/cluster-manager-create-rke2-custom.po';
+import ClusterManagerCreateRke2CustomPagePo from '~/cypress/e2e/po/pages/cluster-manager/create/cluster-manager-create-rke2-custom.po';
+import ClusterManagerImportPagePo from '~/cypress/e2e/po/pages/cluster-manager/import/cluster-manager-import.po';
+import ClusterManagerDetailGenericImportPagePo from '~/cypress/e2e/po/pages/cluster-manager/types/cluster-manager-detail-generic-import.po';
 
 const { baseUrl } = Cypress.config();
 const clusterManagerPath = `${ baseUrl }/c/local/manager/provisioning.cattle.io.cluster`;
@@ -11,20 +13,20 @@ const clusterName = `${ clusterNamePartial }`;
 const clusterNameImport = `${ clusterNamePartial }-import`;
 
 describe.only('Cluster Manager', () => {
+  const listPage = new ClusterManagerListPagePo();
+  const createClusterPage = new ClusterManagerCreateRke2CustomPagePo();
+  const importClusterPage = new ClusterManagerImportPagePo();
+
   beforeEach(() => {
     cy.login();
   });
 
-  it.only('can create new RKE2 custom cluster', () => {
+  it('can create new RKE2 custom cluster', () => {
     cy.userPreferences();
-
-    const listPage = new ClusterManagerListPagePo();
 
     listPage.goTo();
     listPage.checkIsCurrentPage();
     listPage.create();
-
-    const createClusterPage = new ClusterManagerCreateRke2CustomPagePo();
 
     createClusterPage.waitForPage();
     createClusterPage.rkeToggle().toggle();
@@ -32,19 +34,24 @@ describe.only('Cluster Manager', () => {
     createClusterPage.nameNsDescription().name().set(clusterName);
     createClusterPage.create();
 
-    const detailClusterPage = new ClusterManagerDetailRke2CustomPagePo(clusterName, 'registration');
+    const detailClusterPage = new ClusterManagerDetailRke2CustomPagePo(clusterName);
 
-    detailClusterPage.waitForPage();
+    detailClusterPage.waitForPage('registration');
   });
 
-  it('can create new imported generic cluster', () => {
-    cy.visit(clusterManagerPath);
-    cy.getId('cluster-manager-list-import').click();
-    cy.getId('cluster-manager-create-grid-1-0').click();
-    cy.getId('name-ns-description-name').type(clusterNameImport);
-    cy.getId('cluster-manager-import-save').click();
+  it.only('can create new imported generic cluster', () => {
+    listPage.goTo();
+    listPage.checkIsCurrentPage();
+    listPage.import();
 
-    cy.url().should('include', `${ clusterManagerPath }/fleet-default/${ clusterNameImport }#registration`);
+    importClusterPage.waitForPage();
+    importClusterPage.selectGeneric(0);
+    importClusterPage.nameNsDescription().name().set(clusterName);
+    importClusterPage.create();
+
+    const detailClusterPage = new ClusterManagerDetailGenericImportPagePo(clusterName);
+
+    detailClusterPage.waitForPage('registration');
   });
 
   it('can see cluster details', () => {
