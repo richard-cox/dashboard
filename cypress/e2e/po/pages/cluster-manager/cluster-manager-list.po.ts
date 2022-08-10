@@ -1,5 +1,5 @@
 import PagePo from '@/cypress/e2e/po/pages/page.po';
-import ListPo from '@/cypress/e2e/po/components/list.po';
+import ProvClusterListPo from '~/cypress/e2e/po/components/lists/provisioning.cattle.io.cluster.po';
 
 export default class ClusterManagerListPagePo extends PagePo {
   static url: string = '/c/local/manager/provisioning.cattle.io.cluster'
@@ -11,8 +11,8 @@ export default class ClusterManagerListPagePo extends PagePo {
     super(ClusterManagerListPagePo.url);
   }
 
-  list(): ListPo {
-    return new ListPo(this.self().find('[data-testid="cluster-list"]'));
+  list(): ProvClusterListPo {
+    return new ProvClusterListPo(this.self().find('[data-testid="cluster-list"]'));
   }
 
   import() {
