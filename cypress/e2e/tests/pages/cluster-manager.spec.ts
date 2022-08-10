@@ -1,26 +1,40 @@
+import ClusterManagerListPagePo from '@/cypress/e2e/po/pages/cluster-manager/cluster-manager-list.po';
+import ClusterManagerDetailRke2CustomPagePo from '@/cypress/e2e/po/pages/cluster-manager/types/cluster-manager-detail-rke2-custom.po';
+import ClusterManagerCreateRke2CustomPagePo from '~/cypress/e2e/po/pages/cluster-manager/types/cluster-manager-create-rke2-custom.po';
+
 const { baseUrl } = Cypress.config();
 const clusterManagerPath = `${ baseUrl }/c/local/manager/provisioning.cattle.io.cluster`;
 const clusterRequestBase = `${ baseUrl }/v1/provisioning.cattle.io.clusters/fleet-default`;
 const timestamp = +new Date();
-const clusterNamePartial = `e2e-test-create`;
-const clusterName = `${ clusterNamePartial }-${ timestamp }`;
-const clusterNameImport = `${ clusterNamePartial }-${ timestamp }-import`;
+const clusterNamePartial = `e2e-test-${ timestamp }-create`;
+const clusterName = `${ clusterNamePartial }`;
+const clusterNameImport = `${ clusterNamePartial }-import`;
 
-describe('Cluster Manager', () => {
+describe.only('Cluster Manager', () => {
   beforeEach(() => {
     cy.login();
   });
 
-  it('can create new RKE2 custom cluster', () => {
+  it.only('can create new RKE2 custom cluster', () => {
     cy.userPreferences();
-    cy.visit(clusterManagerPath);
-    cy.getId('cluster-manager-list-create').click();
-    cy.getId('cluster-manager-create-rke-switch').click();
-    cy.getId('cluster-manager-create-grid-2-0').click();
-    cy.getId('name-ns-description-name').type(clusterName);
-    cy.getId('rke2-custom-create-save').click();
 
-    cy.url().should('include', `${ clusterManagerPath }/fleet-default/${ clusterName }#registration`);
+    const listPage = new ClusterManagerListPagePo();
+
+    listPage.goTo();
+    listPage.checkIsCurrentPage();
+    listPage.create();
+
+    const createClusterPage = new ClusterManagerCreateRke2CustomPagePo();
+
+    createClusterPage.waitForPage();
+    createClusterPage.rkeToggle().toggle();
+    createClusterPage.selectCreate(0);
+    createClusterPage.nameNsDescription().name().set(clusterName);
+    createClusterPage.create();
+
+    const detailClusterPage = new ClusterManagerDetailRke2CustomPagePo(clusterName, 'registration');
+
+    detailClusterPage.waitForPage();
   });
 
   it('can create new imported generic cluster', () => {
