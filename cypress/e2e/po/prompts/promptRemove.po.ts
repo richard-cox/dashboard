@@ -1,5 +1,5 @@
 import ComponentPo from '@/cypress/e2e/po/components/component.po';
-import LabeledInputPo from '~/cypress/e2e/po/components/labeled-input.po';
+import LabeledInputPo from '@/cypress/e2e/po/components/labeled-input.po';
 
 export default class PromptRemove extends ComponentPo {
   constructor() {

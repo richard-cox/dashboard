@@ -1,4 +1,4 @@
-import ComponentPo from '~/cypress/e2e/po/components/component.po';
+import ComponentPo from '@/cypress/e2e/po/components/component.po';
 
 export default class CruResourcePo extends ComponentPo {
   selectSubType(groupIndex: number, itemIndex: number) {

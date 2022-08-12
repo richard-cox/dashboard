@@ -1,5 +1,8 @@
-import ClusterManagerDetailPagePo from '~/cypress/e2e/po/detail/provisioning.cattle.io.cluster/cluster-detail.po';
+import ClusterManagerDetailPagePo from '@/cypress/e2e/po/detail/provisioning.cattle.io.cluster/cluster-detail.po';
 
-export default class ClusterManagerDetailGenericImportPagePo extends ClusterManagerDetailPagePo {
+/**
+ * Detail page for a imported generic cluster
+ */
+export default class ClusterManagerDetailImportedGenericPagePo extends ClusterManagerDetailPagePo {
 
 }

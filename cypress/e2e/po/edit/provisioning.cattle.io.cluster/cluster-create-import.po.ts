@@ -1,6 +1,6 @@
 import PagePo from '@/cypress/e2e/po/pages/page.po';
 import NameNsDescription from '@/cypress/e2e/po/components/name-ns-description.po';
-import ResourceDetailPo from '~/cypress/e2e/po/edit/resource-detail.po';
+import ResourceDetailPo from '@/cypress/e2e/po/edit/resource-detail.po';
 
 /**
  * Covers core functionality that's common to the dashboard's import or create cluster pages

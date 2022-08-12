@@ -1,6 +1,9 @@
-import ToggleSwitchPo from '~/cypress/e2e/po/components/toggle-switch.po';
-import ClusterManagerCreateImportPagePo from '~/cypress/e2e/po/edit/provisioning.cattle.io.cluster/cluster-create-import.po';
+import ToggleSwitchPo from '@/cypress/e2e/po/components/toggle-switch.po';
+import ClusterManagerCreateImportPagePo from '@/cypress/e2e/po/edit/provisioning.cattle.io.cluster/cluster-create-import.po';
 
+/**
+ * Covers core functionality that's common to the dashboard's create cluster pages
+ */
 export default abstract class ClusterManagerCreatePagePo extends ClusterManagerCreateImportPagePo {
   static url: string = '/c/local/manager/provisioning.cattle.io.cluster/create'
 

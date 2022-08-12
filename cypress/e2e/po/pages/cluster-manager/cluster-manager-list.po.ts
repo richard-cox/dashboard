@@ -1,6 +1,9 @@
 import PagePo from '@/cypress/e2e/po/pages/page.po';
-import ProvClusterListPo from '~/cypress/e2e/po/lists/provisioning.cattle.io.cluster.po';
+import ProvClusterListPo from '@/cypress/e2e/po/lists/provisioning.cattle.io.cluster.po';
 
+/**
+ * List page for provisioning.cattle.io.cluster resources
+ */
 export default class ClusterManagerListPagePo extends PagePo {
   static url: string = '/c/local/manager/provisioning.cattle.io.cluster'
   static goTo(): Cypress.Chainable<Cypress.AUTWindow> {
@@ -11,7 +14,7 @@ export default class ClusterManagerListPagePo extends PagePo {
     super(ClusterManagerListPagePo.url);
   }
 
-  clusterList(): ProvClusterListPo {
+  list(): ProvClusterListPo {
     return new ProvClusterListPo(this.self().find('[data-testid="cluster-list"]'));
   }
 
@@ -19,16 +22,16 @@ export default class ClusterManagerListPagePo extends PagePo {
    * Convenience method
    */
   sortableTable() {
-    return this.clusterList().resourceTable().sortableTable();
+    return this.list().resourceTable().sortableTable();
   }
 
   importCluster() {
-    return this.clusterList().masthead().headerActions().eq(0)
+    return this.list().masthead().actions().eq(0)
       .click();
   }
 
   createCluster() {
-    return this.clusterList().masthead().headerActions().eq(1)
+    return this.list().masthead().actions().eq(1)
       .click();
   }
 }

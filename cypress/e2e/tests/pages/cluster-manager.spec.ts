@@ -1,24 +1,25 @@
 import ClusterManagerListPagePo from '@/cypress/e2e/po/pages/cluster-manager/cluster-manager-list.po';
-import ClusterDashboardPagePo from '~/cypress/e2e/po/pages/explorer/cluster-dashboard.po';
-import ClusterManagerDetailRke2CustomPagePo from '~/cypress/e2e/po/detail/provisioning.cattle.io.cluster/cluster-detail-rke2-custom.po';
-import ClusterManagerDetailGenericImportPagePo from '~/cypress/e2e/po/detail/provisioning.cattle.io.cluster/cluster-detail-import-generic.po';
-import ClusterManagerCreateRke2CustomPagePo from '~/cypress/e2e/po/edit/provisioning.cattle.io.cluster/create/cluster-create-rke2-custom.po';
-import ClusterManagerEditRke2CustomPagePo from '~/cypress/e2e/po/edit/provisioning.cattle.io.cluster/edit/cluster-edit-rke2-custom.po';
-import ClusterManagerImportGenericPagePo from '~/cypress/e2e/po/edit/provisioning.cattle.io.cluster/import/cluster-import.generic.po';
-import ClusterManagerEditGenericPagePo from '~/cypress/e2e/po/edit/provisioning.cattle.io.cluster/edit/cluster-edit-generic.po';
-import PromptRemove from '~/cypress/e2e/po/prompts/promptRemove.po';
+import ClusterDashboardPagePo from '@/cypress/e2e/po/pages/explorer/cluster-dashboard.po';
+import ClusterManagerDetailRke2CustomPagePo from '@/cypress/e2e/po/detail/provisioning.cattle.io.cluster/cluster-detail-rke2-custom.po';
+import ClusterManagerDetailImportedGenericPagePo from '@/cypress/e2e/po/detail/provisioning.cattle.io.cluster/cluster-detail-import-generic.po';
+import ClusterManagerCreateRke2CustomPagePo from '@/cypress/e2e/po/edit/provisioning.cattle.io.cluster/create/cluster-create-rke2-custom.po';
+import ClusterManagerEditRke2CustomPagePo from '@/cypress/e2e/po/edit/provisioning.cattle.io.cluster/edit/cluster-edit-rke2-custom.po';
+import ClusterManagerImportGenericPagePo from '@/cypress/e2e/po/edit/provisioning.cattle.io.cluster/import/cluster-import.generic.po';
+import ClusterManagerEditGenericPagePo from '@/cypress/e2e/po/edit/provisioning.cattle.io.cluster/edit/cluster-edit-generic.po';
+import PromptRemove from '@/cypress/e2e/po/prompts/promptRemove.po';
 
 // At some point these will come from somewhere central, then we can make tools to remove resources from this or all runs
 const runTimestamp = +new Date();
 const runPrefix = `e2e-test-${ runTimestamp }`;
 
+// File specific consts
 const { baseUrl } = Cypress.config();
 const clusterRequestBase = `${ baseUrl }/v1/provisioning.cattle.io.clusters/fleet-default`;
 const clusterNamePartial = `${ runPrefix }-create`;
 const rke2CustomName = `${ clusterNamePartial }-rke2-custom`;
 const importGenericName = `${ clusterNamePartial }-import-generic`;
 
-describe.only('Cluster Manager', () => {
+describe('Cluster Manager', () => {
   const clusterList = new ClusterManagerListPagePo();
   const createClusterPage = new ClusterManagerCreateRke2CustomPagePo();
   const editCreatedClusterPage = new ClusterManagerEditRke2CustomPagePo(rke2CustomName);
@@ -49,7 +50,7 @@ describe.only('Cluster Manager', () => {
   });
 
   it('can create new imported generic cluster', () => {
-    const detailClusterPage = new ClusterManagerDetailGenericImportPagePo(importGenericName);
+    const detailClusterPage = new ClusterManagerDetailImportedGenericPagePo(importGenericName);
 
     clusterList.goTo();
     clusterList.checkIsCurrentPage();
@@ -65,7 +66,7 @@ describe.only('Cluster Manager', () => {
 
   it('can navigate to imported cluster edit page', () => {
     clusterList.goTo();
-    clusterList.clusterList().actionMenu(importGenericName).clickMenuItem(0);
+    clusterList.list().actionMenu(importGenericName).clickMenuItem(0);
 
     editImportedClusterPage.waitForPage('mode=edit');
   });
@@ -75,7 +76,7 @@ describe.only('Cluster Manager', () => {
     const clusterDashboard = new ClusterDashboardPagePo(clusterName);
 
     clusterList.goTo();
-    clusterList.clusterList().explore(clusterName).click();
+    clusterList.list().explore(clusterName).click();
 
     clusterDashboard.waitForPage(undefined, 'cluster-events');
   });
@@ -84,7 +85,7 @@ describe.only('Cluster Manager', () => {
     cy.intercept('PUT', `${ clusterRequestBase }/${ rke2CustomName }`).as('saveRequest');
 
     clusterList.goTo();
-    clusterList.clusterList().actionMenu(rke2CustomName).clickMenuItem(0);
+    clusterList.list().actionMenu(rke2CustomName).clickMenuItem(0);
 
     editCreatedClusterPage.waitForPage('mode=edit', 'basic');
     editCreatedClusterPage.nameNsDescription().description().set(rke2CustomName);
@@ -92,7 +93,7 @@ describe.only('Cluster Manager', () => {
 
     cy.wait('@saveRequest').then(() => {
       clusterList.goTo();
-      clusterList.clusterList().actionMenu(rke2CustomName).clickMenuItem(0);
+      clusterList.list().actionMenu(rke2CustomName).clickMenuItem(0);
 
       editCreatedClusterPage.waitForPage('mode=edit', 'basic');
       editCreatedClusterPage.nameNsDescription().description().self().should('have.value', rke2CustomName);
@@ -101,7 +102,7 @@ describe.only('Cluster Manager', () => {
 
   it('can view RKE2 cluster YAML editor', () => {
     clusterList.goTo();
-    clusterList.clusterList().actionMenu(rke2CustomName).clickMenuItem(1);
+    clusterList.list().actionMenu(rke2CustomName).clickMenuItem(1);
 
     editCreatedClusterPage.waitForPage('mode=edit&as=yaml');
     editCreatedClusterPage.resourceDetail().resourceYaml().checkVisible();
@@ -111,9 +112,7 @@ describe.only('Cluster Manager', () => {
     cy.intercept('DELETE', `${ clusterRequestBase }/${ rke2CustomName }`).as('deleteRequest');
 
     clusterList.goTo();
-
-    clusterList.sortableTable().rowElementWithName(rke2CustomName);
-    clusterList.clusterList().actionMenu(rke2CustomName).clickMenuItem(4);
+    clusterList.list().actionMenu(rke2CustomName).clickMenuItem(4);
 
     const promptRemove = new PromptRemove();
 
@@ -129,8 +128,6 @@ describe.only('Cluster Manager', () => {
     cy.intercept('DELETE', `${ clusterRequestBase }/${ importGenericName }`).as('deleteRequest');
 
     clusterList.goTo();
-
-    clusterList.sortableTable().rowElementWithName(importGenericName);
     clusterList.sortableTable().rowSelectCtlWithName(importGenericName).set();
     clusterList.sortableTable().bulkActionDropDownOpen();
     clusterList.sortableTable().bulkActionDropDownButton('Delete').click();
