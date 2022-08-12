@@ -1,5 +1,4 @@
-import PagePo from '@/cypress/e2e/po/pages/page.po';
-import ClusterManagerCreateImportPagePo from '~/cypress/e2e/po/pages/cluster-manager/cluster-manager-create-import.po';
+import ClusterManagerCreateImportPagePo from '~/cypress/e2e/po/edit/provisioning.cattle.io.cluster/cluster-create-import.po';
 
 export default class ClusterManagerEditRke2CustomPagePo extends ClusterManagerCreateImportPagePo {
   private static createPath(clusterName: string, tab?: string) {
