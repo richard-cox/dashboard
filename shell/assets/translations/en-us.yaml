@@ -6511,6 +6511,11 @@ typeLabel:
       one { Node }
       other { Nodes }
     }
+  apps.deployment: |-
+    {count, plural,
+      one { Deployment }
+      other { Deployments }
+    }
   group.principal: |-
     {count, plural,
       one { Group }
