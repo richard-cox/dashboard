@@ -263,7 +263,8 @@ export default function(dir, _appConfig) {
       dev,
       pl,
       perfTest,
-      rancherEnv
+      rancherEnv,
+      api
     },
 
     publicRuntimeConfig: { rancherEnv },
