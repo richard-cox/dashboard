@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+source scripts/version
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 BASE_DIR="$( cd $SCRIPT_DIR && cd ../.. & pwd)"
 SHELL_DIR=$BASE_DIR/shell/
@@ -13,7 +14,15 @@ if [ ! -d ${SHELL_DIR} ]; then
 fi
 
 VERSION=$(cd pkg/$1; node -p -e "require('./package.json').version")
+
+if [[ $COMMIT_BRANCH == "master" ]]; then
+  VERSION="latest"
+fi
+
+echo "COMMIT_BRANCH: ${COMMIT_BRANCH}"
+
 NAME=${1}-${VERSION}
+
 PKG_DIST=${BASE_DIR}/dist-pkg/${NAME}
 
 if [ -d "${BASE_DIR}/pkg/${1}" ]; then
@@ -42,6 +51,9 @@ if [ -d "${BASE_DIR}/pkg/${1}" ]; then
     FILE=index.ts
   fi
 
+  # Save the version information in the plugin
+  echo ${COMMIT} > ${PKG_DIST}/version 
+
   ${BASE_DIR}/node_modules/.bin/vue-cli-service build --name ${NAME} --target lib ${FILE} --dest ${PKG_DIST} --formats umd-min --filename ${NAME}
   EXIT_CODE=$?
   cp -f ./package.json ${PKG_DIST}/package.json
@@ -51,5 +63,25 @@ if [ -d "${BASE_DIR}/pkg/${1}" ]; then
 
   popd  
 fi
+
+if [ -e ${PKG_DIST} ]; then
+  echo $COMMIT $COMMIT_BRANCH > ${PKG_DIST}/version-commit.txt
+
+  pushd ${PKG_DIST}
+
+  TARBALL=${NAME}.tar.gz
+  echo "Compressing to ${TARBALL}..."
+  echo "PKG_DIST ${PKG_DIST}"
+
+  tar -czf ../${TARBALL} .
+
+  popd
+fi
+
+
+export DRONE_PKG_VERSION=$NAME
+export DRONE_PKG_VERSION_TAR=$TARBALL
+echo "DRONE_PKG_VERSION: ${DRONE_PKG_VERSION}"
+echo "DRONE_PKG_VERSION_TAR: ${DRONE_PKG_VERSION_TAR}"
 
 exit $EXIT_CODE

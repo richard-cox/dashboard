@@ -335,3 +335,54 @@ steps:
     instance:
       - drone-publish.rancher.io
 
+---
+kind: pipeline
+name: harvester-plugin
+
+depends_on:
+- test
+
+trigger:
+  ref:
+  - "refs/heads/release-harvester-plugin-v*"
+  - "refs/heads/master"
+  event:
+  - push
+  - tag
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  pull: default
+  image: node:14
+  commands:
+  - ./scripts/build-hosted
+
+- name: build-pkg
+  pull: default
+  image: node:14
+  commands:
+  - ./shell/scripts/build-pkg.sh harvester
+
+- name: upload-gate
+  pull: default
+  image: node:14
+  commands:
+  - ./scripts/build-upload-gate
+
+- name: upload
+  pull: default
+  image: plugins/gcs
+  environment:
+    PKG_VERSION: ${DRONE_PKG_VERSION}.tar.gz
+  settings:
+    acl:
+    - allUsers:READER
+    cache_control: "no-cache,must-revalidate"
+    source: dist-pkg/${PKG_VERSION}
+    target: releases.rancher.com/harvester-ui/plugin/${PKG_VERSION}
+    token:
+      from_secret: google_auth_key
