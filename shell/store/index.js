@@ -26,6 +26,9 @@ import {
   NAMESPACE_FILTER_NAMESPACED_PREFIX as NAMESPACED_PREFIX,
   splitNamespaceFilterKey,
 } from '@shell/utils/namespace-filter';
+import { gcEnabledForState, gcEnabledSetting } from '~/shell/plugins/dashboard-store/gc';
+
+let gcInterval = null;
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // because it's more efficient to do that sometimes.
@@ -44,6 +47,7 @@ export const plugins = [
     namespace:      'cluster',
     baseUrl:        '', // URL is dynamically set for the selected cluster
     supportsStream: false, // true, -- Disabled due to report that it's sometimes much slower in Chrome
+    supportsGC:     true, // TODO: RC
   }),
   Steve({
     namespace:      'rancher',
@@ -167,6 +171,7 @@ export const state = () => {
     serverVersion:           null,
     systemNamespaces:        [],
     isSingleProduct:         undefined,
+    routeChanged:            null, // TODO: RC comment
   };
 };
 
@@ -539,6 +544,10 @@ export const mutations = {
 
   setIsSingleProduct(state, isSingleProduct) {
     state.isSingleProduct = isSingleProduct;
+  },
+
+  gcRouteChanged(state) { // TODO: RC nameing, make GC Specific
+    state.routeChanged = new Date().getTime();
   }
 };
 
@@ -861,6 +870,8 @@ export const actions = {
   async onLogout(store) {
     const { dispatch, commit, state } = store;
 
+    store.dispatch('gcStopIntervals');
+
     Object.values(this.$plugin.getPlugins()).forEach((p) => {
       if (p.onLogOut) {
         p.onLogOut(store);
@@ -975,5 +986,46 @@ export const actions = {
 
   setIsSingleProduct({ commit }, isSingleProduct) {
     commit(`setIsSingleProduct`, isSingleProduct);
+  },
+
+  gcRouteChanged({ commit }) {
+    commit(`gcRouteChanged`);
+  },
+
+  gcStartIntervals({ dispatch, state }) {
+    gcInterval = setInterval(() => {
+      dispatch('garbageCollect');
+    }, 10000);
+  },
+
+  gcStopIntervals() {
+    clearInterval(gcInterval);
+  },
+
+  garbageCollect(ctx, ignoreTypes) {
+    const { rootState, dispatch } = ctx;
+
+    if (!gcEnabledSetting({ rootState })) {
+      console.warn('root garbageCollect', 'IGNORING (disabled)');
+
+      return;
+    }
+
+    Object.entries(rootState).forEach(([storeName, storeState]) => {
+      if (typeof (storeState) !== 'object') {
+        // TODO: RC store.getModules = () => store._modules.root._children
+        return;
+      }
+
+      if (!gcEnabledForState(storeState)) {
+        // console.warn('root garbageCollect', 'IGNORING (state)', storeName, storeState);
+
+        return;
+      }
+
+      console.warn('root garbageCollect', '', storeName);
+
+      dispatch(`${ storeName }/garbageCollect`, ignoreTypes);
+    });
   }
 };

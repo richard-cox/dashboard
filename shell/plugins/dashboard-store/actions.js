@@ -1,10 +1,14 @@
 import merge from 'lodash/merge';
 
-import { SCHEMA } from '@shell/config/types';
+import { COUNT, MANAGEMENT, SCHEMA } from '@shell/config/types';
 import { SPOOFED_API_PREFIX, SPOOFED_PREFIX } from '@shell/store/type-map';
 import { createYaml } from '@shell/utils/create-yaml';
 import { classify } from '@shell/plugins/dashboard-store/classify';
 import { normalizeType } from './normalize';
+import { SETTING } from '~/shell/config/settings';
+import {
+  gcEnabled, gcEnabledForState, gcEnabledForType, gcEnabledSetting, updateResourceAccessed
+} from '~/shell/plugins/dashboard-store/gc';
 
 export const _ALL = 'all';
 export const _MERGE = 'merge';
@@ -14,6 +18,8 @@ export const _NONE = 'none';
 
 const SCHEMA_CHECK_RETRIES = 15;
 const SCHEMA_CHECK_RETRY_LOG = 10;
+
+let gcInProgress = false;
 
 export async function handleSpoofedRequest(rootGetters, schemaStore, opt, product) {
   // Handle spoofed types instead of making an actual request
@@ -80,6 +86,7 @@ export default {
   // Load a page of data for a given type
   // Used for incremental loading when enabled
   async loadDataPage(ctx, { type, opt }) {
+    // TODO: RC manual fresh updates accessed?
     const { getters, commit, dispatch } = ctx;
 
     type = getters.normalizeType(type);
@@ -316,6 +323,8 @@ export default {
       dispatch('resource-fetch/updateManualRefreshIsLoading', false, { root: true });
     }
 
+    updateResourceAccessed(ctx, type);
+
     return all;
   },
 
@@ -326,7 +335,7 @@ export default {
     namespace
   }) {
     const {
-      getters, commit, dispatch, rootGetters
+      getters, commit, dispatch, rootGetters, state
     } = ctx;
 
     opt = opt || {};
@@ -371,6 +380,8 @@ export default {
       });
     }
 
+    updateResourceAccessed(ctx, type);
+
     return getters.matching( type, selector, namespace );
   },
 
@@ -382,7 +393,7 @@ export default {
   //  url: Use this specific URL instead of looking up the URL for the type/id.  This should only be used for bootstrapping schemas on startup.
   //  @TODO depaginate: If the response is paginated, retrieve all the pages. (default: true)
   async find(ctx, { type, id, opt }) {
-    const { getters, dispatch } = ctx;
+    const { getters, dispatch, state } = ctx;
 
     opt = opt || {};
 
@@ -425,6 +436,8 @@ export default {
     }
 
     out = getters.byId(type, id);
+
+    updateResourceAccessed(ctx, type);
 
     return out;
   },
@@ -587,5 +600,106 @@ export default {
 
   incrementLoadCounter({ commit }, resource) {
     commit('incrementLoadCounter', resource);
+  },
+
+  garbageCollect(ctx, ignoreTypes = {}) {
+    if (gcInProgress) {
+      console.warn('garbageCollect', 'skipped');
+
+      return;
+    }
+
+    gcInProgress = true;
+
+    try {
+      const {
+        getters, rootState, dispatch, state
+      } = ctx;
+
+      if (!rootState.clusterReady) {
+        // TODO: RC block if nav or running
+        console.warn('garbageCollect', 'cluster not ready');
+
+        return ;
+      }
+
+      const hmm = rootState.management.types[MANAGEMENT.SETTING].list.find(s => s.id === SETTING.UI_PERFORMANCE);
+      const uiPerfSetting = JSON.parse(hmm.value); // TODO: RC JSON.parse often called!
+
+      const now = new Date().getTime();
+      const routeChange = rootState.routeChanged;
+
+      console.warn('Now: ', new Date(now));
+      console.warn('Route: ', new Date(routeChange));
+
+      const maxAge = uiPerfSetting.garbageCollection.ageThreshold;
+      const maxCount = uiPerfSetting.garbageCollection.countThreshold;
+
+      console.warn(maxAge, maxCount);
+
+      // dispatch('forgetType', type);
+
+      Object.entries(state.types).forEach(([type, cache]) => {
+        if (!cache.accessed) {
+          console.warn('IGNORING (no record)', type);
+
+          return;
+        }
+
+        if (!gcEnabledForType(ctx, type)) {
+          console.warn('IGNORING (base type)', type);
+
+          return;
+        }
+
+        if (ignoreTypes[type]) {
+          console.warn('IGNORING (nav type)', type);
+
+          return;
+        }
+
+        if (now - cache.accessed <= maxAge) {
+          console.warn('IGNORING (age)', type);
+
+          return;
+        }
+
+        if (routeChange < cache.accessed ) {
+          console.warn('IGNORING (used in current context)', type);
+
+          return;
+        }
+
+        const countFromResource = getters.all(COUNT)[0].counts[type]?.summary.count;
+        const currentCount = countFromResource?.summary?.count ?? cache.list.length;
+
+        if (currentCount === undefined || currentCount < maxCount) {
+          console.warn('IGNORING (count)', type, currentCount);
+
+          return;
+        }
+
+        console.warn('FORGETTING', type, currentCount);
+        dispatch('forgetType', type);
+        // TODO: RC stop watch but keep values? (haveAll no, subs?)
+
+        // console.warn(type, 'last', cache.accessed, new Date(cache.accessed), now, 'now', new Date(now) );
+        // if (now - cache.accessed > maxAge) {
+
+        //   console.warn('FORGETTING', type, currentCount);
+        //   dispatch('forgetType', type);
+        // } else {
+        //   console.warn('IGNORING (age)', type, currentCount);
+        // }
+      });
+
+      gcInProgress = false;
+    } catch {
+      gcInProgress = false;
+    }
+  },
+
+  resetGarbageCollection({ commit }) {
+    commit('resetGarbageCollection');
   }
 };

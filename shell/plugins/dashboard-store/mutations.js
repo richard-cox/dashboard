@@ -3,6 +3,7 @@ import { addObject, addObjects, clear, removeObject } from '@shell/utils/array';
 import { SCHEMA } from '@shell/config/types';
 import { normalizeType } from '@shell/plugins/dashboard-store/normalize';
 import { classify } from '@shell/plugins/dashboard-store/classify';
+import { gcEnabledAll } from '~/shell/plugins/dashboard-store/gc';
 
 function registerType(state, type) {
   let cache = state.types[type];
@@ -15,6 +16,7 @@ function registerType(state, type) {
       revision:     0, // The highest known resourceVersion from the server for this type
       generation:   0, // Updated every time something is loaded for this type
       loadCounter:  0, // Used to cancel incremental loads if the page changes during load
+      accessed:     null, // TODO: RC
     };
 
     // Not enumerable so they don't get sent back to the client for SSR
@@ -308,5 +310,11 @@ export default {
     if (typeData) {
       typeData.loadCounter++;
     }
+  },
+
+  resetGarbageCollection(state) {
+    Object.values(state.types).forEach((cache) => {
+      cache.accessed = null;
+    });
   }
 };

@@ -2,8 +2,12 @@
 import Brand from '@shell/mixins/brand';
 
 export default {
-  middleware: ['authenticated'],
-  mixins:     [Brand],
+  middleware: [
+    'authenticated',
+    'garbage-collection'
+  ],
+
+  mixins: [Brand],
 };
 </script>
 

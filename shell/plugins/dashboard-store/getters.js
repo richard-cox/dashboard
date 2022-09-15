@@ -9,10 +9,11 @@ import Resource from '@shell/plugins/dashboard-store/resource-class';
 import mutations from './mutations';
 import { keyFieldFor, normalizeType } from './normalize';
 import { lookup } from './model-loader';
+import { updateResourceAccessed } from '~/shell/plugins/dashboard-store/gc';
 
 export default {
 
-  all: (state, getters) => (type) => {
+  all: (state, getters, rootState, rootGetters) => (type) => {
     type = getters.normalizeType(type);
 
     if ( !getters.typeRegistered(type) ) {
@@ -22,10 +23,15 @@ export default {
       mutations.registerType(state, type);
     }
 
+    // TODO: RC steve mutator, dashboard-store getter. how to override in plugins. don't use load as it includes sockets
+    updateResourceAccessed({
+      state, getters, rootState
+    }, type);
+
     return state.types[type].list;
   },
 
-  matching: (state, getters) => (type, selector, namespace) => {
+  matching: (state, getters, rootState, rootGetters ) => (type, selector, namespace) => {
     let all = getters['all'](type);
 
     // Filter first by namespace if one is provided, since this is efficient
@@ -33,16 +39,24 @@ export default {
       all = all.filter(obj => obj.namespace === namespace);
     }
 
+    updateResourceAccessed({
+      state, getters, rootState
+    }, type);
+
     return all.filter((obj) => {
       return matches(obj, selector);
     });
   },
 
-  byId: (state, getters) => (type, id) => {
+  byId: (state, getters, rootState, rootGetters) => (type, id) => {
     type = getters.normalizeType(type);
     const entry = state.types[type];
 
     if ( entry ) {
+      updateResourceAccessed({
+        state, getters, rootState
+      }, type);
+
       return entry.map.get(id);
     }
   },
@@ -300,5 +314,9 @@ export default {
     }
 
     return 0;
+  },
+
+  gcIgnoreTypes: () => {
+    return {};
   }
 };

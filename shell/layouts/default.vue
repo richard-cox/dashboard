@@ -63,7 +63,8 @@ export default {
 
   // Note - These will run on route change
   middleware: [
-    'authenticated'
+    'authenticated',
+    'garbage-collection'
   ],
 
   computed: {

@@ -67,6 +67,8 @@ export default {
         worker.loadSchema(data);
       }
     }
+
+    // ctx.commit('accessed', type);
   },
 
   forgetType(state, type) {
@@ -90,6 +92,25 @@ export default {
     });
   },
 
+  // load(state, { data, ctx, existing }) {
+  //   const res = load(state, {
+  //     data, ctx, existing
+  //   });
+
+  //   const type = data?.length ? data[0]?.type : data?.type;
+
+  //   // TODO: RC never array
+  //   if (!data?.[0]) {
+  //     console.warn('data not array', data);
+  //   } else {
+  //     console.warn('data array', data);
+  //   }
+  //   // ctx.commit('accessed', type);
+  //   // updateResourceAccessed(state, type);
+
+  //   return res;
+  // },
+
   loadMulti(state, { data, ctx }) {
     for (const entry of data) {
       const resource = load(state, { data: entry, ctx });
@@ -101,6 +122,9 @@ export default {
         cache.map.set(resource.id, resource);
       }
     }
+
+    // ctx.commit('accessed', data.type);
+    // updateResourceAccessed(state, data.type); // TODO: RC
   },
 
   remove(state, obj) {
@@ -118,5 +142,18 @@ export default {
       // Namespace deleted
       delete state.podsByNamespace[obj.namespace];
     }
-  }
+  },
+
+  // accessed(state, type) {
+  //   if (!type) {
+  //     return;
+  //   }
+  //   debugger;
+  //   // TODO: RC run after to ensure registerType ran
+  //   const cache = state.types[normalizeType(type)];
+
+  //   cache.accessed = new Date().getTime();
+
+  //   // TODO: RC what about things like user, settings, preferences, etc in maangement?
+  // }
 };

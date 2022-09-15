@@ -21,7 +21,10 @@ export default {
 
   mixins: [Brand, BrowserTabVisibility],
 
-  middleware: ['authenticated'],
+  middleware: [
+    'authenticated',
+    'garbage-collection'
+  ],
 
   data() {
     return {

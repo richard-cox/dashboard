@@ -26,6 +26,20 @@ const getPackageFromRoute = (route) => {
   return arraySafe.find(m => !!m.pkg)?.pkg;
 };
 
+function getResourceFromRoute(to) {
+  let resource = to.params?.resource;
+
+  if ( !resource ) {
+    const match = to.name?.match(/^c-cluster-([^-]+)/);
+
+    if ( match ) {
+      resource = match[2];
+    }
+  }
+
+  return resource;
+}
+
 let beforeEachSetup = false;
 
 export function getProductFromRoute(to) {
@@ -234,7 +248,11 @@ export default async function({
         }
       }
     }
+
+    store.dispatch('gcStartIntervals');
   }
+
+  store.dispatch('gcRouteChanged');
 
   if (!process.server) {
     const backTo = window.localStorage.getItem(BACK_TO);
@@ -254,6 +272,7 @@ export default async function({
     store.app.router.beforeEach((to, from, next) => {
       // NOTE - This beforeEach runs AFTER this middleware. So anything in this middleware that requires it must set it manually
       setProduct(store, to);
+
       next();
     });
 
@@ -266,6 +285,17 @@ export default async function({
         setTimeout(() => {
           window._popStateDetected = false;
         }, 1);
+
+        // TODO: RC still runs on log out?
+
+        if (to.name !== 'auth-logout') { // Convenience, not point GC if we've just lost all types
+          const resource = getResourceFromRoute(to);
+          const ignoreTYpes = !!resource ? { [resource]: true } : {};
+
+          console.warn('resource from route:', resource, to);
+
+          store.dispatch('garbageCollect', ignoreTYpes);
+        }
       });
     }
   }

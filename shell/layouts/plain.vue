@@ -26,7 +26,10 @@ export default {
     AzureWarning
   },
 
-  middleware: ['authenticated'],
+  middleware: [
+    'authenticated',
+    'garbage-collection'
+  ],
 
   mixins: [Brand, BrowserTabVisibility],
 

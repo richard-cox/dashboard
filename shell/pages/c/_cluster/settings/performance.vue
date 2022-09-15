@@ -17,7 +17,12 @@ const DEFAULT_PERF_SETTING = {
     enabled:   false,
     threshold: 2500,
   },
-  disableWebsocketNotification: false
+  disableWebsocketNotification: false,
+  garbageCollection:            {
+    enabled:        false,
+    ageThreshold:   1000 * 10, // Ten seconds
+    countThreshold: 5,
+  }
 };
 
 export default {
@@ -42,7 +47,10 @@ export default {
 
     const sValue = this.uiPerfSetting?.value || JSON.stringify(DEFAULT_PERF_SETTING);
 
-    this.value = JSON.parse(sValue);
+    this.value = {
+      ...DEFAULT_PERF_SETTING,
+      ...JSON.parse(sValue),
+    };
   },
 
   data() {
@@ -60,6 +68,14 @@ export default {
 
       return schema?.resourceMethods?.includes('PUT') ? _EDIT : _VIEW;
     },
+  },
+
+  watch: {
+    'value.garbageCollection.enabled'(neu, old) {
+      if (neu === false) {
+        this.$store.dispatch('cluster/resetGarbageCollection'); // TODO: RC fully test
+      }
+    }
   },
 
   methods: {
@@ -140,6 +156,43 @@ export default {
               v-model.number="value.manualRefresh.threshold"
               :label="t('performance.manualRefresh.inputLabel')"
               :disabled="!value.manualRefresh.enabled"
+              class="input"
+              type="number"
+              min="0"
+            />
+          </div>
+        </div>
+        <!-- Enable GC of resources from store -->
+        <div class="mt-40">
+          <h2 v-t="'performance.gc.label'" />
+          <p>{{ t('performance.gc.description') }}</p>
+          <Banner color="error" label-key="performance.gc.banner" />
+          <Checkbox
+            v-model="value.garbageCollection.enabled"
+            :label="t('performance.gc.checkboxLabel')"
+            class="mt-10 mb-20"
+            :primary="true"
+          />
+          <div class="ml-20">
+            <!-- TODO: on disable clear all last accessed -->
+            <p :class="{ 'text-muted': !value.garbageCollection.enabled }">
+              {{ t('performance.gc.age.description') }}
+            </p>
+            <LabeledInput
+              v-model.number="value.garbageCollection.ageThreshold"
+              :label="t('performance.gc.age.inputLabel')"
+              :disabled="!value.garbageCollection.enabled"
+              class="input"
+              type="number"
+              min="0"
+            />
+            <p :class="{ 'text-muted': !value.garbageCollection.enabled }">
+              {{ t('performance.gc.age.description') }}
+            </p>
+            <LabeledInput
+              v-model.number="value.garbageCollection.countThreshold"
+              :label="t('performance.gc.age.inputLabel')"
+              :disabled="!value.garbageCollection.enabled"
               class="input"
               type="number"
               min="0"
