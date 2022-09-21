@@ -149,6 +149,7 @@ nav:
     RBAC: RBAC
     Scheduling: Scheduling
     Storage: Storage
+
   ns:
     all: All Namespaces
     clusterLevel: Only Cluster Resources
@@ -208,6 +209,8 @@ product:
   legacy: Legacy
   plugins: Plugins
   uiplugins: UI Plugins
+  legacy: Legacy
+  plugins: Plugins
 
 suffix:
   percent: "%"
