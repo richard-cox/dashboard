@@ -205,6 +205,8 @@ product:
   legacy: Legacy
   plugins: Plugins
   uiplugins: UI Plugins
+  legacy: Legacy
+  plugins: Plugins
 
 suffix:
   percent: "%"
