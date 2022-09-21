@@ -137,7 +137,7 @@ export default {
       // Ony when developing for now
       if (process.env.dev) {
         items.push({
-          label:   'Plugins',
+          label:   this.$store.getters['i18n/withFallback'](`product."plugins"`),
           inStore: 'management',
           icon:    'icon-gear',
           value:   'plugins',

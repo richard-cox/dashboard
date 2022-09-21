@@ -135,6 +135,7 @@ nav:
     apps: Apps
     clusterProvisioning: Cluster Provisioning
     core: Core
+    legacy: Legacy
   ns:
     all: All Namespaces
     clusterLevel: Only Cluster Resources
@@ -189,6 +190,8 @@ product:
   harvesterManager: Virtualization Management
   harvester: Harvester
   rancher: Rancher
+  legacy: Legacy
+  plugins: Plugins
 
 suffix:
   percent: "%"
@@ -6355,6 +6358,11 @@ typeLabel:
       one { Recent Operation }
       other { Recent Operations }
     }
+  charts: |-
+    {count, plural,
+      one { Recent Operation }
+      other { Recent Operations }
+    }
   catalog.cattle.io.app: |-
     {count, plural,
       one { Installed App }
@@ -6515,6 +6523,76 @@ typeLabel:
     {count, plural,
       one { Deployment }
       other { Deployments }
+    }
+  batch.cronjob: |-
+    {count, plural,
+      one { CronJob }
+      other { CronJobs }
+    }
+  apps.daemonset: |-
+    {count, plural,
+      one { DaemonSet }
+      other { DaemonSets }
+    }
+  batch.job: |-
+    {count, plural,
+      one { Job }
+      other { Jobs }
+    }
+  apps.statefulset: |-
+    {count, plural,
+      one { StatefulSet }
+      other { StatefulSets }
+    }
+  pod: |-
+    {count, plural,
+      one { Pod }
+      other { Pods }
+    }
+  autoscaling.horizontalpodautoscaler: |-
+    {count, plural,
+      one { HorizontalPodAutoscaler }
+      other { HorizontalPodAutoscalers }
+    }
+  networking.k8s.io.ingress: |-
+    {count, plural,
+      one { Ingress }
+      other { Ingresses }
+    }
+  networking.k8s.io.networkpolicy: |-
+    {count, plural,
+      one { NetworkPolicies }
+      other { NetworkPolicies }
+    }
+  service: |-
+    {count, plural,
+      one { Service }
+      other { Services }
+    }
+  persistentvolume: |-
+    {count, plural,
+      one { PersistentVolume }
+      other { PersistentVolumes }
+    }
+  storage.k8s.io.storageclass: |-
+    {count, plural,
+      one { StorageClass }
+      other { StorageClasses }
+    }
+  configmap: |-
+    {count, plural,
+      one { ConfigMap }
+      other { ConfigMaps }
+    }
+  persistentvolumeclaim: |-
+    {count, plural,
+      one { PersistentVolumeClaim }
+      other { PersistentVolumeClaims }
+    }
+  secret: |-
+    {count, plural,
+      one { Secret }
+      other { Secrets }
     }
   group.principal: |-
     {count, plural,
