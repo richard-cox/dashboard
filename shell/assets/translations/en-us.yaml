@@ -160,7 +160,6 @@ nav:
     RBAC: RBAC
     Scheduling: Scheduling
     Storage: Storage
-
   ns:
     all: All Namespaces
     clusterLevel: Only Cluster Resources
@@ -4907,9 +4906,13 @@ tableHeaders:
   address: Address
   age: Age
   apiGroup: API Groups
+<<<<<<< HEAD
   apikey: API Key
   available: Available
   attachedVM: Attached VM
+=======
+  available: Available
+>>>>>>> 3e188e9e8 (Added local keys in sidenav section)
   authRoles:
     globalDefault: New User Default
     clusterDefault: Cluster Creator Default
@@ -4921,7 +4924,10 @@ tableHeaders:
   bundleDeploymentsReady: Deployments
   builtin: Built-In
   chart: Chart
+<<<<<<< HEAD
   capacity: Capacity
+=======
+>>>>>>> 3e188e9e8 (Added local keys in sidenav section)
   current: Current
   clusterCreatorDefault: Cluster Creator Default
   clusterFlow: Cluster Flow
@@ -4934,8 +4940,11 @@ tableHeaders:
   commit: Commit
   condition: Condition
   completions: Completions
+<<<<<<< HEAD
   count: Count
   createdAt: Created At
+=======
+>>>>>>> 3e188e9e8 (Added local keys in sidenav section)
   customVerbs: Custom Verbs
   description: Description
   duration: Duration
@@ -4950,12 +4959,18 @@ tableHeaders:
   desired: Desired
   defaultVersion: Default version
   destination: Target
+<<<<<<< HEAD
   deployed: Deployed
   download: Download
   duration: Duration
   diskState: Disk State
   drivers: Drivers
   distinguisherMethod: DistinguisherMethod
+=======
+  desired: Desired
+  download: Download
+  duration: Duration
+>>>>>>> 3e188e9e8 (Added local keys in sidenav section)
   effect: Effect
   endpoints: Endpoints
   expires: Expires
@@ -5028,15 +5043,30 @@ tableHeaders:
   podImages: Image
   podRestarts: Restarts
   pods: Pods
+<<<<<<< HEAD
   pod-Selector: Pod-Selector
   providers: Providers
   providerID: Provider ID
+=======
+  # Pod-Selector: Pod-Selector
+  # Status: Status
+  # Volume: Volume
+  # Capacity: Capacity
+  # Access Modes: AccessModes
+  # StorageClass: StorageClass
+  # VolumeMode: VolumeMode
+  # Secret-Name: Secret-Name
+>>>>>>> 3e188e9e8 (Added local keys in sidenav section)
   port: Port
   ports: Ports
   project: Project
   protocol: Protocol
   provider: Provider
+<<<<<<< HEAD
   priorityLevel: PriorityLevel
+=======
+  prioritylevel: Prioritylevel
+>>>>>>> 3e188e9e8 (Added local keys in sidenav section)
   publicPorts: Public Ports
   queues: Queues
   queueLengthLimit: QueueLengthLimit
@@ -5074,11 +5104,16 @@ tableHeaders:
   scale: Scale
   scope: Scope
   selector: Selector
+<<<<<<< HEAD
   secrets: Secrets
   schedule: Schedule
   service: Service
   serviceAccounts: ServiceAccounts
   secret-Name: Secret-Name
+=======
+  schedule: Schedule
+  lastSchedule: Last Schedule
+>>>>>>> 3e188e9e8 (Added local keys in sidenav section)
   simpleName: Name
   simpleScale: Scale
   simpleType: Type
