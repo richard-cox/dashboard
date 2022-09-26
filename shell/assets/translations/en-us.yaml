@@ -4867,6 +4867,10 @@ tableHeaders:
   condition: Condition
   completions: Completions
   count: Count
+  customVerbs: Custom Verbs
+  description: Description
+  expires: Expires
+  providers: Providers
   cpu: CPU
   customVerbs: Custom Verbs
   currentReplicas: Current Replicas
