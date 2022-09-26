@@ -4943,6 +4943,10 @@ tableHeaders:
   expires: Expires
   providers: Providers
   count: Count
+  customVerbs: Custom Verbs
+  description: Description
+  expires: Expires
+  providers: Providers
   cpu: CPU
   currentReplicas: Current Replicas
   description: Description
