@@ -141,10 +141,10 @@ export default {
       <template #cell:explorer="{row}">
         <span v-if="row.mgmt && row.mgmt.isHarvester"></span>
         <n-link v-else-if="row.mgmt && row.mgmt.isReady" class="btn btn-sm role-secondary" :to="{name: 'c-cluster', params: {cluster: row.mgmt.id}}">
-          Explore
+          {{ t('cluster.explore') }}
         </n-link>
         <button v-else :disabled="true" class="btn btn-sm role-secondary">
-          Explore
+          {{ t('cluster.explore') }}
         </button>
       </template>
     </ResourceTable>

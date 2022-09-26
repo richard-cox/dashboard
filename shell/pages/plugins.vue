@@ -179,12 +179,12 @@ export default {
 <template>
   <div class="plugins">
     <div class="plugin-header">
-      <h2>Plugins</h2>
+      <h2> {{ t('product.plugins') }} </h2>
       <button class="btn role-primary mr-10" @click="showAddCatalogDialog()">
-        Add Catalog
+        {{ t('generic.addCatalog') }}
       </button>
       <button class="btn role-primary" @click="showAddDialog()">
-        Load
+        {{ t('generic.load') }}
       </button>
     </div>
     <br />

@@ -91,7 +91,7 @@ export default {
           <h1>
             {{ setting.id }}
             <span v-if="setting.fromEnv" class="modified">Set by Environment Variable</span>
-            <span v-else-if="setting.customized" class="modified">Modified</span>
+            <span v-else-if="setting.customized" class="modified"> {{ t('advancedSettings.modified') }} </span>
           </h1>
           <h2>{{ t(`advancedSettings.descriptions.${setting.id}`) }}</h2>
         </div>

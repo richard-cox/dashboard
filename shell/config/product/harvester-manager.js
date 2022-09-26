@@ -54,7 +54,7 @@ export function init(store) {
   ]);
   basicType([HCI.CLUSTER]);
   spoofedType({
-    label:      store.getters['i18n/t']('harvester.manager.cluster.label'),
+    labelKey:      'harvester.manager.cluster.label',
     name:       HCI.CLUSTER,
     type:       HCI.CLUSTER,
     namespaced: false,
