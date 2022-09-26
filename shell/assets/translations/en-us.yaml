@@ -4874,7 +4874,6 @@ tableHeaders:
   customVerbs: Custom Verbs
   description: Description
   expires: Expires
-  providers: Providers
   cpu: CPU
   customVerbs: Custom Verbs
   currentReplicas: Current Replicas
