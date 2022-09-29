@@ -184,6 +184,8 @@ export default {
       if ( oldEndpointKey ) {
         this.endpoint = this.determineEndpointKeyType(OLD_ENDPOINTS);
         this.oldEndpoint = true;
+      } else if ( newEndpointKey ) {
+        this.endpoint = newEndpointKey;
       } else {
         this.endpoint = newEndpointKey;
       }
