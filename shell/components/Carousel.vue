@@ -46,6 +46,7 @@ export default {
 
   computed: {
     ...mapGetters(['clusterId']),
+
     trackStyle() {
       const sliderItem = this.activeItemId * 100 / this.slider.length;
       const width = 60 * this.slider.length;
@@ -82,6 +83,9 @@ export default {
       this.slidePosition();
     },
 
+    timer() {
+      setInterval(this.autoScrollSlide, 2000);
+    },
     autoScrollSlide() {
       if (this.activeItemId < this.slider.length && this.autoScroll ) {
         this.activeItemId++;
