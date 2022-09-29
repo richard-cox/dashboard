@@ -146,6 +146,16 @@ export default {
     this.allNodePools = fetchTwoRes.allNodePools || [];
     this.haveNodePools = !!fetchTwoRes.allNodePools;
     this.machineTemplates = fetchTwoRes.mdtt || [];
+
+    // Fetch RKE template revisions so we can show when an updated template is available
+    // This request does not need to be blocking
+    if ( this.$store.getters['management/canList'](MANAGEMENT.RKE_TEMPLATE) ) {
+      this.$store.dispatch('management/findAll', { type: MANAGEMENT.RKE_TEMPLATE });
+    }
+
+    if ( this.$store.getters['management/canList'](MANAGEMENT.RKE_TEMPLATE_REVISION) ) {
+      this.$store.dispatch('management/findAll', { type: MANAGEMENT.RKE_TEMPLATE_REVISION });
+    }
   },
 
   created() {
@@ -306,6 +316,18 @@ export default {
         return this.$store.getters['rancher/canList'](NORMAN.ETCD_BACKUP);
       } else if (this.value.isRke2) {
         return this.$store.getters['management/canList'](SNAPSHOT);
+      }
+
+      return false;
+    },
+
+    showEksNodeGroupWarning() {
+      if ( this.value.isEKS ) {
+        const desiredTotal = this.value.eksNodeGroups.filter(g => g.desiredSize === 0);
+
+        if ( desiredTotal.length === this.value.eksNodeGroups.length ) {
+          return true;
+        }
       }
 
       return false;
@@ -575,6 +597,7 @@ export default {
   <Loading v-if="$fetchState.pending" />
   <div v-else>
     <Banner v-if="showWindowsWarning" color="error" :label="t('cluster.banner.os', { newOS: 'Windows', existingOS: 'Linux' })" />
+    <Banner v-if="showEksNodeGroupWarning" color="error" :label="t('cluster.banner.desiredNodeGroupWarning')" />
 
     <Banner v-if="$fetchState.error" color="error" :label="$fetchState.error" />
     <ResourceTabs v-model="value" :default-tab="defaultTab">

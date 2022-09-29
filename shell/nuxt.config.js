@@ -141,16 +141,16 @@ export default function(dir, _appConfig) {
       // Package file must have rancher field to be a plugin
       if (includePkg(name) && f.rancher) {
         reqs += `$plugin.initPlugin('${ name }', require(\'~/pkg/${ name }\')); `;
+
+        // // Serve the code for the UI package in case its used for dynamic loading (but not if the same package was provided in node_modules)
+        // if (!nmPackages[name]) {
+        //   const pkgPackageFile = require(path.join(dir, 'pkg', name, 'package.json'));
+        //   const pkgRef = `${ name }-${ pkgPackageFile.version }`;
+
+        //   serverMiddleware.push({ path: `/pkg/${ pkgRef }`, handler: serveStatic(`${ dir }/dist-pkg/${ pkgRef }`) });
+        // }
+        autoImportTypes[`@rancher/auto-import/${ name }`] = generateDynamicTypeImport(`@pkg/${ name }`, path.join(dir, `pkg/${ name }`));
       }
-
-      // // Serve the code for the UI package in case its used for dynamic loading (but not if the same package was provided in node_modules)
-      // if (!nmPackages[name]) {
-      //   const pkgPackageFile = require(path.join(dir, 'pkg', name, 'package.json'));
-      //   const pkgRef = `${ name }-${ pkgPackageFile.version }`;
-
-      //   serverMiddleware.push({ path: `/pkg/${ pkgRef }`, handler: serveStatic(`${ dir }/dist-pkg/${ pkgRef }`) });
-      // }
-      autoImportTypes[`@rancher/auto-import/${ name }`] = generateDynamicTypeImport(`@pkg/${ name }`, path.join(dir, `pkg/${ name }`));
     });
   }
 
@@ -265,7 +265,9 @@ export default function(dir, _appConfig) {
       dev,
       pl,
       perfTest,
-      rancherEnv
+      rancherEnv,
+      harvesterPkgUrl: process.env.HARVESTER_PKG_URL,
+      api
     },
 
     publicRuntimeConfig: { rancherEnv },
@@ -305,8 +307,9 @@ export default function(dir, _appConfig) {
     },
 
     router: {
-      base:       routerBasePath,
-      middleware: ['i18n'],
+      base:          routerBasePath,
+      middleware:    ['i18n'],
+      prefetchLinks: false
     },
 
     alias: {
@@ -570,7 +573,6 @@ export default function(dir, _appConfig) {
       path.join(NUXT_SHELL, 'plugins/global-formatters'),
       path.join(NUXT_SHELL, 'plugins/trim-whitespace'),
       { src: path.join(NUXT_SHELL, 'plugins/extend-router') },
-      { src: path.join(NUXT_SHELL, 'plugins/lookup'), ssr: false },
       { src: path.join(NUXT_SHELL, 'plugins/console'), ssr: false },
       { src: path.join(NUXT_SHELL, 'plugins/int-number'), ssr: false },
       { src: path.join(NUXT_SHELL, 'plugins/nuxt-client-init'), ssr: false },
@@ -578,6 +580,7 @@ export default function(dir, _appConfig) {
       path.join(NUXT_SHELL, 'plugins/back-button'),
       { src: path.join(NUXT_SHELL, 'plugins/plugin'), ssr: false },
       { src: path.join(NUXT_SHELL, 'plugins/codemirror-loader'), ssr: false },
+      { src: path.join(NUXT_SHELL, 'plugins/formatters'), ssr: false }, // Populate formatters cache for sorted table
     ],
 
     // Proxy: https://github.com/nuxt-community/proxy-module#options

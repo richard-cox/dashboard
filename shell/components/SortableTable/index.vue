@@ -22,16 +22,8 @@ import actions from './actions';
 
 // Its quicker to render if we directly supply the components for the formatters
 // rather than just the name of a global component - so create a map of the formatter comoponents
-const FORMATTERS = {};
-
-const components = require.context('@shell/components/formatter', false, /[A-Z]\w+\.(vue)$/);
-
-components.keys().forEach((fileName) => {
-  const componentConfig = components(fileName);
-  const componentName = fileName.split('/').pop().split('.')[0];
-
-  FORMATTERS[componentName] = componentConfig.default || componentConfig;
-});
+// NOTE: This is populated by a plugin (formatters.js) to avoid issues with plugins
+export const FORMATTERS = {};
 
 export const COLUMN_BREAKPOINTS = {
   /**
@@ -293,6 +285,15 @@ export default {
     getCustomDetailLink: {
       type:    Function,
       default: null
+    },
+
+    /**
+     * Inherited global identifier prefix for tests
+     * Define a term based on the parent component to avoid conflicts on multiple components
+     */
+    componentTestid: {
+      type:    String,
+      default: 'sortable-table'
     }
   },
 
@@ -325,6 +326,7 @@ export default {
     clearTimeout(this._loadingDelayTimer);
     clearTimeout(this._liveColumnsTimer);
     clearTimeout(this._delayedColumnsTimer);
+    clearTimeout(this.manualRefreshTimer);
 
     const $main = $('main');
 
@@ -339,33 +341,31 @@ export default {
     descending(neu, old) {
       this.watcherUpdateLiveAndDelayed(neu, old);
     },
-
     searchQuery(neu, old) {
       this.watcherUpdateLiveAndDelayed(neu, old);
     },
-
     sortFields(neu, old) {
       this.watcherUpdateLiveAndDelayed(neu, old);
     },
-
     groupBy(neu, old) {
       this.watcherUpdateLiveAndDelayed(neu, old);
     },
-
     namespaces(neu, old) {
       this.watcherUpdateLiveAndDelayed(neu, old);
     },
-
     page(neu, old) {
       this.watcherUpdateLiveAndDelayed(neu, old);
     },
 
     // Ensure we update live and delayed columns on first load
-    initalLoad(neu, old) {
-      if (neu && !old) {
-        this._didinit = true;
-        this.$nextTick(() => this.updateLiveAndDelayed());
-      }
+    initalLoad: {
+      handler(neu) {
+        if (neu) {
+          this._didinit = true;
+          this.$nextTick(() => this.updateLiveAndDelayed());
+        }
+      },
+      immediate: true
     },
 
     isManualRefreshLoading(neu, old) {
@@ -373,9 +373,11 @@ export default {
 
       // setTimeout is needed so that this is pushed further back on the JS computing queue
       // because nextTick isn't enough to capture the DOM update for the manual refresh only scenario
-      setTimeout(() => {
-        this.watcherUpdateLiveAndDelayed(neu, old);
-      }, 500);
+      if (old && !neu) {
+        this.manualRefreshTimer = setTimeout(() => {
+          this.watcherUpdateLiveAndDelayed(neu, old);
+        }, 1000);
+      }
     }
   },
 
@@ -391,7 +393,7 @@ export default {
     },
 
     initalLoad() {
-      return !this.loading && !this._didinit && this.rows?.length;
+      return !!(!this.loading && !this._didinit && this.rows?.length);
     },
 
     fullColspan() {
@@ -842,6 +844,7 @@ export default {
                 class="btn role-primary"
                 :class="{[bulkActionClass]:true}"
                 :disabled="!act.enabled"
+                :data-testid="componentTestid + '-' + act.action"
                 @click="applyTableAction(act, null, $event)"
                 @mouseover="setBulkActionOfInterest(act)"
                 @mouseleave="setBulkActionOfInterest(null)"
@@ -853,7 +856,7 @@ export default {
                 <template #button-content>
                   <button ref="actionDropDown" class="btn bg-primary mr-0" :disabled="!selectedRows.length">
                     <i class="icon icon-gear" />
-                    <span>{{ t('harvester.tableHeaders.actions') }}</span>
+                    <span>{{ t('sortableTable.bulkActions.collapsed.label') }}</span>
                     <i class="ml-10 icon icon-chevron-down" />
                   </button>
                 </template>
@@ -980,9 +983,21 @@ export default {
               <!-- The data-cant-run-bulk-action-of-interest attribute is being used instead of :class because
               because our selection.js invokes toggleClass and :class clobbers what was added by toggleClass if
               the value of :class changes. -->
-              <tr :key="row.key" class="main-row" :class="{ 'has-sub-row': row.showSubRow}" :data-node-id="row.key" :data-cant-run-bulk-action-of-interest="actionOfInterest && !row.canRunBulkActionOfInterest">
+              <tr
+                :key="row.key"
+                class="main-row"
+                :data-testid="componentTestid + '-' + i + '-row'"
+                :class="{ 'has-sub-row': row.showSubRow}"
+                :data-node-id="row.key"
+                :data-cant-run-bulk-action-of-interest="actionOfInterest && !row.canRunBulkActionOfInterest"
+              >
                 <td v-if="tableActions" class="row-check" align="middle">
-                  {{ row.mainRowKey }}<Checkbox class="selection-checkbox" :data-node-id="row.key" :value="selectedRows.includes(row.row)" />
+                  {{ row.mainRowKey }}<Checkbox
+                    class="selection-checkbox"
+                    :data-node-id="row.key"
+                    :data-testid="componentTestid + '-' + i + '-checkbox'"
+                    :value="selectedRows.includes(row.row)"
+                  />
                 </td>
                 <td v-if="subExpandColumn" class="row-expand" align="middle">
                   <i
@@ -1060,6 +1075,7 @@ export default {
                     <button
                       :id="`actionButton+${i}+${(row.row && row.row.name) ? row.row.name : ''}`"
                       :ref="`actionButton${i}`"
+                      :data-testid="componentTestid + '-' + i + '-action-button'"
                       aria-haspopup="true"
                       aria-expanded="false"
                       type="button"
@@ -1083,6 +1099,7 @@ export default {
             <tr
               v-if="row.row.stateDescription"
               :key="row.row[keyField] + '-description'"
+              :data-testid="componentTestid + '-' + i + '-row-description'"
               class="state-description sub-row"
               @mouseenter="onRowMouseEnter"
               @mouseleave="onRowMouseLeave"

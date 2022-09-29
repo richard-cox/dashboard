@@ -517,6 +517,7 @@ function addChart(ctx, map, chart, repo) {
       chartName:            chart.name,
       chartNameDisplay:     chart.annotations?.[CATALOG_ANNOTATIONS.DISPLAY_NAME] || chart.name,
       chartDescription:     chart.description,
+      featured:             chart.annotations?.[CATALOG_ANNOTATIONS.FEATURED],
       repoKey:              repo._key,
       versions:             [],
       categories:           filterCategories(chart.keywords),
@@ -652,7 +653,9 @@ export function filterAndArrangeCharts(charts, {
       const searchTokens = searchQuery.split(/\s*[, ]\s*/).map(x => ensureRegex(x, false));
 
       for ( const token of searchTokens ) {
-        if ( !c.chartNameDisplay.match(token) && (c.chartDescription && !c.chartDescription.match(token)) ) {
+        const chartDescription = c.chartDescription || '';
+
+        if ( !c.chartNameDisplay.match(token) && !chartDescription.match(token) ) {
           return false;
         }
       }
