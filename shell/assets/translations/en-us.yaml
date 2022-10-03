@@ -5919,6 +5919,11 @@ typeLabel:
       one { Node }
       other { Nodes }
     }
+  event: |-
+    {count, plural,
+      one { Event }
+      other { Events }
+    }
   apps.deployment: |-
     {count, plural,
       one { Deployment }
