@@ -85,11 +85,10 @@ export default {
     },
     headers() {
       const project = {
-<<<<<<< HEAD
-        name:          'project',
-        label:         this.t('tableHeaders.project'),
-        value:         'project.nameDisplay',
-        sort:          ['projectNameSort', 'nameSort'],
+        name:  'project',
+        label: this.t('tableHeaders.project'),
+        value: 'project.nameDisplay',
+        sort:  ['projectNameSort', 'nameSort'],
       };
 
       return [
