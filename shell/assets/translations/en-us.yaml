@@ -4731,48 +4731,65 @@ storageClass:
 
 tableHeaders:
   accessKey: Access Key
+  accessModes: Access Modes
   address: Address
   age: Age
   apiGroup: API Groups
+  apikey: API Key
   available: Available
+  attachedVM: Attached VM
   authRoles:
     globalDefault: New User Default
     clusterDefault: Cluster Creator Default
     projectDefault: Project Creator Default
   branch: Branch
+  backupTarget: Backup Target
   builtIn: Built In
   bundlesReady: Bundles Ready
   bundleDeploymentsReady: Deployments
   builtin: Built-In
   chart: Chart
+  capacity: Capacity
   current: Current
   clusterCreatorDefault: Cluster Creator Default
   clusterFlow: Cluster Flow
   clusterOutput: Cluster Output
+  cluster: Cluster
   clusters: Clusters
   clustersReady: Clusters Ready
   clusterGroups: Cluster Groups
   commit: Commit
   condition: Condition
   completions: Completions
-  customVerbs: Custom Verbs
-  description: Description
-  expires: Expires
-  providers: Providers
+  count: Count
   cpu: CPU
+  customVerbs: Custom Verbs
+  currentReplicas: Current Replicas
+  description: Description
   date: Date
+  data: Data
   default: Default
+  defaultVersion: Default version
   destination: Target
   desired: Desired
   download: Download
   duration: Duration
+  diskState: Disk State
   effect: Effect
   endpoints: Endpoints
+  expires: Expires
+  firstSeen: First Seen
   fleetBundleType: Type
   flow: Flow
+  fingerprint: Fingerprint
   gitRepos: Git Repos
+  groupName: Group Name
+  groupRoleNames: Group Role Names
   host: Host
+  hostIp: Host IP
+  hpaReference: Workload
   health: Health
+  ipAddress: IP Address
   id: ID
   ip: IP
   image: Image
@@ -4795,6 +4812,8 @@ tableHeaders:
   maxKubernetesVersion: Max Kubernetes Version
   message: Message
   minKubernetesVersion: Min Kubernetes Version
+  minReplicas: Minimum Replicas
+  maxReplicas: Maximum Replicas
   memory: Memory
   name: Name
   nameDisplay: Display Name
@@ -4802,8 +4821,10 @@ tableHeaders:
   namespace: Namespace
   namespaceName: Name
   namespaceNameUnlinked: Name
+  networkType: Type
+  networkVlan: Vlan ID
   node: Node
-  nodeName: Name
+  nodeName: Node Name
   nodesReady: Nodes Ready
   nodePort: Node Port
   object: Object
@@ -4812,17 +4833,15 @@ tableHeaders:
   p95: 95%tile
   persistentVolumeClaim: Persistent Volume Claim
   persistentVolumeSource: Source
+  phase: Phase
+  progress: Progress
   podImages: Image
   podRestarts: Restarts
   pods: Pods
-  # Pod-Selector: Pod-Selector
-  # Status: Status
-  # Volume: Volume
-  # Capacity: Capacity
-  # Access Modes: AccessModes
-  # StorageClass: StorageClass
-  # VolumeMode: VolumeMode
-  # Secret-Name: Secret-Name
+  podSelector: Pod-Selector
+  providers: Providers
+  providerId: Provider ID
+  secretName: Secret-Name
   port: Port
   project: Project
   protocol: Protocol
@@ -4854,9 +4873,12 @@ tableHeaders:
   resources: Resources
   resourcesReady: Resources Ready
   restarts: Restarts
+  restart: Restart Required
   role: Role
   roles: Roles
   routes: Routes
+  routeConnectivity: Route Connectivity
+  readyToUse: Ready To Use
   scale: Scale
   scope: Scope
   selector: Selector
@@ -4869,11 +4891,16 @@ tableHeaders:
   started: Started
   state: State
   status: Status
+  targetVm: Target VM
   storage_class_provisioner: Provisioner
+  storage: Storage Size
+  storageClass: Storage Class
+  source: Source
   subject: Subject
   subType: Kind
   success: Success
   summary: Summary
+  subobject: Subobject
   taints: Taints
   target: Target
   targetKind: Target Type
@@ -4889,31 +4916,9 @@ tableHeaders:
   username: Local Username
   value: Value
   version: Version
+  volume: Volume
+  volumeMode: Volume Mode
   weight: Weight
-  progress: Progress
-  fingerprint: Fingerprint
-  networkType: Type
-  networkVlan: Vlan ID
-  readyToUse: Ready To Use
-  backupTarget: Backup Target
-  targetVm: Target VM
-  phase: Phase
-  attachedVM: Attached VM
-  hostIp: Host IP
-  storage: Storage Size
-  defaultVersion: Default version
-  ipAddress: IP Address
-  diskState: Disk State
-  routeConnectivity: Route Connectivity
-  hpaReference: Workload
-  minReplicas: Minimum Replicas
-  maxReplicas: Maximum Replicas
-  currentReplicas: Current Replicas
-  data: Data
-  apikey: API Key
-  groupName: Group Name
-  groupRoleNames: Group Role Names
-  restart: Restart Required
 
 target:
   router:
