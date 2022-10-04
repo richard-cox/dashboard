@@ -219,6 +219,7 @@ product:
   elemental: OS Management
   legacy: Legacy
   plugins: Plugins
+  uiplugins: UI Plugins
 
 suffix:
   percent: "%"

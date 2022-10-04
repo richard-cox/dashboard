@@ -411,6 +411,19 @@ export default {
   }
 }
 
+.tabs-only {
+  margin-bottom: 20px;
+
+  .tab-container {
+    display: none;
+  }
+
+  .tabs {
+    border: 0;
+    border-bottom: 2px solid var(--border);
+  }
+}
+
 .side-tabs {
   display: flex;
   box-shadow: 0 0 20px var(--shadow);
