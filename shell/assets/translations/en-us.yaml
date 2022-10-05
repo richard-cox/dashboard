@@ -1090,7 +1090,7 @@ cluster:
     advanced:
       label: Advanced
       detail: Additional control over how the node will be registered.  These values will often need to be different for each node registered.
-      nodeName: Node Name
+      NodeName: Node Name
       publicIp: Node Public IP
       privateIp: Node Private IP
       nodeLabel:
@@ -4839,6 +4839,7 @@ storageClass:
     title: Local Storage (Unsupported)
 
 tableHeaders:
+  PriorityLevel: udydgshdbshdhb
   accessKey: Access Key
   accessModes: Access Modes
   address: Address
@@ -4863,7 +4864,6 @@ tableHeaders:
   clusterCreatorDefault: Cluster Creator Default
   clusterFlow: Cluster Flow
   clusterOutput: Cluster Output
-  cluster: Cluster
   clusters: Clusters
   clustersReady: Clusters Ready
   clusterGroups: Cluster Groups
@@ -4883,7 +4883,6 @@ tableHeaders:
   default: Default
   defaultVersion: Default version
   destination: Target
-  desired: Desired
   download: Download
   duration: Duration
   diskState: Disk State
@@ -4915,6 +4914,7 @@ tableHeaders:
   key: Key
   keys: Data
   lastUpdated: Last Updated
+  lastSchedule: Last Schedule
   lastSeen: Last Seen
   loggingOutputProviders: Provider
   machines: Machines
@@ -4936,7 +4936,7 @@ tableHeaders:
   networkType: Type
   networkVlan: Vlan ID
   node: Node
-  nodeName: Node Name
+  NodeName: Node Name
   nodesReady: Nodes Ready
   nodePort: Node Port
   object: Object
@@ -4950,10 +4950,10 @@ tableHeaders:
   podImages: Image
   podRestarts: Restarts
   pods: Pods
-  podSelector: Pod-Selector
+  pod-Selector: Pod-Selector
   providers: Providers
-  providerId: Provider ID
-  secretName: Secret-Name
+  ProviderID: Provider ID
+  Secret-Name: Secret-Name
   port: Port
   project: Project
   protocol: Protocol
@@ -4979,7 +4979,7 @@ tableHeaders:
   repositories: Repositories
   repoName: Repository Name
   reposReady: Repos Ready
-  replicas: Replicas
+  Replicas: Replicas
   reqRate: Req Rate
   resource: Resource
   resources: Resources
@@ -4995,7 +4995,7 @@ tableHeaders:
   scope: Scope
   selector: Selector
   schedule: Schedule
-  lastSchedule: Last Schedule
+  service: Service
   simpleName: Name
   simpleScale: Scale
   simpleType: Type
@@ -5031,7 +5031,6 @@ tableHeaders:
   volume: Volume
   volumeMode: Volume Mode
   weight: Weight
-
 target:
   router:
     label: Router
