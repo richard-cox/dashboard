@@ -206,12 +206,6 @@ product:
   legacy: Legacy
   plugins: Plugins
   uiplugins: UI Plugins
-  legacy: Legacy
-  plugins: Plugins
-  uiplugins: UI Plugins
-  legacy: Legacy
-  plugins: Plugins
-  uiplugins: UI Plugins
 
 suffix:
   percent: "%"
@@ -4873,10 +4867,7 @@ tableHeaders:
   completions: Completions
   count: Count
   customVerbs: Custom Verbs
-  description: Description
-  expires: Expires
   cpu: CPU
-  customVerbs: Custom Verbs
   currentReplicas: Current Replicas
   description: Description
   date: Date
