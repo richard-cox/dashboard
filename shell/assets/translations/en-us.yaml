@@ -1105,7 +1105,7 @@ cluster:
     advanced:
       label: Advanced
       detail: Additional control over how the node will be registered.  These values will often need to be different for each node registered.
-      nodeName: Node Name
+      NodeName: Node Name
       publicIp: Node Public IP
       privateIp: Node Private IP
       nodeLabel:
@@ -4927,7 +4927,6 @@ tableHeaders:
   clusterCreatorDefault: Cluster Creator Default
   clusterFlow: Cluster Flow
   clusterOutput: Cluster Output
-  cluster: Cluster
   clusters: Clusters
   cluster-Name: Cluster-Name
   clustersReady: Clusters Ready
@@ -5020,7 +5019,7 @@ tableHeaders:
   networkType: Type
   networkVlan: Vlan ID
   node: Node
-  nodeName: Node Name
+  NodeName: Node Name
   nodesReady: Nodes Ready
   nodePort: Node Port
   object: Object
@@ -5065,7 +5064,7 @@ tableHeaders:
   repositories: Repositories
   repoName: Repository Name
   reposReady: Repos Ready
-  replicas: Replicas
+  Replicas: Replicas
   reqRate: Req Rate
   resource: Resource
   resources: Resources
