@@ -3,7 +3,7 @@ import {
   CAPI,
   CATALOG,
   NORMAN,
-  HCI,
+  HCI
 } from '@shell/config/types';
 import { MULTI_CLUSTER } from '@shell/store/features';
 import { DSL } from '@shell/store/type-map';
