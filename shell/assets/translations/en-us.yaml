@@ -4834,8 +4834,9 @@ storageClass:
     title: Local Storage (Unsupported)
 
 tableHeaders:
-  PriorityLevel: udydgshdbshdhb
+  assuredConcurrencyShares: AssuredConcurrencyShares
   accessKey: Access Key
+  addressType: AddressType
   accessModes: Access Modes
   address: Address
   age: Age
@@ -4859,13 +4860,16 @@ tableHeaders:
   clusterCreatorDefault: Cluster Creator Default
   clusterFlow: Cluster Flow
   clusterOutput: Cluster Output
+  cluster: Cluster
   clusters: Clusters
+  cluster-Name: Cluster-Name
   clustersReady: Clusters Ready
   clusterGroups: Cluster Groups
   commit: Commit
   condition: Condition
   completions: Completions
   count: Count
+  createdAt: Created At
   customVerbs: Custom Verbs
   cpu: CPU
   currentReplicas: Current Replicas
@@ -4873,11 +4877,15 @@ tableHeaders:
   date: Date
   data: Data
   default: Default
+  desired: Desired
   defaultVersion: Default version
   destination: Target
+  deployed: Deployed
   download: Download
   duration: Duration
   diskState: Disk State
+  drivers: Drivers
+  distinguisherMethod: DistinguisherMethod
   effect: Effect
   endpoints: Endpoints
   expires: Expires
@@ -4886,12 +4894,16 @@ tableHeaders:
   flow: Flow
   fingerprint: Fingerprint
   gitRepos: Git Repos
+  groups: Groups
   groupName: Group Name
   groupRoleNames: Group Role Names
+  global-Default: Global-Default
   host: Host
   hostIp: Host IP
+  holder: Holder
   hpaReference: Workload
   health: Health
+  handSize: HandSize
   ipAddress: IP Address
   id: ID
   ip: IP
@@ -4905,6 +4917,7 @@ tableHeaders:
   jobs: Jobs
   key: Key
   keys: Data
+  labels: Labels
   lastUpdated: Last Updated
   lastSchedule: Last Schedule
   lastSeen: Last Seen
@@ -4913,12 +4926,15 @@ tableHeaders:
   machineNodeName: Node
   manual: Manual
   matches: Matches
+  matchingPrecedence: MatchingPrecedence
   maxKubernetesVersion: Max Kubernetes Version
   message: Message
   minKubernetesVersion: Min Kubernetes Version
   minReplicas: Minimum Replicas
   maxReplicas: Maximum Replicas
+  missingPL: MissingPL
   memory: Memory
+  monitored: Monitored
   name: Name
   nameDisplay: Display Name
   nameUnlinked: Name
@@ -4928,7 +4944,7 @@ tableHeaders:
   networkType: Type
   networkVlan: Vlan ID
   node: Node
-  NodeName: Node Name
+  nodeName: Node Name
   nodesReady: Nodes Ready
   nodePort: Node Port
   object: Object
@@ -4944,14 +4960,16 @@ tableHeaders:
   pods: Pods
   pod-Selector: Pod-Selector
   providers: Providers
-  ProviderID: Provider ID
-  Secret-Name: Secret-Name
+  providerID: Provider ID
   port: Port
+  ports: Ports
   project: Project
   protocol: Protocol
   provider: Provider
-  prioritylevel: Prioritylevel
+  priorityLevel: PriorityLevel
   publicPorts: Public Ports
+  queues: Queues
+  queueLengthLimit: QueueLengthLimit
   ram: RAM
   rbac:
     create: Create
@@ -4971,7 +4989,7 @@ tableHeaders:
   repositories: Repositories
   repoName: Repository Name
   reposReady: Repos Ready
-  Replicas: Replicas
+  replicas: Replicas
   reqRate: Req Rate
   resource: Resource
   resources: Resources
@@ -4986,8 +5004,11 @@ tableHeaders:
   scale: Scale
   scope: Scope
   selector: Selector
+  secrets: Secrets
   schedule: Schedule
   service: Service
+  serviceAccounts: ServiceAccounts
+  secret-Name: Secret-Name
   simpleName: Name
   simpleScale: Scale
   simpleType: Type
@@ -5014,6 +5035,7 @@ tableHeaders:
   upToDate: Up To Date
   upgrade: Upgradable
   url: URL
+  users: Users
   userDisplayName: Display Name
   userId: ID
   userStatus: Status
