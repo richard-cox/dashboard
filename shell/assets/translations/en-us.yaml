@@ -4927,6 +4927,7 @@ tableHeaders:
   clusterCreatorDefault: Cluster Creator Default
   clusterFlow: Cluster Flow
   clusterOutput: Cluster Output
+  cluster: Cluster
   clusters: Clusters
   cluster-Name: Cluster-Name
   clustersReady: Clusters Ready
@@ -4942,6 +4943,7 @@ tableHeaders:
   expires: Expires
   providers: Providers
   count: Count
+  createdAt: Created At
   customVerbs: Custom Verbs
   description: Description
   expires: Expires
@@ -5019,7 +5021,7 @@ tableHeaders:
   networkType: Type
   networkVlan: Vlan ID
   node: Node
-  NodeName: Node Name
+  nodeName: Node Name
   nodesReady: Nodes Ready
   nodePort: Node Port
   object: Object
@@ -5064,7 +5066,7 @@ tableHeaders:
   repositories: Repositories
   repoName: Repository Name
   reposReady: Repos Ready
-  Replicas: Replicas
+  replicas: Replicas
   reqRate: Req Rate
   resource: Resource
   resources: Resources
