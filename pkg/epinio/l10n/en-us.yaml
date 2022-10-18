@@ -262,3 +262,8 @@ epinio:
       helmChart: Helm Chart
   warnings:
     noNamespace: There are no namespaces. Please create one before proceeding
+model:
+  authConfig:
+    provider:
+      wip: // TODO: RC remove if not overiding keycloakoidc provider
+      keycloakoidc: OIDC
