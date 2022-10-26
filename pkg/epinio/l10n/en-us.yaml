@@ -265,5 +265,4 @@ epinio:
 model:
   authConfig:
     provider:
-      wip: TODO RC remove if not overiding keycloakoidc provider. also won't work in embedded mode
-      keycloakoidc: OIDC
+      epinio: Dex

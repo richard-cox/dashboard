@@ -172,7 +172,7 @@ export default {
 
   created() {
     this.providerComponents = this.providers.map((name) => {
-      return importLogin(configType[name]);
+      return this.$store.getters['type-map/importLogin'](configType[name] || name);
     });
   },
 
