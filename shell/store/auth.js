@@ -161,7 +161,7 @@ export const actions = {
   },
 
   setNonce({ dispatch }, opt) {
-    const out = { nonce: randomStr(16), to: 'vue' };
+    const out = { nonce: opt?.nonce || randomStr(16), to: 'vue' };
 
     if ( opt.test ) {
       out.test = true;
@@ -169,6 +169,10 @@ export const actions = {
 
     if (opt.provider) {
       out.provider = opt.provider;
+    }
+
+    if (opt.pkceCodeVerifier) {
+      out.pkceCodeVerifier = opt.pkceCodeVerifier;
     }
 
     const strung = JSON.stringify(out);
@@ -200,6 +204,21 @@ export const actions = {
       returnToUrl = `${ window.location.origin }/verify-auth-azure`;
     }
 
+    if (provider === 'keycloakoidc') {
+      const redirectAsUrl = new URL(redirectUrl);
+      const pkceCodeVerifier = redirectAsUrl.searchParams.get('code_verifier');
+
+      if (pkceCodeVerifier) {
+        opt.pkceCodeVerifier = pkceCodeVerifier;
+      }
+
+      const state = redirectAsUrl.searchParams.get('state');
+
+      if (state) {
+        opt.nonce = state;
+      }
+    }
+
     const nonce = await dispatch('setNonce', opt);
 
     const fromQuery = unescape(parseUrl(redirectUrl).query?.[GITHUB_SCOPE] || '');
@@ -216,7 +235,7 @@ export const actions = {
     let url = removeParam(redirectUrl, GITHUB_SCOPE);
 
     const params = {
-      [GITHUB_SCOPE]:    scopes.join(','),
+      [GITHUB_SCOPE]:   `openid offline_access profile email groups audience:server:client_id:epinio-api`, // scopes.join(','), // TODO: RC
       [GITHUB_NONCE]:   base64Encode(nonce, 'url')
     };
 
@@ -225,6 +244,8 @@ export const actions = {
     }
 
     url = addParams(url, params);
+
+    // console.warn(url);
 
     if ( opt.redirect === false ) {
       return url;
@@ -249,9 +270,15 @@ export const actions = {
       return ERR_NONCE;
     }
 
+    const body = { code };
+
+    if (parsed.pkceCodeVerifier) {
+      body.code_verifier = parsed.pkceCodeVerifier; // TODO: RC all this faf
+    }
+
     return dispatch('login', {
       provider,
-      body: { code }
+      body
     });
   },
 

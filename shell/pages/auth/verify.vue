@@ -41,9 +41,16 @@ export default {
     let parsed;
 
     try {
+      console.warn(stateStr);
+      console.warn(base64Decode((stateStr)));
       parsed = JSON.parse(base64Decode((stateStr)));
     } catch (err) {
-      return;
+      // redirect(`/auth/login?err=${ escape(err) }`);
+      parsed = {
+        code,
+        nonce:    stateStr,
+        provider: 'keycloakoidc'
+      };
     }
 
     const { test, provider, nonce } = parsed;
