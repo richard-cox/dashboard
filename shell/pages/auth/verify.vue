@@ -41,16 +41,15 @@ export default {
     let parsed;
 
     try {
-      console.warn(stateStr);
-      console.warn(base64Decode((stateStr)));
       parsed = JSON.parse(base64Decode((stateStr)));
     } catch (err) {
-      // redirect(`/auth/login?err=${ escape(err) }`);
-      parsed = {
-        code,
-        nonce:    stateStr,
-        provider: 'keycloakoidc'
-      };
+      const out = store.getters['i18n/t'](`login.error`);
+
+      console.error('Failed to parse nonce'); // eslint-disable-line no-console
+
+      redirect(`/auth/login?err=${ escape(out) }`);
+
+      return;
     }
 
     const { test, provider, nonce } = parsed;

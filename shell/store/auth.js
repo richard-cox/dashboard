@@ -160,8 +160,11 @@ export const actions = {
     return findBy(authConfigs, 'id', id);
   },
 
-  setNonce({ dispatch }, opt) {
-    const out = { nonce: opt?.nonce || randomStr(16), to: 'vue' };
+  /**
+   * Create the basic json object used for the nonce (this includes the random nonce/state)
+   */
+  createNonce(ctx, opt) {
+    const out = { nonce: randomStr(16), to: 'vue' };
 
     if ( opt.test ) {
       out.test = true;
@@ -171,11 +174,15 @@ export const actions = {
       out.provider = opt.provider;
     }
 
-    if (opt.pkceCodeVerifier) {
-      out.pkceCodeVerifier = opt.pkceCodeVerifier;
-    }
+    return out;
+  },
 
-    const strung = JSON.stringify(out);
+  /**
+   * Save nonce details. Information it contains will be used to validate auth requests/responses
+   * Note - this may be structurally different than the nonce we encode and send
+   */
+  saveNonce(ctx, opt) {
+    const strung = JSON.stringify(opt);
 
     this.$cookies.set(KEY, strung, {
       path:     '/',
@@ -184,6 +191,15 @@ export const actions = {
     });
 
     return strung;
+  },
+
+  /**
+   * Convert the nonce into something we can send
+   */
+  encodeNonce(ctx, nonce) {
+    const stringify = JSON.stringify(nonce);
+
+    return base64Encode(stringify, 'url');
   },
 
   async redirectTo({ state, commit, dispatch }, opt = {}) {
@@ -204,22 +220,13 @@ export const actions = {
       returnToUrl = `${ window.location.origin }/verify-auth-azure`;
     }
 
-    if (provider === 'keycloakoidc') {
-      const redirectAsUrl = new URL(redirectUrl);
-      const pkceCodeVerifier = redirectAsUrl.searchParams.get('code_verifier');
+    // The base nonce that will be sent server way
+    const baseNonce = opt.nonce || await dispatch('createNonce', opt);
 
-      if (pkceCodeVerifier) {
-        opt.pkceCodeVerifier = pkceCodeVerifier;
-      }
-
-      const state = redirectAsUrl.searchParams.get('state');
-
-      if (state) {
-        opt.nonce = state;
-      }
-    }
-
-    const nonce = await dispatch('setNonce', opt);
+    // Save a possibly expanded nonce
+    await dispatch('saveNonce', opt.persistNonce || baseNonce);
+    // Convert the base nonce in to something we can transmit
+    const encodedNonce = await dispatch('encodeNonce', baseNonce);
 
     const fromQuery = unescape(parseUrl(redirectUrl).query?.[GITHUB_SCOPE] || '');
     const scopes = fromQuery.split(/[, ]+/).filter(x => !!x);
@@ -236,7 +243,7 @@ export const actions = {
 
     const params = {
       [GITHUB_SCOPE]:   `openid offline_access profile email groups audience:server:client_id:epinio-api`, // scopes.join(','), // TODO: RC
-      [GITHUB_NONCE]:   base64Encode(nonce, 'url')
+      [GITHUB_NONCE]: encodedNonce
     };
 
     if (!url.includes(GITHUB_REDIRECT)) {
@@ -244,8 +251,6 @@ export const actions = {
     }
 
     url = addParams(url, params);
-
-    // console.warn(url);
 
     if ( opt.redirect === false ) {
       return url;
