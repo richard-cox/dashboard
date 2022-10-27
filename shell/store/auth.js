@@ -242,7 +242,7 @@ export const actions = {
     let url = removeParam(redirectUrl, GITHUB_SCOPE);
 
     const params = {
-      [GITHUB_SCOPE]:   `openid offline_access profile email groups audience:server:client_id:epinio-api`, // scopes.join(','), // TODO: RC
+      [GITHUB_SCOPE]: scopes.join(opt.scopesJoinChart || ','), // Some providers won't accept comma separated scopes
       [GITHUB_NONCE]: encodedNonce
     };
 
@@ -277,8 +277,9 @@ export const actions = {
 
     const body = { code };
 
+    // If the request came with a pkce code ensure we also sent that in the verify
     if (parsed.pkceCodeVerifier) {
-      body.code_verifier = parsed.pkceCodeVerifier; // TODO: RC all this faf
+      body.code_verifier = parsed.pkceCodeVerifier;
     }
 
     return dispatch('login', {
