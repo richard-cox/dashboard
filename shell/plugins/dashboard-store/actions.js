@@ -140,7 +140,7 @@ export default {
       commit('registerType', type);
     }
 
-    if ( opt.force !== true && getters['haveAll'](type) ) {
+    if ( opt.force !== true && (getters['haveAll'](type) || getters['haveAllNamespace'](type, opt.namespaced))) {
       const args = {
         type,
         revision:  '',
@@ -158,7 +158,9 @@ export default {
 
     let load = (opt.load === undefined ? _ALL : opt.load);
 
-    if ( opt.load === false || opt.load === _NONE ) {
+    if (opt.namespaced) {
+      load = _MULTI;
+    } else if ( opt.load === false || opt.load === _NONE ) {
       load = _NONE;
     } else if ( opt.load === _ALL_IF_AUTHED ) {
       const header = rootGetters['auth/fromHeader'];
@@ -279,9 +281,11 @@ export default {
         //
         // This is used e.g. to load a partial list of settings before login
         // while still knowing we need to load the full list later.
+
         commit('loadMulti', {
           ctx,
-          data: out.data
+          data:      out.data,
+          namespace: opt.namespaced
         });
       } else if (load === _MERGE) {
         // This is like loadMulti (updates existing entries) but also removes entries that no longer exist

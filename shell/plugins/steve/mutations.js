@@ -10,6 +10,7 @@ import {
 import { keyForSubscribe } from '@shell/plugins/steve/subscribe';
 import { perfLoadAll } from '@shell/plugins/steve/performanceTesting';
 import Vue from 'vue';
+import { normalizeType } from '~/shell/plugins/dashboard-store/normalize';
 
 function registerNamespace(state, namespace) {
   let cache = state.podsByNamespace[namespace];
@@ -90,7 +91,7 @@ export default {
     });
   },
 
-  loadMulti(state, { data, ctx }) {
+  loadMulti(state, { data, ctx, namespace }) {
     for (const entry of data) {
       const resource = load(state, { data: entry, ctx });
 
@@ -100,6 +101,13 @@ export default {
         addObject(cache.list, resource);
         cache.map.set(resource.id, resource);
       }
+    }
+
+    const type = normalizeType(data[0]?.type); // TODO: RC this won't work if there's no results....
+    const cache = state.types[type];
+
+    if (cache) {
+      cache.haveNamespace = namespace;
     }
   },
 

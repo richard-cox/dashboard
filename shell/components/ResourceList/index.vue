@@ -4,13 +4,15 @@ import Loading from '@shell/components/Loading';
 import Masthead from './Masthead';
 import ResourceLoadingIndicator from './ResourceLoadingIndicator';
 import ResourceFetch from '@shell/mixins/resource-fetch';
+import IconMessage from '@shell/components/IconMessage.vue';
 
 export default {
   components: {
     Loading,
     ResourceTable,
     Masthead,
-    ResourceLoadingIndicator
+    ResourceLoadingIndicator,
+    IconMessage
   },
   mixins: [ResourceFetch],
 
@@ -28,19 +30,18 @@ export default {
       default: false
     },
   },
+
   async fetch() {
     const store = this.$store;
     const resource = this.resource;
 
     let hasFetch = false;
 
-    const inStore = store.getters['currentStore'](resource);
-
-    const schema = store.getters[`${ inStore }/schemaFor`](resource);
+    const schema = this.schema;
 
     if ( this.hasListComponent ) {
       // If you provide your own list then call its asyncData
-      const importer = store.getters['type-map/importList'](resource);
+      const importer = this.listComponent;
       const component = (await importer())?.default;
 
       if ( component?.typeDisplay ) {
@@ -55,7 +56,7 @@ export default {
       // If the custom component supports it, ask it what resources it loads, so we can
       // use the incremental loading indicator when enabled
       if (component?.$loadingResources) {
-        const { loadResources, loadIndeterminate } = component?.$loadingResources(this.$route, this.$store);
+        const { loadResources, loadIndeterminate } = component?.$loadingResources();
 
         this.loadResources = loadResources || [resource];
         this.loadIndeterminate = loadIndeterminate || false;
@@ -138,7 +139,14 @@ export default {
 </script>
 
 <template>
-  <div>
+  <IconMessage
+    v-if="namespaceFilterRequired"
+    :vertical="true"
+    :subtle="false"
+    icon="icon-search"
+    :message="`There's a lorra lorra resources.... please filter to a single namespace`"
+  />
+  <div v-else>
     <Masthead
       v-if="showMasthead"
       :type-display="customTypeDisplay"
