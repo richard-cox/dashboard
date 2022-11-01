@@ -7,6 +7,8 @@ import ResourceFetch from '@shell/mixins/resource-fetch';
 import IconMessage from '@shell/components/IconMessage.vue';
 
 export default {
+  name: 'ResourceList',
+
   components: {
     Loading,
     ResourceTable,
@@ -56,7 +58,7 @@ export default {
       // If the custom component supports it, ask it what resources it loads, so we can
       // use the incremental loading indicator when enabled
       if (component?.$loadingResources) {
-        const { loadResources, loadIndeterminate } = component?.$loadingResources();
+        const { loadResources, loadIndeterminate } = component?.$loadingResources(this.$route, this.$store);
 
         this.loadResources = loadResources || [resource];
         this.loadIndeterminate = loadIndeterminate || false;

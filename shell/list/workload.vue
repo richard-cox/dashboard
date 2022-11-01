@@ -1,4 +1,6 @@
 <script>
+// TODO: RC bug - workloads, reloads old ns when re-selecting
+
 import ResourceTable from '@shell/components/ResourceTable';
 import { WORKLOAD_TYPES, SCHEMA, NODE, POD } from '@shell/config/types';
 import ResourceFetch from '@shell/mixins/resource-fetch';
@@ -11,6 +13,24 @@ const schema = {
     namespaced: true
   },
   metadata: { name: 'workload' },
+};
+
+const $loadingResources = ($route, $store) => {
+  const allowedResources = [];
+
+  Object.values(WORKLOAD_TYPES).forEach((type) => {
+    // You may not have RBAC to see some of the types
+    if ($store.getters['cluster/schemaFor'](type) ) {
+      allowedResources.push(type);
+    }
+  });
+
+  const allTypes = $route.params.resource === schema.id;
+
+  return {
+    loadResources:     allTypes ? allowedResources : [$route.params.resource],
+    loadIndeterminate: allTypes,
+  };
 };
 
 export default {
@@ -30,8 +50,8 @@ export default {
     this.loadHeathResources();
 
     if ( this.allTypes ) {
-      this.resources = await Promise.all(this.allowedResources.map((allowed) => {
-        return this.$fetchType(allowed, this.allowedResources);
+      this.resources = await Promise.all(this.loadResources.map((allowed) => {
+        return this.$fetchType(allowed, this.loadResources);
       }));
     } else {
       const type = this.$route.params.resource;
@@ -45,22 +65,12 @@ export default {
   },
 
   data() {
-    const allowedResources = [];
-
-    Object.values(WORKLOAD_TYPES).forEach((type) => {
-      // You may not have RBAC to see some of the types
-      if (this.$store.getters['cluster/schemaFor'](type) ) {
-        allowedResources.push(type);
-      }
-    });
-
-    const allTypes = this.$route.params.resource === schema.id;
+    const { loadResources, loadIndeterminate } = $loadingResources(this.$route, this.$store);
 
     return {
-      resources:         [],
-      allowedResources,
-      loadResources:     allTypes ? this.allowedResources : [this.$route.params.resource],
-      loadIndeterminate: allTypes
+      resources: [],
+      loadResources,
+      loadIndeterminate
     };
   },
 
@@ -99,11 +109,8 @@ export default {
   },
 
   // All of the resources that we will load that we need for the loading indicator
-  $loadingResources() {
-    return {
-      loadResources:     this.loadResources,
-      loadIndeterminate: this.loadIndeterminate,
-    };
+  $loadingResources($route, $store) {
+    return $loadingResources($route, $store);
   },
 
   methods: {

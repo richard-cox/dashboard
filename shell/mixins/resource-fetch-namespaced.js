@@ -4,6 +4,10 @@
 // TODO: RC TEST - have all and under count. go away and create. come back
 // TODO: RC TEST - have too many and over count. go away and remove. come back
 
+// TODO: RC TEST - manual refresh
+// TODO: RC TEST - incremental loading
+// TODO: RC TEST - manual refresh + incremental loading
+
 // TODO: RC xTEST - select multiple filters after filtering to one NS
 // TODO: RC xTEST if already have deployments... but ns filter is different
 // TODO: RC xdon't group by namespaces if request is namespaced (should be automatic)
@@ -54,7 +58,7 @@ export default {
      * Are all core list resources namespaced?
      */
     __areResourcesNamespaced() {
-      return this.loadResources.every((type) => {
+      return (this.loadResources || []).every((type) => {
         const schema = this.$store.getters['cluster/schemaFor'](type);
 
         return schema?.attributes?.namespaced;
