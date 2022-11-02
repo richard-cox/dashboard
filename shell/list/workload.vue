@@ -1,6 +1,4 @@
 <script>
-// TODO: RC bug - workloads, reloads old ns when re-selecting
-
 import ResourceTable from '@shell/components/ResourceTable';
 import { WORKLOAD_TYPES, SCHEMA, NODE, POD } from '@shell/config/types';
 import ResourceFetch from '@shell/mixins/resource-fetch';

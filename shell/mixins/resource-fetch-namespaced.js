@@ -1,16 +1,21 @@
 // TODO: RC UX create resource in different NS. return to list (shrug?)
 
-// TODO: RC TEST - go from deployment namespaced to somewhere that needs them all
-// TODO: RC TEST - have all and under count. go away and create. come back
-// TODO: RC TEST - have too many and over count. go away and remove. come back
+// TODO: RC Comment - If we're under the threshold and have fetched all resources, if in that session we go over the threshold we won't enforce the NS filter (because we have all already)
+// TODO: RC Comment - If we're over the threshold and have fetched namespaced resources, if in that session we go under the threshold we will fetch all resources
+// TODO: RC Comment - If we're over the threshold and have fetched namespaced resources, going to a page that needs them all will result in us fetching them all (for instance from `events` to `cluster dashboard`)
+// TODO: RC Comment - Gates for forcing the filter (count, resource type is namespaced, etc) apply only to the resources shown in the list.
+// TODO: RC Comment - - For example PV's aren't namespaced, so no enforced filtering. However they fetch PVC's which are namespaced
 
 // TODO: RC TEST - manual refresh
 // TODO: RC TEST - incremental loading
 // TODO: RC TEST - manual refresh + incremental loading
 
+// TODO: RC xTEST - have all and under count. go away and create. come back
+// TODO: RC xTEST - have too many and over count. go away and remove. come back
 // TODO: RC xTEST - select multiple filters after filtering to one NS
 // TODO: RC xTEST if already have deployments... but ns filter is different
 // TODO: RC xdon't group by namespaces if request is namespaced (should be automatic)
+// TODO: RC xTEST - go from deployment namespaced to somewhere that needs them all
 
 import { mapGetters } from 'vuex';
 

@@ -21,7 +21,7 @@ export default {
 
   async fetch() {
     const inStore = this.$store.getters['currentStore']();
-    const pvcPromise = this.$store.dispatch(`${ inStore }/findAll`, { type: PVC }); // TODO: RC PR Comment PV aren't namespaced, but PVC's are
+    const pvcPromise = this.$store.dispatch(`${ inStore }/findAll`, { type: PVC });
 
     await this.$fetchType(this.resource);
     await pvcPromise;
