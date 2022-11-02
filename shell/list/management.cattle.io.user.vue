@@ -57,10 +57,8 @@ export default {
   },
 
   $loadingResources() {
-    return {
-      loadResources:     [MANAGEMENT.USER],
-      loadIndeterminate: true, // results are filtered so we wouldn't get the correct count on indicator...
-    };
+    // results are filtered so we wouldn't get the correct count on indicator...
+    return { loadIndeterminate: true };
   },
 
   computed: {

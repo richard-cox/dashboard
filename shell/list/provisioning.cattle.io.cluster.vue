@@ -132,10 +132,8 @@ export default {
   },
 
   $loadingResources() {
-    return {
-      loadResources:     [CAPI.RANCHER_CLUSTER],
-      loadIndeterminate: true, // results are filtered so we wouldn't get the correct count on indicator...
-    };
+    // results are filtered so we wouldn't get the correct count on indicator...
+    return { loadIndeterminate: true };
   },
 
   mounted() {

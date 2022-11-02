@@ -13,6 +13,7 @@ function registerType(state, type) {
       list:             [],
       haveAll:          false,
       haveSelector:     {},
+      haveNamespace:    undefined, // If the cached list only contains resources for a namespace, this will contain the ns name
       revision:         0, // The highest known resourceVersion from the server for this type
       generation:       0, // Updated every time something is loaded for this type
       loadCounter:      0, // Used to cancel incremental loads if the page changes during load
@@ -115,6 +116,7 @@ export function forgetType(state, type) {
   if ( cache ) {
     cache.haveAll = false;
     cache.haveSelector = {};
+    cache.haveNamespace = undefined;
     cache.revision = 0;
     cache.generation = 0;
     clear(cache.list);
@@ -217,10 +219,18 @@ export default {
     Object.assign(state.config, config);
   },
 
-  loadMulti(state, { data, ctx }) {
+  loadMulti(state, {
+    data, ctx, namespace, type
+  }) {
     // console.log('### Mutation loadMulti', data?.length);
     for ( const entry of data ) {
       load(state, { data: entry, ctx });
+    }
+
+    const cache = state.types[type];
+
+    if (cache) {
+      cache.haveNamespace = namespace;
     }
   },
 
@@ -286,6 +296,12 @@ export default {
     const cache = registerType(state, type);
 
     cache.haveAll = true;
+  },
+
+  setHaveNamespace(state, { type, namespace }) {
+    const cache = registerType(state, type);
+
+    cache.haveNamespace = namespace;
   },
 
   loadedAll(state, { type }) {
