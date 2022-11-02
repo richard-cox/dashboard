@@ -6267,7 +6267,14 @@ performance:
       count:
         description: Resource types must exceed this amount to be considered for garbage collection.
         inputLabel: Resource Count
-
+  nsFiltering:
+    label: Force Namespace Filtering
+    description: Instead of fetching all resources used in a List and filtering by namespaces locally, force the user to select a single namespace and only fetch resources related to it
+    banner: This setting is experimental and may be removed or updated in future versions.
+    checkboxLabel: Enable Forced Namespace Filtering
+    count:
+      inputLabel: Resource Threshold
+      description: You can configure a threshold above which filtering by a namespace is required
 
 banner:
   label: Fixed Banners

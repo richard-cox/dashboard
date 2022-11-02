@@ -228,6 +228,32 @@ export default {
             </div>
           </div>
         </div>
+        <!-- Force NS filter -->
+        <div class="mt-40">
+          <h2>{{ t('performance.nsFiltering.label') }}</h2>
+          <p>{{ t('performance.nsFiltering.description') }}</p>
+          <Checkbox
+            v-model="value.forceNsFilter.enabled"
+            :mode="mode"
+            :label="t('performance.nsFiltering.checkboxLabel')"
+            class="mt-10 mb-20"
+            :primary="true"
+          />
+          <div class="ml-20">
+            <p :class="{ 'text-muted': !value.forceNsFilter.enabled }">
+              {{ t('performance.nsFiltering.count.description') }}
+            </p>
+            <LabeledInput
+              v-model="value.forceNsFilter.threshold"
+              :mode="mode"
+              :label="t('performance.nsFiltering.count.inputLabel')"
+              :disabled="!value.forceNsFilter.enabled"
+              class="input"
+              type="number"
+              min="0"
+            />
+          </div>
+        </div>
       </div>
     </div>
     <template v-for="err in errors">

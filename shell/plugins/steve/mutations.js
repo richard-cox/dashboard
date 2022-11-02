@@ -10,7 +10,6 @@ import {
 import { keyForSubscribe } from '@shell/plugins/steve/subscribe';
 import { perfLoadAll } from '@shell/plugins/steve/performanceTesting';
 import Vue from 'vue';
-import { normalizeType } from '~/shell/plugins/dashboard-store/normalize';
 
 function registerNamespace(state, namespace) {
   let cache = state.podsByNamespace[namespace];

@@ -16,11 +16,6 @@ import { mapGetters } from 'vuex';
 
 export default {
 
-  data() {
-    return { MAX_COUNT: 4, // TODO: RC preference
-    };
-  },
-
   computed: {
     ...mapGetters(['currentCluster', 'isSingleNamespace']),
 
@@ -53,7 +48,11 @@ export default {
      * Do we need to filter the list by a namespace?
      */
     __namespaceRequired() {
-      this.log('rfn mixin', '__namespaceRequired', this.__areResourcesNamespaced, this.__areResourcesTooMany);
+      this.log('rfn mixin', '__namespaceRequired', this.__areResourcesNamespaced, this.__areResourcesTooMany, this.perfConfig);
+
+      if (!this.forceNsFilter?.enabled || this.perfConfig.forceNsFilter.threshold === undefined) {
+        return false;
+      }
 
       return this.__areResourcesNamespaced && this.__areResourcesTooMany;
     },
@@ -75,7 +74,7 @@ export default {
     __areResourcesTooMany() {
       const count = this.__getCountForResources(this.loadResources);
 
-      return count > this.MAX_COUNT;
+      return count > this.perfConfig.forceNsFilter.threshold;
     },
 
   },
