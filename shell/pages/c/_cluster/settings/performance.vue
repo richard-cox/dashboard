@@ -131,7 +131,7 @@ export default {
         <div class="mt-40">
           <h2 v-t="'performance.manualRefresh.label'" />
           <p>{{ t('performance.manualRefresh.description') }}</p>
-          <Banner color="error" label-key="performance.manualRefresh.banner" />
+          <Banner color="error" label-key="performance.experimental" />
           <Checkbox
             v-model="value.manualRefresh.enabled"
             :mode="mode"
@@ -158,7 +158,7 @@ export default {
         <div class="mt-40">
           <h2 v-t="'performance.gc.label'" />
           <p>{{ t('performance.gc.description') }}</p>
-          <Banner color="error" label-key="performance.gc.banner" />
+          <Banner color="error" label-key="performance.experimental" />
           <Checkbox
             v-model="value.garbageCollection.enabled"
             :mode="mode"
@@ -232,6 +232,7 @@ export default {
         <div class="mt-40">
           <h2>{{ t('performance.nsFiltering.label') }}</h2>
           <p>{{ t('performance.nsFiltering.description') }}</p>
+          <Banner color="error" label-key="performance.experimental" />
           <Checkbox
             v-model="value.forceNsFilter.enabled"
             :mode="mode"

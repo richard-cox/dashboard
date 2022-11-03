@@ -5,6 +5,7 @@
 // TODO: RC Comment - If we're over the threshold and have fetched namespaced resources, going to a page that needs them all will result in us fetching them all (for instance from `events` to `cluster dashboard`)
 // TODO: RC Comment - Gates for forcing the filter (count, resource type is namespaced, etc) apply only to the resources shown in the list.
 // TODO: RC Comment - - For example PV's aren't namespaced, so no enforced filtering. However they fetch PVC's which are namespaced
+// TODO: RC Comment - does not take in to account sub resource count
 
 // TODO: RC TEST - manual refresh
 // TODO: RC TEST - incremental loading

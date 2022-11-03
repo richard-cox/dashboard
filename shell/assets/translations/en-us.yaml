@@ -4252,6 +4252,7 @@ resourceList:
     create: Create
     createFromYaml: Create from YAML
     createResource: "Create {resourceName}"
+  nsFiltering: "There are a lot of {resource}.<br>Please filter them by selecting a single Namespace."
 resourceLoadingIndicator:
   loading: Loading
 
@@ -6224,6 +6225,7 @@ featureFlags:
 performance:
   label: UI Performance Settings
   settingName: Performance
+  experimental: This setting is experimental and may be removed or updated in future versions.
   incrementalLoad:
     label: Incremental Loading
     setting: You can configure the threshold above which incremental loading will be used.
@@ -6232,7 +6234,6 @@ performance:
     checkboxLabel: Enable incremental loading
     inputLabel: Resource Threshold
   manualRefresh:
-    banner: This setting is experimental and may be removed or updated in future versions.
     label: Manual Refresh
     setting: You can configure a threshold above which manual refresh will be enabled.
     buttonTooltip: Refresh list
@@ -6248,7 +6249,6 @@ performance:
   gc:
     label: Resource Garbage Collection
     description: The UI will cache kuberentes resources locally to avoid having to re-fetch them. In some cases this can lead to a large amount of data stored in the browser. Enable this setting to periodically remove them.
-    banner: This setting is experimental and may be removed or updated in future versions.
     checkboxLabel: Enable Garbage Collection
     whenRun:
       description: Update when garbage collection runs
@@ -6270,7 +6270,6 @@ performance:
   nsFiltering:
     label: Force Namespace Filtering
     description: Instead of fetching all resources used in a List and filtering by namespaces locally, force the user to select a single namespace and only fetch resources related to it
-    banner: This setting is experimental and may be removed or updated in future versions.
     checkboxLabel: Enable Forced Namespace Filtering
     count:
       inputLabel: Resource Threshold

@@ -70,6 +70,7 @@ export default {
         return;
       }
 
+      // See comment for `namespaceFilterRequired` watcher, skip fetch if we don't have a valid NS
       if (!this.namespaceFilterRequired) {
         await this.$fetchType(resource);
       }
@@ -127,8 +128,15 @@ export default {
   },
 
   watch: {
+    /**
+     * ResourceList has two modes
+     * 1) Root component handles API request to fetch resources
+     * 2) Custom list component handles API request to fetch resources
+     *
+     * Case 2 will fetch resources when the component is shown and will use the latest namespace filter
+     * Case 1 requires a manual prod by watching namespaceFilterRequired
+     */
     namespaceFilterRequired(neu, old) {
-      console.warn('ResourceList (actual)', 'namespaceFilterRequired', neu, !this.hasFetch); // TODO: RC PR
       if (!neu && !this.hasFetch) {
         this.$fetchType(this.resource);
       }
@@ -156,8 +164,11 @@ export default {
     :vertical="true"
     :subtle="false"
     icon="icon-search"
-    :message="`There's a lorra lorra resources.... please filter to a single namespace`"
-  />
+  >
+    <template #message>
+      <span v-html="t('resourceList.nsFiltering', { resource: $store.getters['type-map/labelFor'](schema, 2) || customTypeDisplay }, true)" />
+    </template>
+  </IconMessage>
   <div v-else>
     <Masthead
       v-if="showMasthead"
