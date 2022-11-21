@@ -34,10 +34,10 @@ export function init(store) {
   virtualType({
     labelKey:   'catalog.charts.header',
     icon:       'compass',
-    namespaced:  false,
-    name:        'charts',
-    weight:      100,
-    route:       { name: 'c-cluster-apps-charts' },
+    namespaced: false,
+    name:       'charts',
+    weight:     100,
+    route:      { name: 'c-cluster-apps-charts' },
   });
 
   weightType(CATALOG.APP, 99, true);

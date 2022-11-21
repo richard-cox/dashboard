@@ -37,11 +37,18 @@ export default function({
     },
 
     // Load a plugin from a UI package
-    loadAsyncByNameAndVersion(name, version, url) {
+    loadPluginAsync(plugin) {
+      const { name, version } = plugin;
       const id = `${ name }-${ version }`;
+      let url;
 
-      if (!url) {
-        url = `${ UI_PLUGIN_BASE_URL }/${ name }/${ version }/plugin/${ id }.umd.min.js`;
+      if (plugin?.metadata?.direct === 'true') {
+        url = plugin.endpoint;
+      } else {
+        // See if the plugin has a main metadata property set
+        const main = plugin?.metadata?.main || `${ id }.umd.min.js`;
+
+        url = `${ UI_PLUGIN_BASE_URL }/${ name }/${ version }/plugin/${ main }`;
       }
 
       return this.loadAsync(id, url);
@@ -149,6 +156,26 @@ export default function({
       } catch (e) {
         console.error(`Error loading plugin ${ plugin.name }`); // eslint-disable-line no-console
         console.error(e); // eslint-disable-line no-console
+      }
+    },
+
+    async logout() {
+      const all = Object.values(plugins);
+
+      for (let i = 0; i < all.length; i++) {
+        const plugin = all[i];
+
+        if (plugin.builtin) {
+          continue;
+        }
+
+        try {
+          await this.removePlugin(plugin.name);
+        } catch (e) {
+          console.error('Error removing plugin', e); // eslint-disable-line no-console
+        }
+
+        delete plugins[plugin.name];
       }
     },
 

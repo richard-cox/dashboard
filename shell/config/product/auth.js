@@ -37,12 +37,12 @@ export function init(store) {
   });
 
   virtualType({
-    labelKey:    'auth.config.label',
-    icon:        'lock',
-    namespaced:  false,
-    name:        'config',
-    weight:      -1,
-    route:       { name: 'c-cluster-auth-config' },
+    labelKey:   'auth.config.label',
+    icon:       'lock',
+    namespaced: false,
+    name:       'config',
+    weight:     -1,
+    route:      { name: 'c-cluster-auth-config' },
     ifHaveType: MANAGEMENT.AUTH_CONFIG
   });
 
@@ -152,7 +152,7 @@ export function init(store) {
     route:       { name: 'c-cluster-auth-roles' },
     // There are two resource types shown on this page, MANAGEMENT.GLOBAL_ROLE and MANAGEMENT.ROLE_TEMPLATE
     // If there user can't see ROLE_TEMPLATE, they definitely can't see GLOBAL_ROLE
-    ifHaveType:  MANAGEMENT.ROLE_TEMPLATE
+    ifHaveType: MANAGEMENT.ROLE_TEMPLATE
   });
 
   configureType(MANAGEMENT.AUTH_CONFIG, {
@@ -190,7 +190,7 @@ export function init(store) {
   // A lot of the built in roles have nicer names returned by nameDisplay. In both tables we want to show both nicer and base names
   const DISPLAY_NAME = {
     ...HEADER_NAME,
-    name:          'displayName',
+    name:     'displayName',
     labelKey: 'tableHeaders.nameDisplay',
   };
 

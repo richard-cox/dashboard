@@ -2,7 +2,7 @@ import {
   CONFIG_MAP,
   EVENT,
   NODE, SECRET, INGRESS,
-  WORKLOAD, WORKLOAD_TYPES, SERVICE, HPA, NETWORK_POLICY, PV, PVC, STORAGE_CLASS, POD,
+  WORKLOAD, WORKLOAD_TYPES, SERVICE, HPA, NETWORK_POLICY, PV, PVC, STORAGE_CLASS, POD, POD_DISRUPTION_BUDGET, LIMIT_RANGE, RESOURCE_QUOTA,
   RBAC,
   MANAGEMENT,
   NAMESPACE,
@@ -62,10 +62,15 @@ export function init(store) {
     EVENT,
   ], 'cluster');
   basicType([
+    LIMIT_RANGE,
+    NETWORK_POLICY,
+    POD_DISRUPTION_BUDGET,
+    RESOURCE_QUOTA,
+  ], 'policy');
+  basicType([
     SERVICE,
     INGRESS,
     HPA,
-    NETWORK_POLICY,
   ], 'serviceDiscovery');
   basicType([
     PV,
@@ -88,6 +93,7 @@ export function init(store) {
   weightGroup('workload', 98, true);
   weightGroup('serviceDiscovery', 96, true);
   weightGroup('storage', 95, true);
+  weightGroup('policy', 94, true);
   weightType(POD, -1, true);
 
   // here is where we define the usage of the WORKLOAD custom list view for
@@ -164,8 +170,8 @@ export function init(store) {
   configureType(WORKLOAD, {
     displayName: store.getters['i18n/t'](`typeLabel.${ WORKLOAD }`, { count: 1 }).trim(),
     location:    {
-      name:    'c-cluster-product-resource',
-      params:  { resource: WORKLOAD },
+      name:   'c-cluster-product-resource',
+      params: { resource: WORKLOAD },
     },
   });
 
@@ -231,27 +237,27 @@ export function init(store) {
   ]);
 
   virtualType({
-    label:       store.getters['i18n/t']('clusterIndexPage.header'),
+    label:      store.getters['i18n/t']('clusterIndexPage.header'),
     group:      'Root',
-    namespaced:  false,
-    name:        'cluster-dashboard',
-    weight:      100,
-    route:       { name: 'c-cluster-explorer' },
-    exact:       true,
-    overview:    true,
+    namespaced: false,
+    name:       'cluster-dashboard',
+    weight:     100,
+    route:      { name: 'c-cluster-explorer' },
+    exact:      true,
+    overview:   true,
   });
 
   virtualType({
     labelKey:    'members.clusterMembers',
     group:      'cluster',
-    namespaced:  false,
-    name:        VIRTUAL_TYPES.CLUSTER_MEMBERS,
+    namespaced: false,
+    name:       VIRTUAL_TYPES.CLUSTER_MEMBERS,
     icon:       'globe',
-    weight:      -1,
-    route:       { name: 'c-cluster-product-members' },
-    exact:       true,
-    ifHaveType:  {
-      type:   MANAGEMENT.CLUSTER_ROLE_TEMPLATE_BINDING,
+    weight:     -1,
+    route:      { name: 'c-cluster-product-members' },
+    exact:      true,
+    ifHaveType: {
+      type:  MANAGEMENT.CLUSTER_ROLE_TEMPLATE_BINDING,
       store: 'management'
     }
   });
@@ -265,8 +271,8 @@ export function init(store) {
     icon:           'folder',
     ifHaveSubTypes: Object.values(WORKLOAD_TYPES),
     route:          {
-      name:     'c-cluster-product-resource',
-      params:   { resource: WORKLOAD }
+      name:   'c-cluster-product-resource',
+      params: { resource: WORKLOAD }
     },
     overview: true,
   });

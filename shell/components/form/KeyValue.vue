@@ -21,7 +21,11 @@ export default {
   },
   props: {
     value: {
-      type:     [Array, Object],
+      type:    [Array, Object],
+      default: null,
+    },
+    defaultValue: {
+      type:    [Array, Object],
       default: null,
     },
     // If the user supplies this array, then it indicates which keys should be shown as binary
@@ -224,12 +228,58 @@ export default {
       type:    Boolean
     }
   },
+  data() {
+    const rows = this.getRows(this.value);
+
+    return { rows };
+  },
+
   computed: {
-    rows() {
+
+    isView() {
+      return this.mode === _VIEW;
+    },
+    containerStyle() {
+      const gap = this.canRemove ? ' 50px' : '';
+      const size = 2 + this.extraColumns.length;
+
+      return `grid-template-columns: repeat(${ size }, 1fr)${ gap };`;
+    },
+    usedKeyOptions() {
+      return this.rows.map(row => row[this.keyName]);
+    },
+    filteredKeyOptions() {
+      if (this.keyOptionUnique) {
+        return this.keyOptions
+          .filter(option => !this.usedKeyOptions.includes(option.value));
+      }
+
+      return this.keyOptions;
+    },
+    /**
+     * Prevent removal if expressly not allowed and not in view mode
+     */
+    canRemove() {
+      return !this.isView && this.removeAllowed;
+    }
+  },
+  created() {
+    this.queueUpdate = debounce(this.update, 500);
+  },
+  watch: {
+    defaultValue(neu) {
+      if (Array.isArray(neu)) {
+        this.rows = this.getRows(neu);
+        this.$emit('input', neu);
+      }
+    }
+  },
+  methods: {
+    getRows(value) {
       const rows = [];
 
       if ( this.asMap ) {
-        const input = this.value || {};
+        const input = value || {};
 
         Object.keys(input).forEach((key) => {
           let value = input[key];
@@ -249,7 +299,7 @@ export default {
           });
         });
       } else {
-        const input = this.value || [];
+        const input = value || [];
 
         for ( const row of input ) {
           let value = row[this.valueName] || '';
@@ -287,37 +337,7 @@ export default {
 
       return rows;
     },
-    isView() {
-      return this.mode === _VIEW;
-    },
-    containerStyle() {
-      const gap = this.canRemove ? ' 50px' : '';
-      const size = 2 + this.extraColumns.length;
 
-      return `grid-template-columns: repeat(${ size }, 1fr)${ gap };`;
-    },
-    usedKeyOptions() {
-      return this.rows.map(row => row[this.keyName]);
-    },
-    filteredKeyOptions() {
-      if (this.keyOptionUnique) {
-        return this.keyOptions
-          .filter(option => !this.usedKeyOptions.includes(option.value));
-      }
-
-      return this.keyOptions;
-    },
-    /**
-     * Prevent removal if expressly not allowed and not in view mode
-     */
-    canRemove() {
-      return !this.isView && this.removeAllowed;
-    }
-  },
-  created() {
-    this.queueUpdate = debounce(this.update, 500);
-  },
-  methods: {
     add(key = '', value = '') {
       const obj = {
         ...this.defaultAddData,
@@ -477,27 +497,47 @@ export default {
 </script>
 <template>
   <div class="key-value">
-    <div v-if="title || $slots.title" class="clearfix">
+    <div
+      v-if="title || $slots.title"
+      class="clearfix"
+    >
       <slot name="title">
         <h3>
           {{ title }}
-          <i v-if="titleProtip" v-tooltip="titleProtip" class="icon icon-info" />
+          <i
+            v-if="titleProtip"
+            v-tooltip="titleProtip"
+            class="icon icon-info"
+          />
         </h3>
       </slot>
     </div>
-    <div class="kv-container" :style="containerStyle">
+    <div
+      class="kv-container"
+      :style="containerStyle"
+    >
       <template v-if="rows.length || isView">
         <label class="text-label">
           {{ keyLabel }}
-          <i v-if="protip && !isView && addAllowed" v-tooltip="protip" class="icon icon-info" />
+          <i
+            v-if="protip && !isView && addAllowed"
+            v-tooltip="protip"
+            class="icon icon-info"
+          />
         </label>
         <label class="text-label">
           {{ valueLabel }}
         </label>
-        <label v-for="c in extraColumns" :key="c">
+        <label
+          v-for="c in extraColumns"
+          :key="c"
+        >
           <slot :name="'label:'+c">{{ c }}</slot>
         </label>
-        <slot v-if="canRemove" name="remove">
+        <slot
+          v-if="canRemove"
+          name="remove"
+        >
           <span />
         </slot>
       </template>
@@ -509,8 +549,14 @@ export default {
           &mdash;
         </div>
       </template>
-      <template v-for="(row,i) in rows" v-else>
-        <div :key="i+'key'" class="kv-item key">
+      <template
+        v-for="(row,i) in rows"
+        v-else
+      >
+        <div
+          :key="i+'key'"
+          class="kv-item key"
+        >
           <slot
             name="key"
             :row="row"
@@ -537,10 +583,13 @@ export default {
               :placeholder="keyPlaceholder"
               @input="queueUpdate"
               @paste="onPaste(i, $event)"
-            />
+            >
           </slot>
         </div>
-        <div :key="i+'value'" class="kv-item value">
+        <div
+          :key="i+'value'"
+          class="kv-item value"
+        >
           <slot
             name="value"
             :row="row"
@@ -575,11 +624,19 @@ export default {
               autocapitalize="off"
               spellcheck="false"
               @input="queueUpdate"
-            />
+            >
           </slot>
         </div>
-        <div v-for="c in extraColumns" :key="i + c" class="kv-item extra">
-          <slot :name="'col:' + c" :row="row" :queue-update="queueUpdate" />
+        <div
+          v-for="c in extraColumns"
+          :key="i + c"
+          class="kv-item extra"
+        >
+          <slot
+            :name="'col:' + c"
+            :row="row"
+            :queue-update="queueUpdate"
+          />
         </div>
         <div
           v-if="canRemove"
@@ -587,18 +644,43 @@ export default {
           class="kv-item remove"
           :data-testid="`remove-column-${i}`"
         >
-          <slot name="removeButton" :remove="remove" :row="row" :i="i">
-            <button type="button" :disabled="isView" class="btn role-link" @click="remove(i)">
+          <slot
+            name="removeButton"
+            :remove="remove"
+            :row="row"
+            :i="i"
+          >
+            <button
+              type="button"
+              :disabled="isView"
+              class="btn role-link"
+              @click="remove(i)"
+            >
               {{ removeLabel || t('generic.remove') }}
             </button>
           </slot>
         </div>
       </template>
     </div>
-    <div v-if="(addAllowed || readAllowed) && !isView" class="footer">
-      <slot name="add" :add="add">
-        <button v-if="addAllowed" type="button" class="btn role-tertiary add" :disabled="loading || (keyOptions && filteredKeyOptions.length === 0)" @click="add()">
-          <i v-if="loading" class="mr-5 icon icon-spinner icon-spin icon-lg" /> {{ addLabel }}
+    <div
+      v-if="(addAllowed || readAllowed) && !isView"
+      class="footer"
+    >
+      <slot
+        name="add"
+        :add="add"
+      >
+        <button
+          v-if="addAllowed"
+          type="button"
+          class="btn role-tertiary add"
+          :disabled="loading || (keyOptions && filteredKeyOptions.length === 0)"
+          @click="add()"
+        >
+          <i
+            v-if="loading"
+            class="mr-5 icon icon-spinner icon-spin icon-lg"
+          /> {{ addLabel }}
         </button>
         <FileSelector
           v-if="readAllowed"
