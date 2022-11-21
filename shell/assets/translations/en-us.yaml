@@ -217,7 +217,6 @@ product:
   plugins: Plugins
   uiplugins: Extensions
   elemental: OS Management
-  legacy: Legacy
   plugins: Plugins
   uiplugins: UI Plugins
 

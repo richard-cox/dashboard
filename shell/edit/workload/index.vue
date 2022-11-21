@@ -298,7 +298,11 @@ export default {
                 @removePvcForm="clearPvcFormState"
               />
             </Tab>
-            <Tab :label="t('workload.storage.title')" name="storage" :weight="tabWeightMap['storage']">
+            <Tab
+              :label="t('workload.storage.title')"
+              name="storage"
+              :weight="tabWeightMap['storage']"
+            >
               <ContainerMountPaths
                 v-model="podTemplateSpec"
                 :namespace="value.metadata.namespace"
