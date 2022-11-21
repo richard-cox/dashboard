@@ -990,12 +990,6 @@ export const COMPLETIONS = {
   labelKey:      'tableHeaders.completions',
 };
 
-export const DURATION = {
-  name:          'duration',
-  value:         'duration',
-  labelKey:      'tableHeaders.duration',
-};
-
 export const RESTARTS = {
   name:          'restarts',
   value:         'restarts',
