@@ -248,7 +248,7 @@ export function init(store) {
   });
 
   virtualType({
-    labelKey:    'members.clusterMembers',
+    labelKey:   'members.clusterMembers',
     group:      'cluster',
     namespaced: false,
     name:       VIRTUAL_TYPES.CLUSTER_MEMBERS,

@@ -688,13 +688,13 @@ export default {
       const withFallBack = this.$store.getters['i18n/withFallback'];
 
       return {
-        name:        customStep.name,
-        label:       withFallBack(loaded?.default?.label, null, customStep.name),
-        subtext:     withFallBack(loaded?.default?.subtext, null, ''),
-        weight:      loaded?.default?.weight,
-        ready:       false,
-        hidden:      true,
-        loading:    true,
+        name:      customStep.name,
+        label:     withFallBack(loaded?.default?.label, null, customStep.name),
+        subtext:   withFallBack(loaded?.default?.subtext, null, ''),
+        weight:    loaded?.default?.weight,
+        ready:     false,
+        hidden:    true,
+        loading:   true,
         component: customStep.component,
       };
     },

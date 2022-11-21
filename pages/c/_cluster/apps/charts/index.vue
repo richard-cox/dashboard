@@ -325,8 +325,8 @@ export default {
       this.$router.push({
         name:   'c-cluster-apps-charts-chart',
         params: {
-          cluster:  this.$route.params.cluster,
-          product:  this.$store.getters['productId'],
+          cluster: this.$route.params.cluster,
+          product: this.$store.getters['productId'],
         },
         query: {
           [REPO_TYPE]: chart.repoType,

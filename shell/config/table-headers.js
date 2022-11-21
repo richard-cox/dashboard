@@ -943,61 +943,61 @@ export const IP_ADDRESS = {
 };
 
 export const CURRENT = {
-  name:          'current',
-  value:         'current',
-  labelKey:      'tableHeaders.current',
+  name:     'current',
+  value:    'current',
+  labelKey: 'tableHeaders.current',
 };
 
 export const READY = {
-  name:          'ready',
-  value:         'ready',
-  labelKey:      'tableHeaders.ready',
+  name:     'ready',
+  value:    'ready',
+  labelKey: 'tableHeaders.ready',
 };
 
 export const DESIRED = {
-  name:          'desired',
-  value:         'desired',
-  labelKey:      'tableHeaders.desired',
+  name:     'desired',
+  value:    'desired',
+  labelKey: 'tableHeaders.desired',
 };
 
 export const SCHEDULE = {
-  name:          'schedule',
-  value:         'schedule',
-  labelKey:      'tableHeaders.schedule',
+  name:     'schedule',
+  value:    'schedule',
+  labelKey: 'tableHeaders.schedule',
 };
 
 export const LAST_SCHEDULE = {
-  name:          'lastSchedule',
-  value:         'lastSchedule',
-  labelKey:      'tableHeaders.lastSchedule',
+  name:     'lastSchedule',
+  value:    'lastSchedule',
+  labelKey: 'tableHeaders.lastSchedule',
 };
 
 export const UP_TO_DATE = {
-  name:          'upToDate',
-  value:         'upToDate',
-  labelKey:      'tableHeaders.upToDate',
+  name:     'upToDate',
+  value:    'upToDate',
+  labelKey: 'tableHeaders.upToDate',
 };
 
 export const AVAILABLE = {
-  name:          'available',
-  value:         'available',
-  labelKey:      'tableHeaders.available',
+  name:     'available',
+  value:    'available',
+  labelKey: 'tableHeaders.available',
 };
 
 export const COMPLETIONS = {
-  name:          'completions',
-  value:         'completions',
-  labelKey:      'tableHeaders.completions',
+  name:     'completions',
+  value:    'completions',
+  labelKey: 'tableHeaders.completions',
 };
 
 export const RESTARTS = {
-  name:          'restarts',
-  value:         'restarts',
-  labelKey:      'tableHeaders.restarts',
+  name:     'restarts',
+  value:    'restarts',
+  labelKey: 'tableHeaders.restarts',
 };
 
 export const IP = {
-  name:          'ip',
-  value:         'ip',
-  labelKey:      'tableHeaders.ip',
+  name:     'ip',
+  value:    'ip',
+  labelKey: 'tableHeaders.ip',
 };

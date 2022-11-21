@@ -214,11 +214,9 @@ product:
   harvesterManager: Virtualization Management
   rancher: Rancher
   legacy: Legacy
-  plugins: Plugins
   uiplugins: Extensions
   elemental: OS Management
   plugins: Plugins
-  uiplugins: UI Plugins
 
 suffix:
   percent: "%"
@@ -4938,18 +4936,9 @@ tableHeaders:
   createdAt: Created At
   customVerbs: Custom Verbs
   description: Description
-  duration: Duration
   expires: Expires
-  providers: Providers
-  count: Count
-  createdAt: Created At
-  customVerbs: Custom Verbs
-  description: Description
-  expires: Expires
-  providers: Providers
   cpu: CPU
   currentReplicas: Current Replicas
-  description: Description
   date: Date
   data: Data
   default: Default
@@ -4964,7 +4953,6 @@ tableHeaders:
   distinguisherMethod: DistinguisherMethod
   effect: Effect
   endpoints: Endpoints
-  expires: Expires
   firstSeen: First Seen
   fleetBundleType: Type
   flow: Flow
@@ -5085,7 +5073,6 @@ tableHeaders:
   service: Service
   serviceAccounts: ServiceAccounts
   secret-Name: Secret-Name
-  lastSchedule: Last Schedule
   simpleName: Name
   simpleScale: Scale
   simpleType: Type
