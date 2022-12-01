@@ -298,7 +298,7 @@ export const actions = {
     }
 
     if ( typeof revision === 'undefined' ) {
-      revision = getters.nextResourceVersion(type, id);
+      revision = getters.nextResourceVersion(params);
     }
 
     const msg = { resourceType: type };
@@ -362,6 +362,7 @@ export const actions = {
         opt,
       });
       commit('clearInError', params);
+      // commit('setNextResourceVersion', resourceType) // TODO: RC
 
       return;
     }
@@ -554,7 +555,9 @@ export const actions = {
     });
   },
 
-  'ws.resource.error'({ getters, commit, dispatch }, msg) {
+  'ws.resource.error'({
+    state, getters, commit, dispatch
+  }, msg) {
     console.warn(`Resource error [${ getters.storeName }]`, msg.resourceType, ':', msg.data.error); // eslint-disable-line no-console
 
     const err = msg.data?.error?.toLowerCase();
@@ -564,11 +567,34 @@ export const actions = {
     } else if ( err.includes('failed to find schema') ) {
       commit('setInError', { type: msg.resourceType, reason: NO_SCHEMA });
     } else if ( err.includes('too old') ) {
-      dispatch('resyncWatch', msg);
+      const type = msg.resourceType;
+      const crv = state.nextResourceVersion[type];
+
+      if (crv) {
+        dispatch('watch', {
+          type,
+          id:        msg.id,
+          namespace: msg.namespace,
+          selector:  msg.selector
+        });
+      } else {
+        dispatch('resyncWatch', msg);
+      }
     }
   },
 
-  'ws.resource.stop'({ getters, commit, dispatch }, msg) {
+  // TODO: RC vs nextResourceVersion
+  async setNextResourceVersion({ commit, dispatch, getters }, obj) {
+    // TODO: RC is resource version per type?!
+    const opt = { limit: 1 };
+
+    opt.url = getters.urlFor(obj.type, null, opt);
+    const limitedResult = await dispatch('request', { opt, type: obj.type } );
+
+    commit('setNextResourceVersion', obj, limitedResult.revision);
+  },
+
+  async 'ws.resource.stop'({ getters, commit, dispatch }, msg) {
     const type = msg.resourceType;
     const obj = {
       type,
@@ -583,6 +609,9 @@ export const actions = {
       // Try reconnecting once
 
       commit('setWatchStopped', obj);
+
+      obj.revision = getters.nextResourceVersion(type, obj); // Guessed
+      await dispatch('setNextResourceVersion', obj);
 
       setTimeout(() => {
         // Delay a bit so that immediate start/error/stop causes
@@ -737,6 +766,16 @@ export const mutations = {
     clearTimeout(state.queueTimer);
     state.deferredRequests = {};
     state.queueTimer = null;
+  },
+
+  setNextResourceVersion(state, obj, version) {
+    const key = keyForSubscribe(obj);
+
+    if (version !== undefined || version !== null) {
+      state.nextResourceVersion[key] = version;
+    } else {
+      delete state.nextResourceVersion[key];
+    }
   }
 };
 
@@ -749,8 +788,20 @@ export const getters = {
     return !!state.started.find(entry => equivalentWatch(obj, entry));
   },
 
-  nextResourceVersion: (state, getters) => (type, id) => {
-    type = normalizeType(type);
+  nextResourceVersion: (state, getters, commit) => (obj) => {
+    const { id } = obj;
+    const type = normalizeType(obj.type);
+
+    debugger;
+
+    const nextResourceVersion = state.nextResourceVersion[type];
+
+    if (nextResourceVersion) {
+      commit('setNextResourceVersion', obj);
+
+      return nextResourceVersion;
+    }
+
     let revision = 0;
 
     if ( id ) {
