@@ -17,7 +17,6 @@ import { escapeHtml } from '@shell/utils/string';
 
 // eslint-disable-next-line
 import webworker from './web-worker.steve-sub-worker.js';
-import { addParam } from '@shell/utils/url.ts';
 
 export const NO_WATCH = 'NO_WATCH';
 export const NO_SCHEMA = 'NO_SCHEMA';
@@ -278,24 +277,6 @@ export const actions = {
 
     type = getters.normalizeType(type);
 
-    const dispatchResubscribe = (resourceVersion) => {
-      const payload = { resourceType: type };
-
-      payload.resourceVersion = resourceVersion;
-
-      if ( namespace ) {
-        payload.namespace = namespace;
-      }
-      if ( id ) {
-        payload.id = id;
-      }
-      if ( selector ) {
-        payload.selector = selector;
-      }
-
-      return dispatch('send', payload);
-    };
-
     if (rootGetters['type-map/isSpoofed'](type)) {
       state.debugSocket && console.info('Will not Watch (type is spoofed)', JSON.stringify(params)); // eslint-disable-line no-console
 
@@ -317,26 +298,32 @@ export const actions = {
     }
 
     if ( typeof revision === 'undefined' ) {
-      const url = addParam(`${ state.config.baseUrl }/${ type }`, 'limit', 1);
-      const opt = {
-        method:  'get',
-        headers: { accept: 'application/json' }
-      };
-
-      fetch(url, opt)
-        .then((res) => {
-          if (!res.ok) {
-            console.warn(`Resource error retrieving resourceVersion, unable to resubscribe`, type, ':', res.json()); // eslint-disable-line no-console
-          }
-
-          return res.json();
-        })
-        .then((res) => {
-          dispatchResubscribe(res.revision);
-        });
-    } else {
-      return dispatchResubscribe(`${ revision }`);
+      revision = getters.nextResourceVersion(type, id);
     }
+
+    const msg = { resourceType: type };
+
+    if ( revision ) {
+      msg.resourceVersion = `${ revision }`;
+    }
+
+    if ( namespace ) {
+      msg.namespace = namespace;
+    }
+
+    if ( stop ) {
+      msg.stop = true;
+    }
+
+    if ( id ) {
+      msg.id = id;
+    }
+
+    if ( selector ) {
+      msg.selector = selector;
+    }
+
+    return dispatch('send', msg);
   },
 
   reconnectWatches({
@@ -592,12 +579,27 @@ export const actions = {
 
     // console.warn(`Resource stop: [${ getters.storeName }]`, msg); // eslint-disable-line no-console
 
+    // We want to keep watching this resource type..... unless we've forgotten this type and/or `resource.stop` is associated with us
+    // manually stopping the watch
     if ( getters['schemaFor'](type) && getters['watchStarted'](obj) ) {
       // Try reconnecting once
 
       commit('setWatchStopped', obj);
 
-      dispatch('watch', obj);
+      // Attempt to fetch the latest revision for the stopped time, in theory our local cache should be up to date with this
+      const opt = { limit: 1 };
+
+      opt.url = getters.urlFor(type, null, opt);
+      dispatch('request', { opt, type } )
+        .then((res) => {
+          // Re-watch given the latest revision
+          dispatch('watch', { ...obj, revision: res.revision });
+        })
+        .catch((err) => {
+          // For some reason was can't fetch a reasonable revision, so force a re-fetch
+          console.warn(`Resource error retrieving resourceVersion, forcing re-fetch`, type, ':', err); // eslint-disable-line no-console
+          dispatch('resyncWatch', msg);
+        });
     }
   },
 
@@ -756,6 +758,41 @@ export const getters = {
 
   watchStarted: state => (obj) => {
     return !!state.started.find(entry => equivalentWatch(obj, entry));
+  },
+
+  nextResourceVersion: (state, getters) => (type, id) => {
+    type = normalizeType(type);
+    let revision = 0;
+
+    if ( id ) {
+      const existing = getters['byId'](type, id);
+
+      revision = parseInt(existing?.metadata?.resourceVersion, 10);
+    }
+
+    if ( !revision ) {
+      const cache = state.types[type];
+
+      if ( !cache ) {
+        return null;
+      }
+
+      revision = cache.revision;
+
+      for ( const obj of cache.list ) {
+        if ( obj && obj.metadata ) {
+          const neu = parseInt(obj.metadata.resourceVersion, 10);
+
+          revision = Math.max(revision, neu);
+        }
+      }
+    }
+
+    if ( revision ) {
+      return revision;
+    }
+
+    return null;
   },
 
   currentGeneration: state => (type) => {
