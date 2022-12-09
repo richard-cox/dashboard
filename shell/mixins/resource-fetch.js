@@ -27,6 +27,31 @@ export default {
 
     const inStore = this.$store.getters['currentStore'](COUNT);
 
+    const minutes = new Date().getMinutes();
+
+    const tenMinutesEven = minutes / 10 % 2 < 1;
+    // const tenMinutesEven = true;
+
+    console.warn('DEBUG: Previous PERF_CONFIG: ', perfConfig );
+    console.warn('DEBUG: Incremental Loading & Force NS Filter Enabled: ', tenMinutesEven);
+
+    perfConfig = {
+      ...perfConfig,
+      incrementalLoading: {
+        enabled:   tenMinutesEven,
+        threshold: 50,
+      },
+      manualRefresh: {
+        enabled:   tenMinutesEven,
+        threshold: 50,
+      },
+      forceNsFilter: {
+        enabled:   true,
+        threshold: 50,
+      }
+    };
+    console.warn('DEBUG: New PERF_CONFIG: ', perfConfig);
+
     return {
       perfConfig,
       init:                       false,
