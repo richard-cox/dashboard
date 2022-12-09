@@ -544,6 +544,9 @@ export const actions = {
     }
   },
 
+  /**
+   * Steve only event
+   */
   'ws.resource.start'({ state, getters, commit }, msg) {
     state.debugSocket && console.info(`Resource start: [${ getters.storeName }]`, msg); // eslint-disable-line no-console
     commit('setWatchStarted', {
@@ -568,6 +571,9 @@ export const actions = {
     }
   },
 
+  /**
+   * Steve only event
+   */
   'ws.resource.stop'({ getters, commit, dispatch }, msg) {
     const type = msg.resourceType;
     const obj = {
@@ -579,16 +585,25 @@ export const actions = {
 
     // console.warn(`Resource stop: [${ getters.storeName }]`, msg); // eslint-disable-line no-console
 
+    // Steve only seems to send out `resource.stop` messages for two cases
+    // - We have request that the resource watch should be stopped and we receive this confirmation (aka `watchStarted` is false)
+    // - Steve tells us that the resource is no longer watched
     if ( getters['schemaFor'](type) && getters['watchStarted'](obj) ) {
       // Try reconnecting once
 
       commit('setWatchStopped', obj);
 
       setTimeout(() => {
-        // Delay a bit so that immediate start/error/stop causes
-        // only a slow infinite loop instead of a tight one.
-        dispatch('watch', obj);
-      }, 5000);
+        dispatch('watch', {
+          ...obj,
+          // Cache wise we rely on it being pretty much up to date, so always re-watch from the latest revision
+          // (this avoids getting probably stale revisions --> too old error --> fetch everything again).
+          // See below for why -1 works
+          // - https://github.com/rancher/steve/blob/a10fe811f58ff7d92ffee51dd3f11010afbaf115/pkg/stores/proxy/proxy_store.go#L305
+          // - https://kubernetes.io/docs/reference/using-api/api-concepts/#semantics-for-watch
+          revision: -1,
+        });
+      }, 500); // Previously this was 5 seconds (since 2.5.0), in theory we shouldn't need this as we're going from a known good revision
     }
   },
 
