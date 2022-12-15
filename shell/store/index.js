@@ -607,7 +607,7 @@ export const actions = {
     }
 
     let res = await allHashSettled({
-      mgmtSubscribe:  dispatch('management/subscribe'),
+      // mgmtSubscribe:  dispatch('management/subscribe'),
       mgmtSchemas:    dispatch('management/loadSchemas', true),
       rancherSchemas: dispatch('rancher/loadSchemas', true),
     });
@@ -625,8 +625,20 @@ export const actions = {
 
     const isRancher = res.rancherSchemas.status === 'fulfilled' && !!getters['management/schemaFor'](MANAGEMENT.PROJECT);
 
-    if ( isRancher ) {
-      promises['prefs'] = dispatch('prefs/loadServer');
+    const prefs = isRancher ? await dispatch('prefs/loadServer') : {};
+
+    // if ( isRancher ) {
+    // promises['prefs'] = dispatch('prefs/loadServer');
+    // promises['rancherSubscribe'] = dispatch('rancher/subscribe');
+    // }
+    const loadManagementSocket = prefs?.data?.['management-socket'] === 'true';
+    const loadRancherSocket = prefs?.data?.['rancher-socket'] === 'true';
+
+    if (loadManagementSocket) {
+      promises['managementSubscribe'] = dispatch('management/subscribe');
+    }
+
+    if (loadRancherSocket && isRancher) {
       promises['rancherSubscribe'] = dispatch('rancher/subscribe');
     }
 
@@ -812,7 +824,20 @@ export const actions = {
       dispatch('cluster/loadSchemas', true),
     ]);
 
-    dispatch('cluster/subscribe');
+    let loadClusterSocket;
+
+    try {
+      const prefs = getters['prefs/get']('cluster-socket');
+
+      // const loadClusterSocket = prefs?.data?.['cluster-socket'] === 'true';
+      loadClusterSocket = prefs === 'true';
+    } catch (e) {
+      console.error('Failed to fech pref: ', e);
+    }
+
+    if (loadClusterSocket) {
+      dispatch('cluster/subscribe');
+    }
 
     const projectArgs = {
       type: MANAGEMENT.PROJECT,

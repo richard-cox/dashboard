@@ -120,6 +120,8 @@ export const PSP_DEPRECATION_BANNER = create('hide-psp-deprecation-banner', fals
 // Maximum number of clusters to show in the slide-in menu
 export const MENU_MAX_CLUSTERS = create('menu-max-clusters', 4, { options: [2, 3, 4, 5, 6, 7, 8, 9, 10], parseJSON });
 
+export const CLUSTER_SOCKET = create('cluster-socket', 'false', { });
+
 // --------------------
 
 const cookiePrefix = 'R_';
