@@ -146,6 +146,12 @@ export const actions = {
       return;
     }
 
+    if (state.config.namespace === 'rancher') {
+      console.warn('AVOIDING NORMAN SOCKET');
+
+      return;
+    }
+
     let socket = state.socket;
 
     commit('setWantSocket', true);

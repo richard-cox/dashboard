@@ -627,7 +627,7 @@ export const actions = {
 
     if ( isRancher ) {
       promises['prefs'] = dispatch('prefs/loadServer');
-      promises['rancherSubscribe'] = dispatch('rancher/subscribe');
+      // promises['rancherSubscribe'] = dispatch('rancher/subscribe');
     }
 
     if ( getters['management/schemaFor'](COUNT) ) {

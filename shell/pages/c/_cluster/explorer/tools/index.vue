@@ -78,7 +78,7 @@ export default {
     ...mapGetters({ t: 'i18n/t' }),
 
     v1Apps() {
-      return this.$store.getters['rancher/all'](NORMAN.APP);
+      return this.$store.getters['rancher/all'](NORMAN.APP); // TODO: RC TEST.
     },
 
     namespaces() {
