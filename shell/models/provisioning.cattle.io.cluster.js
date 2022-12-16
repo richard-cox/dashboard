@@ -527,7 +527,7 @@ export default class ProvCluster extends SteveModel {
       return;
     }
 
-    token = await this.$dispatch('rancher/create', {
+    token = await this.$dispatch('rancher/create', { // TODO: RC test lists? does it appear in store afterwards?
       type:      NORMAN.CLUSTER_TOKEN,
       clusterId: this.mgmt.id
     }, { root: true });

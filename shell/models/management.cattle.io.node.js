@@ -15,7 +15,7 @@ export default class MgmtNode extends HybridModel {
 
     const downloadKeys = {
       action:  'downloadKeys',
-      enabled: !!this.norman?.links?.nodeConfig,
+      enabled: !!this._norman?.links?.nodeConfig,
       icon:    'icon icon-fw icon-download',
       label:   this.t('node.actions.downloadNodeConfig'),
     };
@@ -79,26 +79,26 @@ export default class MgmtNode extends HybridModel {
     return this.$rootGetters['management/byId'](MANAGEMENT.NODE_POOL, nodePoolID);
   }
 
-  get norman() {
+  get _norman() {
     const id = this.id.replace('/', ':');
 
     return this.$rootGetters['rancher/byId'](NORMAN.NODE, id);
   }
 
   get canDelete() {
-    return this.norman?.hasLink('remove');
+    return this._norman?.hasLink('remove');
   }
 
   get canUpdate() {
-    return this.hasLink('update') && this.norman?.hasLink('update');
+    return this.hasLink('update') && this._norman?.hasLink('update');
   }
 
   remove() {
-    return this.norman?.remove();
+    return this._norman?.remove();
   }
 
   downloadKeys() {
-    const url = this.norman?.links?.nodeConfig;
+    const url = this._norman?.links?.nodeConfig;
 
     if ( url ) {
       downloadUrl(url);
@@ -109,7 +109,7 @@ export default class MgmtNode extends HybridModel {
     const safeResources = Array.isArray(resources) ? resources : [this];
 
     await Promise.all(safeResources.map((node) => {
-      return node.norman?.doAction('scaledown');
+      return node._norman?.doAction('scaledown');
     }));
   }
 
@@ -166,7 +166,7 @@ export default class MgmtNode extends HybridModel {
   get canScaleDown() {
     const isInOnlyPool = this.pool?.provisioningCluster?.pools?.length === 1;
     const isOnlyNode = this.pool?.nodes?.length === 1;
-    const hasAction = this.norman?.actions?.scaledown;
+    const hasAction = this._norman?.actions?.scaledown;
 
     return hasAction && (!isInOnlyPool || !isOnlyNode);
   }

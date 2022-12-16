@@ -98,6 +98,7 @@ export default {
     }
 
     // Need to get Norman clusters so that we can check if user has permissions to access the local cluster
+    // TODO: RC can do via mgmt cluster with `internal` still
     if ( this.$store.getters['rancher/canList'](NORMAN.CLUSTER) ) {
       fetchOne.normanClusters = this.$store.dispatch('rancher/findAll', { type: NORMAN.CLUSTER });
     }
@@ -211,6 +212,7 @@ export default {
   watch: {
     showNodes(neu) {
       if (neu) {
+        // Ensure we have norman nodes if we have to show mgmt nodes
         this.$store.dispatch('rancher/findAll', { type: NORMAN.NODE });
       }
     },

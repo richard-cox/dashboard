@@ -130,7 +130,7 @@ export default class Project extends HybridModel {
     return (async() => {
       const clearedResourceQuotas = clearUnusedResourceQuotas(this.spec, ['resourceQuota', 'namespaceDefaultResourceQuota']);
 
-      const normanProject = await this.$dispatch('rancher/create', {
+      const normanProject = await this.$dispatch('rancher/create', { // TODO: RC test create project --> shows in project/ns list
         type:                          NORMAN.PROJECT,
         name:                          this.spec.displayName,
         description:                   this.spec.description,

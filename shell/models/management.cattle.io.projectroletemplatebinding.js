@@ -19,7 +19,7 @@ export default class PRTB extends HybridModel {
     return this.$rootGetters['management/byId'](MANAGEMENT.USER, this.userName);
   }
 
-  get principal() {
+  get principal() { // TODO: RC test
     const principalId = this.principalId.replace(/\//g, '%2F');
 
     return this.$dispatch('rancher/find', {

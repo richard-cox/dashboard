@@ -11,7 +11,7 @@ import { LOCAL } from '@shell/config/query-params';
 
 export default class ClusterNode extends SteveModel {
   get _availableActions() {
-    const normanAction = this.norman?.actions || {};
+    const normanAction = this._norman?.actions || {};
 
     const cordon = {
       action:   'cordon',
@@ -261,7 +261,7 @@ export default class ClusterNode extends SteveModel {
     const safeResources = Array.isArray(resources) ? resources : [this];
 
     await Promise.all(safeResources.map((node) => {
-      return node.norman?.doAction('cordon');
+      return node._norman?.doAction('cordon');
     }));
   }
 
@@ -269,7 +269,7 @@ export default class ClusterNode extends SteveModel {
     const safeResources = Array.isArray(resources) ? resources : [this];
 
     await Promise.all(safeResources.map((node) => {
-      return node.norman?.doAction('uncordon');
+      return node._norman?.doAction('uncordon');
     }));
   }
 
@@ -301,7 +301,7 @@ export default class ClusterNode extends SteveModel {
     return null;
   }
 
-  get norman() {
+  get _norman() {
     return this.$rootGetters['rancher/byId'](NORMAN.NODE, this.normanNodeId);
   }
 
@@ -325,7 +325,7 @@ export default class ClusterNode extends SteveModel {
     const safeResources = Array.isArray(resources) ? resources : [this];
 
     await Promise.all(safeResources.map((node) => {
-      return node.norman?.doAction('stopDrain');
+      return node._norman?.doAction('stopDrain');
     }));
   }
 

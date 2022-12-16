@@ -45,7 +45,7 @@ export default {
         },
         query: { [PROJECT_ID]: this.project?.id?.replace('/', ':') }
       },
-      resource:           MANAGEMENT.PROJECT_ROLE_TEMPLATE_BINDING,
+      resource:           MANAGEMENT.PROJECT_ROLE_TEMPLATE_BINDING, // TODO: RC WUT .. this goes in to masthead for project edit componet?
       saveBindings:       null,
       membershipHasOwner: false,
       membershipUpdate:   {},

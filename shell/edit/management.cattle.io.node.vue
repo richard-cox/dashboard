@@ -30,8 +30,8 @@ export default {
   methods: {
     async save(saveCb) {
       try {
-        this.value.norman.name = this.name;
-        await this.value.norman.save();
+        this.value._norman.name = this.name; // TODO: RC
+        await this.value._norman.save(); // TODO: RC
 
         saveCb(true);
 

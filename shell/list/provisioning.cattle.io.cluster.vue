@@ -35,7 +35,7 @@ export default {
   async fetch() {
     const hash = {
       rancherClusters: this.$fetchType(CAPI.RANCHER_CLUSTER),
-      normanClusters:  this.$store.dispatch('rancher/findAll', { type: NORMAN.CLUSTER }),
+      normanClusters:  this.$store.dispatch('rancher/findAll', { type: NORMAN.CLUSTER }), // TODO: RC fine with force. used for normanCluster?.actions?.saveAsTemplate
       mgmtClusters:    this.$store.dispatch('management/findAll', { type: MANAGEMENT.CLUSTER }),
     };
 

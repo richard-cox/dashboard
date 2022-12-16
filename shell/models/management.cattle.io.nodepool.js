@@ -46,11 +46,11 @@ export default class MgmtNodePool extends HybridModel {
   }
 
   get scale() {
-    return this.norman.quantity;
+    return this._norman.quantity;
   }
 
   scalePool(delta) {
-    this.norman.quantity += delta;
+    this._norman.quantity += delta;
 
     if ( this.scaleTimer ) {
       clearTimeout(this.scaleTimer);
@@ -58,7 +58,7 @@ export default class MgmtNodePool extends HybridModel {
 
     this.scaleTimer = setTimeout(() => {
       try {
-        this.norman.save();
+        this._norman.save();
       } catch (error) {
         this.$dispatch('growl/fromError', {
           title: 'Error scaling pool',
@@ -147,21 +147,21 @@ export default class MgmtNodePool extends HybridModel {
     return sortBy(out, 'sort:desc');
   }
 
-  get norman() {
+  get _norman() {
     const id = this.id.replace('/', ':');
 
     return this.$rootGetters['rancher/byId'](NORMAN.NODE_POOL, id);
   }
 
   get canDelete() {
-    return this.norman?.hasLink('remove');
+    return this._norman?.hasLink('remove');
   }
 
   get canUpdate() {
-    return this.norman?.hasLink('update');
+    return this._norman?.hasLink('update');
   }
 
   remove() {
-    return this.norman?.remove();
+    return this._norman?.remove();
   }
 }

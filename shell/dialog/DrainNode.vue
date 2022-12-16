@@ -114,7 +114,7 @@ export default {
       }
 
       try {
-        await Promise.all(this.kubeNodes.map(node => node.norman?.doAction('drain', parsedBody)));
+        await Promise.all(this.kubeNodes.map(node => node._norman?.doAction('drain', parsedBody))); // TODO: RC
         this.close();
       } catch (e) {
         this.errors = exceptionToErrorsArray(e);

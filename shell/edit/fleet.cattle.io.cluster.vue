@@ -28,7 +28,7 @@ export default {
   },
 
   async fetch() {
-    const norman = await this.$store.dispatch('rancher/find', { type: NORMAN.CLUSTER, id: this.value.metadata.labels[FLEET.CLUSTER_NAME] });
+    const norman = await this.$store.dispatch('rancher/find', { type: NORMAN.CLUSTER, id: this.value.metadata.labels[FLEET.CLUSTER_NAME] }); // TODO: RC Fine with force
     const nc = await this.$store.dispatch(`rancher/clone`, { resource: norman });
 
     if ( !nc.metadata ) {

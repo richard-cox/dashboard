@@ -87,7 +87,7 @@ export default {
     async apply(buttonDone) {
       try {
         // Fetch the Norman cluster object
-        const norman = await this.$store.dispatch('rancher/find', { type: NORMAN.CLUSTER, id: this.currentCluster.id });
+        const norman = await this.$store.dispatch('rancher/find', { type: NORMAN.CLUSTER, id: this.currentCluster.id }); // TODO: RC Fine
 
         delete norman.annotations[CLUSTER_BADGE.TEXT];
         delete norman.annotations[CLUSTER_BADGE.COLOR];
