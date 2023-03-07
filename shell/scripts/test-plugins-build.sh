@@ -108,13 +108,18 @@ if [ "${SKIP_STANDALONE}" == "false" ]; then
   yarn install
 
   echo "Building skeleton app"
+  # Fails. Fixed by adding "ts-loader": "^8.0.17" as devDependencies to shell/creators/app/app.package.json
+  # (note - @nuxt/typescript-build@2.1.0 brings in ts-loader@8.4.0,  @vue/cli-plugin-typescript@4.5.15 brings in @vue/cli-plugin-typescript@4.5.15)
   FORCE_COLOR=true yarn build | cat
 
   # Package creator
   echo "Verifying package creator package"
-  yarn create @rancher/pkg test-pkg
+  yarn create @rancher/pkg test-pkg # succeeds
 
   echo "Building test package"
+  # Failures
+  # # 1 - Missing `@vue/cli-plugin-typescript` dep. Adding "@vue/cli-plugin-babel": "4.5.15" to app.package.json devDependencies causes `yarn build` from above to fail with `orig not function``
+  # # 2 - Fix for `orign not function` `shell/vue.config.js` in `config.module.rules.forEach((r)` const orig = r.exclude.length ? r.exclude[0] : r.exclude. (r.exclude is now an array). Causes issues with worker files `Cannot read properties of undefined (reading 'options')``
   FORCE_COLOR=true yarn build-pkg test-pkg | cat
 
   # Add test list component to the test package

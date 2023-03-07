@@ -3,7 +3,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const targets = {
+const targets = { // TODO: RC !!! These need to be converted to use vue cli
   dev:  './node_modules/.bin/nuxt dev',
   nuxt: './node_modules/.bin/nuxt',
 };
@@ -16,8 +16,8 @@ const files = [
 ];
 
 const topLevelScripts = {
-  'build-pkg':  './node_modules/@rancher/shell/scripts/build-pkg.sh',
-  'serve-pkgs': './node_modules/@rancher/shell/scripts/serve-pkgs',
+  'build-pkg':    './node_modules/@rancher/shell/scripts/build-pkg.sh',
+  'serve-pkgs':   './node_modules/@rancher/shell/scripts/serve-pkgs',
   'publish-pkgs': './node_modules/@rancher/shell/scripts/extension/publish',
 };
 

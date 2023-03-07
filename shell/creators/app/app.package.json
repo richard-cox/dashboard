@@ -6,6 +6,10 @@
     "node": ">=12"
   },
   "dependencies": {},
+  "devDependencies": {
+    "ts-loader": "6.2.2",
+    "@vue/cli-plugin-babel": "4.5.15"
+  },
   "resolutions": {
     "**/webpack": "4",
     "@types/node": "^16"
