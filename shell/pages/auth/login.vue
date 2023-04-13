@@ -397,6 +397,7 @@ export default {
             @error="handleProviderError"
           />
         </div>
+        <br>hasLocal: {{ hasLocal }}<br>
         <template v-if="hasLocal">
           <form
             v-if="showLocal"

@@ -115,6 +115,14 @@ export default function steveCreateWorker(ctx, mode) {
     worker.requests = {};
     worker.postMessageAndWait = postMessageAndWait;
 
+    console.warn('urlstate', 'ui thread', {
+      url:        `${ ctx.state.config.baseUrl }`,
+      csrf:       this.$cookies.get(CSRF, { parseJSON: false }), // steveCreateWorker is in the root store
+      config:     ctx.state.config,
+      storeName:  ctx.getters.storeName,
+      i18nConfig: this.getters['i18n/config']() // TODO: RC `state` part of vuex store. this won't have dynamic i18n
+    });
+
     worker.postMessage({
       initWorker: {
         url:        `${ ctx.state.config.baseUrl }`,

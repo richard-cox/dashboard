@@ -51,6 +51,8 @@ export function SteveFactory(namespace, baseUrl) {
 }
 
 export const steveStoreInit = (store, ctx) => {
+  console.warn('urlstate', 'steveStoreInit', ctx.state);
+  debugger;
   createWorker(store, ctx);
 };
 

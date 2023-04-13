@@ -215,6 +215,7 @@ const sharedActions = {
 
     if (ctx.getters.advancedWorkerCompatible) {
       if (!this.$workers[getters.storeName]) {
+        console.warn('urlstate', 'steve', 'sub', ctx.state);
         await createWorker(this, ctx);
       }
       // if the worker is in advanced mode then it'll contain it's own socket which it calls a 'watcher'

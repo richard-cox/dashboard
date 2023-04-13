@@ -142,6 +142,9 @@ export default class BaseCache extends Trace {
   }
 
   __formatListResponse(listLength, data, cacheKey) {
+    if (!this.__requests[cacheKey]) {
+      debugger;
+    }
     const {
       totalLength = 0, revision, status, statusText, links
     } = this.__requests[cacheKey] || {};
@@ -209,6 +212,8 @@ export default class BaseCache extends Trace {
 
   // gets the full list of wholeResources as an array from the cache
   all(returnWholeResource = false) {
+    this.trace('all');
+
     const cacheKey = hashObj({});
     const resources = this.__list({})
       .map(({ resource, wholeResource }) => {
@@ -220,6 +225,8 @@ export default class BaseCache extends Trace {
 
   // gets a specific id from the cache and returns it as a whole resource if it exists
   byId(id, wholeResource = false) {
+    this.trace('byId', id);
+
     const resource = this.resources[id];
 
     if (resource) {
@@ -236,6 +243,10 @@ export default class BaseCache extends Trace {
 
   // gets a specific list of ids from the cache and returns it as a whole resource if it exists
   byIds(ids, { namespace, selector, id } = {}, wholeResource = false) {
+    this.trace('byIds', ids, {
+      namespace, selector, id
+    });
+
     const cacheKey = hashObj({
       namespace, selector, id
     });
@@ -247,6 +258,8 @@ export default class BaseCache extends Trace {
   }
 
   byPage(params) {
+    this.trace('byPage', params);
+
     // if params are undefined then we just use whatever's in __currentPageParams, essentially repeating the page to see if it changed
     if (params) {
       this.__currentPageParams = params;
@@ -304,6 +317,8 @@ export default class BaseCache extends Trace {
   }
 
   matching(selector, namespace) {
+    this.trace('matching', selector, namespace);
+
     return this.__list({ namespace, selector }).filter(({ wholeResource }) => {
       matches();
     });
@@ -396,5 +411,9 @@ export default class BaseCache extends Trace {
     }
 
     return this;
+  }
+
+  trace(...args) {
+    super.trace(this.type, ...args);
   }
 }

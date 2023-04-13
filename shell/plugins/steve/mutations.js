@@ -147,6 +147,7 @@ export default {
 
       if (!worker && ctx.getters.advancedWorkerCompatible) {
         // We've likely navigated away from a cluster at some point and cleared the $workers[storename] entry
+        console.warn('urlstate', 'steve', 'muutitionas', ctx.state);
         await createWorker(this, ctx);
         worker = (this.$workers || {})[ctx.getters.storeName];
       }

@@ -97,10 +97,10 @@ const state = {
   apiQueue:     [],
   batchChanges: {},
   debugWorker:  {
-    trace:   false,
-    watch:   false,
-    request: false,
-    cache:   false,
+    trace:   true,
+    watch:   true,
+    request: true,
+    cache:   true,
   }
 };
 
@@ -358,10 +358,10 @@ const workerActions = {
   },
   updateWorker: (partialConfig) => {
     // TODO: RC sean - this was the fix (uncommented) i added to get sockets working. initial state.config.url needed to be updated
-    // state.config = {
-    //   ...state.config,
-    //   ...partialConfig
-    // };
+    state.config = {
+      ...state.config,
+      ...partialConfig
+    };
   },
   watch: (msg) => {
     watchTracer.trace('watch', msg);
