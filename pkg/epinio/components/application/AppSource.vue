@@ -79,18 +79,18 @@ export default Vue.extend<Data, any, any, any>({
     const defaultBuilderImage = this.info?.default_builder_image || DEFAULT_BUILD_PACK;
     const builderImage = this.source?.builderImage?.value || defaultBuilderImage;
 
-    const git = {
-      usernameOrOrg: this.source?.git?.usernameOrOrg || '',
-      repo:          this.source?.git?.repo || '',
-      commit:        this.source?.git?.commit || '',
-      branch:        this.source?.git?.branch || '',
-      url:           this.source?.git?.url || '',
-      sourceData:    this.source?.git?.sourceData || {
-        repos:    [],
-        branches: [],
-        commits:  []
-      }
-    };
+    // const git = {
+    //   usernameOrOrg: this.source?.git?.usernameOrOrg || '',
+    //   repo:          this.source?.git?.repo || '',
+    //   commit:        this.source?.git?.commit || '',
+    //   branch:        this.source?.git?.branch || '',
+    //   url:           this.source?.git?.url || '',
+    //   sourceData:    this.source?.git?.sourceData || {
+    //     repos:    [],
+    //     branches: [],
+    //     commits:  []
+    //   }
+    // };
 
     return {
       open:  false,
@@ -110,18 +110,35 @@ export default Vue.extend<Data, any, any, any>({
         validGitUrl: false,
       },
 
-      git,
-
-      initValue: {
-        type:             this.source?.type,
-        selectedAccOrOrg: git.usernameOrOrg,
-        selectedRepo:     git.repo,
-        selectedBranch:   git.branch,
-        selectedCommit:   { sha: git.commit },
-        repos:            git.sourceData.repos,
-        branches:         git.sourceData.branches,
-        commits:          git.sourceData.commits,
+      git: {
+        usernameOrOrg: this.source?.git?.usernameOrOrg || '',
+        repo:          this.source?.git?.repo || '',
+        commit:        this.source?.git?.commit || '',
+        branch:        this.source?.git?.branch || '',
+        url:           this.source?.git?.url || '',
+        sourceData:    this.source?.git?.sourceData || {
+          repos:    [],
+          branches: [],
+          commits:  []
+        }
       },
+
+      gitHash: 0,
+
+      gitSource: null,
+
+      gitType: '',
+
+      // initValue: {
+      //   type:             this.source?.type,
+      //   selectedAccOrOrg: git.usernameOrOrg,
+      //   selectedRepo:     git.repo,
+      //   selectedBranch:   git.branch,
+      //   selectedCommit:   { sha: git.commit },
+      //   repos:            git.sourceData.repos,
+      //   branches:         git.sourceData.branches,
+      //   commits:          git.sourceData.commits,
+      // },
 
       builderImage: {
         value:   builderImage,
@@ -140,6 +157,7 @@ export default Vue.extend<Data, any, any, any>({
       EDIT: _EDIT
     };
   },
+
   mounted() {
     if (!this.appChart) {
       if (this.appCharts[0]?.value) {
@@ -148,6 +166,9 @@ export default Vue.extend<Data, any, any, any>({
         Vue.set(this, 'appChart', this.appCharts[0]);
       }
     }
+
+    // this.gitSource = this.createGitPickerSource();
+    Vue.set(this, 'gitHash', Date.now());
 
     this.update();
   },
@@ -201,6 +222,15 @@ export default Vue.extend<Data, any, any, any>({
         case APPLICATION_SOURCE_TYPE.GIT_HUB:
         case APPLICATION_SOURCE_TYPE.GIT_LAB:
           Vue.set(this, 'git', AppUtils.getGitData(parsed.origin.git));
+          debugger;
+
+          // Vue.set(this, 'gitSource', this.createGitPickerSource());
+          // console.warn('onManifestFileSelected', this.gitSource);
+
+          Vue.nextTick(() => {
+            Vue.set(this, 'gitHash', Date.now());
+          });
+
           break;
         }
 
@@ -305,6 +335,7 @@ export default Vue.extend<Data, any, any, any>({
 
       this.update();
     },
+
     gitUpdate({
       repo, selectedAccOrOrg, branch, commit, sourceData
     }: {
@@ -347,14 +378,44 @@ export default Vue.extend<Data, any, any, any>({
         return !!this.git.usernameOrOrg && !!this.git.url && !!this.git.repo && !!this.git.branch && !!this.git.commit;
       }
     },
+
+    createGitPickerSource() { // TODO: RC
+      return {
+        type:             this.type,
+        selectedAccOrOrg: this.git.usernameOrOrg,
+        selectedRepo:     this.git.repo,
+        selectedBranch:   this.git.branch,
+        selectedCommit:   { sha: this.git.commit }
+      };
+    },
   },
 
   watch: {
-    type() {
+    type(neu) {
+      if (neu === APPLICATION_SOURCE_TYPE.GIT_HUB || neu === APPLICATION_SOURCE_TYPE.GIT_LAB) {
+        if (neu !== this.gitType) {
+          if (!this.isFromManifest) {
+            this.git = {};
+            // this.gitSource = this.createGitPickerSource();
+            Vue.set(this, 'gitHash', -Date.now());
+          }
+
+          // this.gitType = neu;
+        }
+      }
+
       this.update();
     },
+
     valid(neu) {
       this.$emit('valid', neu);
+    },
+
+    gitHash(neu) {
+      // if (this.type === APPLICATION_SOURCE_TYPE.GIT_HUB || this.type === APPLICATION_SOURCE_TYPE.GIT_LAB) {
+      // if (this.type !== )
+      Vue.set(this, 'gitSource', this.createGitPickerSource());
+      // }
     }
   },
 
@@ -380,12 +441,29 @@ export default Vue.extend<Data, any, any, any>({
       }));
     },
 
-    sourceValue() {
-      return {
-        ...this.source.git,
-        type: this.type
-      };
-    },
+    // sourceValue() {
+    //   // console.warn('computed', 'sourceValue', 'FIRED', this.source.git, this.type);
+
+    //   return {
+    //     ...this.source.git,
+    //     type: this.type
+    //   };
+    // },
+
+    // gitSource() {
+
+    //   return {
+    //     type:             this.source?.type,
+    //     selectedAccOrOrg: this.git.usernameOrOrg,
+    //     selectedRepo:     this.git.repo,
+    //     selectedBranch:   this.git.branch,
+    //     selectedCommit:   { sha: this.git.commit }
+    //   };
+    // },
+
+    isFromManifest() {
+      return this.$route.query.from === EPINIO_APP_MANIFEST;
+    }
   }
 });
 </script>
@@ -504,9 +582,11 @@ export default Vue.extend<Data, any, any, any>({
     </template>
     <template v-else>
       <KeepAlive>
+        <!-- :init-value="initValue" -->
         <GitPicker
-          :init-value="initValue"
-          :value="sourceValue"
+          :value-hash="gitHash"
+          :value="gitSource"
+          :type="type"
           @change="gitUpdate"
         />
       </KeepAlive>

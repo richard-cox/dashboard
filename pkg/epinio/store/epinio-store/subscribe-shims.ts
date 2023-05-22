@@ -31,7 +31,7 @@ export const actions = {
       POLL_INTERVAL,
       5
     );
-    polling[type].start();
+    // polling[type].start();
   },
 
 };
