@@ -44,7 +44,9 @@ export function init($plugin: any, store: any) {
     to:                    rootEpinioRoute(),
     showNamespaceFilter:   true,
     customNamespaceFilter: true,
+    // inExplorer:            true,&routes
   });
+  // TODO: RC About Page - link to about from side nav
 
   // Internal Types
   spoofedType({

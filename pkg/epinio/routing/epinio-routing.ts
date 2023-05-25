@@ -16,8 +16,7 @@ const routes: RouteConfig[] = [{
   name:      `${ EPINIO_PRODUCT_NAME }-c-cluster-dashboard`,
   path:      `/:product/c/:cluster/dashboard`,
   component: Dashboard,
-},
-{
+}, {
   name:      `${ EPINIO_PRODUCT_NAME }-c-cluster-applications-createapp`,
   path:      `/:product/c/:cluster/applications/createapp`,
   component: CreateApp,
@@ -25,10 +24,6 @@ const routes: RouteConfig[] = [{
   name:      `${ EPINIO_PRODUCT_NAME }-c-cluster-applications`,
   path:      `/:product/c/:cluster/applications`,
   component: ListApp,
-}, {
-  name:      `${ EPINIO_PRODUCT_NAME }-applications`,
-  path:      `/:product/application`,
-  component: ListEpinio,
 }, {
   name:      `${ EPINIO_PRODUCT_NAME }-about`,
   path:      `/:product/about`,
@@ -50,5 +45,15 @@ const routes: RouteConfig[] = [{
   path:      `/:product/c/:cluster/:resource/:namespace/:id`,
   component: ViewEpinioNsResource,
 }];
+
+const isEpinioSingleProduct = process.env.rancherEnv === 'epinio';
+
+if (!isEpinioSingleProduct) {
+  routes.unshift({
+    name:      `${ EPINIO_PRODUCT_NAME }`,
+    path:      `/:product/`,
+    component: ListEpinio,
+  });
+}
 
 export default routes;

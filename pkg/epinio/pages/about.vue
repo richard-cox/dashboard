@@ -6,6 +6,7 @@ import BackLink from '@shell/components/BackLink';
 import BackRoute from '@shell/mixins/back-link';
 
 export default {
+  // TODO: RC About Page - link to about from side nav
   layout:     'plain',
   components: { BackLink },
   mixins:     [BackRoute],
