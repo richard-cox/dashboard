@@ -15,8 +15,10 @@ export const KONTAINER_TO_DRIVER = {
   huaweicontainercloudengine:       'huaweicce', // Does this actually exist?
   huaweiengine:                     'huaweicce',
   linodekubernetesengine:           'linodelke', // Does this actually exist?
+  lke:                              'linodelke',
   lkeengine:                        'linodelke',
   okeengine:                        'oracleoke',
+  oke:                              'oracleoke',
   oraclecontainerengine:            'oracleoke', // Does this actually exist?
   rke2:                             'rke2',
   tencentengine:                    'tencenttke',
@@ -63,6 +65,15 @@ export default class KontainerDriver extends HybridModel {
   }
 
   get driverName() {
+    if (!this.spec.builtIn) {
+      const driverName = this.status?.displayName?.toLowerCase();
+
+      if (driverName) {
+        // some drivers are built in but don't have the builtIn flag. ensure we pass these through K_TO_D
+        return KONTAINER_TO_DRIVER[driverName] || driverName;
+      }
+    }
+
     return KONTAINER_TO_DRIVER[this.id] || this.id;
   }
 }
