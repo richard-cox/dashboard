@@ -156,7 +156,12 @@ export default {
     }
 
     // No need to request the resources if we have them already
-    if ( opt.force !== true && (getters['haveAll'](type) || getters['haveAllNamespace'](type, opt.namespaced))) {
+    if (
+      opt.force !== true &&
+      (opt.pagination ? getters['haveAllPaginated'](type, opt.pagination) : true) &&
+      (getters['haveAll'](type) || getters['haveAllNamespace'](type, opt.namespaced))
+    ) {
+      // TODO: RC TEST that when returning to a list we don't re-fetch
       const args = {
         type,
         revision:  '',
@@ -313,10 +318,17 @@ export default {
         commit('loadAll', {
           ctx,
           type,
-          data:      out.data,
-          revision:  out.revision,
+          data:       out.data,
+          revision:   out.revision,
           skipHaveAll,
-          namespace: opt.namespaced
+          namespace:  opt.namespaced,
+          pagination: opt.pagination ? {
+            request: opt.pagination,
+            result:  {
+              count: out.count,
+              pages: out.pages
+            }
+          } : undefined,
         });
       }
     }
@@ -327,6 +339,7 @@ export default {
         type,
         revision:  out.revision,
         namespace: opt.watchNamespace || opt.namespaced, // it could be either apparently
+        // TODO:  RC watch
         // ToDo: SM namespaced is sometimes a boolean and sometimes a string, I don't see it as especially broken but we should refactor that in the future
         force:     opt.forceWatch === true,
       };
