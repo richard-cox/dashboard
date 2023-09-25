@@ -35,7 +35,7 @@ function hasLabel(issue, label) {
 }
 
 function removeZubeLabels(labels) {
-    return labels.filter(l => l.name.indexOf('[zube]') === -1);
+    return labels?.filter(l => l.name.indexOf('[zube]') === -1) || [];
 }
 
 async function resetZubeLabels(issue, label) {
@@ -54,8 +54,10 @@ async function resetZubeLabels(issue, label) {
     console.log(`    New Labels    : ${cleanLabels}`);
 
     // Update the labels
-    const labelsAPI = `${issue.url}/labels`;
-    return request.put(labelsAPI, {labels: cleanLabels});
+    if (issue.url) {
+        const labelsAPI = `${issue.url}/labels`;
+        return request.put(labelsAPI, {labels: cleanLabels});
+    }
 }
 
 async function waitForLabel(issue, label) {
@@ -243,6 +245,23 @@ async function processOpenOrEditAction() {
         console.log('PR is already assigned to milestone ' + keys[0]);
       }
     }
+
+    console.warn('pr', pr.base.repo.ref, pr.url, pr.base.repo)
+    console.warn('pr', JSON.stringify(pr))
+    console.warn('organization', JSON.stringify(event.organization))
+    console.warn('repository', JSON.stringify(event.repository))
+
+    // const repo = pr.base.ref
+    const repo =  pr.head.label.replace(':', '/')
+    const branch = pr.base.repo.full_name
+    const workflow = 'pr-validation';
+
+    const validatePrUrl = `${event.repository.url}/repos/${repo}/actions/workflows/${workflow}/dispatches`;
+    console.warn(validatePrUrl);
+  
+    await request.post(validatePrUrl, {
+        "ref": branch
+    });
 }
 
 // Debugging
