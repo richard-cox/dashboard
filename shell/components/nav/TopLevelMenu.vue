@@ -742,7 +742,7 @@ export default {
       display: flex;
       height: 55px;
       flex: 0 0 55px;
-      width: 100%;
+      width: $app-bar-collapsed-width;
       border-bottom: 1px solid var(--nav-border);
       justify-content: flex-start;
       align-items: center;
