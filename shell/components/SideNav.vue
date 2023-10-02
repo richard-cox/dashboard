@@ -214,6 +214,11 @@ export default {
      * Fetch navigation by creating groups from product schemas
      */
     getGroups() {
+      const getGroups = `getGroups fn TOTAL (id: ${ Date.now() })`;
+      const getProductsGroups = 'getProductsGroups';
+      // const getExplorerGroups = 'getExplorerGroups';
+
+      console.time(getGroups);
       if ( this.gettingGroups ) {
         return;
       }
@@ -254,21 +259,40 @@ export default {
 
       // This should already have come into the list from above, but in case it hasn't...
       addObject(loadProducts, currentProduct);
+      console.time(getProductsGroups);
 
       this.getProductsGroups(out, loadProducts, namespaceMode, namespaces, productMap);
+      console.timeEnd(getProductsGroups);
+
+      // console.time(getExplorerGroups);
+
       this.getExplorerGroups(out);
+      // console.timeEnd(getExplorerGroups);
 
       replaceWith(this.groups, ...sortBy(out, ['weight:desc', 'label']));
 
       this.gettingGroups = false;
+      console.timeEnd(getGroups);
     },
 
     getProductsGroups(out, loadProducts, namespaceMode, namespaces, productMap) {
+      const timeStamp = `getProductsGroups fn (id: ${ Date.now() })`;
+
+      console.group(timeStamp);
+      const getProductsGroups = 'getProductsGroups fn TOTAL';
+      const allTypes = 'sub allTypes';
+      const getTree = 'sub getTree';
+      const addObjectss = 'sub addObjects';
+
+      console.time(getProductsGroups);
+
       const clusterId = this.$store.getters['clusterId'];
       const currentType = this.$route.params.resource || '';
 
+      debugger;
+
       for ( const productId of loadProducts ) {
-        const modes = [BASIC];
+        const modes = [BASIC]; // TODO: RC why this twice?
 
         if ( productId === NAVLINKS ) {
           // Navlinks produce their own top-level nav items so don't need to show it as a product.
@@ -281,10 +305,21 @@ export default {
         }
 
         for ( const mode of modes ) {
+          debugger;
+
+          console.time(`${ productId }/${ mode }/${ allTypes }`);
+
           const types = this.$store.getters['type-map/allTypes'](productId, mode) || {};
+
+          console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
+
+          console.time(`${ productId }/${ mode }/${ getTree }`);
 
           const more = this.$store.getters['type-map/getTree'](productId, mode, types, clusterId, namespaceMode, namespaces, currentType);
 
+          console.timeEnd(`${ productId }/${ mode }/${ getTree }`);
+
+          console.time(`${ productId }/${ mode }/${ addObjectss }`);
           if ( productId === EXPLORER || !this.isExplorer ) {
             addObjects(out, more);
           } else {
@@ -300,8 +335,12 @@ export default {
 
             addObject(out, group);
           }
+          console.timeEnd(`${ productId }/${ mode }/${ addObjectss }`);
         }
       }
+
+      console.timeEnd(getProductsGroups);
+      console.groupEnd(timeStamp);
     },
 
     getExplorerGroups(out) {

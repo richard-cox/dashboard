@@ -812,7 +812,16 @@ export const getters = {
   },
 
   allTypes(state, getters, rootState, rootGetters) {
-    return (product, mode = ALL) => {
+    function allTypes(product, mode = ALL) {
+      console.error('YOLO!!!!!!');
+      const timeStamp = `allTypes fn (id: ${ Date.now() })`;
+
+      const allTypes = 'allTypes fn TOTAL';
+      const schemasLoop = 'schemas loop';
+
+      console.group(timeStamp);
+      console.time(allTypes);
+
       const module = findBy(state.products, 'name', product)?.inStore;
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
       const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
@@ -821,7 +830,17 @@ export const getters = {
 
       const out = {};
 
+      console.time(schemasLoop);
+
+      let i = 0;
+
       for ( const schema of schemas ) {
+        i++;
+        const timestamp = `schema inner loop ${ schema } (id: ${ Date.now() })`;
+
+        if (i < 10) {
+          console.time(timestamp);
+        }
         const attrs = schema.attributes || {};
         const count = counts[schema.id];
         const label = getters.labelFor(schema, count);
@@ -856,7 +875,12 @@ export const getters = {
           revision:    count ? count.revision : null,
           route:       typeOptions.customRoute
         };
+
+        if (i < 10) {
+          console.timeEnd(timestamp);
+        }
       }
+      console.timeEnd(schemasLoop);
 
       // Add virtual and spoofed types
       if ( mode !== USED ) {
@@ -933,9 +957,13 @@ export const getters = {
           out[id] = item;
         }
       }
+      console.timeEnd(allTypes);
+      console.groupEnd(timeStamp);
 
       return out;
-    };
+    }
+
+    return allTypes;
   },
 
   groupByFor(state) {
