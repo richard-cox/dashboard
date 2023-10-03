@@ -209,13 +209,14 @@ export default {
       return this.$store.getters['activeNamespaceCache'];
     },
   },
+
   methods: {
     /**
      * Fetch navigation by creating groups from product schemas
      */
     getGroups() {
       const getGroups = `getGroups fn TOTAL (id: ${ Date.now() })`;
-      const getProductsGroups = 'getProductsGroups';
+      const getProductsGroupsS = 'getProductsGroups';
       // const getExplorerGroups = 'getExplorerGroups';
 
       console.time(getGroups);
@@ -259,17 +260,20 @@ export default {
 
       // This should already have come into the list from above, but in case it hasn't...
       addObject(loadProducts, currentProduct);
-      console.time(getProductsGroups);
+
+      console.time(getProductsGroupsS);
 
       this.getProductsGroups(out, loadProducts, namespaceMode, namespaces, productMap);
-      console.timeEnd(getProductsGroups);
+
+      console.timeEnd(getProductsGroupsS);
 
       // console.time(getExplorerGroups);
 
       this.getExplorerGroups(out);
+
       // console.timeEnd(getExplorerGroups);
 
-      replaceWith(this.groups, ...sortBy(out, ['weight:desc', 'label']));
+      replaceWith(this.groups, ...sortBy(out, ['weight:desc', 'label'], undefined));
 
       this.gettingGroups = false;
       console.timeEnd(getGroups);
@@ -304,12 +308,14 @@ export default {
           modes.push(USED);
         }
 
+        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
+
         for ( const mode of modes ) {
           debugger;
 
           console.time(`${ productId }/${ mode }/${ allTypes }`);
 
-          const types = this.$store.getters['type-map/allTypes'](productId, mode) || {};
+          const types = modeTypes[mode] || {};
 
           console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
 

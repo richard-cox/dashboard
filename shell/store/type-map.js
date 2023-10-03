@@ -812,6 +812,203 @@ export const getters = {
   },
 
   allTypes(state, getters, rootState, rootGetters) {
+    function allTypes(product, modes) {
+      // console.error('YOLO!!!!!!');
+      const timeStamp = `allTypes fn (id: ${ Date.now() })`;
+      const allTypes = 'allTypes fn TOTAL';
+      const schemasLoop = 'schemas loop';
+
+      // console.group(timeStamp);
+      // console.time(allTypes);
+
+      const module = findBy(state.products, 'name', product)?.inStore;
+      const schemas = rootGetters[`${ module }/all`](SCHEMA);
+
+      console.warn('schemas', schemas);
+      console.warn('schemas', `${ module }/all`);
+      const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
+      const isDev = rootGetters['prefs/get'](VIEW_IN_API);
+      // const isBasic = mode === BASIC;
+
+      const out = {};
+
+      // console.time(schemasLoop);
+
+      let i = 0;
+
+      for ( const schema of schemas ) {
+        i++;
+        const timestamp = `schema inner loop ${ schema } (id: ${ Date.now() })`;
+
+        const schemaModes = [...modes];
+
+        if (i < 10) {
+          console.time(timestamp);
+        }
+        const attrs = schema.attributes || {};
+        const count = counts[schema.id];
+        const label = getters.labelFor(schema, count);
+        // const weight = getters.typeWeightFor(schema?.id || label, isBasic);
+        const typeOptions = getters['optionsFor'](schema);
+
+        // if ( isBasic ) {
+        // These are separate ifs so that things with no kind can still be basic
+        if (schemaModes.includes(BASIC) && !getters.groupForBasicType(product, schema.id) ) {
+          schemaModes.splice(schemaModes.indexOf(BASIC), 1);
+          // continue;
+          // }
+        }
+        if (schemaModes.includes(FAVORITE) && !getters.isFavorite(schema.id) ) { // mode === FAVORITE &&
+          schemaModes.splice(schemaModes.indexOf(FAVORITE), 1);
+          // continue;
+        }
+
+        const invalidSchema = !attrs.kind ||
+        (typeof typeOptions.ifRancherCluster !== 'undefined' && typeOptions.ifRancherCluster !== rootGetters.isRancher) ||
+        (typeOptions.localOnly && !rootGetters.currentCluster?.isLocal);
+
+        if (invalidSchema) {
+          // Skip the schemas that aren't top-level types
+          if (!schemaModes.includes(BASIC)) {
+            continue;
+          } else {
+            // Remove everything but basic
+            schemaModes.length = 0;
+            schemaModes.push(BASIC);
+          }
+        }
+
+        schemaModes.forEach((mode) => {
+          const isBasic = mode === BASIC;
+
+          if (!out[mode]) {
+            out[mode] = {};
+          }
+          out[mode][schema.id] = {
+            label,
+            mode,
+            weight:      getters.typeWeightFor(schema?.id || label, isBasic),
+            schema,
+            name:        schema.id,
+            namespaced:  typeOptions.namespaced === null ? attrs.namespaced : typeOptions.namespaced,
+            count:       count ? count.summary.count || 0 : null,
+            byNamespace: count ? count.namespaces : {},
+            revision:    count ? count.revision : null,
+            route:       typeOptions.customRoute
+          };
+        });
+
+        if (i < 10) {
+          console.timeEnd(timestamp);
+        }
+      }
+      // console.timeEnd(schemasLoop);
+
+      const nonUsedModes = modes.filter((m) => m !== USED);
+
+      // Add virtual and spoofed types
+      if ( nonUsedModes.length ) {
+        const virtualTypes = state.virtualTypes[product] || [];
+        const spoofedTypes = state.spoofedTypes[product] || [];
+        const allTypes = [...virtualTypes, ...spoofedTypes];
+        const virtSpoofedModes = [...nonUsedModes];
+
+        for ( const type of allTypes ) {
+          const item = clone(type);
+          const id = item.name;
+          // const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
+
+          // Is there a virtual/spoofed type override for schema type?
+          // Currently used by harvester, this should be investigated and removed if possible
+          if (out[id]) {
+            delete out[id];
+          }
+
+          if ( item['public'] === false && !isDev ) {
+            continue;
+          }
+
+          if (item.ifHave && !ifHave(rootGetters, item.ifHave)) {
+            continue;
+          }
+
+          if ( item.ifHaveType ) {
+            const targetedSchemas = typeof item.ifHaveType === 'string' ? schemas : rootGetters[`${ item.ifHaveType.store }/all`](SCHEMA);
+            const type = typeof item.ifHaveType === 'string' ? item.ifHaveType : item.ifHaveType?.type;
+
+            const haveIds = filterBy(targetedSchemas, 'id', normalizeType(type)).map((s) => s.id);
+
+            if (!haveIds.length) {
+              continue;
+            }
+
+            if (item.ifHaveVerb && !ifHaveVerb(rootGetters, module, item.ifHaveVerb, haveIds)) {
+              continue;
+            }
+          }
+
+          if ( item.ifHaveSubTypes ) {
+            const hasSome = (item.ifHaveSubTypes || []).some((type) => {
+              return !!findBy(schemas, 'id', normalizeType(type));
+            });
+
+            if (!hasSome) {
+              continue;
+            }
+          }
+
+          if ( typeof item.ifRancherCluster !== 'undefined' && item.ifRancherCluster !== rootGetters.isRancher ) {
+            continue;
+          }
+
+          if (virtSpoofedModes.includes(BASIC) && !getters.groupForBasicType(product, id) ) {
+            virtSpoofedModes.splice(virtSpoofedModes.indexOf(BASIC), 1);
+          }
+          if (virtSpoofedModes.includes(FAVORITE) && !getters.isFavorite(id) ) { // mode === FAVORITE &&
+            virtSpoofedModes.splice(virtSpoofedModes.indexOf(FAVORITE), 1);
+          }
+
+          //! !!!!!!!!1
+          // if ( isBasic && !getters.groupForBasicType(product, id) ) {
+          //   continue;
+          // } else if ( mode === FAVORITE && !getters.isFavorite(id) ) {
+          //   continue;
+          // }
+
+          // item.mode = mode;
+          // item.weight = weight;
+
+          // Ensure labelKey is taken into account... with a mock count
+          // This is harmless if the translation doesn't require count
+          if (item.labelKey && rootGetters['i18n/exists'](item.labelKey)) {
+            item.label = rootGetters['i18n/t'](item.labelKey, { count: 2 }).trim();
+            delete item.labelKey; // Label should really take precedence over labelKey, but it doesn't, so remove it
+          } else {
+            item.label = item.label || item.name;
+          }
+
+          virtSpoofedModes.forEach((mode) => {
+            const isBasic = mode === BASIC;
+            const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
+
+            item.mode = mode;
+            item.weight = weight;
+            out[mode][id] = item;
+          });
+
+          // out[id] = item;
+        }
+      }
+      // console.timeEnd(allTypes);
+      // console.groupEnd(timeStamp);
+
+      return out;
+    }
+
+    return allTypes;
+  },
+
+  allTypes1(state, getters, rootState, rootGetters) {
     function allTypes(product, mode = ALL) {
       console.error('YOLO!!!!!!');
       const timeStamp = `allTypes fn (id: ${ Date.now() })`;
