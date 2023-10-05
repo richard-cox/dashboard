@@ -586,7 +586,7 @@ export const getters = {
         } else if ( isBasic && !groupForBasicType ) {
           // If we want the basic tree only return basic types;
           continue;
-        } else if ( mode === USED && count <= 0 ) {
+        } else if ( mode === USED && count <= 0 ) { // TODO: RC MOVE to other. OR COMBINE IN NEW
           // If there's none of this type, ignore this entry when viewing only in-use types
           // Note: count is sometimes null, which is <= 0.
           continue;
@@ -812,7 +812,7 @@ export const getters = {
   },
 
   allTypes(state, getters, rootState, rootGetters) {
-    function allTypes(product, modes) {
+    function allTypes(product, modes = [ALL]) {
       // console.error('YOLO!!!!!!');
       const timeStamp = `allTypes fn (id: ${ Date.now() })`;
       const allTypes = 'allTypes fn TOTAL';
@@ -824,8 +824,6 @@ export const getters = {
       const module = findBy(state.products, 'name', product)?.inStore;
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
 
-      console.warn('schemas', schemas);
-      console.warn('schemas', `${ module }/all`);
       const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
       // const isBasic = mode === BASIC;
@@ -858,10 +856,12 @@ export const getters = {
           // continue;
           // }
         }
+        console.warn(schema, schemaModes.includes(FAVORITE), !getters.isFavorite(schema.id) );
         if (schemaModes.includes(FAVORITE) && !getters.isFavorite(schema.id) ) { // mode === FAVORITE &&
           schemaModes.splice(schemaModes.indexOf(FAVORITE), 1);
           // continue;
         }
+        console.warn(schema, schemaModes );
 
         const invalidSchema = !attrs.kind ||
         (typeof typeOptions.ifRancherCluster !== 'undefined' && typeOptions.ifRancherCluster !== rootGetters.isRancher) ||
@@ -993,6 +993,9 @@ export const getters = {
 
             item.mode = mode;
             item.weight = weight;
+            if (!out[mode]) {
+              out[mode] = {}; // TODO: RC?
+            }
             out[mode][id] = item;
           });
 
@@ -1008,7 +1011,7 @@ export const getters = {
     return allTypes;
   },
 
-  allTypes1(state, getters, rootState, rootGetters) {
+  allTypes2(state, getters, rootState, rootGetters) {
     function allTypes(product, mode = ALL) {
       console.error('YOLO!!!!!!');
       const timeStamp = `allTypes fn (id: ${ Date.now() })`;
@@ -1161,6 +1164,133 @@ export const getters = {
     }
 
     return allTypes;
+  },
+
+  allTypes3(state, getters, rootState, rootGetters) {
+    return (product, mode = ALL) => {
+      const module = findBy(state.products, 'name', product)?.inStore;
+      const schemas = rootGetters[`${ module }/all`](SCHEMA);
+      const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
+      const isDev = rootGetters['prefs/get'](VIEW_IN_API);
+      const isBasic = mode === BASIC;
+
+      const out = {};
+
+      for ( const schema of schemas ) {
+        const attrs = schema.attributes || {};
+        const count = counts[schema.id];
+        const label = getters.labelFor(schema, count);
+        const weight = getters.typeWeightFor(schema?.id || label, isBasic);
+        const typeOptions = getters['optionsFor'](schema);
+
+        if ( isBasic ) {
+          // These are separate ifs so that things with no kind can still be basic
+          if ( !getters.groupForBasicType(product, schema.id) ) {
+            continue;
+          }
+        } else if ( mode === FAVORITE && !getters.isFavorite(schema.id) ) {
+          continue;
+        } else if ( !attrs.kind ) {
+          // Skip the schemas that aren't top-level types
+          continue;
+        } else if ( typeof typeOptions.ifRancherCluster !== 'undefined' && typeOptions.ifRancherCluster !== rootGetters.isRancher ) {
+          continue;
+        } else if (typeOptions.localOnly && !rootGetters.currentCluster?.isLocal) {
+          continue;
+        }
+
+        out[schema.id] = {
+          label,
+          mode,
+          weight,
+          schema,
+          name:        schema.id,
+          namespaced:  typeOptions.namespaced === null ? attrs.namespaced : typeOptions.namespaced,
+          count:       count ? count.summary.count || 0 : null,
+          byNamespace: count ? count.namespaces : {},
+          revision:    count ? count.revision : null,
+          route:       typeOptions.customRoute
+        };
+      }
+
+      // Add virtual and spoofed types
+      if ( mode !== USED ) {
+        const virtualTypes = state.virtualTypes[product] || [];
+        const spoofedTypes = state.spoofedTypes[product] || [];
+        const allTypes = [...virtualTypes, ...spoofedTypes];
+
+        for ( const type of allTypes ) {
+          const item = clone(type);
+          const id = item.name;
+          const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
+
+          // Is there a virtual/spoofed type override for schema type?
+          // Currently used by harvester, this should be investigated and removed if possible
+          if (out[id]) {
+            delete out[id];
+          }
+
+          if ( item['public'] === false && !isDev ) {
+            continue;
+          }
+
+          if (item.ifHave && !ifHave(rootGetters, item.ifHave)) {
+            continue;
+          }
+
+          if ( item.ifHaveType ) {
+            const targetedSchemas = typeof item.ifHaveType === 'string' ? schemas : rootGetters[`${ item.ifHaveType.store }/all`](SCHEMA);
+            const type = typeof item.ifHaveType === 'string' ? item.ifHaveType : item.ifHaveType?.type;
+
+            const haveIds = filterBy(targetedSchemas, 'id', normalizeType(type)).map((s) => s.id);
+
+            if (!haveIds.length) {
+              continue;
+            }
+
+            if (item.ifHaveVerb && !ifHaveVerb(rootGetters, module, item.ifHaveVerb, haveIds)) {
+              continue;
+            }
+          }
+
+          if ( item.ifHaveSubTypes ) {
+            const hasSome = (item.ifHaveSubTypes || []).some((type) => {
+              return !!findBy(schemas, 'id', normalizeType(type));
+            });
+
+            if (!hasSome) {
+              continue;
+            }
+          }
+
+          if ( typeof item.ifRancherCluster !== 'undefined' && item.ifRancherCluster !== rootGetters.isRancher ) {
+            continue;
+          }
+
+          if ( isBasic && !getters.groupForBasicType(product, id) ) {
+            continue;
+          } else if ( mode === FAVORITE && !getters.isFavorite(id) ) {
+            continue;
+          }
+
+          item.mode = mode;
+          item.weight = weight;
+
+          // Ensure labelKey is taken into account... with a mock count
+          // This is harmless if the translation doesn't require count
+          if (item.labelKey && rootGetters['i18n/exists'](item.labelKey)) {
+            item.label = rootGetters['i18n/t'](item.labelKey, { count: 2 }).trim();
+            delete item.labelKey; // Label should really take precedence over labelKey, but it doesn't, so remove it
+          } else {
+            item.label = item.label || item.name;
+          }
+
+          out[id] = item;
+        }
+      }
+
+      return out;
+    };
   },
 
   groupByFor(state) {

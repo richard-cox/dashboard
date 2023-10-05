@@ -15,8 +15,19 @@ import {
 describe('type-map', () => {
   describe('getters', () => {
     describe('allTypes', () => {
+      const expandModes = (modes, type) => {
+        return modes.reduce((res, mode) => {
+          Object.values(type).forEach((t: any) => {
+            t.mode = mode;
+          });
+          res[mode] = type;
+
+          return res;
+        }, {});
+      };
+
       /** All basic ctx properties and helpers */
-      const generateDefaults = (productName = EXPLORER, productStore = 'cluster', modes = BASIC) => {
+      const generateDefaults = (productName = EXPLORER, productStore = 'cluster', modes = [BASIC]) => {
         return {
           productName,
           productStore,
@@ -64,8 +75,8 @@ describe('type-map', () => {
         /**
          * Extend generateDefaults with env to return a pod type
          */
-        const createEnvBasicPod = (modes = BASIC, expected = true) => {
-          const defaults = generateDefaults(EXPLORER, `cluster`, BASIC);
+        const createEnvBasicPod = (modes = [BASIC], expected = true) => {
+          const defaults = generateDefaults(EXPLORER, `cluster`, [BASIC]);
           const {
             state, typeMapGetters, rootGetters, productName, productStore
           } = defaults;
@@ -113,12 +124,11 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? {
+            expectedTypes: expected ? expandModes(modes, {
               pod: {
                 byNamespace: { a: true },
                 count:       1,
                 label:       'Pod',
-                mode:        modes,
                 name:        'pod',
                 namespaced:  true,
                 revision:    'abc',
@@ -129,14 +139,14 @@ describe('type-map', () => {
                 },
                 weight: 1,
               }
-            } : {}
+            }) : {}
           };
         };
 
         /**
          * Extend generateDefaults with env to return a virtual type
          */
-        const createEnvBasicVirtual = (modes = BASIC, expected = true) => {
+        const createEnvBasicVirtual = (modes = [BASIC], expected = true) => {
           const defaults = generateDefaults();
           const { state, typeMapGetters, productName } = defaults;
 
@@ -157,21 +167,20 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? {
+            expectedTypes: expected ? expandModes(modes, {
               virt: {
                 label:  'virt',
-                mode:   modes,
                 name:   'virt',
                 weight: 1,
               }
-            } : {}
+            }) : {}
           };
         };
 
         /**
          * Extend generateDefaults with env to return a spoof type
          */
-        const createEnvBasicSpoof = (modes = BASIC, expected = true) => {
+        const createEnvBasicSpoof = (modes = [BASIC], expected = true) => {
           const defaults = generateDefaults();
           const { state, typeMapGetters, productName } = defaults;
 
@@ -192,14 +201,13 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? {
+            expectedTypes: expected ? expandModes(modes, {
               spoof: {
                 label:  'spoof',
-                mode:   modes,
                 name:   'spoof',
                 weight: 1,
               }
-            } : {}
+            }) : {}
           };
         };
 
@@ -253,7 +261,7 @@ describe('type-map', () => {
           it('no entry (basic but no group)', () => {
             const {
               state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-            } = createEnvBasicPod(BASIC, false);
+            } = createEnvBasicPod([BASIC], false);
 
             const testTypeMapGetters = {
               ...typeMapGetters,
@@ -279,7 +287,7 @@ describe('type-map', () => {
             it('no entry (group not basic)', () => {
               const {
                 state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-              } = createEnvBasicVirtual(BASIC, false);
+              } = createEnvBasicVirtual([BASIC], false);
 
               const testTypeMapGetters = {
                 ...typeMapGetters,
@@ -306,7 +314,7 @@ describe('type-map', () => {
             it('no entry (group not basic)', () => {
               const {
                 state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-              } = createEnvBasicSpoof(BASIC, false);
+              } = createEnvBasicSpoof([BASIC], false);
 
               const testTypeMapGetters = {
                 ...typeMapGetters,
@@ -325,7 +333,7 @@ describe('type-map', () => {
           * Extend createEnvBasicPod with env to return a pod type for mode ALL
           */
           const createEnvAllPod = (expected = true) => {
-            const defaults = createEnvBasicPod(ALL);
+            const defaults = createEnvBasicPod([ALL]);
             const { rootGetters, productStore } = defaults;
 
             const testRootGetters = {
@@ -358,12 +366,11 @@ describe('type-map', () => {
               ...defaults,
               rootGetters: testRootGetters,
 
-              expectedTypes: expected ? {
+              expectedTypes: expected ? expandModes([ALL], {
                 pod: {
                   byNamespace: { a: true },
                   count:       1,
                   label:       'Pod',
-                  mode:        ALL,
                   name:        'pod',
                   namespaced:  true,
                   revision:    'abc',
@@ -375,7 +382,7 @@ describe('type-map', () => {
                   },
                   weight: 1,
                 }
-              } : { }
+              }) : { }
             };
           };
 
@@ -383,14 +390,14 @@ describe('type-map', () => {
           * Extend createEnvBasicVirtual with env to return a virtual type for mode ALL
           */
           const createAllVirtualType = () => {
-            return createEnvBasicVirtual(ALL);
+            return createEnvBasicVirtual([ALL]);
           };
 
           /**
           * Extend createEnvBasicSpoof with env to return a spoof type for mode ALL
           */
           const createAllSpoofedType = () => {
-            return createEnvBasicSpoof(ALL);
+            return createEnvBasicSpoof([ALL]);
           };
 
           it('one entry', () => {
@@ -630,16 +637,15 @@ describe('type-map', () => {
 
             return {
               ...defaults,
-              modes:          FAVORITE,
+              modes:          [FAVORITE],
               typeMapGetters: testTypeMapGetters,
               rootGetters:    testRootGetters,
 
-              expectedTypes: expected ? {
+              expectedTypes: expected ? expandModes([FAVORITE], {
                 pod: {
                   byNamespace: { a: true },
                   count:       1,
                   label:       'Pod',
-                  mode:        FAVORITE,
                   name:        'pod',
                   namespaced:  true,
                   revision:    'abc',
@@ -651,7 +657,7 @@ describe('type-map', () => {
                   },
                   weight: 1,
                 }
-              } : {}
+              }) : {}
             };
           };
 
@@ -673,14 +679,13 @@ describe('type-map', () => {
               state:       testState,
               rootGetters: defaults.rootGetters,
 
-              expectedTypes: expected ? {
+              expectedTypes: expected ? expandModes([FAVORITE], {
                 virt: {
                   label:  'virt',
-                  mode:   FAVORITE,
                   name:   'virt',
                   weight: 1,
                 }
-              } : {}
+              }) : {}
             };
           };
 
@@ -702,14 +707,13 @@ describe('type-map', () => {
               state:       testState,
               rootGetters: defaults.rootGetters,
 
-              expectedTypes: expected ? {
+              expectedTypes: expected ? expandModes([FAVORITE], {
                 spoof: {
                   label:  'spoof',
-                  mode:   FAVORITE,
                   name:   'spoof',
                   weight: 1,
                 }
-              } : {}
+              }) : {}
             };
           };
 
@@ -800,7 +804,7 @@ describe('type-map', () => {
           * Extend createEnvBasicPod with env to return a pod for mode USED
           */
           const createUsedPod = () => {
-            const defaults = createEnvBasicPod(USED);
+            const defaults = createEnvBasicPod([USED]);
             const { rootGetters, productStore } = defaults;
 
             const testRootGetters = {
@@ -836,7 +840,7 @@ describe('type-map', () => {
           };
 
           it('one entry', () => {
-            const expectedGroups = {
+            const expectedGroups = expandModes([USED], {
               pod: {
                 byNamespace: { a: true },
                 count:       1,
@@ -853,7 +857,7 @@ describe('type-map', () => {
                 },
                 weight: 1,
               }
-            };
+            });
 
             const {
               state, typeMapGetters, rootState, rootGetters, productName, modes
@@ -872,7 +876,7 @@ describe('type-map', () => {
                 state, typeMapGetters, rootState, rootGetters, productName
               } = createEnvBasicVirtual();
 
-              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, USED);
+              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [USED]);
 
               expect(groups).toStrictEqual(expectedGroups);
             });
@@ -886,11 +890,210 @@ describe('type-map', () => {
                 state, typeMapGetters, rootState, rootGetters, productName
               } = createEnvBasicSpoof();
 
-              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, USED);
+              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [USED]);
 
               expect(groups).toStrictEqual(expectedGroups);
             });
           });
+        });
+
+        describe('mode: multiple', () => {
+          // Covers getProductsGroups use cases
+          const modes = [BASIC, FAVORITE, USED];
+
+          const createAllOfTheThings = () => {
+            const defaults = generateDefaults(EXPLORER, 'cluster', modes);
+            const {
+              state, typeMapGetters, rootGetters, productName, productStore
+            } = defaults;
+
+            const testState = {
+              ...state,
+              virtualTypes: { [productName]: [{ name: 'virt' }] },
+              spoofedTypes: { [productName]: [{ name: 'spoof' }] }
+            };
+
+            const testRootGetters = {
+              ...rootGetters,
+              [`${ productStore }/all`]: (resource: string) => {
+                switch (resource) {
+                case SCHEMA:
+                  return [{
+                    id:   'toplevel',
+                    type: SCHEMA
+                  }, {
+                    id:         'pod',
+                    type:       SCHEMA,
+                    attributes: { kind: 'pod' }
+                  }, {
+                    id:         'fav',
+                    type:       SCHEMA,
+                    attributes: { kind: 'fav' }
+                  }];
+                case COUNT:
+                  return [{
+                    counts: {
+                      toplevel: {
+                        summary:    { count: 1 },
+                        revision:   'abc',
+                        namespaces: { a: true }
+                      },
+                      pod: {
+                        summary:    { count: 1 },
+                        revision:   'abc',
+                        namespaces: { a: true }
+                      },
+                      fav: {
+                        summary:    { count: 1 },
+                        revision:   'abc',
+                        namespaces: { a: true }
+                      }
+                    }
+                  }];
+                }
+
+                return [];
+              },
+            };
+
+            const testTypeMapGetters = {
+              ...typeMapGetters,
+              labelFor:          (schema, count) => 'Pod',
+              groupForBasicType: () => true,
+              optionsFor:        (schema) => ({
+                namespaced:  true,
+                customRoute: 'cde'
+              }),
+              isFavorite: (id) => id === 'fav',
+            };
+
+            return {
+              ...defaults,
+              typeMapGetters: testTypeMapGetters,
+              rootGetters:    testRootGetters,
+              state:          testState,
+
+              modes,
+
+              expectedTypes: {
+                [BASIC]: {
+                  // A resource that's favourite should still appear in the basic side nav
+                  fav: {
+                    byNamespace: { a: true },
+                    count:       1,
+                    label:       'Pod',
+                    name:        'fav',
+                    namespaced:  true,
+                    revision:    'abc',
+                    route:       'cde',
+                    schema:      {
+                      id:         'fav',
+                      type:       'schema',
+                      attributes: { kind: 'fav' }
+                    },
+                    weight: 1,
+                    mode:   BASIC,
+                  },
+                  // A basic resource
+                  pod: {
+                    byNamespace: { a: true },
+                    count:       1,
+                    label:       'Pod',
+                    name:        'pod',
+                    namespaced:  true,
+                    revision:    'abc',
+                    route:       'cde',
+                    schema:      {
+                      id:         'pod',
+                      type:       'schema',
+                      attributes: { kind: 'pod' }
+                    },
+                    weight: 1,
+                    mode:   BASIC,
+                  },
+                  // A top level resource with an invalid schema (no kind)
+                  toplevel: {
+                    byNamespace: { a: true },
+                    count:       1,
+                    label:       'Pod',
+                    mode:        'basic',
+                    name:        'toplevel',
+                    namespaced:  true,
+                    revision:    'abc',
+                    route:       'cde',
+                    schema:      {
+                      id:   'toplevel',
+                      type: 'schema',
+                    },
+                    weight: 1,
+                  },
+
+                  virt: {
+                    label:  'virt',
+                    mode:   BASIC,
+                    name:   'virt',
+                    weight: 1,
+                  },
+                  spoof: {
+                    label:  'spoof',
+                    mode:   BASIC,
+                    name:   'spoof',
+                    weight: 1,
+                  }
+                },
+                [FAVORITE]: {
+                  fav: {
+                    byNamespace: { a: true },
+                    count:       1,
+                    label:       'Pod',
+                    name:        'fav',
+                    namespaced:  true,
+                    revision:    'abc',
+                    route:       'cde',
+                    schema:      {
+                      id:         'fav',
+                      type:       'schema',
+                      attributes: { kind: 'fav' }
+                    },
+                    weight: 1,
+                    mode:   FAVORITE,
+                  },
+                }
+                // [USED]:     {}
+              },
+
+            };
+          };
+
+          it('no entries', () => {
+            const {
+              state, typeMapGetters, rootState, rootGetters, productName
+            } = generateDefaults(EXPLORER, 'cluster', modes);
+
+            const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, modes);
+
+            expect(groups).toStrictEqual({});
+          });
+
+          it('one entry each', () => {
+            const {
+              state, typeMapGetters, rootState, rootGetters, productName, expectedTypes
+            } = createAllOfTheThings();
+
+            const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, modes);
+
+            expect(groups).toStrictEqual(expectedTypes);
+          });
+
+          it.todo('no basic type');
+
+          it.todo('no favourite type');
+
+          it.todo('no used type');
+
+          it.todo('no spoof type');
+
+          it.todo('no virt type');
         });
       });
     });

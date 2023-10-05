@@ -308,13 +308,13 @@ export default {
           modes.push(USED);
         }
 
-        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
+        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes); // TODO: This will have x2 copy of everything at the same time
 
         for ( const mode of modes ) {
-          debugger;
-
           console.time(`${ productId }/${ mode }/${ allTypes }`);
 
+          debugger;
+          // const types = this.$store.getters['type-map/allTypes'](productId, mode);
           const types = modeTypes[mode] || {};
 
           console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
