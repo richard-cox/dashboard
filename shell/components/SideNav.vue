@@ -308,6 +308,10 @@ export default {
           modes.push(TYPE_MODES.USED);
         }
 
+        // TODO: RC remaining TODOs
+        // TODO: RC testing locally. testing at scale? compare with confluence?. test products (kube warnden. legacy things)
+        // TODO: RC before / after comparison (ensure store functiuns are named)
+
         const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes); // TODO: RC This will have x2 copy of everything at the same time
 
         for ( const mode of modes ) {
