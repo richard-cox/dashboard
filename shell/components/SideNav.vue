@@ -16,7 +16,7 @@ import {
 } from '@shell/config/types';
 import { HARVESTER_NAME as HARVESTER } from '@shell/config/features';
 import { NAME as EXPLORER } from '@shell/config/product/explorer';
-import { BASIC, FAVORITE, USED } from '@shell/store/type-map';
+import { SIDE_NAV_MODES } from '@shell/store/type-map';
 import { NAME as NAVLINKS } from '@shell/config/product/navlinks';
 import Group from '@shell/components/nav/Group';
 
@@ -296,7 +296,7 @@ export default {
       debugger;
 
       for ( const productId of loadProducts ) {
-        const modes = [BASIC]; // TODO: RC why this twice?
+        const modes = [SIDE_NAV_MODES.BASIC]; // TODO: RC why this twice?
 
         if ( productId === NAVLINKS ) {
           // Navlinks produce their own top-level nav items so don't need to show it as a product.
@@ -304,11 +304,11 @@ export default {
         }
 
         if ( productId === EXPLORER ) {
-          modes.push(FAVORITE);
-          modes.push(USED);
+          modes.push(SIDE_NAV_MODES.FAVORITE);
+          modes.push(SIDE_NAV_MODES.USED);
         }
 
-        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes); // TODO: This will have x2 copy of everything at the same time
+        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes); // TODO: RC This will have x2 copy of everything at the same time
 
         for ( const mode of modes ) {
           console.time(`${ productId }/${ mode }/${ allTypes }`);

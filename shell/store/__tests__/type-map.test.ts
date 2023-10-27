@@ -1,33 +1,144 @@
 /* eslint-disable jest/max-nested-describe */
 
-import {
-  ALL, BASIC, FAVORITE, getters, USED
-} from '../type-map';
+import { SIDE_NAV_MODES, getters } from '../type-map';
 import { NAME as EXPLORER } from '@shell/config/product/explorer';
 import {
-  CATALOG,
   COUNT,
   SCHEMA,
-  MANAGEMENT,
-  NAMESPACE
 } from '@shell/config/types';
+
+/**
+ * types in the store
+ */
+const types = {
+  virtual: { name: 'virt' },
+  spoof:   { name: 'spoof' }
+};
+
+const schemas = {
+  pod: {
+    id:         'pod',
+    type:       SCHEMA,
+    attributes: { kind: 'pod' },
+  },
+  podNoAttributes: {
+    id:   'pod',
+    type: SCHEMA,
+  },
+  secret: {
+    id:         'secret',
+    type:       SCHEMA,
+    attributes: { kind: 'secret' },
+  },
+  topLevel: {
+    id:   'toplevel',
+    type: SCHEMA,
+  }
+};
+
+const counts = {
+  pod: {
+    summary:    { count: 1 },
+    revision:   'abc',
+    namespaces: { a: true }
+  },
+  toplevel: {
+    summary:    { count: 1 },
+    revision:   'abc',
+    namespaces: { a: true }
+  },
+  secret: {
+    summary:    { count: 1 },
+    revision:   'abc',
+    namespaces: { a: true }
+  }
+};
+
+/**
+ * Some of the objects that we expect to be returned by allTypes
+ */
+const expectedMenuItems = {
+  podWithoutAttribute: {
+    byNamespace: { a: true },
+    count:       1,
+    label:       'Pod',
+    name:        'pod',
+    namespaced:  true,
+    revision:    'abc',
+    route:       'cde',
+    schema:      schemas.podNoAttributes,
+    weight:      1,
+  },
+  podWithAttribute: {
+    byNamespace: { a: true },
+    count:       1,
+    label:       'Pod',
+    name:        'pod',
+    namespaced:  true,
+    revision:    'abc',
+    route:       'cde',
+    schema:      schemas.pod,
+    weight:      1,
+  },
+  secretWithAttribute: {
+    byNamespace: { a: true },
+    count:       1,
+    label:       'Secret',
+    name:        'secret',
+    namespaced:  true,
+    revision:    'abc',
+    route:       'cde',
+    schema:      schemas.secret,
+    weight:      1,
+  },
+  virtual: {
+    label:  'virt',
+    name:   'virt',
+    weight: 1,
+  },
+  spoof: {
+    label:  'spoof',
+    name:   'spoof',
+    weight: 1,
+  },
+  topLevel: {
+    byNamespace: { a: true },
+    count:       1,
+    label:       'Pod',
+    mode:        'basic',
+    name:        'toplevel',
+    namespaced:  true,
+    revision:    'abc',
+    route:       'cde',
+    schema:      schemas.topLevel,
+    weight:      1,
+  }
+};
 
 describe('type-map', () => {
   describe('getters', () => {
     describe('allTypes', () => {
-      const expandModes = (modes, type) => {
+      /**
+       * Stick in the required mode param to the expected menu items
+       */
+      const expandModes = (modes, resourcesById) => {
         return modes.reduce((res, mode) => {
-          Object.values(type).forEach((t: any) => {
-            t.mode = mode;
+          const newResource = { };
+
+          Object.entries(resourcesById).forEach(([id, resource]: [string, any]) => {
+            newResource[id] = {
+              ...resource,
+              mode,
+            };
           });
-          res[mode] = type;
+          res[mode] = newResource;
 
           return res;
         }, {});
       };
 
       /** All basic ctx properties and helpers */
-      const generateDefaults = (productName = EXPLORER, productStore = 'cluster', modes = [BASIC]) => {
+      const generateDefaults = (productName = EXPLORER, productStore = 'cluster', modes = [SIDE_NAV_MODES.BASIC]) => {
         return {
           productName,
           productStore,
@@ -59,47 +170,35 @@ describe('type-map', () => {
         };
       };
 
+      /**
+       * When there are no schema, spoofed or virtual types there's no menu types
+       */
       it('empty', () => {
         const {
           state, typeMapGetters, rootState, rootGetters, productName, modes
         } = generateDefaults();
 
-        const expectedGroups = { };
-
         const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, modes);
 
-        expect(groups).toStrictEqual(expectedGroups);
+        expect(groups).toStrictEqual({});
       });
 
       describe('product: Explorer', () => {
         /**
          * Extend generateDefaults with env to return a pod type
          */
-        const createEnvBasicPod = (modes = [BASIC], expected = true) => {
-          const defaults = generateDefaults(EXPLORER, `cluster`, [BASIC]);
-          const {
-            state, typeMapGetters, rootGetters, productName, productStore
-          } = defaults;
+        const createEnvBasicPod = (modes = [SIDE_NAV_MODES.BASIC], expected = true) => {
+          const defaults = generateDefaults(EXPLORER, `cluster`, [SIDE_NAV_MODES.BASIC]);
+          const { typeMapGetters, rootGetters, productStore } = defaults;
 
           const testRootGetters = {
             ...rootGetters,
             [`${ productStore }/all`]: (resource: string) => {
               switch (resource) {
               case SCHEMA:
-                return [{
-                  id:   'pod',
-                  type: SCHEMA
-                }];
+                return [schemas.pod];
               case COUNT:
-                return [{
-                  counts: {
-                    pod: {
-                      summary:    { count: 1 },
-                      revision:   'abc',
-                      namespaces: { a: true }
-                    }
-                  }
-                }];
+                return [{ counts: { pod: counts.pod } }];
               }
 
               return [];
@@ -124,35 +223,20 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? expandModes(modes, {
-              pod: {
-                byNamespace: { a: true },
-                count:       1,
-                label:       'Pod',
-                name:        'pod',
-                namespaced:  true,
-                revision:    'abc',
-                route:       'cde',
-                schema:      {
-                  id:   'pod',
-                  type: 'schema',
-                },
-                weight: 1,
-              }
-            }) : {}
+            expectedTypes: expected ? expandModes(modes, { pod: expectedMenuItems.podWithAttribute }) : {}
           };
         };
 
         /**
          * Extend generateDefaults with env to return a virtual type
          */
-        const createEnvBasicVirtual = (modes = [BASIC], expected = true) => {
+        const createEnvBasicVirtual = (modes = [SIDE_NAV_MODES.BASIC], expected = true) => {
           const defaults = generateDefaults();
           const { state, typeMapGetters, productName } = defaults;
 
           const testState = {
             ...state,
-            virtualTypes: { [productName]: [{ name: 'virt' }] }
+            virtualTypes: { [productName]: [types.virtual] }
           };
 
           const testTypeMapGetters = {
@@ -167,26 +251,20 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? expandModes(modes, {
-              virt: {
-                label:  'virt',
-                name:   'virt',
-                weight: 1,
-              }
-            }) : {}
+            expectedTypes: expected ? expandModes(modes, { virt: expectedMenuItems.virtual }) : {}
           };
         };
 
         /**
          * Extend generateDefaults with env to return a spoof type
          */
-        const createEnvBasicSpoof = (modes = [BASIC], expected = true) => {
+        const createEnvBasicSpoof = (modes = [SIDE_NAV_MODES.BASIC], expected = true) => {
           const defaults = generateDefaults();
           const { state, typeMapGetters, productName } = defaults;
 
           const testState = {
             ...state,
-            spoofedTypes: { [productName]: [{ name: 'spoof' }] }
+            spoofedTypes: { [productName]: [types.spoof] }
           };
 
           const testTypeMapGetters = {
@@ -201,13 +279,7 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? expandModes(modes, {
-              spoof: {
-                label:  'spoof',
-                name:   'spoof',
-                weight: 1,
-              }
-            }) : {}
+            expectedTypes: expected ? expandModes(modes, { spoof: expectedMenuItems.spoof }) : {}
           };
         };
 
@@ -225,7 +297,7 @@ describe('type-map', () => {
           it('one entry (explicitly test basic mode with a schema without `kind`)', () => {
             // This is odd, but it should be clear that in basic mode schemas without a kind are ok)
             const {
-              state, typeMapGetters, rootState, rootGetters, productName, modes, productStore, expectedTypes
+              state, typeMapGetters, rootState, rootGetters, productName, modes, productStore
             } = createEnvBasicPod();
 
             const testRootGetters = {
@@ -233,20 +305,9 @@ describe('type-map', () => {
               [`${ productStore }/all`]: (resource: string) => {
                 switch (resource) {
                 case SCHEMA:
-                  return [{
-                    id:   'pod',
-                    type: SCHEMA
-                  }];
+                  return [schemas.podNoAttributes];
                 case COUNT:
-                  return [{
-                    counts: {
-                      pod: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      }
-                    }
-                  }];
+                  return [{ counts: { pod: counts.pod } }];
                 }
 
                 return [];
@@ -255,13 +316,13 @@ describe('type-map', () => {
 
             const groups = getters.allTypes(state, typeMapGetters, rootState, testRootGetters)(productName, modes);
 
-            expect(groups).toStrictEqual(expectedTypes);
+            expect(groups).toStrictEqual(expandModes([SIDE_NAV_MODES.BASIC], { pod: expectedMenuItems.podWithoutAttribute }));
           });
 
           it('no entry (basic but no group)', () => {
             const {
               state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-            } = createEnvBasicPod([BASIC], false);
+            } = createEnvBasicPod([SIDE_NAV_MODES.BASIC], false);
 
             const testTypeMapGetters = {
               ...typeMapGetters,
@@ -287,7 +348,7 @@ describe('type-map', () => {
             it('no entry (group not basic)', () => {
               const {
                 state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-              } = createEnvBasicVirtual([BASIC], false);
+              } = createEnvBasicVirtual([SIDE_NAV_MODES.BASIC], false);
 
               const testTypeMapGetters = {
                 ...typeMapGetters,
@@ -314,7 +375,7 @@ describe('type-map', () => {
             it('no entry (group not basic)', () => {
               const {
                 state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-              } = createEnvBasicSpoof([BASIC], false);
+              } = createEnvBasicSpoof([SIDE_NAV_MODES.BASIC], false);
 
               const testTypeMapGetters = {
                 ...typeMapGetters,
@@ -330,10 +391,10 @@ describe('type-map', () => {
 
         describe('mode: ALL', () => {
           /**
-          * Extend createEnvBasicPod with env to return a pod type for mode ALL
+          * Extend createEnvBasicPod with env to return a pod type for mode SIDE_NAV_MODES.ALL
           */
           const createEnvAllPod = (expected = true) => {
-            const defaults = createEnvBasicPod([ALL]);
+            const defaults = createEnvBasicPod([SIDE_NAV_MODES.ALL]);
             const { rootGetters, productStore } = defaults;
 
             const testRootGetters = {
@@ -341,21 +402,9 @@ describe('type-map', () => {
               [`${ productStore }/all`]: (resource: string) => {
                 switch (resource) {
                 case SCHEMA:
-                  return [{
-                    id:         'pod',
-                    type:       SCHEMA,
-                    attributes: { kind: 'pod' },
-                  }];
+                  return [schemas.pod];
                 case COUNT:
-                  return [{
-                    counts: {
-                      pod: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      }
-                    }
-                  }];
+                  return [{ counts: { pod: counts.pod } }];
                 }
 
                 return [];
@@ -366,38 +415,23 @@ describe('type-map', () => {
               ...defaults,
               rootGetters: testRootGetters,
 
-              expectedTypes: expected ? expandModes([ALL], {
-                pod: {
-                  byNamespace: { a: true },
-                  count:       1,
-                  label:       'Pod',
-                  name:        'pod',
-                  namespaced:  true,
-                  revision:    'abc',
-                  route:       'cde',
-                  schema:      {
-                    id:         'pod',
-                    type:       SCHEMA,
-                    attributes: { kind: 'pod' },
-                  },
-                  weight: 1,
-                }
+              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.ALL], { pod: expectedMenuItems.podWithAttribute, // TODO: RC all should have attribute kind??
               }) : { }
             };
           };
 
           /**
-          * Extend createEnvBasicVirtual with env to return a virtual type for mode ALL
+          * Extend createEnvBasicVirtual with env to return a virtual type for mode SIDE_NAV_MODES.ALL
           */
           const createAllVirtualType = () => {
-            return createEnvBasicVirtual([ALL]);
+            return createEnvBasicVirtual([SIDE_NAV_MODES.ALL]);
           };
 
           /**
-          * Extend createEnvBasicSpoof with env to return a spoof type for mode ALL
+          * Extend createEnvBasicSpoof with env to return a spoof type for mode SIDE_NAV_MODES.ALL
           */
           const createAllSpoofedType = () => {
-            return createEnvBasicSpoof([ALL]);
+            return createEnvBasicSpoof([SIDE_NAV_MODES.ALL]);
           };
 
           it('one entry', () => {
@@ -420,20 +454,9 @@ describe('type-map', () => {
               [`${ productStore }/all`]: (resource: string) => {
                 switch (resource) {
                 case SCHEMA:
-                  return [{
-                    id:   'pod',
-                    type: SCHEMA,
-                  }];
+                  return [schemas.podNoAttributes];
                 case COUNT:
-                  return [{
-                    counts: {
-                      pod: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      }
-                    }
-                  }];
+                  return [{ counts: { pod: counts.pod } }];
                 }
 
                 return [];
@@ -592,7 +615,7 @@ describe('type-map', () => {
 
         describe('mode: FAVORITE', () => {
           /**
-          * Extend generateDefaults with env to return a pod type for mode FAVORITE
+          * Extend generateDefaults with env to return a pod type for mode SIDE_NAV_MODES.FAVORITE
           */
           const generateDefaultsForFavourite = (expected = true) => {
             const defaults = generateDefaults();
@@ -603,21 +626,9 @@ describe('type-map', () => {
               [`${ productStore }/all`]: (resource: string) => {
                 switch (resource) {
                 case SCHEMA:
-                  return [{
-                    id:         'pod',
-                    type:       SCHEMA,
-                    attributes: { kind: 'pod' },
-                  }];
+                  return [schemas.secret];
                 case COUNT:
-                  return [{
-                    counts: {
-                      pod: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      }
-                    }
-                  }];
+                  return [{ counts: { secret: counts.secret } }];
                 }
 
                 return [];
@@ -626,7 +637,7 @@ describe('type-map', () => {
 
             const testTypeMapGetters = {
               ...typeMapGetters,
-              labelFor:          (schema, count) => 'Pod',
+              labelFor:          (schema, count) => 'Secret',
               groupForBasicType: () => true,
               optionsFor:        (schema) => ({
                 namespaced:  true,
@@ -637,32 +648,16 @@ describe('type-map', () => {
 
             return {
               ...defaults,
-              modes:          [FAVORITE],
+              modes:          [SIDE_NAV_MODES.FAVORITE],
               typeMapGetters: testTypeMapGetters,
               rootGetters:    testRootGetters,
 
-              expectedTypes: expected ? expandModes([FAVORITE], {
-                pod: {
-                  byNamespace: { a: true },
-                  count:       1,
-                  label:       'Pod',
-                  name:        'pod',
-                  namespaced:  true,
-                  revision:    'abc',
-                  route:       'cde',
-                  schema:      {
-                    id:         'pod',
-                    type:       SCHEMA,
-                    attributes: { kind: 'pod' },
-                  },
-                  weight: 1,
-                }
-              }) : {}
+              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }) : {}
             };
           };
 
           /**
-          * Extend generateDefaultsForFavourite with env to return a virtual type for mode FAVORITE
+          * Extend generateDefaultsForFavourite with env to return a virtual type for mode SIDE_NAV_MODES.FAVORITE
           */
           const createDefaultsForFavouriteVirtualType = (expected = true) => {
             const defaults = generateDefaults();
@@ -671,7 +666,7 @@ describe('type-map', () => {
 
             const testState = {
               ...state,
-              virtualTypes: { [productName]: [{ name: 'virt' }] }
+              virtualTypes: { [productName]: [types.virtual] }
             };
 
             return {
@@ -679,18 +674,12 @@ describe('type-map', () => {
               state:       testState,
               rootGetters: defaults.rootGetters,
 
-              expectedTypes: expected ? expandModes([FAVORITE], {
-                virt: {
-                  label:  'virt',
-                  name:   'virt',
-                  weight: 1,
-                }
-              }) : {}
+              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.FAVORITE], { virt: expectedMenuItems.virtual }) : {}
             };
           };
 
           /**
-          * Extend generateDefaultsForFavourite with env to return a spoof type for mode FAVORITE
+          * Extend generateDefaultsForFavourite with env to return a spoof type for mode SIDE_NAV_MODES.FAVORITE
           */
           const createDefaultsForFavouriteSpoofType = (expected = true) => {
             const defaults = generateDefaults();
@@ -699,7 +688,7 @@ describe('type-map', () => {
 
             const testState = {
               ...state,
-              spoofedTypes: { [productName]: [{ name: 'spoof' }] }
+              spoofedTypes: { [productName]: [types.spoof] }
             };
 
             return {
@@ -707,13 +696,7 @@ describe('type-map', () => {
               state:       testState,
               rootGetters: defaults.rootGetters,
 
-              expectedTypes: expected ? expandModes([FAVORITE], {
-                spoof: {
-                  label:  'spoof',
-                  name:   'spoof',
-                  weight: 1,
-                }
-              }) : {}
+              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.FAVORITE], { spoof: expectedMenuItems.spoof }) : {}
             };
           };
 
@@ -801,10 +784,10 @@ describe('type-map', () => {
 
         describe('mode: USED', () => {
           /**
-          * Extend createEnvBasicPod with env to return a pod for mode USED
+          * Extend createEnvBasicPod with env to return a pod for mode SIDE_NAV_MODES.USED
           */
           const createUsedPod = () => {
-            const defaults = createEnvBasicPod([USED]);
+            const defaults = createEnvBasicPod([SIDE_NAV_MODES.USED]);
             const { rootGetters, productStore } = defaults;
 
             const testRootGetters = {
@@ -812,21 +795,9 @@ describe('type-map', () => {
               [`${ productStore }/all`]: (resource: string) => {
                 switch (resource) {
                 case SCHEMA:
-                  return [{
-                    id:         'pod',
-                    type:       SCHEMA,
-                    attributes: { kind: 'pod' }
-                  }];
+                  return [schemas.pod];
                 case COUNT:
-                  return [{
-                    counts: {
-                      pod: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      }
-                    }
-                  }];
+                  return [{ counts: { pod: counts.pod } }];
                 }
 
                 return [];
@@ -840,24 +811,7 @@ describe('type-map', () => {
           };
 
           it('one entry', () => {
-            const expectedGroups = expandModes([USED], {
-              pod: {
-                byNamespace: { a: true },
-                count:       1,
-                label:       'Pod',
-                mode:        USED,
-                name:        'pod',
-                namespaced:  true,
-                revision:    'abc',
-                route:       'cde',
-                schema:      {
-                  id:         'pod',
-                  type:       'schema',
-                  attributes: { kind: 'pod' }
-                },
-                weight: 1,
-              }
-            });
+            const expectedGroups = expandModes([SIDE_NAV_MODES.USED], { pod: expectedMenuItems.podWithAttribute });
 
             const {
               state, typeMapGetters, rootState, rootGetters, productName, modes
@@ -876,7 +830,7 @@ describe('type-map', () => {
                 state, typeMapGetters, rootState, rootGetters, productName
               } = createEnvBasicVirtual();
 
-              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [USED]);
+              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [SIDE_NAV_MODES.USED]);
 
               expect(groups).toStrictEqual(expectedGroups);
             });
@@ -890,7 +844,7 @@ describe('type-map', () => {
                 state, typeMapGetters, rootState, rootGetters, productName
               } = createEnvBasicSpoof();
 
-              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [USED]);
+              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [SIDE_NAV_MODES.USED]);
 
               expect(groups).toStrictEqual(expectedGroups);
             });
@@ -899,7 +853,7 @@ describe('type-map', () => {
 
         describe('mode: multiple', () => {
           // Covers getProductsGroups use cases
-          const modes = [BASIC, FAVORITE, USED];
+          const modes = [SIDE_NAV_MODES.BASIC, SIDE_NAV_MODES.FAVORITE, SIDE_NAV_MODES.USED];
 
           const createAllOfTheThings = () => {
             const defaults = generateDefaults(EXPLORER, 'cluster', modes);
@@ -909,8 +863,8 @@ describe('type-map', () => {
 
             const testState = {
               ...state,
-              virtualTypes: { [productName]: [{ name: 'virt' }] },
-              spoofedTypes: { [productName]: [{ name: 'spoof' }] }
+              virtualTypes: { [productName]: [types.virtual] },
+              spoofedTypes: { [productName]: [types.spoof] }
             };
 
             const testRootGetters = {
@@ -918,36 +872,13 @@ describe('type-map', () => {
               [`${ productStore }/all`]: (resource: string) => {
                 switch (resource) {
                 case SCHEMA:
-                  return [{
-                    id:   'toplevel',
-                    type: SCHEMA
-                  }, {
-                    id:         'pod',
-                    type:       SCHEMA,
-                    attributes: { kind: 'pod' }
-                  }, {
-                    id:         'fav',
-                    type:       SCHEMA,
-                    attributes: { kind: 'fav' }
-                  }];
+                  return [schemas.topLevel, schemas.pod, schemas.secret];
                 case COUNT:
                   return [{
                     counts: {
-                      toplevel: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      },
-                      pod: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      },
-                      fav: {
-                        summary:    { count: 1 },
-                        revision:   'abc',
-                        namespaces: { a: true }
-                      }
+                      toplevel: counts.toplevel,
+                      pod:      counts.pod,
+                      secret:   counts.secret
                     }
                   }];
                 }
@@ -958,13 +889,20 @@ describe('type-map', () => {
 
             const testTypeMapGetters = {
               ...typeMapGetters,
-              labelFor:          (schema, count) => 'Pod',
+              labelFor: (schema, count) => {
+                switch (schema.id) {
+                case 'secret':
+                  return 'Secret';
+                default:
+                  return 'Pod';
+                }
+              },
               groupForBasicType: () => true,
               optionsFor:        (schema) => ({
                 namespaced:  true,
                 customRoute: 'cde'
               }),
-              isFavorite: (id) => id === 'fav',
+              isFavorite: (id) => id === 'secret',
             };
 
             return {
@@ -974,94 +912,31 @@ describe('type-map', () => {
               state:          testState,
 
               modes,
-
+              // TODO: RC do we really have dupes in basic and used?
               expectedTypes: {
-                [BASIC]: {
+                ...expandModes([SIDE_NAV_MODES.BASIC], {
                   // A resource that's favourite should still appear in the basic side nav
-                  fav: {
-                    byNamespace: { a: true },
-                    count:       1,
-                    label:       'Pod',
-                    name:        'fav',
-                    namespaced:  true,
-                    revision:    'abc',
-                    route:       'cde',
-                    schema:      {
-                      id:         'fav',
-                      type:       'schema',
-                      attributes: { kind: 'fav' }
-                    },
-                    weight: 1,
-                    mode:   BASIC,
-                  },
+                  // fav: {
+                  secret: expectedMenuItems.secretWithAttribute,
+
                   // A basic resource
-                  pod: {
-                    byNamespace: { a: true },
-                    count:       1,
-                    label:       'Pod',
-                    name:        'pod',
-                    namespaced:  true,
-                    revision:    'abc',
-                    route:       'cde',
-                    schema:      {
-                      id:         'pod',
-                      type:       'schema',
-                      attributes: { kind: 'pod' }
-                    },
-                    weight: 1,
-                    mode:   BASIC,
-                  },
+                  pod: expectedMenuItems.podWithAttribute,
+
                   // A top level resource with an invalid schema (no kind)
-                  toplevel: {
-                    byNamespace: { a: true },
-                    count:       1,
-                    label:       'Pod',
-                    mode:        'basic',
-                    name:        'toplevel',
-                    namespaced:  true,
-                    revision:    'abc',
-                    route:       'cde',
-                    schema:      {
-                      id:   'toplevel',
-                      type: 'schema',
-                    },
-                    weight: 1,
-                  },
+                  toplevel: expectedMenuItems.topLevel,
 
-                  virt: {
-                    label:  'virt',
-                    mode:   BASIC,
-                    name:   'virt',
-                    weight: 1,
-                  },
-                  spoof: {
-                    label:  'spoof',
-                    mode:   BASIC,
-                    name:   'spoof',
-                    weight: 1,
-                  }
-                },
-                [FAVORITE]: {
-                  fav: {
-                    byNamespace: { a: true },
-                    count:       1,
-                    label:       'Pod',
-                    name:        'fav',
-                    namespaced:  true,
-                    revision:    'abc',
-                    route:       'cde',
-                    schema:      {
-                      id:         'fav',
-                      type:       'schema',
-                      attributes: { kind: 'fav' }
-                    },
-                    weight: 1,
-                    mode:   FAVORITE,
-                  },
-                }
-                // [USED]:     {}
-              },
+                  virt: expectedMenuItems.virtual,
 
+                  spoof: expectedMenuItems.spoof
+                }),
+                ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+                ...expandModes([SIDE_NAV_MODES.USED], {
+                  // A resource that's favourite should still appear in the basic side nav
+                  secret: expectedMenuItems.secretWithAttribute,
+                  // A basic resource
+                  pod:    expectedMenuItems.podWithAttribute,
+                }),
+              }
             };
           };
 
@@ -1085,15 +960,167 @@ describe('type-map', () => {
             expect(groups).toStrictEqual(expectedTypes);
           });
 
-          it.todo('no basic type');
+          it('limited basic type', () => {
+            const {
+              state, typeMapGetters, rootState, rootGetters, productName, productStore
+            } = createAllOfTheThings();
 
-          it.todo('no favourite type');
+            const testState = {
+              ...state,
+              virtualTypes: { },
+              spoofedTypes: { }
+            };
 
-          it.todo('no used type');
+            const testRootGetters = {
+              ...rootGetters,
+              [`${ productStore }/all`]: (resource: string) => {
+                switch (resource) {
+                case SCHEMA:
+                  return [schemas.secret];
+                case COUNT:
+                  return [{ counts: { secret: counts.secret } }];
+                }
 
-          it.todo('no spoof type');
+                return [];
+              },
+            };
 
-          it.todo('no virt type');
+            const testExpectedTypes = {
+              ...expandModes([SIDE_NAV_MODES.BASIC], { secret: expectedMenuItems.secretWithAttribute }),
+              ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+              ...expandModes([SIDE_NAV_MODES.USED], { secret: expectedMenuItems.secretWithAttribute }),
+            };
+
+            const groups = getters.allTypes(testState, typeMapGetters, rootState, testRootGetters)(productName, modes);
+
+            expect(groups).toStrictEqual(testExpectedTypes);
+          });
+
+          it('no favourite type', () => {
+            const {
+              state, typeMapGetters, rootState, rootGetters, productName, productStore
+            } = createAllOfTheThings();
+
+            const testRootGetters = {
+              ...rootGetters,
+              [`${ productStore }/all`]: (resource: string) => {
+                switch (resource) {
+                case SCHEMA:
+                  return [schemas.topLevel, schemas.pod];
+                case COUNT:
+                  return [{
+                    counts: {
+                      toplevel: counts.toplevel,
+                      pod:      counts.pod,
+                    }
+                  }];
+                }
+
+                return [];
+              },
+            };
+
+            const testExpectedTypes = {
+              ...expandModes([SIDE_NAV_MODES.BASIC], {
+                // A basic resource
+                pod: expectedMenuItems.podWithAttribute,
+
+                // A top level resource with an invalid schema (no kind)
+                toplevel: expectedMenuItems.topLevel,
+
+                virt: expectedMenuItems.virtual,
+
+                spoof: expectedMenuItems.spoof
+              }),
+              ...expandModes([SIDE_NAV_MODES.USED], {
+                // A basic resource
+                pod: expectedMenuItems.podWithAttribute,
+              }),
+            };
+
+            const groups = getters.allTypes(state, typeMapGetters, rootState, testRootGetters)(productName, modes);
+
+            expect(groups).toStrictEqual(testExpectedTypes);
+          });
+
+          it('no used type / no virtual type', () => {
+            const {
+              state, typeMapGetters, rootState, rootGetters, productName
+            } = createAllOfTheThings();
+
+            const testState = {
+              ...state,
+              spoofedTypes: { [productName]: [types.spoof] },
+              virtualTypes: { [productName]: [] },
+            };
+
+            const testExpectedTypes = {
+              ...expandModes([SIDE_NAV_MODES.BASIC], {
+                // A resource that's favourite should still appear in the basic side nav
+                // fav: {
+                secret: expectedMenuItems.secretWithAttribute,
+
+                // A basic resource
+                pod: expectedMenuItems.podWithAttribute,
+
+                // A top level resource with an invalid schema (no kind)
+                toplevel: expectedMenuItems.topLevel,
+
+                spoof: expectedMenuItems.spoof
+              }),
+              ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+              ...expandModes([SIDE_NAV_MODES.USED], { // TODO: RC why are virtual spoof not un used?
+                // A resource that's favourite should still appear in the basic side nav
+                secret: expectedMenuItems.secretWithAttribute,
+                // A basic resource
+                pod:    expectedMenuItems.podWithAttribute,
+              }),
+            };
+
+            const groups = getters.allTypes(testState, typeMapGetters, rootState, rootGetters)(productName, modes);
+
+            expect(groups).toStrictEqual(testExpectedTypes);
+          });
+
+          it('no used type / no spoofed type', () => {
+            const {
+              state, typeMapGetters, rootState, rootGetters, productName
+            } = createAllOfTheThings();
+
+            const testState = {
+              ...state,
+              spoofedTypes: { [productName]: [] },
+              virtualTypes: { [productName]: [types.virtual] },
+            };
+
+            const testExpectedTypes = {
+              ...expandModes([SIDE_NAV_MODES.BASIC], {
+                // A resource that's favourite should still appear in the basic side nav
+                // fav: {
+                secret: expectedMenuItems.secretWithAttribute,
+
+                // A basic resource
+                pod: expectedMenuItems.podWithAttribute,
+
+                // A top level resource with an invalid schema (no kind)
+                toplevel: expectedMenuItems.topLevel,
+
+                virt: expectedMenuItems.virtual,
+
+              }),
+              ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+              ...expandModes([SIDE_NAV_MODES.USED], {
+                // A resource that's favourite should still appear in the basic side nav
+                secret: expectedMenuItems.secretWithAttribute,
+                // A basic resource
+                pod:    expectedMenuItems.podWithAttribute,
+              }),
+            };
+
+            const groups = getters.allTypes(testState, typeMapGetters, rootState, rootGetters)(productName, modes);
+
+            expect(groups).toStrictEqual(testExpectedTypes);
+          });
         });
       });
     });

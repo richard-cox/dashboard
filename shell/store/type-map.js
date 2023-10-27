@@ -155,10 +155,24 @@ export const NAMESPACED = 'namespaced';
 export const CLUSTER_LEVEL = 'cluster';
 export const BOTH = 'both';
 
-export const ALL = 'all';
-export const BASIC = 'basic';
-export const FAVORITE = 'favorite';
-export const USED = 'used';
+export const SIDE_NAV_MODES = {
+  /**
+   *
+   */
+  ALL:      'all',
+  /**
+   * Resources that aren't in a group
+   */
+  BASIC:    'basic',
+  /**
+   * Resource types that have been favorited
+   */
+  FAVORITE: 'favorite',
+  /**
+   * All resource types that are not virtual or spoofed
+   */
+  USED:     'used',
+};
 
 export const ROOT = 'root';
 
@@ -535,7 +549,7 @@ export const getters = {
   },
 
   getTree(state, getters, rootState, rootGetters) {
-    return (productId, mode, allTypes, clusterId, namespaceMode, namespaces, currentType, search) => {
+    return function getTree(productId, mode, allTypes, clusterId, namespaceMode, namespaces, currentType, search) {
       // getTree has four modes:
       // - `basic` matches data types that should always be shown even if there
       //    are 0 of them.
@@ -545,7 +559,7 @@ export const getters = {
       // - `favorite` matches starred types.
       // namespaceMode: 'namespaced', 'cluster', or 'both'
       // namespaces: null means all, otherwise it will be an array of specific namespaces to include
-      const isBasic = mode === BASIC;
+      const isBasic = mode === SIDE_NAV_MODES.BASIC;
 
       let searchRegex;
 
@@ -586,7 +600,7 @@ export const getters = {
         } else if ( isBasic && !groupForBasicType ) {
           // If we want the basic tree only return basic types;
           continue;
-        } else if ( mode === USED && count <= 0 ) { // TODO: RC MOVE to other. OR COMBINE IN NEW
+        } else if ( mode === SIDE_NAV_MODES.USED && count <= 0 ) { // TODO: RC MOVE to other. OR COMBINE IN NEW
           // If there's none of this type, ignore this entry when viewing only in-use types
           // Note: count is sometimes null, which is <= 0.
           continue;
@@ -605,10 +619,10 @@ export const getters = {
 
         if ( isBasic ) {
           group = _ensureGroup(root, groupForBasicType, true);
-        } else if ( mode === FAVORITE ) {
+        } else if ( mode === SIDE_NAV_MODES.FAVORITE ) {
           group = _ensureGroup(root, 'starred');
           group.weight = 1000;
-        } else if ( mode === USED ) {
+        } else if ( mode === SIDE_NAV_MODES.USED ) {
           group = _ensureGroup(root, `inUse::${ getters.groupLabelFor(typeObj.schema) }`);
         } else {
           group = _ensureGroup(root, typeObj.schema || typeObj.group || ROOT);
@@ -811,8 +825,11 @@ export const getters = {
     });
   },
 
+  /**
+   * Given many things, create a list of menu items per schema given the mode
+   */
   allTypes(state, getters, rootState, rootGetters) {
-    function allTypes(product, modes = [ALL]) {
+    function allTypes(product, modes = [SIDE_NAV_MODES.ALL]) {
       // console.error('YOLO!!!!!!');
       const timeStamp = `allTypes fn (id: ${ Date.now() })`;
       const allTypes = 'allTypes fn TOTAL';
@@ -826,7 +843,7 @@ export const getters = {
 
       const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
-      // const isBasic = mode === BASIC;
+      // const isBasic = mode === SIDE_NAV_MODES.BASIC;
 
       const out = {};
 
@@ -851,14 +868,14 @@ export const getters = {
 
         // if ( isBasic ) {
         // These are separate ifs so that things with no kind can still be basic
-        if (schemaModes.includes(BASIC) && !getters.groupForBasicType(product, schema.id) ) {
-          schemaModes.splice(schemaModes.indexOf(BASIC), 1);
+        if (schemaModes.includes(SIDE_NAV_MODES.BASIC) && !getters.groupForBasicType(product, schema.id) ) {
+          schemaModes.splice(schemaModes.indexOf(SIDE_NAV_MODES.BASIC), 1);
           // continue;
           // }
         }
-        console.warn(schema, schemaModes.includes(FAVORITE), !getters.isFavorite(schema.id) );
-        if (schemaModes.includes(FAVORITE) && !getters.isFavorite(schema.id) ) { // mode === FAVORITE &&
-          schemaModes.splice(schemaModes.indexOf(FAVORITE), 1);
+        console.warn(schema, schemaModes.includes(SIDE_NAV_MODES.FAVORITE), !getters.isFavorite(schema.id) );
+        if (schemaModes.includes(SIDE_NAV_MODES.FAVORITE) && !getters.isFavorite(schema.id) ) { // mode === SIDE_NAV_MODES.FAVORITE &&
+          schemaModes.splice(schemaModes.indexOf(SIDE_NAV_MODES.FAVORITE), 1);
           // continue;
         }
         console.warn(schema, schemaModes );
@@ -869,17 +886,17 @@ export const getters = {
 
         if (invalidSchema) {
           // Skip the schemas that aren't top-level types
-          if (!schemaModes.includes(BASIC)) {
+          if (!schemaModes.includes(SIDE_NAV_MODES.BASIC)) {
             continue;
           } else {
             // Remove everything but basic
             schemaModes.length = 0;
-            schemaModes.push(BASIC);
+            schemaModes.push(SIDE_NAV_MODES.BASIC);
           }
         }
 
         schemaModes.forEach((mode) => {
-          const isBasic = mode === BASIC;
+          const isBasic = mode === SIDE_NAV_MODES.BASIC;
 
           if (!out[mode]) {
             out[mode] = {};
@@ -904,7 +921,7 @@ export const getters = {
       }
       // console.timeEnd(schemasLoop);
 
-      const nonUsedModes = modes.filter((m) => m !== USED);
+      const nonUsedModes = modes.filter((m) => m !== SIDE_NAV_MODES.USED);
 
       // Add virtual and spoofed types
       if ( nonUsedModes.length ) {
@@ -961,17 +978,17 @@ export const getters = {
             continue;
           }
 
-          if (virtSpoofedModes.includes(BASIC) && !getters.groupForBasicType(product, id) ) {
-            virtSpoofedModes.splice(virtSpoofedModes.indexOf(BASIC), 1);
+          if (virtSpoofedModes.includes(SIDE_NAV_MODES.BASIC) && !getters.groupForBasicType(product, id) ) {
+            virtSpoofedModes.splice(virtSpoofedModes.indexOf(SIDE_NAV_MODES.BASIC), 1);
           }
-          if (virtSpoofedModes.includes(FAVORITE) && !getters.isFavorite(id) ) { // mode === FAVORITE &&
-            virtSpoofedModes.splice(virtSpoofedModes.indexOf(FAVORITE), 1);
+          if (virtSpoofedModes.includes(SIDE_NAV_MODES.FAVORITE) && !getters.isFavorite(id) ) { // mode === SIDE_NAV_MODES.FAVORITE &&
+            virtSpoofedModes.splice(virtSpoofedModes.indexOf(SIDE_NAV_MODES.FAVORITE), 1);
           }
 
           //! !!!!!!!!1
           // if ( isBasic && !getters.groupForBasicType(product, id) ) {
           //   continue;
-          // } else if ( mode === FAVORITE && !getters.isFavorite(id) ) {
+          // } else if ( mode === SIDE_NAV_MODES.FAVORITE && !getters.isFavorite(id) ) {
           //   continue;
           // }
 
@@ -988,7 +1005,7 @@ export const getters = {
           }
 
           virtSpoofedModes.forEach((mode) => {
-            const isBasic = mode === BASIC;
+            const isBasic = mode === SIDE_NAV_MODES.BASIC;
             const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
 
             item.mode = mode;
@@ -1012,7 +1029,7 @@ export const getters = {
   },
 
   allTypes2(state, getters, rootState, rootGetters) {
-    function allTypes(product, mode = ALL) {
+    function allTypes(product, mode = SIDE_NAV_MODES.ALL) {
       console.error('YOLO!!!!!!');
       const timeStamp = `allTypes fn (id: ${ Date.now() })`;
 
@@ -1026,7 +1043,7 @@ export const getters = {
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
       const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
-      const isBasic = mode === BASIC;
+      const isBasic = mode === SIDE_NAV_MODES.BASIC;
 
       const out = {};
 
@@ -1052,7 +1069,7 @@ export const getters = {
           if ( !getters.groupForBasicType(product, schema.id) ) {
             continue;
           }
-        } else if ( mode === FAVORITE && !getters.isFavorite(schema.id) ) {
+        } else if ( mode === SIDE_NAV_MODES.FAVORITE && !getters.isFavorite(schema.id) ) {
           continue;
         } else if ( !attrs.kind ) {
           // Skip the schemas that aren't top-level types
@@ -1083,7 +1100,7 @@ export const getters = {
       console.timeEnd(schemasLoop);
 
       // Add virtual and spoofed types
-      if ( mode !== USED ) {
+      if ( mode !== SIDE_NAV_MODES.USED ) {
         const virtualTypes = state.virtualTypes[product] || [];
         const spoofedTypes = state.spoofedTypes[product] || [];
         const allTypes = [...virtualTypes, ...spoofedTypes];
@@ -1138,7 +1155,7 @@ export const getters = {
 
           if ( isBasic && !getters.groupForBasicType(product, id) ) {
             continue;
-          } else if ( mode === FAVORITE && !getters.isFavorite(id) ) {
+          } else if ( mode === SIDE_NAV_MODES.FAVORITE && !getters.isFavorite(id) ) {
             continue;
           }
 
@@ -1167,12 +1184,12 @@ export const getters = {
   },
 
   allTypes3(state, getters, rootState, rootGetters) {
-    return (product, mode = ALL) => {
+    return (product, mode = SIDE_NAV_MODES.ALL) => {
       const module = findBy(state.products, 'name', product)?.inStore;
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
       const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
-      const isBasic = mode === BASIC;
+      const isBasic = mode === SIDE_NAV_MODES.BASIC;
 
       const out = {};
 
@@ -1188,7 +1205,7 @@ export const getters = {
           if ( !getters.groupForBasicType(product, schema.id) ) {
             continue;
           }
-        } else if ( mode === FAVORITE && !getters.isFavorite(schema.id) ) {
+        } else if ( mode === SIDE_NAV_MODES.FAVORITE && !getters.isFavorite(schema.id) ) {
           continue;
         } else if ( !attrs.kind ) {
           // Skip the schemas that aren't top-level types
@@ -1214,7 +1231,7 @@ export const getters = {
       }
 
       // Add virtual and spoofed types
-      if ( mode !== USED ) {
+      if ( mode !== SIDE_NAV_MODES.USED ) {
         const virtualTypes = state.virtualTypes[product] || [];
         const spoofedTypes = state.spoofedTypes[product] || [];
         const allTypes = [...virtualTypes, ...spoofedTypes];
@@ -1269,7 +1286,7 @@ export const getters = {
 
           if ( isBasic && !getters.groupForBasicType(product, id) ) {
             continue;
-          } else if ( mode === FAVORITE && !getters.isFavorite(id) ) {
+          } else if ( mode === SIDE_NAV_MODES.FAVORITE && !getters.isFavorite(id) ) {
             continue;
           }
 
