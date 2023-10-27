@@ -1,6 +1,6 @@
 /* eslint-disable jest/max-nested-describe */
 
-import { SIDE_NAV_MODES, getters } from '../type-map';
+import { TYPE_MODES, getters } from '../type-map';
 import { NAME as EXPLORER } from '@shell/config/product/explorer';
 import {
   COUNT,
@@ -121,7 +121,7 @@ describe('type-map', () => {
       /**
        * Stick in the required mode param to the expected menu items
        */
-      const expandModes = (modes, resourcesById) => {
+      const setTypeMode = (modes, resourcesById) => {
         return modes.reduce((res, mode) => {
           const newResource = { };
 
@@ -138,7 +138,7 @@ describe('type-map', () => {
       };
 
       /** All basic ctx properties and helpers */
-      const generateDefaults = (productName = EXPLORER, productStore = 'cluster', modes = [SIDE_NAV_MODES.BASIC]) => {
+      const generateDefaults = (productName = EXPLORER, productStore = 'cluster', modes = [TYPE_MODES.BASIC]) => {
         return {
           productName,
           productStore,
@@ -187,8 +187,8 @@ describe('type-map', () => {
         /**
          * Extend generateDefaults with env to return a pod type
          */
-        const createEnvBasicPod = (modes = [SIDE_NAV_MODES.BASIC], expected = true) => {
-          const defaults = generateDefaults(EXPLORER, `cluster`, [SIDE_NAV_MODES.BASIC]);
+        const createEnvBasicPod = (modes = [TYPE_MODES.BASIC], expected = true) => {
+          const defaults = generateDefaults(EXPLORER, `cluster`, [TYPE_MODES.BASIC]);
           const { typeMapGetters, rootGetters, productStore } = defaults;
 
           const testRootGetters = {
@@ -223,14 +223,14 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? expandModes(modes, { pod: expectedMenuItems.podWithAttribute }) : {}
+            expectedTypes: expected ? setTypeMode(modes, { pod: expectedMenuItems.podWithAttribute }) : {}
           };
         };
 
         /**
          * Extend generateDefaults with env to return a virtual type
          */
-        const createEnvBasicVirtual = (modes = [SIDE_NAV_MODES.BASIC], expected = true) => {
+        const createEnvBasicVirtual = (modes = [TYPE_MODES.BASIC], expected = true) => {
           const defaults = generateDefaults();
           const { state, typeMapGetters, productName } = defaults;
 
@@ -251,14 +251,14 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? expandModes(modes, { virt: expectedMenuItems.virtual }) : {}
+            expectedTypes: expected ? setTypeMode(modes, { virt: expectedMenuItems.virtual }) : {}
           };
         };
 
         /**
          * Extend generateDefaults with env to return a spoof type
          */
-        const createEnvBasicSpoof = (modes = [SIDE_NAV_MODES.BASIC], expected = true) => {
+        const createEnvBasicSpoof = (modes = [TYPE_MODES.BASIC], expected = true) => {
           const defaults = generateDefaults();
           const { state, typeMapGetters, productName } = defaults;
 
@@ -279,7 +279,7 @@ describe('type-map', () => {
 
             modes,
 
-            expectedTypes: expected ? expandModes(modes, { spoof: expectedMenuItems.spoof }) : {}
+            expectedTypes: expected ? setTypeMode(modes, { spoof: expectedMenuItems.spoof }) : {}
           };
         };
 
@@ -316,13 +316,13 @@ describe('type-map', () => {
 
             const groups = getters.allTypes(state, typeMapGetters, rootState, testRootGetters)(productName, modes);
 
-            expect(groups).toStrictEqual(expandModes([SIDE_NAV_MODES.BASIC], { pod: expectedMenuItems.podWithoutAttribute }));
+            expect(groups).toStrictEqual(setTypeMode([TYPE_MODES.BASIC], { pod: expectedMenuItems.podWithoutAttribute }));
           });
 
           it('no entry (basic but no group)', () => {
             const {
               state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-            } = createEnvBasicPod([SIDE_NAV_MODES.BASIC], false);
+            } = createEnvBasicPod([TYPE_MODES.BASIC], false);
 
             const testTypeMapGetters = {
               ...typeMapGetters,
@@ -348,7 +348,7 @@ describe('type-map', () => {
             it('no entry (group not basic)', () => {
               const {
                 state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-              } = createEnvBasicVirtual([SIDE_NAV_MODES.BASIC], false);
+              } = createEnvBasicVirtual([TYPE_MODES.BASIC], false);
 
               const testTypeMapGetters = {
                 ...typeMapGetters,
@@ -375,7 +375,7 @@ describe('type-map', () => {
             it('no entry (group not basic)', () => {
               const {
                 state, typeMapGetters, rootState, rootGetters, productName, modes, expectedTypes
-              } = createEnvBasicSpoof([SIDE_NAV_MODES.BASIC], false);
+              } = createEnvBasicSpoof([TYPE_MODES.BASIC], false);
 
               const testTypeMapGetters = {
                 ...typeMapGetters,
@@ -391,10 +391,10 @@ describe('type-map', () => {
 
         describe('mode: ALL', () => {
           /**
-          * Extend createEnvBasicPod with env to return a pod type for mode SIDE_NAV_MODES.ALL
+          * Extend createEnvBasicPod with env to return a pod type for mode TYPE_MODES.ALL
           */
           const createEnvAllPod = (expected = true) => {
-            const defaults = createEnvBasicPod([SIDE_NAV_MODES.ALL]);
+            const defaults = createEnvBasicPod([TYPE_MODES.ALL]);
             const { rootGetters, productStore } = defaults;
 
             const testRootGetters = {
@@ -415,23 +415,23 @@ describe('type-map', () => {
               ...defaults,
               rootGetters: testRootGetters,
 
-              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.ALL], { pod: expectedMenuItems.podWithAttribute, // TODO: RC all should have attribute kind??
+              expectedTypes: expected ? setTypeMode([TYPE_MODES.ALL], { pod: expectedMenuItems.podWithAttribute, // TODO: RC all should have attribute kind??
               }) : { }
             };
           };
 
           /**
-          * Extend createEnvBasicVirtual with env to return a virtual type for mode SIDE_NAV_MODES.ALL
+          * Extend createEnvBasicVirtual with env to return a virtual type for mode TYPE_MODES.ALL
           */
           const createAllVirtualType = () => {
-            return createEnvBasicVirtual([SIDE_NAV_MODES.ALL]);
+            return createEnvBasicVirtual([TYPE_MODES.ALL]);
           };
 
           /**
-          * Extend createEnvBasicSpoof with env to return a spoof type for mode SIDE_NAV_MODES.ALL
+          * Extend createEnvBasicSpoof with env to return a spoof type for mode TYPE_MODES.ALL
           */
           const createAllSpoofedType = () => {
-            return createEnvBasicSpoof([SIDE_NAV_MODES.ALL]);
+            return createEnvBasicSpoof([TYPE_MODES.ALL]);
           };
 
           it('one entry', () => {
@@ -615,7 +615,7 @@ describe('type-map', () => {
 
         describe('mode: FAVORITE', () => {
           /**
-          * Extend generateDefaults with env to return a pod type for mode SIDE_NAV_MODES.FAVORITE
+          * Extend generateDefaults with env to return a pod type for mode TYPE_MODES.FAVORITE
           */
           const generateDefaultsForFavourite = (expected = true) => {
             const defaults = generateDefaults();
@@ -648,16 +648,16 @@ describe('type-map', () => {
 
             return {
               ...defaults,
-              modes:          [SIDE_NAV_MODES.FAVORITE],
+              modes:          [TYPE_MODES.FAVORITE],
               typeMapGetters: testTypeMapGetters,
               rootGetters:    testRootGetters,
 
-              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }) : {}
+              expectedTypes: expected ? setTypeMode([TYPE_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }) : {}
             };
           };
 
           /**
-          * Extend generateDefaultsForFavourite with env to return a virtual type for mode SIDE_NAV_MODES.FAVORITE
+          * Extend generateDefaultsForFavourite with env to return a virtual type for mode TYPE_MODES.FAVORITE
           */
           const createDefaultsForFavouriteVirtualType = (expected = true) => {
             const defaults = generateDefaults();
@@ -674,12 +674,12 @@ describe('type-map', () => {
               state:       testState,
               rootGetters: defaults.rootGetters,
 
-              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.FAVORITE], { virt: expectedMenuItems.virtual }) : {}
+              expectedTypes: expected ? setTypeMode([TYPE_MODES.FAVORITE], { virt: expectedMenuItems.virtual }) : {}
             };
           };
 
           /**
-          * Extend generateDefaultsForFavourite with env to return a spoof type for mode SIDE_NAV_MODES.FAVORITE
+          * Extend generateDefaultsForFavourite with env to return a spoof type for mode TYPE_MODES.FAVORITE
           */
           const createDefaultsForFavouriteSpoofType = (expected = true) => {
             const defaults = generateDefaults();
@@ -696,7 +696,7 @@ describe('type-map', () => {
               state:       testState,
               rootGetters: defaults.rootGetters,
 
-              expectedTypes: expected ? expandModes([SIDE_NAV_MODES.FAVORITE], { spoof: expectedMenuItems.spoof }) : {}
+              expectedTypes: expected ? setTypeMode([TYPE_MODES.FAVORITE], { spoof: expectedMenuItems.spoof }) : {}
             };
           };
 
@@ -784,10 +784,10 @@ describe('type-map', () => {
 
         describe('mode: USED', () => {
           /**
-          * Extend createEnvBasicPod with env to return a pod for mode SIDE_NAV_MODES.USED
+          * Extend createEnvBasicPod with env to return a pod for mode TYPE_MODES.USED
           */
           const createUsedPod = () => {
-            const defaults = createEnvBasicPod([SIDE_NAV_MODES.USED]);
+            const defaults = createEnvBasicPod([TYPE_MODES.USED]);
             const { rootGetters, productStore } = defaults;
 
             const testRootGetters = {
@@ -811,7 +811,7 @@ describe('type-map', () => {
           };
 
           it('one entry', () => {
-            const expectedGroups = expandModes([SIDE_NAV_MODES.USED], { pod: expectedMenuItems.podWithAttribute });
+            const expectedGroups = setTypeMode([TYPE_MODES.USED], { pod: expectedMenuItems.podWithAttribute });
 
             const {
               state, typeMapGetters, rootState, rootGetters, productName, modes
@@ -830,7 +830,7 @@ describe('type-map', () => {
                 state, typeMapGetters, rootState, rootGetters, productName
               } = createEnvBasicVirtual();
 
-              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [SIDE_NAV_MODES.USED]);
+              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [TYPE_MODES.USED]);
 
               expect(groups).toStrictEqual(expectedGroups);
             });
@@ -844,7 +844,7 @@ describe('type-map', () => {
                 state, typeMapGetters, rootState, rootGetters, productName
               } = createEnvBasicSpoof();
 
-              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [SIDE_NAV_MODES.USED]);
+              const groups = getters.allTypes(state, typeMapGetters, rootState, rootGetters)(productName, [TYPE_MODES.USED]);
 
               expect(groups).toStrictEqual(expectedGroups);
             });
@@ -853,7 +853,7 @@ describe('type-map', () => {
 
         describe('mode: multiple', () => {
           // Covers getProductsGroups use cases
-          const modes = [SIDE_NAV_MODES.BASIC, SIDE_NAV_MODES.FAVORITE, SIDE_NAV_MODES.USED];
+          const modes = [TYPE_MODES.BASIC, TYPE_MODES.FAVORITE, TYPE_MODES.USED];
 
           const createAllOfTheThings = () => {
             const defaults = generateDefaults(EXPLORER, 'cluster', modes);
@@ -914,7 +914,7 @@ describe('type-map', () => {
               modes,
               // TODO: RC do we really have dupes in basic and used?
               expectedTypes: {
-                ...expandModes([SIDE_NAV_MODES.BASIC], {
+                ...setTypeMode([TYPE_MODES.BASIC], {
                   // A resource that's favourite should still appear in the basic side nav
                   // fav: {
                   secret: expectedMenuItems.secretWithAttribute,
@@ -929,8 +929,8 @@ describe('type-map', () => {
 
                   spoof: expectedMenuItems.spoof
                 }),
-                ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
-                ...expandModes([SIDE_NAV_MODES.USED], {
+                ...setTypeMode([TYPE_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+                ...setTypeMode([TYPE_MODES.USED], {
                   // A resource that's favourite should still appear in the basic side nav
                   secret: expectedMenuItems.secretWithAttribute,
                   // A basic resource
@@ -986,9 +986,9 @@ describe('type-map', () => {
             };
 
             const testExpectedTypes = {
-              ...expandModes([SIDE_NAV_MODES.BASIC], { secret: expectedMenuItems.secretWithAttribute }),
-              ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
-              ...expandModes([SIDE_NAV_MODES.USED], { secret: expectedMenuItems.secretWithAttribute }),
+              ...setTypeMode([TYPE_MODES.BASIC], { secret: expectedMenuItems.secretWithAttribute }),
+              ...setTypeMode([TYPE_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+              ...setTypeMode([TYPE_MODES.USED], { secret: expectedMenuItems.secretWithAttribute }),
             };
 
             const groups = getters.allTypes(testState, typeMapGetters, rootState, testRootGetters)(productName, modes);
@@ -1021,7 +1021,7 @@ describe('type-map', () => {
             };
 
             const testExpectedTypes = {
-              ...expandModes([SIDE_NAV_MODES.BASIC], {
+              ...setTypeMode([TYPE_MODES.BASIC], {
                 // A basic resource
                 pod: expectedMenuItems.podWithAttribute,
 
@@ -1032,7 +1032,7 @@ describe('type-map', () => {
 
                 spoof: expectedMenuItems.spoof
               }),
-              ...expandModes([SIDE_NAV_MODES.USED], {
+              ...setTypeMode([TYPE_MODES.USED], {
                 // A basic resource
                 pod: expectedMenuItems.podWithAttribute,
               }),
@@ -1055,7 +1055,7 @@ describe('type-map', () => {
             };
 
             const testExpectedTypes = {
-              ...expandModes([SIDE_NAV_MODES.BASIC], {
+              ...setTypeMode([TYPE_MODES.BASIC], {
                 // A resource that's favourite should still appear in the basic side nav
                 // fav: {
                 secret: expectedMenuItems.secretWithAttribute,
@@ -1068,8 +1068,8 @@ describe('type-map', () => {
 
                 spoof: expectedMenuItems.spoof
               }),
-              ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
-              ...expandModes([SIDE_NAV_MODES.USED], { // TODO: RC why are virtual spoof not un used?
+              ...setTypeMode([TYPE_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+              ...setTypeMode([TYPE_MODES.USED], { // TODO: RC why are virtual spoof not un used?
                 // A resource that's favourite should still appear in the basic side nav
                 secret: expectedMenuItems.secretWithAttribute,
                 // A basic resource
@@ -1094,7 +1094,7 @@ describe('type-map', () => {
             };
 
             const testExpectedTypes = {
-              ...expandModes([SIDE_NAV_MODES.BASIC], {
+              ...setTypeMode([TYPE_MODES.BASIC], {
                 // A resource that's favourite should still appear in the basic side nav
                 // fav: {
                 secret: expectedMenuItems.secretWithAttribute,
@@ -1108,8 +1108,8 @@ describe('type-map', () => {
                 virt: expectedMenuItems.virtual,
 
               }),
-              ...expandModes([SIDE_NAV_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
-              ...expandModes([SIDE_NAV_MODES.USED], {
+              ...setTypeMode([TYPE_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
+              ...setTypeMode([TYPE_MODES.USED], {
                 // A resource that's favourite should still appear in the basic side nav
                 secret: expectedMenuItems.secretWithAttribute,
                 // A basic resource

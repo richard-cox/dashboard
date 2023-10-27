@@ -2,7 +2,7 @@
 import debounce from 'lodash/debounce';
 import Group from '@shell/components/nav/Group';
 import { isMac } from '@shell/utils/platform';
-import { BOTH, ALL } from '@shell/store/type-map';
+import { BOTH, TYPE_MODES } from '@shell/store/type-map';
 
 export default {
   components: { Group },
@@ -41,7 +41,8 @@ export default {
       }
 
       const allTypes = this.$store.getters['type-map/allTypes'](product) || {};
-      const out = this.$store.getters['type-map/getTree'](product, ALL, allTypes, clusterId, BOTH, namespaces, null, this.value);
+      // TODO: RC test all usages of TYPE_MODES
+      const out = this.$store.getters['type-map/getTree'](product, TYPE_MODES.ALL, allTypes, clusterId, BOTH, namespaces, null, this.value);
 
       this.groups = out;
 

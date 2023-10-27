@@ -1,9 +1,9 @@
 <script>
 import Favorite from '@shell/components/nav/Favorite';
-import { SIDE_NAV_MODES } from '@shell/store/type-map';
+import { TYPE_MODES } from '@shell/store/type-map';
 import { linkActiveClass } from '@shell/config/router';
 
-const showFavoritesFor = [SIDE_NAV_MODES.FAVORITE, SIDE_NAV_MODES.USED];
+const showFavoritesFor = [TYPE_MODES.FAVORITE, TYPE_MODES.USED];
 
 export default {
 
