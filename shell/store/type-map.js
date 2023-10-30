@@ -157,19 +157,39 @@ export const BOTH = 'both';
 
 export const TYPE_MODES = {
   /**
+   * allTypes usage: All resource types
    *
+   * getTree usage: Remove ignored schemas, resources not applicable to ns, etc
    */
   ALL:      'all',
   /**
-   * Resources that aren't in a group
+   * Represents resource types that should be shown at the top of the side nav.
+   *
+   * These will always be shown in the side nav
+   *
+   * allTypes usage: Resources that are in a group
+   *
+   * getTree usage: Remove ignored schemas, resources not applicable to ns, etc
    */
   BASIC:    'basic',
   /**
-   * Resource types that have been favorited
+   * Represents any type of resource type that has been favourited
+   *
+   * These will always be shown in the side nav
+   *
+   * allTypes usage: Resource types that have been favorited
+   *
+   * getTree usage: Remove ignored schemas, resources not applicable to ns, etc
    */
   FAVORITE: 'favorite',
   /**
-   * All resource types that are not virtual or spoofed
+   * Represents no virtual or spoofed types that have a count.
+   *
+   * These will be shown in the side nav if there are resources in the ns filter OR the resource is not namespaces
+   *
+   * allTypes usage: All resource types that are not virtual or spoofed
+   *
+   * getTree usage: Remove types with no counts. Remove ignored schemas, resources not applicable to ns, etc
    */
   USED:     'used',
 };
@@ -549,6 +569,7 @@ export const getters = {
   },
 
   getTree(state, getters, rootState, rootGetters) {
+    // Name the function so it's easily discernible on performance tracing
     return function getTree(productId, mode, allTypes, clusterId, namespaceMode, namespaces, currentType, search) {
       // getTree has four modes:
       // - `basic` matches data types that should always be shown even if there
@@ -600,7 +621,7 @@ export const getters = {
         } else if ( isBasic && !groupForBasicType ) {
           // If we want the basic tree only return basic types;
           continue;
-        } else if ( mode === TYPE_MODES.USED && count <= 0 ) { // TODO: RC MOVE to other. OR COMBINE IN NEW
+        } else if ( mode === TYPE_MODES.USED && count <= 0 ) {
           // If there's none of this type, ignore this entry when viewing only in-use types
           // Note: count is sometimes null, which is <= 0.
           continue;
@@ -829,7 +850,8 @@ export const getters = {
    * Given many things, create a list of menu items per schema given the mode
    */
   allTypes(state, getters, rootState, rootGetters) {
-    function allTypes(product, modes = [TYPE_MODES.ALL]) {
+    // Name the function so it's easily discernible on performance tracing
+    return function allTypes(product, modes = [TYPE_MODES.ALL]) {
       // console.error('YOLO!!!!!!');
       const timeStamp = `allTypes fn (id: ${ Date.now() })`;
       const allTypes = 'allTypes fn TOTAL';
@@ -936,9 +958,11 @@ export const getters = {
 
           // Is there a virtual/spoofed type override for schema type?
           // Currently used by harvester, this should be investigated and removed if possible
-          if (out[id]) {
-            delete out[id];
-          }
+          virtSpoofedModes.forEach((mode) => {
+            if (out[mode]?.[id]) {
+              delete out[mode][id];
+            }
+          });
 
           if ( item['public'] === false && !isDev ) {
             continue;
@@ -1004,27 +1028,27 @@ export const getters = {
           }
 
           virtSpoofedModes.forEach((mode) => {
+            if (id === 'drivers') {
+              debugger;
+            }
+
             const isBasic = mode === TYPE_MODES.BASIC;
             const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
 
             item.mode = mode;
             item.weight = weight;
             if (!out[mode]) {
-              out[mode] = {}; // TODO: RC?
+              out[mode] = {};
             }
             out[mode][id] = item;
           });
-
-          // out[id] = item;
         }
       }
       // console.timeEnd(allTypes);
       // console.groupEnd(timeStamp);
 
       return out;
-    }
-
-    return allTypes;
+    };
   },
 
   allTypes2(state, getters, rootState, rootGetters) {
@@ -1181,8 +1205,6 @@ export const getters = {
 
     return allTypes;
   },
-
-  // TODO: RC compare before and after
 
   allTypes3(state, getters, rootState, rootGetters) {
     return (product, mode = TYPE_MODES.ALL) => {

@@ -21,6 +21,9 @@ const schemas = {
     type:       SCHEMA,
     attributes: { kind: 'pod' },
   },
+  /**
+   * Represents a group
+   */
   podNoAttributes: {
     id:   'pod',
     type: SCHEMA,
@@ -36,6 +39,9 @@ const schemas = {
   }
 };
 
+/**
+ * counts in the store
+ */
 const counts = {
   pod: {
     summary:    { count: 1 },
@@ -415,8 +421,7 @@ describe('type-map', () => {
               ...defaults,
               rootGetters: testRootGetters,
 
-              expectedTypes: expected ? setTypeMode([TYPE_MODES.ALL], { pod: expectedMenuItems.podWithAttribute, // TODO: RC all should have attribute kind??
-              }) : { }
+              expectedTypes: expected ? setTypeMode([TYPE_MODES.ALL], { pod: expectedMenuItems.podWithAttribute }) : { }
             };
           };
 
@@ -912,7 +917,6 @@ describe('type-map', () => {
               state:          testState,
 
               modes,
-              // TODO: RC do we really have dupes in basic and used?
               expectedTypes: {
                 ...setTypeMode([TYPE_MODES.BASIC], {
                   // A resource that's favourite should still appear in the basic side nav
@@ -1069,7 +1073,7 @@ describe('type-map', () => {
                 spoof: expectedMenuItems.spoof
               }),
               ...setTypeMode([TYPE_MODES.FAVORITE], { secret: expectedMenuItems.secretWithAttribute }),
-              ...setTypeMode([TYPE_MODES.USED], { // TODO: RC why are virtual spoof not un used?
+              ...setTypeMode([TYPE_MODES.USED], {
                 // A resource that's favourite should still appear in the basic side nav
                 secret: expectedMenuItems.secretWithAttribute,
                 // A basic resource
@@ -1126,3 +1130,5 @@ describe('type-map', () => {
     });
   });
 });
+
+// getTree - Remove ignored schemas, not-applicable to ns filter

@@ -41,7 +41,6 @@ export default {
       }
 
       const allTypes = this.$store.getters['type-map/allTypes'](product) || {};
-      // TODO: RC test all usages of TYPE_MODES
       const out = this.$store.getters['type-map/getTree'](product, TYPE_MODES.ALL, allTypes, clusterId, BOTH, namespaces, null, this.value);
 
       this.groups = out;

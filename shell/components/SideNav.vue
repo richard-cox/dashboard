@@ -19,6 +19,7 @@ import { NAME as EXPLORER } from '@shell/config/product/explorer';
 import { TYPE_MODES } from '@shell/store/type-map';
 import { NAME as NAVLINKS } from '@shell/config/product/navlinks';
 import Group from '@shell/components/nav/Group';
+import { diff } from '@shell/utils/object';
 
 export default {
   name:       'SideNav',
@@ -48,7 +49,7 @@ export default {
       }
     },
 
-    allSchemas(a, b) {
+    allSchemasIds(a, b) {
       if ( a !== b ) {
         this.queueUpdate();
       }
@@ -174,7 +175,7 @@ export default {
       return this.$store.getters['cluster/all'](UI.NAV_LINK);
     },
 
-    allSchemas() {
+    allSchemasIds() {
       const managementReady = this.managementReady;
       const product = this.currentProduct;
 
@@ -182,7 +183,7 @@ export default {
         return [];
       }
 
-      return this.$store.getters[`${ product.inStore }/all`](SCHEMA);
+      return this.$store.getters[`${ product.inStore }/all`](SCHEMA).map((s) => s.id);
     },
 
     counts() {
@@ -296,7 +297,7 @@ export default {
       debugger;
 
       for ( const productId of loadProducts ) {
-        const modes = [TYPE_MODES.BASIC]; // TODO: RC why this twice?
+        const modes = [TYPE_MODES.BASIC];
 
         if ( productId === NAVLINKS ) {
           // Navlinks produce their own top-level nav items so don't need to show it as a product.
@@ -309,16 +310,32 @@ export default {
         }
 
         // TODO: RC remaining TODOs
-        // TODO: RC testing locally. testing at scale? compare with confluence?. test products (kube warnden. legacy things)
+        // TODO: RC testing locally. testing at scale? compare with confluence?
         // TODO: RC before / after comparison (ensure store functiuns are named)
+        // TODO: RC Comment on PR.
+        // - Tested `diff` between previous allTYpes mode with mode returned via new amalgamented allTypes
+        // - Tested cis benchmark, kubewarden. legacy
+        // - Tested locally, visually
+        // - Wrote unit tests for before case... updated for after case
 
-        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes); // TODO: RC This will have x2 copy of everything at the same time
+        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
+        const TESTmodeTypes = {};
 
         for ( const mode of modes ) {
           console.time(`${ productId }/${ mode }/${ allTypes }`);
 
           debugger;
-          // const types = this.$store.getters['type-map/allTypes'](productId, mode);
+
+          TESTmodeTypes[mode] = this.$store.getters['type-map/allTypes3'](productId, mode);
+          const derp = diff(TESTmodeTypes[mode], modeTypes[mode]);
+
+          if (Object.keys(derp).length) {
+            console.warn('ERROR!!!!!!!!!!!!!', mode, derp, TESTmodeTypes[mode]?.drivers.weight, modeTypes[mode]?.drivers.weight);
+          } else {
+            // console.warn(mode, derp);
+          }
+          // console.warn(mode, TESTmodeTypes[mode], modeTypes[mode]);
+
           const types = modeTypes[mode] || {};
 
           console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
