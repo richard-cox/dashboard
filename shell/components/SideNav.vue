@@ -31,7 +31,7 @@ export default {
   },
 
   created() {
-    this.queueUpdate = debounce(this.getGroups, 250);
+    this.queueUpdate = debounce(this.getGroups, 500);
 
     this.getGroups();
   },
@@ -47,13 +47,15 @@ export default {
      * Keep this simple, we're only interested in new / removed schemas
      */
     allSchemasIds(a, b) {
-      if ( !sameContents(a, b)) {
+      if ( !sameContents(a, b) ) {
+        console.warn('queueUpdate', 'allSchemasIds');
         this.queueUpdate();
       }
     },
 
     allNavLinksKey(a, b) {
-      if ( a !== b ) {
+      if ( !sameContents(a, b) ) {
+        console.warn('queueUpdate', 'allNavLinksKey', a, b);
         this.queueUpdate();
       }
     },
@@ -63,18 +65,21 @@ export default {
      */
     favoriteTypes(a, b) {
       if ( !isEqual(a, b) ) {
+        console.warn('queueUpdate', 'favoriteTypes');
         this.queueUpdate();
       }
     },
 
     locale(a, b) {
       if ( !isEqual(a, b) ) {
+        console.warn('queueUpdate', 'locale');
         this.getGroups();
       }
     },
 
     productId(a, b) {
       if ( a !== b) {
+        console.warn('queueUpdate', 'productId');
         // Immediately update because you'll see it come in later
         this.getGroups();
       }
@@ -85,18 +90,21 @@ export default {
 
     namespaceMode(a, b) {
       if ( a !== b ) {
+        console.warn('queueUpdate', 'namespaceMode');
         this.queueUpdate();
       }
     },
 
     namespaces(a, b) {
       if ( !isEqual(a, b) ) {
+        console.warn('queueUpdate', 'namespaces');
         this.queueUpdate();
       }
     },
 
     clusterReady(a, b) {
       if ( !isEqual(a, b) ) {
+        console.warn('queueUpdate', 'clusterReady');
         // Immediately update because you'll see it come in later
         this.getGroups();
       }
@@ -186,7 +194,7 @@ export default {
     },
 
     allNavLinksKey() {
-      return this.allNavLinks.map((a) => a.id + a.metadata.generation);
+      return this.allNavLinks.map((a) => a.id);
     },
   },
 
@@ -255,13 +263,13 @@ export default {
     getProductsGroups(out, loadProducts, namespaceMode, productMap) { // TODO: RC
       const timeStamp = `getProductsGroups fn (id: ${ Date.now() })`;
 
-      // console.group(timeStamp);
+      console.group(timeStamp);
       const getProductsGroups = 'getProductsGroups fn TOTAL';
       const allTypes = 'sub allTypes';
       const getTree = 'sub getTree';
       const addObjectss = 'sub addObjects';
 
-      // console.time(getProductsGroups);
+      console.time(getProductsGroups);
 
       const clusterId = this.$store.getters['clusterId'];
       const currentType = this.$route.params.resource || '';
@@ -295,12 +303,15 @@ export default {
         // TODO: RC Notes
         // - allTypes always used with getTree and vice-versa
 
+        console.time(`${ productId }/allTypes`);
+
         const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
+
+        console.timeEnd(`${ productId }/allTypes`);
+
         // const TESTmodeTypes = {};
 
         for ( const mode of modes ) {
-          // console.time(`${ productId }/${ mode }/${ allTypes }`);
-
           // TESTmodeTypes[mode] = this.$store.getters['type-map/allTypes3'](productId, mode);
           // const derp = diff(TESTmodeTypes[mode], modeTypes[mode]);
 
@@ -312,15 +323,18 @@ export default {
           // console.warn(mode, TESTmodeTypes[mode], modeTypes[mode]);
 
           const types = modeTypes[mode] || {};
+
+          // console.time(`${ productId }/${ mode }/${ allTypes }`);
+
           // const types = this.$store.getters['type-map/allTypes3'](productId, mode);
 
           // console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
 
-          // console.time(`TIMING: ${ productId }/${ mode }/${ getTree }`);
+          // console.time(`${ productId }/${ mode }/${ getTree }`);
 
           const more = this.$store.getters['type-map/getTree'](productId, mode, types, clusterId, namespaceMode, currentType);
 
-          // console.timeEnd(`TIMING: ${ productId }/${ mode }/${ getTree }`);
+          // console.timeEnd(`${ productId }/${ mode }/${ getTree }`);
 
           // console.time(`${ productId }/${ mode }/${ addObjectss }`);
           if ( productId === EXPLORER || !this.isExplorer ) {
@@ -342,8 +356,8 @@ export default {
         }
       }
 
-      // console.timeEnd(getProductsGroups);
-      // console.groupEnd(timeStamp);
+      console.timeEnd(getProductsGroups);
+      console.groupEnd(timeStamp);
     },
 
     getExplorerGroups(out) {
