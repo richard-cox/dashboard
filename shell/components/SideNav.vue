@@ -34,7 +34,7 @@ export default {
   },
 
   created() {
-    this.queueUpdate = debounce(this.getGroups, 1000);
+    this.queueUpdate = debounce(this.getGroups, 250);
 
     this.getGroups();
   },
@@ -47,28 +47,25 @@ export default {
   watch: {
     allSchemasIds(a, b) {
       if ( !sameContents(a, b)) {
-        console.info('queueUpdate: getGroups: allSchemasIds');
         this.queueUpdate();
       }
     },
 
-    allNavLinks(a, b) {
+    allNavLinksKey(a, b) {
       if ( a !== b ) {
-        console.info('queueUpdate: getGroups: allNavLinks');
         this.queueUpdate();
       }
     },
 
+    // TODO: RC Favourites .. no watch on prefs... so only catches local updates
     favoriteTypes(a, b) {
       if ( !isEqual(a, b) ) {
-        console.info('queueUpdate: getGroups: favoriteTypes');
         this.queueUpdate();
       }
     },
 
     locale(a, b) {
       if ( !isEqual(a, b) ) {
-        console.info('queueUpdate: getGroups: locale');
         this.getGroups();
       }
     },
@@ -76,7 +73,6 @@ export default {
     productId(a, b) {
       if ( a !== b) {
         // Immediately update because you'll see it come in later
-        console.info('getGroups: productId');
         this.getGroups();
       }
     },
@@ -86,7 +82,7 @@ export default {
         // Immediately update because you'll see it come in later
         console.info('getGroups: namespaceMode');
 
-        this.getGroups();
+        this.queueUpdate(); // TODO: RC if namespaceMode changes namespaces will change.
       }
     },
 
@@ -95,15 +91,13 @@ export default {
         // Immediately update because you'll see it come in later
         console.info('getGroups: namespaces', a, b);
 
-        this.getGroups();
+        this.queueUpdate();
       }
     },
 
     clusterReady(a, b) {
       if ( !isEqual(a, b) ) {
         // Immediately update because you'll see it come in later
-        console.info('getGroups: clusterReady');
-
         this.getGroups();
       }
     },
@@ -173,6 +167,10 @@ export default {
       }
 
       return this.$store.getters['cluster/all'](UI.NAV_LINK);
+    },
+
+    allNavLinksKey() {
+      return this.allNavLinks.map((a) => a.id + a.metadata.generation);
     },
 
     allSchemasIds() {
@@ -292,6 +290,7 @@ export default {
         // - Vast majority of getGroups is getProductsGroups --> allTypes
         // - Before - after comparison
         // - Tested Find Resource interface
+        // - Tested adding CRD --> schema id update
 
         // TODO: RC Notes
         // - allTypes always used with getTree and vice-versa
@@ -416,7 +415,6 @@ export default {
     },
 
     groupSelected(selected) {
-      console.info('methods', 'groupSelected');
       this.$refs.groups.forEach((grp) => {
         if (grp.canCollapse) {
           grp.isExpanded = (grp.group.name === selected.name);
