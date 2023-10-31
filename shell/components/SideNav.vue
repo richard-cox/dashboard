@@ -42,6 +42,10 @@ export default {
   },
 
   watch: {
+
+    /**
+     * Keep this simple, we're only interested in new / removed schemas
+     */
     allSchemasIds(a, b) {
       if ( !sameContents(a, b)) {
         this.queueUpdate();
@@ -54,7 +58,9 @@ export default {
       }
     },
 
-    // TODO: RC Favourites .. no watch on prefs... so only catches local updates
+    /**
+     * Note - There's no watch on prefs, so this only catches in session changes
+     */
     favoriteTypes(a, b) {
       if ( !isEqual(a, b) ) {
         this.queueUpdate();
@@ -74,20 +80,17 @@ export default {
       }
     },
 
+    // Queue namespaceMode and namespaces
+    // Changes to namespaceMode can also change namespaces, so keep this simple and execute both in a shortened queue
+
     namespaceMode(a, b) {
       if ( a !== b ) {
-        // Immediately update because you'll see it come in later
-        console.info('getGroups: namespaceMode');
-
-        this.queueUpdate(); // TODO: RC if namespaceMode changes namespaces will change.
+        this.queueUpdate();
       }
     },
 
     namespaces(a, b) {
       if ( !isEqual(a, b) ) {
-        // Immediately update because you'll see it come in later
-        console.info('getGroups: namespaces', a, b);
-
         this.queueUpdate();
       }
     },
@@ -166,10 +169,6 @@ export default {
       return this.$store.getters['cluster/all'](UI.NAV_LINK);
     },
 
-    allNavLinksKey() {
-      return this.allNavLinks.map((a) => a.id + a.metadata.generation);
-    },
-
     allSchemasIds() {
       const managementReady = this.managementReady;
       const product = this.currentProduct;
@@ -184,6 +183,10 @@ export default {
 
     namespaces() {
       return this.$store.getters['activeNamespaceCache'];
+    },
+
+    allNavLinksKey() {
+      return this.allNavLinks.map((a) => a.id + a.metadata.generation);
     },
   },
 

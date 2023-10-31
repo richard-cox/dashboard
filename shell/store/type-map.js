@@ -856,7 +856,6 @@ export const getters = {
   allTypes(state, getters, rootState, rootGetters) {
     // Name the function so it's easily discernible on performance tracing
     return function allTypes(product, modes = [TYPE_MODES.ALL]) {
-      // console.error('YOLO!!!!!!');
       const timeStamp = `allTypes fn (id: ${ Date.now() })`;
       const allTypes = 'allTypes fn TOTAL';
       const schemasLoop = 'schemas loop';
@@ -868,7 +867,6 @@ export const getters = {
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
 
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
-      // const isBasic = mode === TYPE_MODES.BASIC;
 
       const out = {};
 
@@ -882,26 +880,18 @@ export const getters = {
 
         const schemaModes = [...modes];
 
-        // if (i < 10) {
-        //   console.time(timestamp);
-        // }
         const attrs = schema.attributes || {};
 
         const label = getters.labelFor(schema, 2);
-        // const weight = getters.typeWeightFor(schema?.id || label, isBasic);
         const typeOptions = getters['optionsFor'](schema);
 
-        // if ( isBasic ) {
         // These are separate ifs so that things with no kind can still be basic
         if (schemaModes.includes(TYPE_MODES.BASIC) && !getters.groupForBasicType(product, schema.id) ) {
           schemaModes.splice(schemaModes.indexOf(TYPE_MODES.BASIC), 1);
-          // continue;
-          // }
         }
 
         if (schemaModes.includes(TYPE_MODES.FAVORITE) && !getters.isFavorite(schema.id) ) { // mode === TYPE_MODES.FAVORITE &&
           schemaModes.splice(schemaModes.indexOf(TYPE_MODES.FAVORITE), 1);
-          // continue;
         }
 
         const invalidSchema = !attrs.kind ||
@@ -935,10 +925,6 @@ export const getters = {
             route:      typeOptions.customRoute
           };
         });
-
-        // if (i < 10) {
-        //   console.timeEnd(timestamp);
-        // }
       }
       // console.timeEnd(schemasLoop);
 
@@ -954,7 +940,6 @@ export const getters = {
         for ( const type of allTypes ) {
           const item = clone(type);
           const id = item.name;
-          // const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
 
           // Is there a virtual/spoofed type override for schema type?
           // Currently used by harvester, this should be investigated and removed if possible
@@ -1007,16 +992,6 @@ export const getters = {
           if (virtSpoofedModes.includes(TYPE_MODES.FAVORITE) && !getters.isFavorite(id) ) { // mode === TYPE_MODES.FAVORITE &&
             virtSpoofedModes.splice(virtSpoofedModes.indexOf(TYPE_MODES.FAVORITE), 1);
           }
-
-          //! !!!!!!!!1
-          // if ( isBasic && !getters.groupForBasicType(product, id) ) {
-          //   continue;
-          // } else if ( mode === TYPE_MODES.FAVORITE && !getters.isFavorite(id) ) {
-          //   continue;
-          // }
-
-          // item.mode = mode;
-          // item.weight = weight;
 
           // Ensure labelKey is taken into account... with a mock count
           // This is harmless if the translation doesn't require count
