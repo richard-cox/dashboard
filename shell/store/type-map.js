@@ -574,6 +574,7 @@ export const getters = {
 
   getTree(state, getters, rootState, rootGetters) {
     // Name the function so it's easily discernible on performance tracing
+    // TODO: RC test other places this is used RE namespaces
     return function getTree(productId, mode, allTypes, clusterId, namespaceMode, namespaces, currentType, search) {
       // getTree has four modes:
       // - `basic` matches data types that should always be shown even if there
@@ -617,7 +618,8 @@ export const getters = {
           continue;
         }
 
-        const count = _matchingCounts(typeObj, namespaces);
+        const inStore = rootGetters.currentStore(typeObj.name);
+        const count = rootGetters[`${ inStore }/count`](typeObj);
         const groupForBasicType = getters.groupForBasicType(productId, typeObj.name);
 
         if ( typeObj.id === currentType ) {
@@ -866,8 +868,6 @@ export const getters = {
 
       const module = findBy(state.products, 'name', product)?.inStore;
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
-
-      console.error('!!!!!!!!!!', schemas.length);
 
       const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
@@ -1922,21 +1922,21 @@ function _sortGroup(tree, mode) {
   }
 }
 
-function _matchingCounts(typeObj, namespaces) {
-  // That was easy
-  if ( !typeObj.namespaced || !typeObj.byNamespace || namespaces === null || typeObj.count === null) {
-    return typeObj.count;
-  }
+// function _matchingCounts(typeObj, namespaces) {
+//   // That was easy
+//   if ( !typeObj.namespaced || !typeObj.byNamespace || namespaces === null || typeObj.count === null) {
+//     return typeObj.count;
+//   }
 
-  let out = 0;
+//   let out = 0;
 
-  // Otherwise start with 0 and count up
-  for ( const namespace of namespaces ) {
-    out += typeObj.byNamespace[namespace]?.count || 0;
-  }
+//   // Otherwise start with 0 and count up
+//   for ( const namespace of namespaces ) {
+//     out += typeObj.byNamespace[namespace]?.count || 0;
+//   }
 
-  return out;
-}
+//   return out;
+// }
 
 function _applyMapping(objOrValue, mappings, keyField, cache, defaultFn) {
   let key = objOrValue;

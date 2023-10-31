@@ -364,33 +364,30 @@ export default {
     return {};
   },
 
-  count: (state, getters, rootState, rootGetters) => (type, selectedNamespaces) => {
-    debugger;
-    const schema = getters.schemaFor(type);
+  count: (state, getters, rootState, rootGetters) => (typeObj) => {
+    let _typeObj = typeObj;
+    const { name: type, count } = _typeObj;
 
-    const namespaceMode = rootGetters.namespaceMode;
-    const namespaced = schema.attributes.namespaced;
+    if (!type) {
+      throw new Error(`Resource type required to calc count: ${ JSON.stringify(typeObj) }`);
+    }
 
-    // if ( (namespaceMode === NAMESPACED && !namespaced ) || (namespaceMode === CLUSTER_LEVEL && namespaced) ) {
-    //   // Skip types that are not the right namespace mode
-    //   return;
-    // }
+    if (!count) {
+      const schema = getters.schemaFor(type);
+      const counts = getters.all(COUNT)?.[0]?.counts || {};
+      const count = counts[type];
 
-    const counts = getters.all(COUNT)?.[0]?.counts || {};
+      _typeObj = {
+        count:       count ? count.summary.count || 0 : null,
+        byNamespace: count ? count.namespaces : {},
+        revision:    count ? count.revision : null,
+        namespaced:  schema?.attributes.namespaced
+      };
+    }
 
-    const count = counts[type];
+    const namespaces = Object.keys(rootGetters.activeNamespaceCache || {});
 
-    const typeObj = {
-      count:       count ? count.summary.count || 0 : null,
-      byNamespace: count ? count.namespaces : {},
-      revision:    count ? count.revision : null,
-      namespaced
-    };
+    return _matchingCounts(_typeObj, namespaces.length ? namespaces : null);
+  },
 
-    // const namespaces = namespaced ? Object.keys(rootGetters['namespaces']()) : [];
-
-    const count2 = _matchingCounts(typeObj, selectedNamespaces);
-
-    return count2;
-  }
 };

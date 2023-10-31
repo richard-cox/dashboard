@@ -2,7 +2,6 @@
 import Favorite from '@shell/components/nav/Favorite';
 import { TYPE_MODES } from '@shell/store/type-map';
 import { linkActiveClass } from '@shell/config/router';
-import { mapGetters } from 'vuex';
 
 const showFavoritesFor = [TYPE_MODES.FAVORITE, TYPE_MODES.USED];
 
@@ -37,9 +36,6 @@ export default {
   },
 
   computed: {
-    // ...mapGetters(['inStore']),
-    // ...mapGetters(['productId', 'clusterId', 'currentProduct', 'isSingleProduct', 'namespaceMode', 'isExplorer', 'isVirtualCluster']),
-
     isCurrent() {
       // This is required to avoid scenarios where fragments break vue routers location matching
       // For example, the following fails
@@ -103,34 +99,16 @@ export default {
       return this.type.namespaced;
     },
 
-    selectedNamespaces() {
-      debugger;
-      if (!this.type.namespaced) {
-        return [];
-      }
-
-      if (this.$store.getters['isAllNamespaces'] ) {
+    count() {
+      if (!this.showCount) {
         return null;
       }
 
-      return Object.keys(this.$store.getters['namespaces']());
-    },
-
-    count() {
       const inStore = this.$store.getters['currentStore'](this.type);
 
-      return this.$store.getters[`${ inStore }/count`](this.type.name, this.selectedNamespaces);
+      return this.$store.getters[`${ inStore }/count`]({ name: this.type.name });
     }
 
-    //     if ( !this.$store.getters['isAllNamespaces'] ) {
-    //   const namespacesObject = this.$store.getters['namespaces']();
-
-    //   namespaces = Object.keys(namespacesObject);
-    // }
-
-    // isTypeNamespaced() {
-    //   this.type.namespaced;
-    // }
   },
 
   methods: {

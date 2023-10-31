@@ -98,10 +98,10 @@ export default {
       this.$emit('expand', this.group);
     },
 
-    groupPeeked() {
-      this.isPeeked = true;
-      this.$emit('peeked', { group: this.group, peeked: this.isPeeked });
-    },
+    // groupPeeked() {
+    //   this.isPeeked = true;
+    //   this.$emit('peeked', { group: this.group, peeked: this.isPeeked });
+    // },
 
     groupSelected() {
       console.warn('group.vue', 'methods', 'groupSelected');
@@ -273,7 +273,6 @@ export default {
             :fixed-open="fixedOpen"
             @selected="groupSelected($event)"
             @expand="expandGroup($event)"
-            @peeked="groupPeeked($event)"
             @close="close($event)"
           />
         </li>
