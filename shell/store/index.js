@@ -604,7 +604,7 @@ export const mutations = {
     state.isRancherInHarvester = neu;
   },
 
-  updateNamespaces(state, { filters, all }) {
+  updateNamespaces(state, { filters, all, getters }) {
     state.namespaceFilters = filters.filter((x) => !!x);
 
     if ( all ) {
@@ -956,6 +956,7 @@ export const actions = {
     commit('updateNamespaces', {
       filters: filters || [ALL_USER],
       all:     allNamespaces,
+      getters
     });
 
     if (getters['currentCluster'] && getters['currentCluster'].isHarvester) {
@@ -978,7 +979,7 @@ export const actions = {
       }
     });
 
-    commit('updateNamespaces', { filters: ids });
+    commit('updateNamespaces', { filters: ids, getters });
   },
 
   async cleanNamespaces({ getters, dispatch }) {

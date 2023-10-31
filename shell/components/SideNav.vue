@@ -93,7 +93,7 @@ export default {
     namespaces(a, b) {
       if ( !isEqual(a, b) ) {
         // Immediately update because you'll see it come in later
-        console.info('getGroups: namespaces');
+        console.info('getGroups: namespaces', a, b);
 
         this.getGroups();
       }
@@ -215,9 +215,6 @@ export default {
       }
 
       const currentProduct = this.$store.getters['productId'];
-
-      // Call this to ensure the namespace cache `activeNamespaceCache` gets updated
-      this.$store.getters['namespaces']();
 
       // Always show cluster-level types, regardless of the namespace filter
       const namespaceMode = 'both';
