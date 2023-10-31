@@ -635,7 +635,7 @@ export const getters = {
 
         const label = typeObj.labelKey ? rootGetters['i18n/t'](typeObj.labelKey) || typeObj.label : typeObj.label;
 
-        const labelDisplay = highlightLabel(label, typeObj.count, typeObj.schema);
+        const labelDisplay = highlightLabel(label, count, typeObj.schema);
 
         if ( !labelDisplay ) {
           // Search happens in highlight and returns null if not found
@@ -682,7 +682,6 @@ export const getters = {
           label,
           labelDisplay,
           mode:     typeObj.mode,
-          count,
           exact:    typeObj.exact || false,
           namespaced,
           route,
@@ -869,7 +868,6 @@ export const getters = {
       const module = findBy(state.products, 'name', product)?.inStore;
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
 
-      const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
       // const isBasic = mode === TYPE_MODES.BASIC;
 
@@ -889,8 +887,8 @@ export const getters = {
         //   console.time(timestamp);
         // }
         const attrs = schema.attributes || {};
-        const count = counts[schema.id];
-        const label = getters.labelFor(schema, count);
+
+        const label = getters.labelFor(schema, 2);
         // const weight = getters.typeWeightFor(schema?.id || label, isBasic);
         const typeOptions = getters['optionsFor'](schema);
 
@@ -931,14 +929,11 @@ export const getters = {
           out[mode][schema.id] = {
             label,
             mode,
-            weight:      getters.typeWeightFor(schema?.id || label, isBasic),
+            weight:     getters.typeWeightFor(schema?.id || label, isBasic),
             schema,
-            name:        schema.id,
-            namespaced:  typeOptions.namespaced === null ? attrs.namespaced : typeOptions.namespaced,
-            count:       count ? count.summary.count || 0 : null,
-            byNamespace: count ? count.namespaces : {},
-            revision:    count ? count.revision : null,
-            route:       typeOptions.customRoute
+            name:       schema.id,
+            namespaced: typeOptions.namespaced === null ? attrs.namespaced : typeOptions.namespaced,
+            route:      typeOptions.customRoute
           };
         });
 

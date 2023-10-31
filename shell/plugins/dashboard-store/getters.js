@@ -50,7 +50,7 @@ export const urlFor = (state, getters) => (type, id, opt) => {
  * - if the type is namespaced
  * - if there are any counts per namespace
  * - if there are no namespaces
- * - if there is no initial count
+ * - if there is no total count
  */
 function matchingCounts(typeObj, namespaces) {
   // That was easy
@@ -375,7 +375,7 @@ export default {
    *
    * This takes into account if the type is namespaced.
    *
-   * @param typeObj see inners for properties. must have at least `name` (type)
+   * @param typeObj see inners for properties. must have at least `name` (resource type)
    *
    */
   count: (state, getters, rootState, rootGetters) => (typeObj) => {

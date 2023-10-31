@@ -298,6 +298,7 @@ export default {
         // - Wrote unit tests for before case... updated for after case
         // - Vast majority of getGroups is getProductsGroups --> allTypes
         // - Before - after comparison
+        // - Tested Find Resource interface
 
         const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
         // const TESTmodeTypes = {};

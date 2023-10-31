@@ -92,7 +92,7 @@ export default {
     },
 
     showCount() {
-      return typeof this.type.count !== 'undefined';
+      return typeof this.count !== 'undefined';
     },
 
     namespaceIcon() {
@@ -100,10 +100,6 @@ export default {
     },
 
     count() {
-      if (!this.showCount) {
-        return null;
-      }
-
       const inStore = this.$store.getters['currentStore'](this.type);
 
       return this.$store.getters[`${ inStore }/count`]({ name: this.type.name });
@@ -175,7 +171,6 @@ export default {
           v-if="namespaceIcon"
           class="icon icon-namespace namespaced"
         />
-        {{ type.count }} VS
         {{ count }}
       </span>
     </a>

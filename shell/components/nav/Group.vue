@@ -93,7 +93,6 @@ export default {
   methods: {
     expandGroup() {
       this.isExpanded = true;
-      console.warn('group.vue', 'methods', 'expandgroups');
       this.$emit('expand', this.group);
     },
 

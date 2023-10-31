@@ -40,7 +40,8 @@ export default {
         namespaces = Object.keys(this.$store.getters['activeNamespaceCache']);
       }
 
-      const allTypes = this.$store.getters['type-map/allTypes'](product) || {};
+      const allTypesByMode = this.$store.getters['type-map/allTypes'](product) || {}; // TODO: RC search for allTypes
+      const allTypes = allTypesByMode[TYPE_MODES.ALL];
       const out = this.$store.getters['type-map/getTree'](product, TYPE_MODES.ALL, allTypes, clusterId, BOTH, namespaces, null, this.value);
 
       this.groups = out;
