@@ -31,7 +31,7 @@ export default {
   },
 
   created() {
-    this.queueUpdate = debounce(this.getGroups, 500);
+    this.queueUpdate = debounce(this.getGroups, 250);
 
     this.getGroups();
   },
@@ -48,14 +48,12 @@ export default {
      */
     allSchemasIds(a, b) {
       if ( !sameContents(a, b) ) {
-        console.warn('queueUpdate', 'allSchemasIds');
         this.queueUpdate();
       }
     },
 
     allNavLinksKey(a, b) {
       if ( !sameContents(a, b) ) {
-        console.warn('queueUpdate', 'allNavLinksKey', a, b);
         this.queueUpdate();
       }
     },
@@ -65,21 +63,18 @@ export default {
      */
     favoriteTypes(a, b) {
       if ( !isEqual(a, b) ) {
-        console.warn('queueUpdate', 'favoriteTypes');
         this.queueUpdate();
       }
     },
 
     locale(a, b) {
       if ( !isEqual(a, b) ) {
-        console.warn('queueUpdate', 'locale');
         this.getGroups();
       }
     },
 
     productId(a, b) {
       if ( a !== b) {
-        console.warn('queueUpdate', 'productId');
         // Immediately update because you'll see it come in later
         this.getGroups();
       }
@@ -90,21 +85,18 @@ export default {
 
     namespaceMode(a, b) {
       if ( a !== b ) {
-        console.warn('queueUpdate', 'namespaceMode');
         this.queueUpdate();
       }
     },
 
     namespaces(a, b) {
       if ( !isEqual(a, b) ) {
-        console.warn('queueUpdate', 'namespaces');
         this.queueUpdate();
       }
     },
 
     clusterReady(a, b) {
       if ( !isEqual(a, b) ) {
-        console.warn('queueUpdate', 'clusterReady');
         // Immediately update because you'll see it come in later
         this.getGroups();
       }

@@ -574,7 +574,7 @@ export const getters = {
 
   getTree(state, getters, rootState, rootGetters) {
     // Name the function so it's easily discernible on performance tracing
-    return function getTree(productId, mode, allTypes, clusterId, namespaceMode, namespaces, currentType, search) {
+    return function getTree(productId, mode, allTypes, clusterId, namespaceMode, currentType, search) {
       // getTree has four modes:
       // - `basic` matches data types that should always be shown even if there
       //    are 0 of them.

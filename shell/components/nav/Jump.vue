@@ -3,6 +3,7 @@ import debounce from 'lodash/debounce';
 import Group from '@shell/components/nav/Group';
 import { isMac } from '@shell/utils/platform';
 import { BOTH, TYPE_MODES } from '@shell/store/type-map';
+import { COUNT } from '@shell/config/types';
 
 export default {
   components: { Group },
@@ -31,11 +32,26 @@ export default {
   methods: {
     updateMatches() {
       const clusterId = this.$store.getters['clusterId'];
-      const product = this.$store.getters['productId'];
+      const productId = this.$store.getters['productId'];
+      const product = this.$store.getters['currentProduct'];
 
-      const allTypesByMode = this.$store.getters['type-map/allTypes'](product, [TYPE_MODES.ALL]) || {};
+      const allTypesByMode = this.$store.getters['type-map/allTypes'](productId, [TYPE_MODES.ALL]) || {};
       const allTypes = allTypesByMode[TYPE_MODES.ALL];
-      const out = this.$store.getters['type-map/getTree'](product, TYPE_MODES.ALL, allTypes, clusterId, BOTH, null, this.value);
+      const out = this.$store.getters['type-map/getTree'](productId, TYPE_MODES.ALL, allTypes, clusterId, BOTH, null, this.value);
+
+      // Suplement the output with count info. Usualy the `Type` component would handle this individualy... but scales real so give it some
+      // help
+      const counts = this.$store.getters[`${ product.inStore }/all`](COUNT)?.[0]?.counts || {};
+
+      out.forEach((o) => {
+        o.children?.forEach((t) => {
+          const count = counts[t.name];
+
+          t.count = count ? count.summary.count || 0 : null;
+          t.byNamespace = count ? count.namespaces : {};
+          t.revision = count ? count.revision : null;
+        });
+      });
 
       this.groups = out;
 
