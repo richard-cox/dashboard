@@ -1,5 +1,4 @@
 <script>
-import Vue from 'vue';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import { mapGetters, mapState } from 'vuex';
@@ -30,8 +29,7 @@ export default {
   data() {
     return {
       groups:        [],
-      gettingGroups: false,
-      // visibleCounts: null,
+      gettingGroups: false
     };
   },
 
@@ -47,13 +45,6 @@ export default {
   },
 
   watch: {
-    // counts(a, b) {
-    //   if ( a !== b ) {
-    //     console.info('queueUpdate: getGroups: counts', a, b);
-    //     this.queueUpdate();
-    //   }
-    // },
-
     allSchemasIds(a, b) {
       if ( !sameContents(a, b)) {
         console.info('queueUpdate: getGroups: allSchemasIds');
@@ -196,52 +187,12 @@ export default {
       return this.$store.getters[`${ product.inStore }/all`](SCHEMA).map((s) => s.id).sort();
     },
 
-    // counts() {
-    //   const managementReady = this.managementReady;
-    //   const product = this.currentProduct;
-
-    //   if ( !managementReady || !product ) {
-    //     return {};
-    //   }
-
-    //   const inStore = product.inStore;
-
-    //   // console.info('watch', 'counts', this.visibleCounts, this.$store.getters[`${ inStore }/all`](COUNT)?.[0]?.counts);
-
-    //   // So that there's something to watch for updates
-    //   const counts = this.$store.getters[`${ inStore }/all`](COUNT)?.[0]?.counts || {};
-
-    //   return this.visibleCounts?.reduce((res, vc) => {
-    //     res[vc] = counts[vc];
-
-    //     return res;
-    //   }, {});
-    // },
-
     namespaces() {
       return this.$store.getters['activeNamespaceCache'];
     },
   },
 
   methods: {
-    calcVisibleCounts(refs = this.$refs.groups) {
-      const a = refs?.reduce((types, grp) => {
-        if (grp._name === '<Group>') {
-          if (!grp.isExpanded) {
-            return types;
-          }
-
-          types.push(...this.calcVisibleCounts(grp.$children));
-        } else if (grp._name === '<Type>') {
-          types.push(grp.type.name);
-        }
-
-        return types;
-      }, []);
-
-      return a;
-    },
-
     /**
      * Fetch navigation by creating groups from product schemas
      */
@@ -304,7 +255,7 @@ export default {
 
       // console.timeEnd(getExplorerGroups);
 
-      replaceWith(this.groups, ...sortBy(out, ['weight:desc', 'label'], undefined));
+      replaceWith(this.groups, ...sortBy(out, ['weight:desc', 'label']));
 
       this.gettingGroups = false;
       console.timeEnd(getGroups);
@@ -471,24 +422,10 @@ export default {
       console.info('methods', 'groupSelected');
       this.$refs.groups.forEach((grp) => {
         if (grp.canCollapse) {
-          grp.isExpanded = grp.group.name === selected.name;
+          grp.isExpanded = (grp.group.name === selected.name);
         }
       });
-
-      // this.$nextTick(() => Vue.set(this, 'visibleCounts', this.calcVisibleCounts()));
     },
-
-    // groupPeeked({ group, peeked }) {
-    //   console.info('methods', 'groupPeeked', group.id, peeked);
-
-    //   // this.$refs.groups.forEach((grp) => {
-    //   //   if ( grp.group.name === group.name) {
-    //   //     Vue.set(group, 'isPeeked', peeked);
-    //   //   }
-    //   // });
-
-    //   this.$nextTick(() => Vue.set(this, 'visibleCounts', this.calcVisibleCounts()));
-    // },
 
     collapseAll() {
       this.$refs.groups.forEach((grp) => {
@@ -550,7 +487,6 @@ export default {
           @selected="groupSelected($event)"
           @expand="groupSelected($event)"
         />
-        <!-- @peeked="groupPeeked($event)" -->
       </template>
     </div>
     <!-- Cluster tools -->

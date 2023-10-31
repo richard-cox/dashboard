@@ -1922,22 +1922,6 @@ function _sortGroup(tree, mode) {
   }
 }
 
-// function _matchingCounts(typeObj, namespaces) {
-//   // That was easy
-//   if ( !typeObj.namespaced || !typeObj.byNamespace || namespaces === null || typeObj.count === null) {
-//     return typeObj.count;
-//   }
-
-//   let out = 0;
-
-//   // Otherwise start with 0 and count up
-//   for ( const namespace of namespaces ) {
-//     out += typeObj.byNamespace[namespace]?.count || 0;
-//   }
-
-//   return out;
-// }
-
 function _applyMapping(objOrValue, mappings, keyField, cache, defaultFn) {
   let key = objOrValue;
   let found = false;

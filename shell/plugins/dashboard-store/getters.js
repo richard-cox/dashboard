@@ -10,7 +10,6 @@ import mutations from './mutations';
 import { keyFieldFor, normalizeType } from './normalize';
 import { lookup } from './model-loader';
 import garbageCollect from '@shell/utils/gc/gc';
-import { CLUSTER_LEVEL, NAMESPACED } from 'store/type-map';
 
 export const urlFor = (state, getters) => (type, id, opt) => {
   opt = opt || {};
@@ -46,7 +45,14 @@ export const urlFor = (state, getters) => (type, id, opt) => {
   return url;
 };
 
-function _matchingCounts(typeObj, namespaces) {
+/**
+ * Find the number of resources given
+ * - if the type is namespaced
+ * - if there are any counts per namespace
+ * - if there are no namespaces
+ * - if there is no initial count
+ */
+function matchingCounts(typeObj, namespaces) {
   // That was easy
   if ( !typeObj.namespaced || !typeObj.byNamespace || namespaces === null || typeObj.count === null) {
     return typeObj.count;
@@ -364,6 +370,14 @@ export default {
     return {};
   },
 
+  /**
+   * For the given type, and it's settings, find the number of resources associated with it
+   *
+   * This takes into account if the type is namespaced.
+   *
+   * @param typeObj see inners for properties. must have at least `name` (type)
+   *
+   */
   count: (state, getters, rootState, rootGetters) => (typeObj) => {
     let _typeObj = typeObj;
     const { name: type, count } = _typeObj;
@@ -387,7 +401,7 @@ export default {
 
     const namespaces = Object.keys(rootGetters.activeNamespaceCache || {});
 
-    return _matchingCounts(_typeObj, namespaces.length ? namespaces : null);
+    return matchingCounts(_typeObj, namespaces.length ? namespaces : null);
   },
 
 };
