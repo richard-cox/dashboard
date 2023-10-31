@@ -1,5 +1,5 @@
 
-import { SCHEMA } from '@shell/config/types';
+import { SCHEMA, COUNT } from '@shell/config/types';
 
 import { matches } from '@shell/utils/selector';
 import { typeMunge, typeRef, SIMPLE_TYPES } from '@shell/utils/create-yaml';
@@ -10,6 +10,7 @@ import mutations from './mutations';
 import { keyFieldFor, normalizeType } from './normalize';
 import { lookup } from './model-loader';
 import garbageCollect from '@shell/utils/gc/gc';
+import { CLUSTER_LEVEL, NAMESPACED } from 'store/type-map';
 
 export const urlFor = (state, getters) => (type, id, opt) => {
   opt = opt || {};
@@ -44,6 +45,22 @@ export const urlFor = (state, getters) => (type, id, opt) => {
 
   return url;
 };
+
+function _matchingCounts(typeObj, namespaces) {
+  // That was easy
+  if ( !typeObj.namespaced || !typeObj.byNamespace || namespaces === null || typeObj.count === null) {
+    return typeObj.count;
+  }
+
+  let out = 0;
+
+  // Otherwise start with 0 and count up
+  for ( const namespace of namespaces ) {
+    out += typeObj.byNamespace[namespace]?.count || 0;
+  }
+
+  return out;
+}
 
 export default {
 
@@ -345,5 +362,35 @@ export default {
 
   gcIgnoreTypes: () => {
     return {};
+  },
+
+  count: (state, getters, rootState, rootGetters) => (type, selectedNamespaces) => {
+    debugger;
+    const schema = getters.schemaFor(type);
+
+    const namespaceMode = rootGetters.namespaceMode;
+    const namespaced = schema.attributes.namespaced;
+
+    // if ( (namespaceMode === NAMESPACED && !namespaced ) || (namespaceMode === CLUSTER_LEVEL && namespaced) ) {
+    //   // Skip types that are not the right namespace mode
+    //   return;
+    // }
+
+    const counts = getters.all(COUNT)?.[0]?.counts || {};
+
+    const count = counts[type];
+
+    const typeObj = {
+      count:       count ? count.summary.count || 0 : null,
+      byNamespace: count ? count.namespaces : {},
+      revision:    count ? count.revision : null,
+      namespaced
+    };
+
+    // const namespaces = namespaced ? Object.keys(rootGetters['namespaces']()) : [];
+
+    const count2 = _matchingCounts(typeObj, selectedNamespaces);
+
+    return count2;
   }
 };

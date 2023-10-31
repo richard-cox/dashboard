@@ -87,16 +87,24 @@ export default {
       set(v) {
         this.expanded = v;
       }
-    }
+    },
+
   },
 
   methods: {
     expandGroup() {
       this.isExpanded = true;
+      console.warn('group.vue', 'methods', 'expandgroups');
       this.$emit('expand', this.group);
     },
 
+    groupPeeked() {
+      this.isPeeked = true;
+      this.$emit('peeked', { group: this.group, peeked: this.isPeeked });
+    },
+
     groupSelected() {
+      console.warn('group.vue', 'methods', 'groupSelected');
       // Don't auto-select first group entry if we're already expanded and contain the currently-selected nav item
       if (this.hasActiveRoute() && this.isExpanded) {
         return;
@@ -142,12 +150,16 @@ export default {
 
     // User clicked on the expander icon, so toggle the expansion so the user can see inside the group
     peek($event) {
+      debugger;
       // Add active class to the current header if click on chevron icon
       $event.target.parentElement.classList.remove('active');
       if (this.hasActiveRoute() && this.isExpanded) {
         $event.target.parentElement.classList.add('active');
       }
       this.isExpanded = !this.isExpanded;
+      // this.isPeeked = !this.isPeeked;
+      this.$emit('peeked', { group: this, peeked: this.isPeeked });
+
       $event.stopPropagation();
     },
 
@@ -261,6 +273,7 @@ export default {
             :fixed-open="fixedOpen"
             @selected="groupSelected($event)"
             @expand="expandGroup($event)"
+            @peeked="groupPeeked($event)"
             @close="close($event)"
           />
         </li>

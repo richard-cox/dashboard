@@ -1,4 +1,5 @@
 <script>
+import Vue from 'vue';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import { mapGetters, mapState } from 'vuex';
@@ -7,7 +8,9 @@ import {
   FAVORITE_TYPES
 } from '@shell/store/prefs';
 import { getVersionInfo } from '@shell/utils/version';
-import { addObjects, replaceWith, clear, addObject } from '@shell/utils/array';
+import {
+  addObjects, replaceWith, clear, addObject, sameContents
+} from '@shell/utils/array';
 import { sortBy } from '@shell/utils/sort';
 import { ucFirst } from '@shell/utils/string';
 
@@ -27,12 +30,13 @@ export default {
   data() {
     return {
       groups:        [],
-      gettingGroups: false
+      gettingGroups: false,
+      visibleCounts: null,
     };
   },
 
   created() {
-    this.queueUpdate = debounce(this.getGroups, 500);
+    this.queueUpdate = debounce(this.getGroups, 1000);
 
     this.getGroups();
   },
@@ -45,44 +49,52 @@ export default {
   watch: {
     counts(a, b) {
       if ( a !== b ) {
-        this.queueUpdate();
+        console.info('queueUpdate: getGroups: counts', a, b);
+        // this.queueUpdate();
       }
     },
 
     allSchemasIds(a, b) {
-      if ( a !== b ) {
+      if ( !sameContents(a, b)) {
+        console.info('queueUpdate: getGroups: allSchemasIds');
         this.queueUpdate();
       }
     },
 
     allNavLinks(a, b) {
       if ( a !== b ) {
+        console.info('queueUpdate: getGroups: allNavLinks');
         this.queueUpdate();
       }
     },
 
     favoriteTypes(a, b) {
       if ( !isEqual(a, b) ) {
+        console.info('queueUpdate: getGroups: favoriteTypes');
         this.queueUpdate();
       }
     },
 
     locale(a, b) {
       if ( !isEqual(a, b) ) {
+        console.info('queueUpdate: getGroups: locale');
         this.getGroups();
       }
     },
 
     productId(a, b) {
-      if ( !isEqual(a, b) ) {
+      if ( a !== b) {
         // Immediately update because you'll see it come in later
+        console.info('getGroups: productId');
         this.getGroups();
       }
     },
 
     namespaceMode(a, b) {
-      if ( !isEqual(a, b) ) {
+      if ( a !== b ) {
         // Immediately update because you'll see it come in later
+        console.info('getGroups: namespaceMode');
+
         this.getGroups();
       }
     },
@@ -90,6 +102,8 @@ export default {
     namespaces(a, b) {
       if ( !isEqual(a, b) ) {
         // Immediately update because you'll see it come in later
+        console.info('getGroups: namespaces');
+
         this.getGroups();
       }
     },
@@ -97,13 +111,8 @@ export default {
     clusterReady(a, b) {
       if ( !isEqual(a, b) ) {
         // Immediately update because you'll see it come in later
-        this.getGroups();
-      }
-    },
+        console.info('getGroups: clusterReady');
 
-    product(a, b) {
-      if ( !isEqual(a, b) ) {
-        // Immediately update because you'll see it come in later
         this.getGroups();
       }
     },
@@ -183,7 +192,8 @@ export default {
         return [];
       }
 
-      return this.$store.getters[`${ product.inStore }/all`](SCHEMA).map((s) => s.id);
+      // This does take some up-front time, however avoids an even more costly getGroups call
+      return this.$store.getters[`${ product.inStore }/all`](SCHEMA).map((s) => s.id).sort();
     },
 
     counts() {
@@ -196,14 +206,16 @@ export default {
 
       const inStore = product.inStore;
 
+      console.info('watch', 'counts', this.visibleCounts, this.$store.getters[`${ inStore }/all`](COUNT)?.[0]?.counts);
+
       // So that there's something to watch for updates
-      if ( this.$store.getters[`${ inStore }/haveAll`](COUNT) ) {
-        const counts = this.$store.getters[`${ inStore }/all`](COUNT)[0].counts;
+      const counts = this.$store.getters[`${ inStore }/all`](COUNT)?.[0]?.counts || {};
 
-        return counts;
-      }
+      return this.visibleCounts?.reduce((res, vc) => {
+        res[vc] = counts[vc];
 
-      return {};
+        return res;
+      }, {});
     },
 
     namespaces() {
@@ -212,12 +224,30 @@ export default {
   },
 
   methods: {
+    calcVisibleCounts(refs = this.$refs.groups) {
+      const a = refs?.reduce((types, grp) => {
+        if (grp._name === '<Group>') {
+          if (!grp.isExpanded) {
+            return types;
+          }
+
+          types.push(...this.calcVisibleCounts(grp.$children));
+        } else if (grp._name === '<Type>') {
+          types.push(grp.type.name);
+        }
+
+        return types;
+      }, []);
+
+      return a;
+    },
+
     /**
      * Fetch navigation by creating groups from product schemas
      */
     getGroups() {
-      const getGroups = `getGroups fn TOTAL (id: ${ Date.now() })`;
-      const getProductsGroupsS = 'getProductsGroups';
+      const getGroups = `TIMING: getGroups fn TOTAL (id: ${ Date.now() })`;
+      const getProductsGroupsS = 'TIMING: getProductsGroups';
       // const getExplorerGroups = 'getExplorerGroups';
 
       console.time(getGroups);
@@ -283,18 +313,16 @@ export default {
     getProductsGroups(out, loadProducts, namespaceMode, namespaces, productMap) {
       const timeStamp = `getProductsGroups fn (id: ${ Date.now() })`;
 
-      console.group(timeStamp);
+      // console.group(timeStamp);
       const getProductsGroups = 'getProductsGroups fn TOTAL';
       const allTypes = 'sub allTypes';
       const getTree = 'sub getTree';
       const addObjectss = 'sub addObjects';
 
-      console.time(getProductsGroups);
+      // console.time(getProductsGroups);
 
       const clusterId = this.$store.getters['clusterId'];
       const currentType = this.$route.params.resource || '';
-
-      debugger;
 
       for ( const productId of loadProducts ) {
         const modes = [TYPE_MODES.BASIC];
@@ -317,36 +345,37 @@ export default {
         // - Tested cis benchmark, kubewarden. legacy
         // - Tested locally, visually
         // - Wrote unit tests for before case... updated for after case
+        // - Vast majority of getGroups is getProductsGroups --> allTypes
+        // - Before - after comparison
 
         const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
-        const TESTmodeTypes = {};
+        // const TESTmodeTypes = {};
 
         for ( const mode of modes ) {
-          console.time(`${ productId }/${ mode }/${ allTypes }`);
+          // console.time(`${ productId }/${ mode }/${ allTypes }`);
 
-          debugger;
+          // TESTmodeTypes[mode] = this.$store.getters['type-map/allTypes3'](productId, mode);
+          // const derp = diff(TESTmodeTypes[mode], modeTypes[mode]);
 
-          TESTmodeTypes[mode] = this.$store.getters['type-map/allTypes3'](productId, mode);
-          const derp = diff(TESTmodeTypes[mode], modeTypes[mode]);
-
-          if (Object.keys(derp).length) {
-            console.warn('ERROR!!!!!!!!!!!!!', mode, derp, TESTmodeTypes[mode]?.drivers.weight, modeTypes[mode]?.drivers.weight);
-          } else {
-            // console.warn(mode, derp);
-          }
+          // if (Object.keys(derp).length) {
+          //   console.warn('ERROR!!!!!!!!!!!!!', mode, derp, TESTmodeTypes[mode]?.drivers.weight, modeTypes[mode]?.drivers.weight);
+          // } else {
+          //   console.warn(mode, derp);
+          // }
           // console.warn(mode, TESTmodeTypes[mode], modeTypes[mode]);
 
           const types = modeTypes[mode] || {};
+          // const types = this.$store.getters['type-map/allTypes3'](productId, mode);
 
-          console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
+          // console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
 
-          console.time(`${ productId }/${ mode }/${ getTree }`);
+          // console.time(`TIMING: ${ productId }/${ mode }/${ getTree }`);
 
           const more = this.$store.getters['type-map/getTree'](productId, mode, types, clusterId, namespaceMode, namespaces, currentType);
 
-          console.timeEnd(`${ productId }/${ mode }/${ getTree }`);
+          // console.timeEnd(`TIMING: ${ productId }/${ mode }/${ getTree }`);
 
-          console.time(`${ productId }/${ mode }/${ addObjectss }`);
+          // console.time(`${ productId }/${ mode }/${ addObjectss }`);
           if ( productId === EXPLORER || !this.isExplorer ) {
             addObjects(out, more);
           } else {
@@ -362,12 +391,12 @@ export default {
 
             addObject(out, group);
           }
-          console.timeEnd(`${ productId }/${ mode }/${ addObjectss }`);
+          // console.timeEnd(`${ productId }/${ mode }/${ addObjectss }`);
         }
       }
 
-      console.timeEnd(getProductsGroups);
-      console.groupEnd(timeStamp);
+      // console.timeEnd(getProductsGroups);
+      // console.groupEnd(timeStamp);
     },
 
     getExplorerGroups(out) {
@@ -439,11 +468,26 @@ export default {
     },
 
     groupSelected(selected) {
+      console.info('methods', 'groupSelected');
       this.$refs.groups.forEach((grp) => {
         if (grp.canCollapse) {
-          grp.isExpanded = (grp.group.name === selected.name);
+          Vue.set(grp, 'isExpanded', grp.group.name === selected.name);
         }
       });
+
+      this.$nextTick(() => Vue.set(this, 'visibleCounts', this.calcVisibleCounts()));
+    },
+
+    groupPeeked({ group, peeked }) {
+      console.info('methods', 'groupPeeked', group.id, peeked);
+
+      // this.$refs.groups.forEach((grp) => {
+      //   if ( grp.group.name === group.name) {
+      //     Vue.set(group, 'isPeeked', peeked);
+      //   }
+      // });
+
+      this.$nextTick(() => Vue.set(this, 'visibleCounts', this.calcVisibleCounts()));
     },
 
     collapseAll() {
@@ -505,6 +549,7 @@ export default {
           :show-header="!g.isRoot"
           @selected="groupSelected($event)"
           @expand="groupSelected($event)"
+          @peeked="groupPeeked($event)"
         />
       </template>
     </div>
