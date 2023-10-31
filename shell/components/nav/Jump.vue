@@ -31,18 +31,11 @@ export default {
   methods: {
     updateMatches() {
       const clusterId = this.$store.getters['clusterId'];
-      const isAllNamespaces = this.$store.getters['isAllNamespaces'];
       const product = this.$store.getters['productId'];
 
-      let namespaces = null;
-
-      if ( !isAllNamespaces ) {
-        namespaces = Object.keys(this.$store.getters['activeNamespaceCache']);
-      }
-
-      const allTypesByMode = this.$store.getters['type-map/allTypes'](product) || {}; // TODO: RC search for allTypes
+      const allTypesByMode = this.$store.getters['type-map/allTypes'](product, [TYPE_MODES.ALL]) || {};
       const allTypes = allTypesByMode[TYPE_MODES.ALL];
-      const out = this.$store.getters['type-map/getTree'](product, TYPE_MODES.ALL, allTypes, clusterId, BOTH, namespaces, null, this.value);
+      const out = this.$store.getters['type-map/getTree'](product, TYPE_MODES.ALL, allTypes, clusterId, BOTH, null, this.value);
 
       this.groups = out;
 

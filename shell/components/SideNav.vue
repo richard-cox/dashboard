@@ -215,13 +215,9 @@ export default {
       }
 
       const currentProduct = this.$store.getters['productId'];
-      let namespaces = null;
 
-      if ( !this.$store.getters['isAllNamespaces'] ) {
-        const namespacesObject = this.$store.getters['namespaces']();
-
-        namespaces = Object.keys(namespacesObject);
-      }
+      // Call this to ensure the namespace cache `activeNamespaceCache` gets updated
+      this.$store.getters['namespaces']();
 
       // Always show cluster-level types, regardless of the namespace filter
       const namespaceMode = 'both';
@@ -245,7 +241,7 @@ export default {
 
       console.time(getProductsGroupsS);
 
-      this.getProductsGroups(out, loadProducts, namespaceMode, namespaces, productMap);
+      this.getProductsGroups(out, loadProducts, namespaceMode, productMap);
 
       console.timeEnd(getProductsGroupsS);
 
@@ -261,7 +257,7 @@ export default {
       console.timeEnd(getGroups);
     },
 
-    getProductsGroups(out, loadProducts, namespaceMode, namespaces, productMap) {
+    getProductsGroups(out, loadProducts, namespaceMode, productMap) { // TODO: RC
       const timeStamp = `getProductsGroups fn (id: ${ Date.now() })`;
 
       // console.group(timeStamp);
@@ -290,7 +286,7 @@ export default {
 
         // TODO: RC remaining TODOs
         // TODO: RC testing locally. testing at scale? compare with confluence?
-        // TODO: RC before / after comparison (ensure store functiuns are named)
+        // TODO: RC latest comparison stats
         // TODO: RC Comment on PR.
         // - Tested `diff` between previous allTYpes mode with mode returned via new amalgamented allTypes
         // - Tested cis benchmark, kubewarden. legacy
@@ -299,6 +295,9 @@ export default {
         // - Vast majority of getGroups is getProductsGroups --> allTypes
         // - Before - after comparison
         // - Tested Find Resource interface
+
+        // TODO: RC Notes
+        // - allTypes always used with getTree and vice-versa
 
         const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
         // const TESTmodeTypes = {};
@@ -323,7 +322,7 @@ export default {
 
           // console.time(`TIMING: ${ productId }/${ mode }/${ getTree }`);
 
-          const more = this.$store.getters['type-map/getTree'](productId, mode, types, clusterId, namespaceMode, namespaces, currentType);
+          const more = this.$store.getters['type-map/getTree'](productId, mode, types, clusterId, namespaceMode, currentType);
 
           // console.timeEnd(`TIMING: ${ productId }/${ mode }/${ getTree }`);
 
