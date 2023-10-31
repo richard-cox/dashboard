@@ -252,15 +252,14 @@ export default {
       console.timeEnd(getGroups);
     },
 
-    getProductsGroups(out, loadProducts, namespaceMode, productMap) { // TODO: RC
-      const timeStamp = `getProductsGroups fn (id: ${ Date.now() })`;
-
-      console.group(timeStamp);
+    getProductsGroups(out, loadProducts, namespaceMode, productMap) {
       const getProductsGroups = 'getProductsGroups fn TOTAL';
       const allTypes = 'sub allTypes';
       const getTree = 'sub getTree';
       const addObjectss = 'sub addObjects';
+      const timeStamp = `getProductsGroups fn (id: ${ Date.now() })`;
 
+      console.group(timeStamp);
       console.time(getProductsGroups);
 
       const clusterId = this.$store.getters['clusterId'];
@@ -291,11 +290,12 @@ export default {
         // - Before - after comparison
         // - Tested Find Resource interface
         // - Tested adding CRD --> schema id update
+        // -
 
         // TODO: RC Notes
         // - allTypes always used with getTree and vice-versa
-
-        // TODO: RC comment position of labelFor... caches strings, creates and caches regexs, etc
+        // - labelFor getter performs much worse when passed number instead of random & invalid `counts` object.
+        // - labelFor with a cold cache is expensive (need to cache strings... create and cache regex)
 
         console.time(`${ productId }/allTypes`);
 
@@ -303,19 +303,7 @@ export default {
 
         console.timeEnd(`${ productId }/allTypes`);
 
-        // const TESTmodeTypes = {};
-
         for ( const mode of modes ) {
-          // TESTmodeTypes[mode] = this.$store.getters['type-map/allTypes3'](productId, mode);
-          // const derp = diff(TESTmodeTypes[mode], modeTypes[mode]);
-
-          // if (Object.keys(derp).length) {
-          //   console.warn('ERROR!!!!!!!!!!!!!', mode, derp, TESTmodeTypes[mode]?.drivers.weight, modeTypes[mode]?.drivers.weight);
-          // } else {
-          //   console.warn(mode, derp);
-          // }
-          // console.warn(mode, TESTmodeTypes[mode], modeTypes[mode]);
-
           const types = modeTypes[mode] || {};
 
           // console.time(`${ productId }/${ mode }/${ allTypes }`);
@@ -330,7 +318,6 @@ export default {
 
           // console.timeEnd(`${ productId }/${ mode }/${ getTree }`);
 
-          // console.time(`${ productId }/${ mode }/${ addObjectss }`);
           if ( productId === EXPLORER || !this.isExplorer ) {
             addObjects(out, more);
           } else {
@@ -346,7 +333,6 @@ export default {
 
             addObject(out, group);
           }
-          // console.timeEnd(`${ productId }/${ mode }/${ addObjectss }`);
         }
       }
 

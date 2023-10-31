@@ -855,7 +855,7 @@ export const getters = {
    *
    */
   allTypes(state, getters, rootState, rootGetters) {
-    // Name the function so it's easily discernible on performance tracing // TODO: RC
+    // Name the function so it's easily discernible on performance tracing
     return function allTypes(product, modes = [TYPE_MODES.ALL]) {
       const module = findBy(state.products, 'name', product)?.inStore;
 
