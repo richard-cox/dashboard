@@ -850,128 +850,6 @@ export const getters = {
     });
   },
 
-  allTypes0(state, getters, rootState, rootGetters) {
-    // Name the function so it's easily discernible on performance tracing
-    return function allTypes(product, modes = [TYPE_MODES.ALL]) {
-      const module = findBy(state.products, 'name', product)?.inStore;
-      const schemas = rootGetters[`${ module }/all`](SCHEMA);
-      const isLocal = !rootGetters.currentCluster?.isLocal;
-      const isRancher = rootGetters.isRancher;
-
-      const isDev = rootGetters['prefs/get'](VIEW_IN_API);
-
-      const out = {};
-
-      const modeObj = {};
-
-      modes.forEach((m) => {
-        modeObj[m] = true;
-
-        if (!out[m]) {
-          out[m] = {};
-        }
-      });
-
-      for ( const schema of schemas ) {
-        // i++;
-        // const timestamp = `schema inner loop ${ schema } (id: ${ Date.now() })`;
-
-        // log(schema, `${ timestamp }`, console.time);
-        // log(schema, `${ timestamp }_timestamp_1`, console.time);
-
-        let schemaModes = { ...modeObj };
-
-        // log(schema, `${ timestamp }_timestamp_1.0`, console.time);
-        // modes.forEach((m) => {
-        //   schemaModes[m] = true;
-
-        //   if (!out[m]) {
-        //     out[m] = {};
-        //   }
-        // });
-        // log(schema, `${ timestamp }_timestamp_1.0`, console.timeEnd);
-
-        const attrs = schema.attributes || {};
-
-        // log(schema, `${ timestamp }_timestamp_1.1`, console.time);
-        const label = '';// getters.labelFor(schema, 2);
-
-        // log(schema, `${ timestamp }_timestamp_1.1`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_1.2`, console.time);
-        const typeOptions = getters['optionsFor'](schema);
-
-        // log(schema, `${ timestamp }_timestamp_1.2`, console.timeEnd);
-
-        // log(schema, `${ timestamp }_timestamp_1`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_2`, console.time);
-
-        // if (schemaModes[TYPE_MODES.BASIC]) {
-        //   if (!getters.groupForBasicType(product, schema.id) ) {
-        //     if (modes.length === 1) {
-        //       continue;
-        //     } else {
-        //       schemaModes[TYPE_MODES.BASIC] = false;
-        //     }
-        //   }
-        // }
-
-        schemaModes[TYPE_MODES.BASIC] = schemaModes[TYPE_MODES.BASIC] && getters.groupForBasicType(product, schema.id);
-
-        if (!schemaModes[TYPE_MODES.BASIC] && modes.length === 1) {
-          // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-          // log(schema, `${ timestamp }`, console.timeEnd);
-          continue;
-        }
-
-        schemaModes[TYPE_MODES.FAVORITE] = schemaModes[TYPE_MODES.FAVORITE] && getters.isFavorite(schema.id);
-
-        if (Object.values(schemaModes).every((s) => !s)) {
-          // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-          // log(schema, `${ timestamp }`, console.timeEnd);
-          continue;
-        }
-
-        const invalidSchema = !attrs.kind ||
-        (typeof typeOptions.ifRancherCluster !== 'undefined' && typeOptions.ifRancherCluster !== isRancher) ||
-        (typeOptions.localOnly && isLocal);
-
-        if (invalidSchema) {
-          if (!schemaModes[TYPE_MODES.BASIC]) {
-            // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-            // log(schema, `${ timestamp }`, console.timeEnd);
-            continue;
-          } else {
-            // Remove everything but basic
-            schemaModes = { [TYPE_MODES.BASIC]: true };
-          }
-        }
-        // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_3`, console.time);
-
-        // Object.entries(schemaModes).forEach(([mode, enabled]) => {
-        //   if (!enabled) {
-        //     return;
-        //   }
-
-        //   out[mode][schema.id] = {
-        //     label,
-        //     mode,
-        //     weight:     getters.typeWeightFor(schema?.id || label, mode === TYPE_MODES.BASIC),
-        //     schema,
-        //     name:       schema.id,
-        //     namespaced: typeOptions.namespaced === null ? attrs.namespaced : typeOptions.namespaced,
-        //     route:      typeOptions.customRoute
-        //   };
-        // });
-
-        // log(schema, `${ timestamp }_timestamp_3`, console.timeEnd);
-        // log(schema, `${ timestamp }`, console.timeEnd);
-      }
-
-      return out;
-    };
-  },
-
   /**
    * Given many things, create a list of menu items per schema given the mode
    *
@@ -985,111 +863,55 @@ export const getters = {
       const isLocal = !rootGetters.currentCluster?.isLocal;
       const isRancher = rootGetters.isRancher;
 
-      const isDev = rootGetters['prefs/get'](VIEW_IN_API);
-
       const out = {};
 
-      // console.time(schemasLoop);
-
-      // const i = 0;
-
-      // const log = (schema, msg, fn) => {
-      //   if (schema.id === 'pod') {
-      //     fn(msg);
-      //   }
-      // };
-
-      const modeObj = {};
-
-      modes.forEach((m) => {
-        modeObj[m] = true;
-
-        if (!out[m]) {
-          out[m] = {};
-        }
-      });
-
-      // For performance sac
+      // For performance reasons this must be super quick to iterate over
 
       for ( const schema of schemas ) {
-        // i++;
-        // const timestamp = `schema inner loop ${ schema } (id: ${ Date.now() })`;
+        let schemaModes = { };
 
-        // log(schema, `${ timestamp }`, console.time);
-        // log(schema, `${ timestamp }_timestamp_1`, console.time);
-
-        let schemaModes = { ...modeObj };
-
-        // log(schema, `${ timestamp }_timestamp_1.0`, console.time);
-        // modes.forEach((m) => {
-        //   schemaModes[m] = true;
-
-        //   if (!out[m]) {
-        //     out[m] = {};
-        //   }
-        // });
-        // log(schema, `${ timestamp }_timestamp_1.0`, console.timeEnd);
+        modes.forEach((m) => {
+          schemaModes[m] = true;
+        });
 
         const attrs = schema.attributes || {};
-
-        // log(schema, `${ timestamp }_timestamp_1.1`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_1.2`, console.time);
         const typeOptions = getters['optionsFor'](schema);
-
-        // log(schema, `${ timestamp }_timestamp_1.2`, console.timeEnd);
-
-        // log(schema, `${ timestamp }_timestamp_1`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_2`, console.time);
-
-        // if (schemaModes[TYPE_MODES.BASIC]) {
-        //   if (!getters.groupForBasicType(product, schema.id) ) {
-        //     if (modes.length === 1) {
-        //       continue;
-        //     } else {
-        //       schemaModes[TYPE_MODES.BASIC] = false;
-        //     }
-        //   }
-        // }
 
         schemaModes[TYPE_MODES.BASIC] = schemaModes[TYPE_MODES.BASIC] && getters.groupForBasicType(product, schema.id);
 
-        if (!schemaModes[TYPE_MODES.BASIC] && modes.length === 1) {
-          // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-          // log(schema, `${ timestamp }`, console.timeEnd);
+        if (Object.values(schemaModes).every((s) => !s)) {
           continue;
         }
 
         schemaModes[TYPE_MODES.FAVORITE] = schemaModes[TYPE_MODES.FAVORITE] && getters.isFavorite(schema.id);
 
         if (Object.values(schemaModes).every((s) => !s)) {
-          // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-          // log(schema, `${ timestamp }`, console.timeEnd);
           continue;
         }
 
-        const invalidSchema = !attrs.kind ||
-        (typeof typeOptions.ifRancherCluster !== 'undefined' && typeOptions.ifRancherCluster !== isRancher) ||
-        (typeOptions.localOnly && isLocal);
+        const onlyBasic = schemaModes[TYPE_MODES.BASIC] && modes.length === 1;
 
-        if (invalidSchema) {
-          if (!schemaModes[TYPE_MODES.BASIC]) {
-            // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-            // log(schema, `${ timestamp }`, console.timeEnd);
-            continue;
-          } else {
-            // Remove everything but basic
-            schemaModes = { [TYPE_MODES.BASIC]: true };
+        // This clause is only valid for non-basic modes. So if we have only basic... skip it
+        if (!onlyBasic) {
+          const invalidType = !attrs.kind ||
+          (typeof typeOptions.ifRancherCluster !== 'undefined' && typeOptions.ifRancherCluster !== isRancher) ||
+          (typeOptions.localOnly && isLocal);
+
+          if (invalidType) {
+            // Remove anything not basic
+            schemaModes = { [TYPE_MODES.BASIC]: schemaModes[TYPE_MODES.BASIC] };
           }
         }
-        // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_3`, console.time);
 
-        // log(schema, `${ timestamp }_timestamp_1.1`, console.time);
         const label = getters.labelFor(schema, 2);
 
         Object.entries(schemaModes).forEach(([mode, enabled]) => {
           if (!enabled) {
             return;
+          }
+
+          if (!out[mode]) {
+            out[mode] = {};
           }
 
           out[mode][schema.id] = {
@@ -1102,266 +924,11 @@ export const getters = {
             route:      typeOptions.customRoute
           };
         });
-
-        // log(schema, `${ timestamp }_timestamp_3`, console.timeEnd);
-        // log(schema, `${ timestamp }`, console.timeEnd);
       }
-      // console.timeEnd(schemasLoop);
 
-      // console.time(virts);
       const nonUsedModes = modes.filter((m) => m !== TYPE_MODES.USED);
-
-      // Add virtual and spoofed types
-      if ( nonUsedModes.length ) {
-        const virtualTypes = state.virtualTypes[product] || [];
-        const spoofedTypes = state.spoofedTypes[product] || [];
-        const allTypes = [...virtualTypes, ...spoofedTypes];
-        const virtSpoofedModes = [...nonUsedModes];
-
-        for ( const type of allTypes ) {
-          const item = clone(type);
-          const id = item.name;
-
-          // Is there a virtual/spoofed type override for schema type?
-          // Currently used by harvester, this should be investigated and removed if possible
-          virtSpoofedModes.forEach((mode) => {
-            if (out[mode]?.[id]) {
-              delete out[mode][id];
-            }
-          });
-
-          if ( item['public'] === false && !isDev ) {
-            continue;
-          }
-
-          if (item.ifHave && !ifHave(rootGetters, item.ifHave)) {
-            continue;
-          }
-
-          if ( item.ifHaveType ) {
-            const targetedSchemas = typeof item.ifHaveType === 'string' ? schemas : rootGetters[`${ item.ifHaveType.store }/all`](SCHEMA);
-            const type = typeof item.ifHaveType === 'string' ? item.ifHaveType : item.ifHaveType?.type;
-
-            const haveIds = filterBy(targetedSchemas, 'id', normalizeType(type)).map((s) => s.id);
-
-            if (!haveIds.length) {
-              continue;
-            }
-
-            if (item.ifHaveVerb && !ifHaveVerb(rootGetters, module, item.ifHaveVerb, haveIds)) {
-              continue;
-            }
-          }
-
-          if ( item.ifHaveSubTypes ) {
-            const hasSome = (item.ifHaveSubTypes || []).some((type) => {
-              return !!findBy(schemas, 'id', normalizeType(type));
-            });
-
-            if (!hasSome) {
-              continue;
-            }
-          }
-
-          if ( typeof item.ifRancherCluster !== 'undefined' && item.ifRancherCluster !== rootGetters.isRancher ) {
-            continue;
-          }
-
-          if (virtSpoofedModes.includes(TYPE_MODES.BASIC) && !getters.groupForBasicType(product, id) ) {
-            virtSpoofedModes.splice(virtSpoofedModes.indexOf(TYPE_MODES.BASIC), 1);
-          }
-          if (virtSpoofedModes.includes(TYPE_MODES.FAVORITE) && !getters.isFavorite(id) ) { // mode === TYPE_MODES.FAVORITE &&
-            virtSpoofedModes.splice(virtSpoofedModes.indexOf(TYPE_MODES.FAVORITE), 1);
-          }
-
-          // Ensure labelKey is taken into account... with a mock count
-          // This is harmless if the translation doesn't require count
-          if (item.labelKey && rootGetters['i18n/exists'](item.labelKey)) {
-            item.label = rootGetters['i18n/t'](item.labelKey, { count: 2 }).trim();
-            delete item.labelKey; // Label should really take precedence over labelKey, but it doesn't, so remove it
-          } else {
-            item.label = item.label || item.name;
-          }
-
-          virtSpoofedModes.forEach((mode) => {
-            const isBasic = mode === TYPE_MODES.BASIC;
-            const weight = type.weight || getters.typeWeightFor(item.label, isBasic);
-
-            item.mode = mode;
-            item.weight = weight;
-            if (!out[mode]) {
-              out[mode] = {};
-            }
-            out[mode][id] = item;
-          });
-        }
-      }
-      // console.timeEnd(virts);
-      // console.timeEnd(allTypes);
-      // console.groupEnd(timeStamp);
-
-      return out;
-    };
-  },
-
-  /**
-   * Given many things, create a list of menu items per schema given the mode
-   */
-  allTypes2(state, getters, rootState, rootGetters) {
-    // Name the function so it's easily discernible on performance tracing
-    return function allTypes(product, modes = [TYPE_MODES.ALL]) {
-      // const timeStamp = `allTypes fn (id: ${ Date.now() })`;
-      // const allTypes = 'allTypes fn TOTAL';
-      // const schemasLoop = 'schemas loop';
-      // const virts = 'virts';
-
-      // console.group(timeStamp);
-      // console.time(allTypes);
-
-      const module = findBy(state.products, 'name', product)?.inStore;
-      const schemas = rootGetters[`${ module }/all`](SCHEMA);
-      const isLocal = !rootGetters.currentCluster?.isLocal;
-      const isRancher = rootGetters.isRancher;
-
       const isDev = rootGetters['prefs/get'](VIEW_IN_API);
 
-      const out = { [TYPE_MODES.BASIC]: {} };
-
-      // console.time(schemasLoop);
-
-      // const i = 0;
-
-      // const log = (schema, msg, fn) => {
-      //   if (schema.id === 'pod') {
-      //     fn(msg);
-      //   }
-      // };
-
-      const modeObj = {};
-
-      // modes.forEach((m) => {
-      //   modeObj[m] = true;
-
-      //   if (!out[m]) {
-      //     out[m] = {};
-      //   }
-      // });
-
-      for ( const schema of schemas ) {
-        // i++;
-        // const timestamp = `schema inner loop ${ schema } (id: ${ Date.now() })`;
-
-        // log(schema, `${ timestamp }`, console.time);
-        // log(schema, `${ timestamp }_timestamp_1`, console.time);
-
-        // let schemaModes = { ...modeObj };
-
-        // log(schema, `${ timestamp }_timestamp_1.0`, console.time);
-        // modes.forEach((m) => {
-        //   schemaModes[m] = true;
-
-        //   if (!out[m]) {
-        //     out[m] = {};
-        //   }
-        // });
-        // log(schema, `${ timestamp }_timestamp_1.0`, console.timeEnd);
-
-        const attrs = schema.attributes || {};
-
-        // log(schema, `${ timestamp }_timestamp_1.1`, console.time);
-        const label = getters.labelFor(schema, 2);
-
-        // log(schema, `${ timestamp }_timestamp_1.1`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_1.2`, console.time);
-        const typeOptions = getters['optionsFor'](schema);
-
-        // log(schema, `${ timestamp }_timestamp_1.2`, console.timeEnd);
-
-        // log(schema, `${ timestamp }_timestamp_1`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_2`, console.time);
-
-        // if (schemaModes[TYPE_MODES.BASIC]) {
-        //   if (!getters.groupForBasicType(product, schema.id) ) {
-        //     if (modes.length === 1) {
-        //       continue;
-        //     } else {
-        //       schemaModes[TYPE_MODES.BASIC] = false;
-        //     }
-        //   }
-        // }
-
-        // schemaModes[TYPE_MODES.BASIC] = schemaModes[TYPE_MODES.BASIC] && getters.groupForBasicType(product, schema.id);
-
-        // if (!schemaModes[TYPE_MODES.BASIC] && modes.length === 1) {
-        //   // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-        //   // log(schema, `${ timestamp }`, console.timeEnd);
-        //   continue;
-        // }
-        if (!getters.groupForBasicType(product, schema.id)) {
-          continue;
-        }
-
-        // schemaModes[TYPE_MODES.FAVORITE] = schemaModes[TYPE_MODES.FAVORITE] && getters.isFavorite(schema.id);
-
-        // if (Object.values(schemaModes).every((s) => !s)) {
-        //   // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-        //   // log(schema, `${ timestamp }`, console.timeEnd);
-        //   continue;
-        // }
-
-        // const invalidSchema = !attrs.kind  ||
-        // (typeof typeOptions.ifRancherCluster !== 'undefined' && typeOptions.ifRancherCluster !== isRancher) ||
-        // (typeOptions.localOnly && isLocal);
-
-        // if (invalidSchema) {
-        //   if (!schemaModes[TYPE_MODES.BASIC]) {
-        //     // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-        //     // log(schema, `${ timestamp }`, console.timeEnd);
-        //     continue;
-        //   } else {
-        //     // Remove everything but basic
-        //     schemaModes = { [TYPE_MODES.BASIC]: true };
-        //   }
-        // }
-        // log(schema, `${ timestamp }_timestamp_2`, console.timeEnd);
-        // log(schema, `${ timestamp }_timestamp_3`, console.time);
-
-        // Object.entries(schemaModes).forEach(([mode, enabled]) => {
-        //   if (!enabled) {
-        //     return;
-        //   }
-
-        //   out[mode][schema.id] = {
-        //     label,
-        //     mode,
-        //     weight:     getters.typeWeightFor(schema?.id || label, mode === TYPE_MODES.BASIC),
-        //     schema,
-        //     name:       schema.id,
-        //     namespaced: typeOptions.namespaced === null ? attrs.namespaced : typeOptions.namespaced,
-        //     route:      typeOptions.customRoute
-        //   };
-        // });
-
-        const mode = TYPE_MODES.BASIC;
-
-        out[mode][schema.id] = {
-          label,
-          mode,
-          weight:     getters.typeWeightFor(schema?.id || label, mode === TYPE_MODES.BASIC),
-          schema,
-          name:       schema.id,
-          namespaced: typeOptions.namespaced === null ? attrs.namespaced : typeOptions.namespaced,
-          route:      typeOptions.customRoute
-        };
-
-        // log(schema, `${ timestamp }_timestamp_3`, console.timeEnd);
-        // log(schema, `${ timestamp }`, console.timeEnd);
-      }
-      // console.timeEnd(schemasLoop);
-
-      // console.time(virts);
-      const nonUsedModes = modes.filter((m) => m !== TYPE_MODES.USED);
-
       // Add virtual and spoofed types
       if ( nonUsedModes.length ) {
         const virtualTypes = state.virtualTypes[product] || [];
@@ -1447,9 +1014,6 @@ export const getters = {
           });
         }
       }
-      // console.timeEnd(virts);
-      // console.timeEnd(allTypes);
-      // console.groupEnd(timeStamp);
 
       return out;
     };

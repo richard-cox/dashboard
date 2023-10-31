@@ -303,6 +303,8 @@ export default {
         // TODO: RC Notes
         // - allTypes always used with getTree and vice-versa
 
+        // TODO: RC comment position of labelFor... caches strings, creates and caches regexs, etc
+
         console.time(`${ productId }/allTypes`);
 
         const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
