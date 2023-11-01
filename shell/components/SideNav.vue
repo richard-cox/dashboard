@@ -197,7 +197,6 @@ export default {
     getGroups() {
       const getGroups = `TIMING: getGroups fn TOTAL (id: ${ Date.now() })`;
       const getProductsGroupsS = 'TIMING: getProductsGroups';
-      // const getExplorerGroups = 'getExplorerGroups';
 
       console.time(getGroups);
       if ( this.gettingGroups ) {
@@ -240,11 +239,7 @@ export default {
 
       console.timeEnd(getProductsGroupsS);
 
-      // console.time(getExplorerGroups);
-
       this.getExplorerGroups(out);
-
-      // console.timeEnd(getExplorerGroups);
 
       replaceWith(this.groups, ...sortBy(out, ['weight:desc', 'label']));
 
@@ -278,25 +273,6 @@ export default {
           modes.push(TYPE_MODES.USED);
         }
 
-        // TODO: RC remaining TODOs
-        // TODO: RC testing locally. testing at scale? compare with confluence?
-        // TODO: RC latest comparison stats
-        // TODO: RC Comment on PR.
-        // - Tested `diff` between previous allTYpes mode with mode returned via new amalgamented allTypes
-        // - Tested cis benchmark, kubewarden. legacy
-        // - Tested locally, visually
-        // - Wrote unit tests for before case... updated for after case
-        // - Vast majority of getGroups is getProductsGroups --> allTypes
-        // - Before - after comparison
-        // - Tested Find Resource interface
-        // - Tested adding CRD --> schema id update
-        // -
-
-        // TODO: RC Notes
-        // - allTypes always used with getTree and vice-versa
-        // - labelFor getter performs much worse when passed number instead of random & invalid `counts` object.
-        // - labelFor with a cold cache is expensive (need to cache strings... create and cache regex)
-
         console.time(`${ productId }/allTypes`);
 
         const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
@@ -312,11 +288,7 @@ export default {
 
           // console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
 
-          // console.time(`${ productId }/${ mode }/${ getTree }`);
-
           const more = this.$store.getters['type-map/getTree'](productId, mode, types, clusterId, namespaceMode, currentType);
-
-          // console.timeEnd(`${ productId }/${ mode }/${ getTree }`);
 
           if ( productId === EXPLORER || !this.isExplorer ) {
             addObjects(out, more);
