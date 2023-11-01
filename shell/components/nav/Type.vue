@@ -104,7 +104,7 @@ export default {
         return this.type.count;
       }
 
-      const inStore = this.$store.getters['currentStore'](this.type);
+      const inStore = this.$store.getters['currentStore'](this.type.name);
 
       return this.$store.getters[`${ inStore }/count`]({ name: this.type.name });
     }

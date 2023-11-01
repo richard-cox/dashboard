@@ -395,7 +395,7 @@ export default {
         count:       count ? count.summary.count || 0 : null,
         byNamespace: count ? count.namespaces : {},
         revision:    count ? count.revision : null,
-        namespaced:  schema?.attributes.namespaced
+        namespaced:  schema?.attributes?.namespaced
       };
     }
 
