@@ -858,11 +858,9 @@ export const getters = {
     // Name the function so it's easily discernible on performance tracing
     return function allTypes(product, modes = [TYPE_MODES.ALL]) {
       const module = findBy(state.products, 'name', product)?.inStore;
-
       const schemas = rootGetters[`${ module }/all`](SCHEMA);
       const isLocal = !rootGetters.currentCluster?.isLocal;
       const isRancher = rootGetters.isRancher;
-
       const counts = rootGetters[`${ module }/all`](COUNT)?.[0]?.counts || {};
 
       const out = {};
@@ -1770,17 +1768,16 @@ function _sortGroup(tree, mode) {
   }
 }
 
-// schema, state.typeMappings, 'id', false
-function _applyMapping(schema, mappings, keyField, cache, defaultFn) {
-  let key = schema;
+function _applyMapping(objOrValue, mappings, keyField, cache, defaultFn) {
+  let key = objOrValue;
   let found = false;
 
   if ( keyField ) {
-    if ( typeof schema !== 'object' ) {
-      return schema;
+    if ( typeof objOrValue !== 'object' ) {
+      return objOrValue;
     }
 
-    key = get(schema, keyField);
+    key = get(objOrValue, keyField);
 
     if ( typeof key !== 'string' ) {
       return null;
@@ -1808,7 +1805,7 @@ function _applyMapping(schema, mappings, keyField, cache, defaultFn) {
   }
 
   if ( !found && defaultFn ) {
-    out = defaultFn(out, schema);
+    out = defaultFn(out, objOrValue);
   }
 
   if ( cache ) {
