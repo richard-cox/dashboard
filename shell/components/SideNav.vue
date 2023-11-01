@@ -195,10 +195,6 @@ export default {
      * Fetch navigation by creating groups from product schemas
      */
     getGroups() {
-      const getGroups = `TIMING: getGroups fn TOTAL (id: ${ Date.now() })`;
-      const getProductsGroupsS = 'TIMING: getProductsGroups';
-
-      console.time(getGroups);
       if ( this.gettingGroups ) {
         return;
       }
@@ -233,30 +229,16 @@ export default {
       // This should already have come into the list from above, but in case it hasn't...
       addObject(loadProducts, currentProduct);
 
-      console.time(getProductsGroupsS);
-
       this.getProductsGroups(out, loadProducts, namespaceMode, productMap);
-
-      console.timeEnd(getProductsGroupsS);
 
       this.getExplorerGroups(out);
 
       replaceWith(this.groups, ...sortBy(out, ['weight:desc', 'label']));
 
       this.gettingGroups = false;
-      console.timeEnd(getGroups);
     },
 
     getProductsGroups(out, loadProducts, namespaceMode, productMap) {
-      const getProductsGroups = 'getProductsGroups fn TOTAL';
-      const allTypes = 'sub allTypes';
-      const getTree = 'sub getTree';
-      const addObjectss = 'sub addObjects';
-      const timeStamp = `getProductsGroups fn (id: ${ Date.now() })`;
-
-      console.group(timeStamp);
-      console.time(getProductsGroups);
-
       const clusterId = this.$store.getters['clusterId'];
       const currentType = this.$route.params.resource || '';
 
@@ -273,21 +255,11 @@ export default {
           modes.push(TYPE_MODES.USED);
         }
 
-        console.time(`${ productId }/allTypes`);
-
-        const modeTypes = this.$store.getters['type-map/allTypes'](productId, modes);
-
-        console.timeEnd(`${ productId }/allTypes`);
+        // Get all types for all modes
+        const typesByMode = this.$store.getters['type-map/allTypes'](productId, modes);
 
         for ( const mode of modes ) {
-          const types = modeTypes[mode] || {};
-
-          // console.time(`${ productId }/${ mode }/${ allTypes }`);
-
-          // const types = this.$store.getters['type-map/allTypes3'](productId, mode);
-
-          // console.timeEnd(`${ productId }/${ mode }/${ allTypes }`);
-
+          const types = typesByMode[mode] || {};
           const more = this.$store.getters['type-map/getTree'](productId, mode, types, clusterId, namespaceMode, currentType);
 
           if ( productId === EXPLORER || !this.isExplorer ) {
@@ -307,9 +279,6 @@ export default {
           }
         }
       }
-
-      console.timeEnd(getProductsGroups);
-      console.groupEnd(timeStamp);
     },
 
     getExplorerGroups(out) {
