@@ -2034,6 +2034,8 @@ clusterIndexPage:
       etcd: Etcd
       scheduler: Scheduler
       controller-manager: Controller Manager
+    certs:
+      label: Certificates
 
 configmap:
   tabs:

@@ -6,6 +6,7 @@ import { SERVICE_ACCOUNT } from '@shell/config/types';
 import { set } from '@shell/utils/object';
 import { NAME as MANAGER } from '@shell/config/product/manager';
 import SteveModel from '@shell/plugins/steve/steve-class';
+import { colorForState, stateDisplay, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
 
 export const TYPES = {
   OPAQUE:           'Opaque',
@@ -317,6 +318,18 @@ export default class Secret extends SteveModel {
     return null;
   }
 
+  get timeTilExpirationEpoch() {
+    if (this._type === TYPES.TLS) {
+      return this.certInfo.notAfter.getTime();
+    }
+
+    return null;
+  }
+
+  get timeTilExpirationStandard() {
+    return this.timeTilExpiration ? this.timeTilExpiration / 1000 : null;
+  }
+
   get decodedData() {
     const out = {};
 
@@ -356,5 +369,28 @@ export default class Secret extends SteveModel {
     } else {
       return 'c-cluster-product-resource';
     }
+  }
+
+  get certState() {
+    // const eightDays = 691200000;
+    const eightDays = 1000 * 60 * 60 * 24 * 60; // TODO: RC drop to 8
+
+    if (this.timeTilExpiration > eightDays ) {
+      return ''; // TODO: RC sensible state
+    } else if (this.timeTilExpiration > 0) {
+      return STATES_ENUM.EXPIRING;
+    } else {
+      return STATES_ENUM.EXPIRED;
+    }
+  }
+
+  get certStateDisplay() {
+    return stateDisplay(this.certState);
+  }
+
+  get certStateBackground() {
+    const color = colorForState(this.certState);
+
+    return color.replace('text-', 'bg-');
   }
 }
