@@ -158,6 +158,11 @@ export default {
     forceUpdateLiveAndDelayed: {
       type:    Number,
       default: 0
+    },
+
+    changeIndicatorContext: {
+      type:    String,
+      default: ''
     }
   },
 
@@ -475,6 +480,7 @@ export default {
     ref="table"
     v-bind="$attrs"
     :headers="_headers"
+    :change-indicator-context="schema.id"
     :rows="filteredRows"
     :loading="loading"
     :group-by="computedGroupBy"

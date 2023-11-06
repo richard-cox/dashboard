@@ -1,8 +1,10 @@
 import { insertAt } from '@shell/utils/array';
 import { colorForState, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
-import { NODE, WORKLOAD_TYPES } from '@shell/config/types';
+import { NODE, WORKLOAD_TYPES, POD, METRIC } from '@shell/config/types';
 import { escapeHtml, shortenedImage } from '@shell/utils/string';
 import WorkloadService from '@shell/models/workload.service';
+import ChangeIndicator from '@shell/utils/change-indicator';
+import { formatSi, parseSi } from '@shell/utils/units';
 
 export const WORKLOAD_PRIORITY = {
   [WORKLOAD_TYPES.DEPLOYMENT]:             1,
@@ -13,6 +15,107 @@ export const WORKLOAD_PRIORITY = {
   [WORKLOAD_TYPES.REPLICA_SET]:            6,
   [WORKLOAD_TYPES.REPLICATION_CONTROLLER]: 7,
 };
+
+ChangeIndicator.registerWithContext(POD, 'ready', {
+  calc: (old, neu) => {
+    const [oUp, oReq] = old.split('/');
+    const [nUp, nReq] = neu.split('/');
+
+    if (oReq === nReq) {
+      if (oUp < nUp) {
+        return {
+          increased: true,
+          positive:  true
+        };
+      }
+      if (nUp < oUp) {
+        return {
+          increased: false,
+          positive:  false
+        };
+      }
+    }
+
+    return null;
+  }
+});
+
+ChangeIndicator.registerWithContext(POD, 'restarts', {
+  calc: (old, neu) => {
+    const [oUp] = old.split(' ');
+    const [nUp] = neu.split(' ');
+
+    if (oUp < nUp) {
+      return {
+        increased: true,
+        positive:  false
+      };
+    }
+
+    return null;
+  }
+});
+
+ChangeIndicator.registerWithContext(POD, 'state', {
+  calc: (old, neu) => {
+    if (old === 'Running' && neu !== 'Running') {
+      return {
+        increased: false,
+        positive:  false
+      };
+    }
+
+    if (old !== 'Running' && neu === 'Running') {
+      return {
+        increased: true,
+        positive:  true
+      };
+    }
+
+    return null;
+  }
+});
+
+ChangeIndicator.registerWithContext(POD, 'mem', {
+  calc: (old, neu) => {
+    if (!old && !neu) {
+      return null;
+    }
+
+    if (!old && neu) {
+      return {
+        increased: true,
+        positive:  false
+      };
+    }
+
+    if (old && !neu) {
+      return {
+        increased: false,
+        positive:  false
+      };
+    }
+
+    old = parseSi(old);
+    neu = parseSi(neu);
+
+    if (old < neu) {
+      return {
+        increased: true,
+        positive:  false,
+      };
+    }
+
+    if (neu < old) {
+      return {
+        increased: false,
+        positive:  true,
+      };
+    }
+
+    return null;
+  }
+});
 
 export default class Pod extends WorkloadService {
   _os = undefined;
@@ -255,5 +358,52 @@ export default class Pod extends WorkloadService {
 
       return Promise.reject(e);
     });
+  }
+
+  async fetchPodMetric() {
+    if (this.$getters['schemaFor'](this.type)) {
+      return this.$dispatch('find', { type: METRIC.POD, id: `${ this.id }` });
+    }
+  }
+
+  get podMetric() {
+    return this.$getters['byId'](METRIC.POD, this.id);
+  }
+
+  // get podMetricsSummary() {
+  //   if (!this.podMetric) {
+  //     this.fetchPodMetric(); // TODO: RC scale, spam
+  //   }
+
+  //   if (this.podMetric) {
+  //     return this.podMetric.containers.reduce((r, c) => {
+  //       r.cpu += parseSi(c.usage.cpu);
+  //       r.mem += parseSi(c.usage.memory);
+
+  //       return r;
+  //     }, {
+  //       cpu: 0,
+  //       mem: 0
+  //     });
+  //   }
+
+  //   return null;
+  // }
+
+  get cpu() {
+    // console.warn(this.podMetricsSummary?.cpu, formatSi(this.podMetricsSummary?.cpu, { increment: 1000, suffix: 'C' }));
+    // if (!this.podMetric) {
+    //   this.fetchPodMetric(); // TODO: RC scale, spam
+    // }
+
+    // return formatSi(this.podMetricsSummary?.cpu, { increment: 1000, suffix: 'C' });
+    return this.podMetric?.totalCpuUsage;
+  }
+
+  get mem() {
+    // return formatSi(this.podMetricsSummary?.cpu, {
+    //   increment: 1024, suffix: 'iB', firstSuffix: 'B'
+    // }); // TODO: RC ??
+    return this.podMetric?.totalMemoryUsage;
   }
 }

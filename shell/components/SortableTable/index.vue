@@ -19,6 +19,9 @@ import grouping from './grouping';
 import actions from './actions';
 import AdvancedFiltering from './advanced-filtering';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import ChangeIndication from '@shell/components/ChangeIndication';
+import ChangeIndicator, { ChangeIndicatorContextKey } from '@shell/utils/change-indicator';
+
 import { getParent } from '@shell/utils/dom';
 
 // Uncomment for table performance debugging
@@ -57,7 +60,7 @@ export const COLUMN_BREAKPOINTS = {
 export default {
   name:       'SortableTable',
   components: {
-    THead, Checkbox, AsyncButton, ActionDropdown, LabeledSelect
+    THead, Checkbox, AsyncButton, ActionDropdown, LabeledSelect, ChangeIndication
   },
   mixins: [
     filtering,
@@ -313,6 +316,11 @@ export default {
     forceUpdateLiveAndDelayed: {
       type:    Number,
       default: 0
+    },
+
+    changeIndicatorContext: {
+      type:    String,
+      default: ''
     }
   },
 
@@ -623,17 +631,23 @@ export default {
               }
             }
 
+            const changeIndicatorColumnKey = ChangeIndicatorContextKey(this.changeIndicatorContext, c.name);
+            const columnHasChangeIndictor = ChangeIndicator.hasIndicator(changeIndicatorColumnKey);
+
             rowData.columns.push({
-              col:       c,
+              col:                c,
               value,
               formatted,
               component,
               needRef,
-              delayed:   c.delayLoading,
-              live:      c.formatter?.startsWith('Live') || c.liveUpdates,
-              label:     this.labelFor(c),
-              dasherize: columnFormmatterIDs[c.formatter] || '',
+              delayed:            c.delayLoading,
+              live:               c.formatter?.startsWith('Live') || c.liveUpdates,
+              label:              this.labelFor(c),
+              dasherize:          columnFormmatterIDs[c.formatter] || '',
+              changeIndicatorKey: columnHasChangeIndictor ? changeIndicatorColumnKey : null,
             });
+
+            // console.warn(this.changeIndicatorContext, c.name, changeIndicatorColumnKey, columnHasChangeIndictor, c);
           });
         });
       });
@@ -1272,41 +1286,55 @@ export default {
                         :col="col.col"
                         :value="col.value"
                       >
-                        <component
-                          :is="col.component"
-                          v-if="col.component && col.needRef"
-                          ref="column"
+                        <!--  v-else-if="col.changeIndicatorKey" -->
+                        <ChangeIndication
+                          :indicator-key="col.changeIndicatorKey"
+                          :display-value="col.formatted"
                           :value="col.value"
-                          :row="row.row"
-                          :col="col.col"
-                          v-bind="col.col.formatterOpts"
-                          :row-key="row.key"
-                          :get-custom-detail-link="getCustomDetailLink"
-                        />
-                        <component
-                          :is="col.component"
-                          v-else-if="col.component"
-                          :value="col.value"
-                          :row="row.row"
-                          :col="col.col"
-                          v-bind="col.col.formatterOpts"
-                          :row-key="row.key"
-                        />
-                        <component
-                          :is="col.col.formatter"
-                          v-else-if="col.col.formatter"
-                          :value="col.value"
-                          :row="row.row"
-                          :col="col.col"
-                          v-bind="col.col.formatterOpts"
-                          :row-key="row.key"
-                        />
-                        <template v-else-if="col.value !== ''">
-                          {{ col.formatted }}
-                        </template>
-                        <template v-else-if="col.col.dashIfEmpty">
-                          <span class="text-muted">&mdash;</span>
-                        </template>
+                        >
+                          <!--  Needs a component and a formatter -->
+                          <component
+                            :is="col.component"
+                            v-if="col.component && col.needRef"
+                            ref="column"
+                            :value="col.value"
+                            :row="row.row"
+                            :col="col.col"
+                            v-bind="col.col.formatterOpts"
+                            :row-key="row.key"
+                            :get-custom-detail-link="getCustomDetailLink"
+                          />
+                          <!--  Needs a component -->
+                          <component
+                            :is="col.component"
+                            v-else-if="col.component"
+                            :value="col.value"
+                            :row="row.row"
+                            :col="col.col"
+                            v-bind="col.col.formatterOpts"
+                            :row-key="row.key"
+                          />
+                          <!-- Needs a formatter -->
+                          <component
+                            :is="col.col.formatter"
+                            v-else-if="col.col.formatter"
+                            :value="col.value"
+                            :row="row.row"
+                            :col="col.col"
+                            v-bind="col.col.formatterOpts"
+                            :row-key="row.key"
+                          />
+                          <!-- col.col.changeIndicatorKey -->
+
+                          <!-- Vanilla value -->
+                          <template v-else-if="col.value !== ''">
+                            {{ col.formatted }}
+                          </template>
+                          <!-- No value, conditionally show a dash -->
+                          <template v-else-if="col.col.dashIfEmpty">
+                            <span class="text-muted">&mdash;</span>
+                          </template>
+                        </ChangeIndication>
                       </slot>
                     </td>
                   </slot>

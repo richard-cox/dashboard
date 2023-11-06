@@ -164,12 +164,14 @@ export default {
 </script>
 
 <template>
-  <ResourceTable
-    :loading="$fetchState.pending"
-    :schema="schema"
-    :rows="filteredRows"
-    :overflow-y="true"
-    :use-query-params-for-simple-filtering="useQueryParamsForSimpleFiltering"
-    :force-update-live-and-delayed="forceUpdateLiveAndDelayed"
-  />
+  <div>
+    <ResourceTable
+      :loading="$fetchState.pending"
+      :schema="schema"
+      :rows="filteredRows"
+      :overflow-y="true"
+      :use-query-params-for-simple-filtering="useQueryParamsForSimpleFiltering"
+      :force-update-live-and-delayed="forceUpdateLiveAndDelayed"
+    />
+  </div>
 </template>
