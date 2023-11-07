@@ -4,17 +4,28 @@ import { mapGetters } from 'vuex';
 import ResourceTable from '@shell/components/ResourceTable';
 import { SECRET } from '@shell/config/types';
 import { NAME as NAME_COL, NAMESPACE as NAMESPACE_COL, AGE, STATE } from '@shell/config/table-headers';
-import { TYPES } from '@shell/models/secret';
+import Secret, { TYPES } from '@shell/models/secret';
 import { Banner } from '@components/Banner';
 import { stateDisplay, STATES_ENUM, colorForState, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { BadgeState } from '@components/BadgeState';
 
 interface Data {
+  schema: Object,
+  headers: Object[],
+  certs: Secret[],
+  pagingParams: {
+        pluralLabel: string,
+        singularLabel: string
+      }
 }
 
-export default Vue.extend({
+export default Vue.extend<Data, any, any, any>({
   components: {
     ResourceTable, Banner, BadgeState
+  },
+
+  async fetch() {
+    this.certs = await this.fetchCerts();
   },
 
   data(): Data {
@@ -35,21 +46,21 @@ export default Vue.extend({
         {
           name:     'cn',
           labelKey: 'secret.certificate.cn',
-          getValue: (row) => {
+          getValue: (row: Secret) => {
             return row.cn + (row.unrepeatedSans.length ? this.t('secret.certificate.plusMore', { n: row.unrepeatedSans.length }) : ''); // TODO: RC
           },
           sort:   ['cn'],
           search: ['cn'],
         }, {
           name:      'cert-expires',
-          labelKey:  'secret.certificate.expires',
+          labelKey:  'secret.certificate.expiresOn',
           value:     'certInfo.notAfter',
           formatter: 'Date',
           sort:      ['certInfo.notAfter'],
           search:    ['certInfo.notAfter'],
         }, {
           name:      'cert-expires2',
-          labelKey:  'secret.certificate.expires',
+          labelKey:  'secret.certificate.expiresDuration',
           value:     'timeTilExpirationEpoch',
           formatter: 'LiveDate',
           sort:      ['timeTilExpiration'],
@@ -57,38 +68,35 @@ export default Vue.extend({
         },
         AGE
       ],
-      certs:          [],
-      intervalHandle: null
+      certs:        [],
+      pagingParams: {
+        pluralLabel:   this.t('secret.certificate.certificates'),
+        singularLabel: this.t('secret.certificate.certificate')
+      }
     };
-  },
-
-  async fetch() {
-    this.certs = await this.fetchCerts();
   },
 
   computed: {
     ...mapGetters(['currentCluster']),
 
     expiredData() {
-      const res = this.certs.reduce((res, cert) => {
-        switch (cert.certState) {
-        case STATES_ENUM.EXPIRING:
-          res.expiring.push(`${ cert.namespace }/${ cert.name }`);
-          break;
-        case STATES_ENUM.EXPIRED:
-          res.expiring.push(`${ cert.namespace }/${ cert.name }`);
-          break;
-        }
+      let expiring = 0;
+      let expired = 0;
 
-        return res;
-      }, {
-        expiring: [],
-        expired:  []
-      });
+      for (let i = 0; i < this.certs.length; i++) {
+        const cert = this.certs[i];
+
+        if (cert.certState === STATES_ENUM.EXPIRING) {
+          expiring++;
+        }
+        if (cert.certState === STATES_ENUM.EXPIRED) {
+          expired++;
+        }
+      }
 
       return {
-        expiring: res.expiring.length ? `The following certificates will expire in 8 days:\n${ res.expiring.join(',') }` : '',
-        expired:  res.expired.length ? `The following certificates have expired:\n${ res.expiring.join(',') }` : '',
+        expiring: expiring ? this.t('secret.certificate.warnings.expiring', { count: expiring }) : '',
+        expired:  expired ? this.t('secret.certificate.warnings.expired', { count: expired }) : '',
       };
     }
   },
@@ -127,6 +135,8 @@ export default Vue.extend({
       :schema="schema"
       :headers="headers"
       :rows="certs"
+      :paging-label="'secret.certificate.paging'"
+      :paging-params="pagingParams"
     >
       <template #col:certState="{row}">
         <td>
