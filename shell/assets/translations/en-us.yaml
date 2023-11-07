@@ -4789,7 +4789,7 @@ secret:
     warnings:
       expiring: "{count} {count, plural, =1 {Certificate expires soon} other {Certificates expire soon}}"
       expired: "{count} {count, plural, =1 {Certificate has expired} other {Certificates have expired}}"
-      filtered: "\nA namespace filter has been applied. Not all certificates may be visible"
+      filtered: ". Not all may be visible given the selected project/namespace filter"
   data: Data
   registry:
     address: Registry

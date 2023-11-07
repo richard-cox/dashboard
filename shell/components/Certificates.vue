@@ -29,8 +29,6 @@ export default Vue.extend<Data, any, any, any>({
   },
 
   data(): Data {
-    // TODO: RC default sort
-    // TODO: RC state for expiring certs?
     return {
       schema:  this.$store.getters['cluster/schemaFor'](SECRET),
       headers: [
@@ -46,12 +44,13 @@ export default Vue.extend<Data, any, any, any>({
         {
           name:     'cn',
           labelKey: 'secret.certificate.cn',
-          getValue: (row: Secret) => {
-            return row.cn + (row.unrepeatedSans.length ? this.t('secret.certificate.plusMore', { n: row.unrepeatedSans.length }) : ''); // TODO: RC
+          value:    (row: Secret) => {
+            return row.cn + (row.unrepeatedSans.length ? ` ${ this.t('secret.certificate.plusMore', { n: row.unrepeatedSans.length }) }` : ''); // TODO: RC
           },
           sort:   ['cn'],
           search: ['cn'],
-        }, {
+        },
+        {
           name:        'cert-expires2',
           labelKey:    'secret.certificate.expiresDuration',
           value:       'timeTilExpirationEpoch',
@@ -78,18 +77,12 @@ export default Vue.extend<Data, any, any, any>({
   },
 
   computed: {
-    ...mapGetters(['currentCluster', 'activeNamespaceFilters', 'isAllNamespaces']),
-
-    // haveNamespaceFilter() {
-
-    // },
+    ...mapGetters(['isAllNamespaces']),
 
     expiredData() {
-      console.warn(this.activeNamespaceFilters, this.isAllNamespaces); // TODO: RC optimise? & check
       let expiring = 0;
       let expired = 0;
 
-      debugger;
       for (let i = 0; i < this.certs.length; i++) {
         const cert = this.certs[i];
 
@@ -101,7 +94,7 @@ export default Vue.extend<Data, any, any, any>({
         }
       }
 
-      const filterWarning = !this.isAllNamespaces ? this.t('secret.certicicate.warnings.filtered') : '';
+      const filterWarning = !this.isAllNamespaces ? this.t('secret.certificate.warnings.filtered') : '';
 
       return {
         expiring: expiring ? this.t('secret.certificate.warnings.expiring', { count: expiring, filtered: !this.isAllNamespaces }) + filterWarning : '',

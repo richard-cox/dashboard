@@ -251,6 +251,11 @@ export default class Secret extends SteveModel {
     let issuer, notAfter, cn, sans, x;
     const END_MARKER = '-----END CERTIFICATE-----';
 
+    // TODO: RC epinio certs miss domain
+
+    // if (this.name === 'dex-tls') {
+    //   debugger;
+    // }
     if (pem) {
       const certs = pem.split(END_MARKER);
       let first = pem;
@@ -297,7 +302,9 @@ export default class Secret extends SteveModel {
   get unrepeatedSans() {
     if (this._type === TYPES.TLS ) {
       if (this.certInfo?.sans?.filter) {
-        const commonBases = this.certInfo?.sans.filter((name) => name.indexOf('*.') === 0 || name.indexOf('www.') === 0).map((name) => name.substr(name.indexOf('.')));
+        const commonBases = this.certInfo?.sans
+          .filter((name) => name.indexOf('*.') === 0 || name.indexOf('www.') === 0)
+          .map((name) => name.substr(name.indexOf('.')));
         const displaySans = removeObjects(this.certInfo?.sans, commonBases);
 
         return displaySans;
@@ -386,7 +393,6 @@ export default class Secret extends SteveModel {
     // const eightDays = 691200000;
     const eightDays = 1000 * 60 * 60 * 24 * 60; // TODO: RC drop to 8
 
-    debugger;
     if (!this.timeTilExpiration || this.timeTilExpiration > eightDays ) {
       return ''; // TODO: RC sensible state
     } else if (this.timeTilExpiration > 0) {
