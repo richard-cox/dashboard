@@ -78,9 +78,14 @@ export default Vue.extend<Data, any, any, any>({
   },
 
   computed: {
-    ...mapGetters(['currentCluster']),
+    ...mapGetters(['currentCluster', 'activeNamespaceFilters', 'isAllNamespaces']),
+
+    // haveNamespaceFilter() {
+
+    // },
 
     expiredData() {
+      console.warn(this.activeNamespaceFilters, this.isAllNamespaces); // TODO: RC optimise? & check
       let expiring = 0;
       let expired = 0;
 
@@ -96,12 +101,11 @@ export default Vue.extend<Data, any, any, any>({
         }
       }
 
-      // TODO: RC has filter, state
-      // TODO: RC singlular (1 certificates expiring...)
+      const filterWarning = !this.isAllNamespaces ? this.t('secret.certicicate.warnings.filtered') : '';
 
       return {
-        expiring: expiring ? this.t('secret.certificate.warnings.expiring', { count: expiring }) : '',
-        expired:  expired ? this.t('secret.certificate.warnings.expired', { count: expired }) : '',
+        expiring: expiring ? this.t('secret.certificate.warnings.expiring', { count: expiring, filtered: !this.isAllNamespaces }) + filterWarning : '',
+        expired:  expired ? this.t('secret.certificate.warnings.expired', { count: expired, filtered: !this.isAllNamespaces }) + filterWarning : '',
       };
     }
   },

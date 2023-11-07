@@ -4787,8 +4787,9 @@ secret:
     privateKey: Private Key
     privateKeyPlaceholder: "Paste in the private key, typically starting with -----BEGIN RSA PRIVATE KEY-----"
     warnings:
-      expiring: "{count} certificates expire soon"
-      expired: "{count} certificates have expired"
+      expiring: "{count} {count, plural, =1 {Certificate expires soon} other {Certificates expire soon}}"
+      expired: "{count} {count, plural, =1 {Certificate has expired} other {Certificates have expired}}"
+      filtered: "\nA namespace filter has been applied. Not all certificates may be visible"
   data: Data
   registry:
     address: Registry
