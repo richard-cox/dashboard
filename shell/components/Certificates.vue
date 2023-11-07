@@ -6,7 +6,7 @@ import { SECRET } from '@shell/config/types';
 import { NAME as NAME_COL, NAMESPACE as NAMESPACE_COL, AGE, STATE } from '@shell/config/table-headers';
 import Secret, { TYPES } from '@shell/models/secret';
 import { Banner } from '@components/Banner';
-import { STATES_ENUM, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
+import { STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
 import { BadgeState } from '@components/BadgeState';
 
 interface Data {
@@ -14,9 +14,9 @@ interface Data {
   headers: Object[],
   certs: Secret[],
   pagingParams: {
-        pluralLabel: string,
-        singularLabel: string
-      }
+    pluralLabel: string,
+    singularLabel: string
+  }
 }
 
 export default Vue.extend<Data, any, any, any>({
@@ -25,6 +25,9 @@ export default Vue.extend<Data, any, any, any>({
   },
 
   async fetch() {
+    // We're fetching secrets with a filter, this will clash with secrets in other contexts
+    this.$store.dispatch('cluster/forgetType', SECRET);
+
     this.certs = await this.fetchCerts();
   },
 
@@ -45,7 +48,7 @@ export default Vue.extend<Data, any, any, any>({
           name:     'cn',
           labelKey: 'secret.certificate.cn',
           value:    (row: Secret) => {
-            return row.cn + (row.unrepeatedSans.length ? ` ${ this.t('secret.certificate.plusMore', { n: row.unrepeatedSans.length }) }` : ''); // TODO: RC
+            return row.cn + (row.unrepeatedSans.length ? ` ${ this.t('secret.certificate.plusMore', { n: row.unrepeatedSans.length }) }` : '');
           },
           sort:   ['cn'],
           search: ['cn'],
@@ -58,6 +61,7 @@ export default Vue.extend<Data, any, any, any>({
           sort:        ['timeTilExpiration'],
           search:      ['timeTilExpiration'],
           defaultSort: true,
+          width:       100
         }, {
           name:      'cert-expires',
           labelKey:  'secret.certificate.expiresOn',
@@ -103,10 +107,13 @@ export default Vue.extend<Data, any, any, any>({
     }
   },
 
+  beforeDestroy() {
+    // We're fetching secrets with a filter, clear it so as to not clash with other contexts
+    this.$store.dispatch('cluster/forgetType', SECRET);
+  },
+
   methods: {
     async fetchCerts() {
-      // TODO: RC what happens if go to secrets? what happens when return here?
-
       return await this.$store.dispatch('cluster/findAll', {
         type: SECRET,
         opt:  {

@@ -251,11 +251,6 @@ export default class Secret extends SteveModel {
     let issuer, notAfter, cn, sans, x;
     const END_MARKER = '-----END CERTIFICATE-----';
 
-    // TODO: RC epinio certs miss domain
-
-    // if (this.name === 'dex-tls') {
-    //   debugger;
-    // }
     if (pem) {
       const certs = pem.split(END_MARKER);
       let first = pem;
@@ -274,7 +269,9 @@ export default class Secret extends SteveModel {
         notAfter = r.zulutodate(x.getNotAfter());
 
         if (!notAfter) {
-          debugger;
+          debugger; // TODO: RC remove todo's
+          // TODO: RC test expired
+          // TODO: RC self review
         }
 
         const cnString = x.getSubjectString();
@@ -394,7 +391,7 @@ export default class Secret extends SteveModel {
     const eightDays = 1000 * 60 * 60 * 24 * 60; // TODO: RC drop to 8
 
     if (!this.timeTilExpiration || this.timeTilExpiration > eightDays ) {
-      return ''; // TODO: RC sensible state
+      return '';
     } else if (this.timeTilExpiration > 0) {
       return STATES_ENUM.EXPIRING;
     } else {
