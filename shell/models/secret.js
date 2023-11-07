@@ -81,14 +81,13 @@ export default class Secret extends SteveModel {
   // use text-warning' or 'text-error' if cert is expiring within 8 days or is expired
   get dateClass() {
     if (this.isCertificate) {
-      const eightDays = 691200000;
-
-      if (this.timeTilExpiration > eightDays ) {
-        return '';
-      } else if (this.timeTilExpiration > 0) {
+      switch (this.certState) {
+      case STATES_ENUM.EXPIRING:
         return 'text-warning';
-      } else {
+      case STATES_ENUM.EXPIRED:
         return 'text-error';
+      default:
+        return '';
       }
     }
 
@@ -269,6 +268,10 @@ export default class Secret extends SteveModel {
         issuer = issuerString.slice(issuerString.indexOf('CN=') + 3);
         notAfter = r.zulutodate(x.getNotAfter());
 
+        if (!notAfter) {
+          debugger;
+        }
+
         const cnString = x.getSubjectString();
 
         cn = cnString.slice(cnString.indexOf('CN=') + 3);
@@ -308,6 +311,10 @@ export default class Secret extends SteveModel {
 
   get timeTilExpiration() {
     if (this._type === TYPES.TLS) {
+      if (!this.certInfo.notAfter) {
+        return null;
+      }
+
       const expiration = this.certInfo.notAfter;
       const timeThen = expiration.valueOf();
       const timeNow = Date.now();
@@ -320,6 +327,10 @@ export default class Secret extends SteveModel {
 
   get timeTilExpirationEpoch() {
     if (this._type === TYPES.TLS) {
+      if (!this.certInfo.notAfter) {
+        return null;
+      }
+
       return this.certInfo.notAfter.getTime();
     }
 
@@ -375,7 +386,8 @@ export default class Secret extends SteveModel {
     // const eightDays = 691200000;
     const eightDays = 1000 * 60 * 60 * 24 * 60; // TODO: RC drop to 8
 
-    if (this.timeTilExpiration > eightDays ) {
+    debugger;
+    if (!this.timeTilExpiration || this.timeTilExpiration > eightDays ) {
       return ''; // TODO: RC sensible state
     } else if (this.timeTilExpiration > 0) {
       return STATES_ENUM.EXPIRING;

@@ -6,7 +6,7 @@ import { SECRET } from '@shell/config/types';
 import { NAME as NAME_COL, NAMESPACE as NAMESPACE_COL, AGE, STATE } from '@shell/config/table-headers';
 import Secret, { TYPES } from '@shell/models/secret';
 import { Banner } from '@components/Banner';
-import { stateDisplay, STATES_ENUM, colorForState, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
+import { STATES_ENUM, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { BadgeState } from '@components/BadgeState';
 
 interface Data {
@@ -52,19 +52,20 @@ export default Vue.extend<Data, any, any, any>({
           sort:   ['cn'],
           search: ['cn'],
         }, {
+          name:        'cert-expires2',
+          labelKey:    'secret.certificate.expiresDuration',
+          value:       'timeTilExpirationEpoch',
+          formatter:   'LiveDate',
+          sort:        ['timeTilExpiration'],
+          search:      ['timeTilExpiration'],
+          defaultSort: true,
+        }, {
           name:      'cert-expires',
           labelKey:  'secret.certificate.expiresOn',
           value:     'certInfo.notAfter',
           formatter: 'Date',
           sort:      ['certInfo.notAfter'],
           search:    ['certInfo.notAfter'],
-        }, {
-          name:      'cert-expires2',
-          labelKey:  'secret.certificate.expiresDuration',
-          value:     'timeTilExpirationEpoch',
-          formatter: 'LiveDate',
-          sort:      ['timeTilExpiration'],
-          search:    ['timeTilExpiration'],
         },
         AGE
       ],
@@ -83,6 +84,7 @@ export default Vue.extend<Data, any, any, any>({
       let expiring = 0;
       let expired = 0;
 
+      debugger;
       for (let i = 0; i < this.certs.length; i++) {
         const cert = this.certs[i];
 
@@ -94,6 +96,9 @@ export default Vue.extend<Data, any, any, any>({
         }
       }
 
+      // TODO: RC has filter, state
+      // TODO: RC singlular (1 certificates expiring...)
+
       return {
         expiring: expiring ? this.t('secret.certificate.warnings.expiring', { count: expiring }) : '',
         expired:  expired ? this.t('secret.certificate.warnings.expired', { count: expired }) : '',
@@ -103,16 +108,16 @@ export default Vue.extend<Data, any, any, any>({
 
   methods: {
     async fetchCerts() {
-      // const url = `/k8s/clusters/${ this.currentCluster.id }/v1/secrets?filter=metadata.fields.1=kubernetes.io/tls`;
-      const response = await this.$store.dispatch('cluster/findAll', {
+      // TODO: RC what happens if go to secrets? what happens when return here?
+
+      return await this.$store.dispatch('cluster/findAll', {
         type: SECRET,
         opt:  {
           watch:  false,
-          filter: { filter: `metadata.fields.1=${ TYPES.TLS }` }
+          // Note - urlOptions handles filter in a weird way
+          filter: { 'metadata.fields.1': TYPES.TLS }
         }
       });
-
-      return response;
     },
   }
 });
@@ -149,7 +154,3 @@ export default Vue.extend<Data, any, any, any>({
     </ResourceTable>
   </div>
 </template>
-
-<style lang='scss' scoped>
-
-</style>

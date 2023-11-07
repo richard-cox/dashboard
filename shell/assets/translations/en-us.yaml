@@ -4776,7 +4776,7 @@ secret:
     cn: Domain Name
     expires: Expires
     expiresOn: Expires On
-    expiresDuration: Time to Expiration
+    expiresDuration: Expires In
     issuer: Issuer
     paging: |-
       {pages, plural,
