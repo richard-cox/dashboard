@@ -51,7 +51,7 @@ export default {
 
     time() {
       if ( !this.value ) {
-        return '-';
+        return '';
       }
 
       const timeFormat = escapeHtml( this.$store.getters['prefs/get'](TIME_FORMAT));

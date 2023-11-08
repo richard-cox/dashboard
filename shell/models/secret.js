@@ -274,12 +274,6 @@ export default class Secret extends SteveModel {
         notBefore = r.zulutodate(x.getNotBefore());
         notAfter = r.zulutodate(x.getNotAfter());
 
-        if (!notAfter) {
-          debugger; // TODO: RC remove todo's
-          // TODO: RC test expired
-          // TODO: RC self review
-        }
-
         const cnString = x.getSubjectString();
 
         cn = cnString.slice(cnString.indexOf('CN=') + 3);
