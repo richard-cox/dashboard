@@ -52,11 +52,10 @@ export default Vue.extend<Data, any, any, any>({
           },
           sort:   ['cn'],
           search: ['cn'],
-        },
-        {
+        }, {
           name:        'cert-expires2',
           labelKey:    'secret.certificate.expiresDuration',
-          value:       'timeTilExpirationEpoch',
+          value:       (row: Secret) => row.certInfo?.notAfter.valueOf(),
           formatter:   'LiveDate',
           sort:        ['timeTilExpiration'],
           search:      ['timeTilExpiration'],
@@ -69,6 +68,12 @@ export default Vue.extend<Data, any, any, any>({
           formatter: 'Date',
           sort:      ['certInfo.notAfter'],
           search:    ['certInfo.notAfter'],
+        }, {
+          name:     'cert-lifetime',
+          labelKey: 'secret.certificate.lifetime',
+          value:    (row: Secret) => row.certLifetime,
+          sort:     ['certLifetime'],
+          search:   ['certLifetime'],
         },
         AGE
       ],

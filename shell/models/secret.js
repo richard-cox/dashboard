@@ -7,6 +7,8 @@ import { set } from '@shell/utils/object';
 import { NAME as MANAGER } from '@shell/config/product/manager';
 import SteveModel from '@shell/plugins/steve/steve-class';
 import { colorForState, stateDisplay, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
+import { diffFrom } from 'utils/time';
+import day from 'dayjs';
 
 export const TYPES = {
   OPAQUE:           'Opaque',
@@ -23,6 +25,9 @@ export const TYPES = {
   CLOUD_CREDENTIAL: 'provisioning.cattle.io/cloud-credential',
   RKE_AUTH_CONFIG:  'rke.cattle.io/auth-config'
 };
+
+/** Class a cert as expiring if in eight days */
+const certExpiringPeriod = 1000 * 60 * 60 * 24 * 8;
 
 export default class Secret extends SteveModel {
   get hasSensitiveData() {
@@ -248,7 +253,7 @@ export default class Secret extends SteveModel {
   // parse TLS certs and return issuer, notAfter, cn, sans
   get certInfo() {
     const pem = base64Decode(this.data['tls.crt']);
-    let issuer, notAfter, cn, sans, x;
+    let issuer, notBefore, notAfter, cn, sans, x;
     const END_MARKER = '-----END CERTIFICATE-----';
 
     if (pem) {
@@ -266,6 +271,7 @@ export default class Secret extends SteveModel {
         const issuerString = x.getIssuerString();
 
         issuer = issuerString.slice(issuerString.indexOf('CN=') + 3);
+        notBefore = r.zulutodate(x.getNotBefore());
         notAfter = r.zulutodate(x.getNotAfter());
 
         if (!notAfter) {
@@ -288,7 +294,7 @@ export default class Secret extends SteveModel {
       }
 
       return {
-        issuer, notAfter, cn, sans
+        issuer, notBefore, notAfter, cn, sans
       };
     }
 
@@ -329,20 +335,16 @@ export default class Secret extends SteveModel {
     return null;
   }
 
-  get timeTilExpirationEpoch() {
+  get certLifetime() {
     if (this._type === TYPES.TLS) {
-      if (!this.certInfo.notAfter) {
-        return null;
-      }
+      const certInfo = this.certInfo;
 
-      return this.certInfo.notAfter.getTime();
+      if (certInfo) {
+        return diffFrom(day(certInfo.notBefore), day(certInfo.notAfter), (key, args) => this.t(key, args)).string;
+      }
     }
 
     return null;
-  }
-
-  get timeTilExpirationStandard() {
-    return this.timeTilExpiration ? this.timeTilExpiration / 1000 : null;
   }
 
   get decodedData() {
@@ -386,11 +388,15 @@ export default class Secret extends SteveModel {
     }
   }
 
+  /**
+   * Get the model `state` for secrets of type cert
+   */
   get certState() {
-    // const eightDays = 691200000;
-    const eightDays = 1000 * 60 * 60 * 24 * 60; // TODO: RC drop to 8
+    if (this._type !== TYPES.TLS) {
+      return undefined;
+    }
 
-    if (!this.timeTilExpiration || this.timeTilExpiration > eightDays ) {
+    if (!this.timeTilExpiration || this.timeTilExpiration > certExpiringPeriod ) {
       return '';
     } else if (this.timeTilExpiration > 0) {
       return STATES_ENUM.EXPIRING;
@@ -399,11 +405,25 @@ export default class Secret extends SteveModel {
     }
   }
 
+  /**
+   * Get the model `state display` for secrets of type cert
+   */
   get certStateDisplay() {
+    if (this._type !== TYPES.TLS) {
+      return undefined;
+    }
+
     return stateDisplay(this.certState);
   }
 
+  /**
+   * Get the model `state background` for secrets of type cert
+   */
   get certStateBackground() {
+    if (this._type !== TYPES.TLS) {
+      return undefined;
+    }
+
     const color = colorForState(this.certState);
 
     return color.replace('text-', 'bg-');

@@ -4778,6 +4778,7 @@ secret:
     expires: Expires
     expiresOn: Expires On
     expiresDuration: Expires In
+    lifetime: Lifetime
     issuer: Issuer
     paging: |-
       {pages, plural,
