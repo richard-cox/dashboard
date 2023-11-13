@@ -879,14 +879,18 @@ export const getters = {
         const attrs = schema.attributes || {};
         const typeOptions = getters['optionsFor'](schema);
 
+        // Calc if we need basic mode and resource is valid for it...
         schemaModes[TYPE_MODES.BASIC] = schemaModes[TYPE_MODES.BASIC] && getters.groupForBasicType(product, schema.id);
 
+        // ... and if every mode is invalid, there's no point continuing
         if (Object.values(schemaModes).every((s) => !s)) {
           continue;
         }
 
+        // Calc if we need fav mode and resource is valid for it...
         schemaModes[TYPE_MODES.FAVORITE] = schemaModes[TYPE_MODES.FAVORITE] && getters.isFavorite(schema.id);
 
+        // ... and if every mode is invalid, there's no point continuing
         if (Object.values(schemaModes).every((s) => !s)) {
           continue;
         }

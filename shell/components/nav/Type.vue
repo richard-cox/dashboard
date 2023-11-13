@@ -100,6 +100,9 @@ export default {
     },
 
     count() {
+      // For cases where there are a lot of this component on screen (e.g. resource search modal) the `count` should be provided.
+      // This is done for performance reasons. For other cases (e.g. the side bar nav group) it's more performant to work out individually &
+      // on demand
       if (typeof this.type.count !== 'undefined') {
         return this.type.count;
       }
