@@ -158,7 +158,7 @@ export default {
       }
 
       if ( as === _YAML ) {
-        yaml = createYaml(schemas, resource, data);
+        yaml = await createYaml(schemas, resource, data);
       }
     } else {
       if ( as === _GRAPH ) {

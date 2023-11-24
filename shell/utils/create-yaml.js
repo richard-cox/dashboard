@@ -66,8 +66,8 @@ export const ACTIVELY_REMOVE = [
 const INDENT = 2;
 
 // TODO: RC Make both createYamlWithOptions and createYaml async
-export function createYamlWithOptions(schemas, type, data, options) {
-  return createYaml(
+export async function createYamlWithOptions(schemas, type, data, options) {
+  return await createYaml(
     schemas,
     type,
     data,
@@ -76,10 +76,10 @@ export function createYamlWithOptions(schemas, type, data, options) {
   );
 }
 
-export function createYaml( // TODO: RC lots of places call this...
+export async function createYaml( // TODO: RC lots of places call this...
   schemas, // TODO: RC resourceFields
   type,
-  data,
+  data, // TODO: RC why 0, and why not rest schemas filled out?
   processAlwaysAdd = true,
   depth = 0,
   path = '',
@@ -94,6 +94,8 @@ export function createYaml( // TODO: RC lots of places call this...
     schema = findBy(schemas, 'id', type);
 
     if (schema.resourceFieldsFromSchemaDefinitions) {
+      await schema.fetchResourceFields();
+
       schemaDefinitions = schema.schemaDefinitions.others;
       schemaDefinition = schema.schemaDefinitions?.self;
     }

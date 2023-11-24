@@ -160,7 +160,7 @@ export default {
   data() {
     // const yaml = this.createResourceYaml();
 
-    this.initialiseYaml();
+    // this.initialiseYaml();
 
     this.$on('createNamespace', (e) => {
       // When createNamespace is set to true,
@@ -220,7 +220,7 @@ export default {
     },
 
     canShowYaml() {
-      return this.canYaml && (this._selectedSubtype || !this.subtypes.length) && this.canEditYaml && this.mode !== _VIEW && !!this.initialYaml;
+      return this.canYaml && (this._selectedSubtype || !this.subtypes.length) && this.canEditYaml && this.mode !== _VIEW;
     },
 
     isView() {
@@ -335,18 +335,20 @@ export default {
         const schemas = this.$store.getters[`${ inStore }/all`](SCHEMA);
         const clonedResource = clone(resource);
 
-        const schema = this.$store.getters[`${ inStore }/schemaFor`](this.resource);
-        const definitions = await schema.fetchResourceFields();
+        // const schema = this.$store.getters[`${ inStore }/schemaFor`](this.resource);
+        // const definitions = await schema.fetchResourceFields();
 
-        console.warn('createResourceYaml', definitions);
+        // console.warn('createResourceYaml', definitions);
 
-        const out = createYamlWithOptions(schemas, resource.type, clonedResource, modifiers);
+        const out = await createYamlWithOptions(schemas, resource.type, clonedResource, modifiers);
 
         return out;
       }
     },
 
     async showYaml() {
+      await this.initialiseYaml();
+
       if ( this.applyHooks ) {
         try {
           await this.applyHooks(BEFORE_SAVE_HOOKS, CONTEXT_HOOK_EDIT_YAML);
@@ -357,11 +359,11 @@ export default {
         }
       }
 
-      const inStore = this.$store.getters['currentStore'](this.resource);
-      const schema = this.$store.getters[`${ inStore }/schemaFor`](this.resource);
-      const definitions = await schema.fetchResourceFields();
+      // const inStore = this.$store.getters['currentStore'](this.resource);
+      // const schema = this.$store.getters[`${ inStore }/schemaFor`](this.resource);
+      // const definitions = await schema.fetchResourceFields();
 
-      console.warn('showYaml', definitions);
+      // console.warn('showYaml', definitions);
 
       const resourceYaml = await this.createResourceYaml(this.yamlModifiers);
 
