@@ -65,7 +65,7 @@ export default {
       // }
       const schema = this.$store.getters['rancher/schemaFor']('rotatecertificateinput');
 
-      return get(schema, 'resourceFields.services.options') || [];
+      return get(schema, 'resourceFields.services.options') || []; // TODO: RC RANCHER resourceFields
     },
 
     actionParams() {

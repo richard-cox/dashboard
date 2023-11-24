@@ -173,7 +173,7 @@ export const getters = {
 
         return [];
       }
-
+      // TODO: RC resourceFields
       const out = Object.keys(schema?.resourceFields || {});
 
       removeObjects(out, ['apiVersion', 'dockerPort', 'kind', 'metadata']);
@@ -189,6 +189,7 @@ export const getters = {
 
       const out = {};
 
+      // TODO: RC resourceFields
       for ( const n of names ) {
         out[n] = schema.resourceFields[n];
       }

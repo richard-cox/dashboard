@@ -57,7 +57,7 @@ export default {
       const normanSchema = this.$store.getters['rancher/schemaFor'](`${ normanType }credentialconfig`);
 
       if ( normanSchema ) {
-        return Object.keys(normanSchema.resourceFields || {});
+        return Object.keys(normanSchema.resourceFields || {}); // TODO: RC RANCHER resourceFields
       } else {
         return this.$store.getters['plugins/fieldNamesForDriver'](this.provider);
       }

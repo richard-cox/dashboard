@@ -157,8 +157,10 @@ export default {
     }
   },
 
-  data(props) {
-    const yaml = this.createResourceYaml();
+  data() {
+    // const yaml = this.createResourceYaml();
+
+    this.initialiseYaml();
 
     this.$on('createNamespace', (e) => {
       // When createNamespace is set to true,
@@ -171,8 +173,14 @@ export default {
       isCancelModal:   false,
       createNamespace: false,
       showAsForm:      this.$route.query[AS] !== _YAML,
-      resourceYaml:    yaml,
-      initialYaml:     yaml,
+      /**
+       * Used in the process of showing edit yaml... or in edit yaml
+       */
+      resourceYaml:    null,
+      /**
+       * Used in edit yaml
+       */
+      initialYaml:     null, // TODO: RC showYaml
       abbrSizes:       {
         3: '24px',
         4: '18px',
@@ -200,7 +208,7 @@ export default {
       return this.validationPassed;
     },
 
-    canDiff() {
+    yamlComponentCanDiff() {
       return this.initialYaml !== this.resourceYaml;
     },
 
@@ -211,8 +219,8 @@ export default {
       return !(schema?.resourceMethods?.includes('blocked-PUT'));
     },
 
-    showYaml() {
-      return this.canYaml && (this._selectedSubtype || !this.subtypes.length) && this.canEditYaml && this.mode !== _VIEW;
+    canShowYaml() {
+      return this.canYaml && (this._selectedSubtype || !this.subtypes.length) && this.canEditYaml && this.mode !== _VIEW && !!this.initialYaml;
     },
 
     isView() {
@@ -273,6 +281,14 @@ export default {
   },
 
   methods: {
+    async initialiseYaml() {
+      // TODO: RC only do this when we need to (use want to view yaml). how wire in with initialYaml?
+      const yaml = await this.createResourceYaml();
+
+      this.resourceYaml = yaml;
+      this.initialYaml = yaml;
+    },
+
     stringify,
 
     confirmCancel(isCancelNotBack = true) {
@@ -309,7 +325,7 @@ export default {
       }
     },
 
-    createResourceYaml(modifiers) {
+    async createResourceYaml(modifiers) {
       const resource = this.resource;
 
       if ( typeof this.generateYaml === 'function' ) {
@@ -319,13 +335,18 @@ export default {
         const schemas = this.$store.getters[`${ inStore }/all`](SCHEMA);
         const clonedResource = clone(resource);
 
+        const schema = this.$store.getters[`${ inStore }/schemaFor`](this.resource);
+        const definitions = await schema.fetchResourceFields();
+
+        console.warn('createResourceYaml', definitions);
+
         const out = createYamlWithOptions(schemas, resource.type, clonedResource, modifiers);
 
         return out;
       }
     },
 
-    async showPreviewYaml() {
+    async showYaml() {
       if ( this.applyHooks ) {
         try {
           await this.applyHooks(BEFORE_SAVE_HOOKS, CONTEXT_HOOK_EDIT_YAML);
@@ -336,7 +357,13 @@ export default {
         }
       }
 
-      const resourceYaml = this.createResourceYaml(this.yamlModifiers);
+      const inStore = this.$store.getters['currentStore'](this.resource);
+      const schema = this.$store.getters[`${ inStore }/schemaFor`](this.resource);
+      const definitions = await schema.fetchResourceFields();
+
+      console.warn('showYaml', definitions);
+
+      const resourceYaml = await this.createResourceYaml(this.yamlModifiers);
 
       this.resourceYaml = resourceYaml;
       this.showAsForm = false;
@@ -575,10 +602,10 @@ export default {
                   </template>
                   <div class="controls-steps">
                     <button
-                      v-if="showYaml"
+                      v-if="canShowYaml"
                       type="button"
                       class="btn role-secondary"
-                      @click="showPreviewYaml"
+                      @click="showYaml"
                     >
                       <t k="cruResource.previewYaml" />
                     </button>
@@ -658,11 +685,11 @@ export default {
             <template #default>
               <div v-if="!isView">
                 <button
-                  v-if="showYaml"
+                  v-if="canShowYaml"
                   :data-testid="componentTestid + '-yaml'"
                   type="button"
                   class="btn role-secondary"
-                  @click="showPreviewYaml"
+                  @click="showYaml"
                 >
                   <t k="cruResource.previewYaml" />
                 </button>
@@ -681,7 +708,7 @@ export default {
       </template>
       <!------ YAML ------>
       <section
-        v-else-if="showYaml"
+        v-else-if="canShowYaml"
         class="cru-resource-yaml-container resource-container cru__content"
       >
         <ResourceYaml
@@ -721,7 +748,7 @@ export default {
                     <button
                       v-if="!showPreview && isEdit"
                       :data-testid="componentTestid + '-yaml-yaml-preview'"
-                      :disabled="!canDiff"
+                      :disabled="!yamlComponentCanDiff"
                       type="button"
                       class="btn role-secondary"
                       @click="yamlPreview"

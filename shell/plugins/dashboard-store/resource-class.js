@@ -1658,7 +1658,7 @@ export default class Resource {
       return errors;
     }
 
-    const fields = schema.resourceFields || {};
+    const fields = schema.resourceFields || {};// TODO: RC resourceFields
     const keys = Object.keys(fields);
     let field, key, val, displayKey;
 

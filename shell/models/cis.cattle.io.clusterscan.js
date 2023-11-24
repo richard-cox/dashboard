@@ -65,6 +65,7 @@ export default class ClusterScan extends SteveModel {
 
   canBeScheduled() {
     const schema = this.$getters['schemaFor'](this.type);
+    // TODO: RC resourceFields
     const specSchema = this.$getters['schemaFor'](get(schema, 'resourceFields.spec.type') || '');
 
     if (!specSchema) {

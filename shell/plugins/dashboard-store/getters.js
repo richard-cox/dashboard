@@ -101,6 +101,7 @@ export default {
     while ( parts.length ) {
       const key = parts.shift();
 
+      // TODO: RC resourceFields
       type = schema.resourceFields?.[key]?.type;
 
       if ( !type ) {
@@ -189,7 +190,7 @@ export default {
   },
 
   defaultFor: (state, getters) => (type) => {
-    const schema = getters['schemaFor'](type);
+    const schema = getters['schemaFor'](type); // ...... recursion
 
     if ( !schema ) {
       return null;
@@ -197,6 +198,7 @@ export default {
 
     const out = {};
 
+    // TODO: RC resourceFields
     for ( const key in schema.resourceFields ) {
       const field = schema.resourceFields[key];
 

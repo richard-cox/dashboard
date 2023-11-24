@@ -33,6 +33,7 @@ export default {
     hasWarningState() {
       const specSchema = this.$store.getters['cluster/schemaFor'](get(this.schema, 'resourceFields.spec.type') || '');
 
+      // TODO: RC resourceFields
       if (!specSchema) {
         return false;
       }

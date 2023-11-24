@@ -65,6 +65,7 @@ export const ACTIVELY_REMOVE = [
 
 const INDENT = 2;
 
+// TODO: RC Make both createYamlWithOptions and createYaml async
 export function createYamlWithOptions(schemas, type, data, options) {
   return createYaml(
     schemas,
@@ -75,25 +76,44 @@ export function createYamlWithOptions(schemas, type, data, options) {
   );
 }
 
-export function createYaml(
-  schemas,
+export function createYaml( // TODO: RC lots of places call this...
+  schemas, // TODO: RC resourceFields
   type,
   data,
   processAlwaysAdd = true,
   depth = 0,
   path = '',
   rootType = null,
-  dataOptions = {}
+  dataOptions = {},
+  schemaDefinitions = null,
 ) {
-  const schema = findBy(schemas, 'id', type);
+  debugger;
+  let schema, schemaDefinition;
+
+  if (depth === 0) {
+    schema = findBy(schemas, 'id', type);
+
+    if (schema.resourceFieldsFromSchemaDefinitions) {
+      schemaDefinitions = schema.schemaDefinitions.others;
+      schemaDefinition = schema.schemaDefinitions?.self;
+    }
+  } else {
+    if (schemaDefinitions) {
+      schemaDefinition = findBy(schemaDefinitions, 'id', type);
+    }
+  }
 
   if ( !rootType ) {
     rootType = type;
   }
 
-  if ( !schema ) {
-    return `Error loading schema for ${ type }`;
+  if ( !schema && !schemaDefinition) {
+    return `Error loading schema or schemaDefinition for ${ type }`;
   }
+
+  const resourceFields = schemaDefinition?.resourceFields || schema?.resourceFields;
+
+  // TODO: RC error
 
   data = data || {};
 
@@ -127,14 +147,15 @@ export function createYaml(
       const key = parts[parts.length - 1];
       const prefix = parts.slice(0, -1).join('.');
 
-      if ( prefix === path && schema.resourceFields && schema.resourceFields[key] ) {
+      if ( prefix === path && resourceFields && resourceFields[key] ) {
         addObject(regularFields, key);
       }
     }
   }
 
   // Include all fields in schema's resourceFields as comments
-  const commentFields = Object.keys(schema.resourceFields || {});
+  debugger;
+  const commentFields = Object.keys(resourceFields || {});
 
   commentFields.forEach((key) => {
     if ( typeof data[key] !== 'undefined' || (depth === 0 && key === '_type') ) {
@@ -166,7 +187,7 @@ export function createYaml(
     const key = parts[parts.length - 1];
     const prefix = parts.slice(0, -1).join('.');
 
-    if ( prefix === path && schema.resourceFields && schema.resourceFields[key] ) {
+    if ( prefix === path && resourceFields && resourceFields[key] ) {
       removeObject(commentFields, key);
     }
   }
@@ -177,7 +198,8 @@ export function createYaml(
   const regular = regularFields.map((k) => stringifyField(k));
   const comments = commentFields.map((k) => {
     // Don't add a namespace comment for types that aren't namespaced.
-    if ( path === 'metadata' && k === 'namespace' ) {
+    // TODO: RC Test...
+    if (depth === 0 && path === 'metadata' && k === 'namespace' ) {
       const rootSchema = findBy(schemas, 'id', rootType);
 
       if ( rootSchema && !rootSchema.attributes?.namespaced ) {
@@ -198,7 +220,7 @@ export function createYaml(
   // ---------------
 
   function stringifyField(key) {
-    const field = schema.resourceFields?.[key];
+    const field = resourceFields?.[key];
     let out = `${ key }:`;
 
     // '_type' in steve maps to kubernetes 'type' field; show 'type' field in yaml
@@ -250,8 +272,9 @@ export function createYaml(
       if ( SIMPLE_TYPES.includes(mapOf) ) {
         out += `#  key: ${ mapOf }`;
       } else {
+        // TODO: RC test
         // If not a simple type ie some sort of object/array, recusively build out commented fields (note data = null here) per the type's (mapOf's) schema
-        const chunk = createYaml(schemas, mapOf, null, processAlwaysAdd, depth + 1, (path ? `${ path }.${ key }` : key), rootType, dataOptions);
+        const chunk = createYaml(schemas, mapOf, null, processAlwaysAdd, depth + 1, (path ? `${ path }.${ key }` : key), rootType, dataOptions, schemaDefinitions);
         let indented = indent(chunk);
 
         // convert "#    foo" to "#foo"
@@ -282,7 +305,8 @@ export function createYaml(
       if ( SIMPLE_TYPES.includes(arrayOf) ) {
         out += `\n#  - ${ arrayOf }`;
       } else {
-        const chunk = createYaml(schemas, arrayOf, null, false, depth + 1, (path ? `${ path }.${ key }` : key), rootType, dataOptions);
+        // TODO: RC test
+        const chunk = createYaml(schemas, arrayOf, null, false, depth + 1, (path ? `${ path }.${ key }` : key), rootType, dataOptions, schemaDefinitions);
         let indented = indent(chunk, 2);
 
         // turn "#        foo" into "#  - foo"
@@ -331,13 +355,16 @@ export function createYaml(
       }
     }
 
-    const subDef = findBy(schemas, 'id', type);
+    const subDefResourceFields = schemaDefinitions ? findBy(schemaDefinitions, 'id', type) : findBy(schemas, 'id', type)?.resourceFields;
 
-    if ( subDef) {
+    // sdfdsf
+
+    if ( subDefResourceFields) {
       let chunk;
 
-      if (subDef?.resourceFields && !isEmpty(subDef?.resourceFields)) {
-        chunk = createYaml(schemas, type, data[key], processAlwaysAdd, depth + 1, (path ? `${ path }.${ key }` : key), rootType, dataOptions);
+      if (!isEmpty(subDefResourceFields)) {
+        // TODO: RC test
+        chunk = createYaml(schemas, type, data[key], processAlwaysAdd, depth + 1, (path ? `${ path }.${ key }` : key), rootType, dataOptions, schemaDefinitions);
       } else if (data[key]) {
         // if there are no fields defined on the schema but there are in the data, just format data as yaml and add to output yaml
         try {
@@ -345,7 +372,7 @@ export function createYaml(
 
           chunk = parsed.trim();
         } catch (e) {
-          console.error(`Error: Unale to parse data for yaml of type: ${ type }`, e); // eslint-disable-line no-console
+          console.error(`Error: Unable to parse data for yaml of type: ${ type }`, e); // eslint-disable-line no-console
         }
       }
 
