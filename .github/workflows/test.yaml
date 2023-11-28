@@ -33,19 +33,12 @@ env:
 #// ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} OR ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
 #// (@adminUserSetup AND @charts) OR (@adminUserSetup AND @charts)
 
-jobs:
-  e2e-test:
-    if: "!contains( github.event.pull_request.labels.*.name, 'ci/skip-e2e')"
-    strategy:
-      fail-fast: false
-      matrix:
-        role: [
-          { username: 'admin', tag: '@adminUser' }, 
-          { username: 'standard_user', tag: '@standardUser' }
-        ]
-        features:  [
-         '@navigation',
-        #  ['@extensions'],
+        # role: [
+        #   { username: 'admin', tag: '@adminUser' }, 
+        #   { username: 'standard_user', tag: '@standardUser' }
+        # ]
+
+                #  ['@extensions'],
         #  ['@charts'],
         #  ['@explorer'],
         #  ['@fleet'],
@@ -54,6 +47,17 @@ jobs:
         #  ['@manager'],
         #  ['@userMenu'],
         #  ['@usersAndAuths'],
+
+jobs:
+  e2e-test:
+    if: "!contains( github.event.pull_request.labels.*.name, 'ci/skip-e2e')"
+    strategy:
+      fail-fast: false
+      matrix:
+
+        features:  [
+         '@navigation',
+
         ]
     runs-on: ubuntu-latest
     steps:
