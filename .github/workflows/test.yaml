@@ -79,24 +79,20 @@ jobs:
       - name: Prepare build
         run: yarn e2e:pre-prod
       
-      - name: Setup Rancher and user
+      - name: Setup Rancher and Run Admin Tests
         run: |
           yarn e2e:prod
-          [ "$BUILD_DASHBOARD" != "false" ] || exit 0
         env: 
-          GREP_TAGS: '@setup'
+          GREP_TAGS: '@setup @adminUser+${{ matrix.features }}'
           TEST_USERNAME: admin
       
       - name: Run user tests
         run: |
           yarn e2e:prod
           [ "$BUILD_DASHBOARD" != "false" ] || exit 0
-          mkdir -p coverage-artifacts/coverage
-          cp coverage/e2e/coverage-final.json coverage-artifacts/coverage/coverage-e2e.json
-          cp -r coverage/e2e/ coverage-artifacts/coverage/e2e/
         env: 
-          GREP_TAGS: ${{ matrix.role.tag }}+${{ matrix.features }}
-          TEST_USERNAME: ${{ matrix.role.username }}
+          GREP_TAGS: '@standardUser+${{ matrix.features }}'
+          TEST_USERNAME: standard_user
         
       - name: Upload coverage
         uses: actions/upload-artifact@v3
