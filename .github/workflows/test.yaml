@@ -27,6 +27,12 @@ env:
   # Build the dashboard to use in tests. When set to false it will grab `latest` from CDN (useful for running e2e tests quickly)
   BUILD_DASHBOARD: true
 
+
+#// ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
+
+#// ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} OR ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
+#// (@adminUserSetup AND @charts) OR (@adminUserSetup AND @charts)
+
 jobs:
   e2e-test:
     if: "!contains( github.event.pull_request.labels.*.name, 'ci/skip-e2e')"
@@ -38,13 +44,16 @@ jobs:
           { username: 'standard_user', tag: '@standardUser' }
         ]
         features:  [
-         ['@navigation', '@extensions'],
+         ['@navigation'],
+         ['@extensions'],
          ['@charts'],
          ['@explorer'],
          ['@fleet'],
-         ['@generic', '@globalSettings'],
+         ['@globalSettings'],
+         ['@generic'],
          ['@manager'],
-         ['@userMenu', '@usersAndAuths']
+         ['@userMenu'],
+         ['@usersAndAuths'],
         ]
     runs-on: ubuntu-latest
     steps:
@@ -75,9 +84,11 @@ jobs:
           yarn e2e:prod
           [ "$BUILD_DASHBOARD" != "false" ] || exit 0
         env: 
-          GREP_TAGS: ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
+          # GREP_TAGS: ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} 
+            #          ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
+          GREP_TAGS: '@setup'
           TEST_USERNAME: admin
-          TEST_ONLY: setup
+          # TEST_ONLY: setup
       
       - name: Run user tests
         run: |
@@ -87,7 +98,7 @@ jobs:
           cp coverage/e2e/coverage-final.json coverage-artifacts/coverage/coverage-e2e.json
           cp -r coverage/e2e/ coverage-artifacts/coverage/e2e/
         env: 
-          TEST_SKIP: setup
+          # TEST_SKIP: setup
           GREP_TAGS: ${{ matrix.role.tag }}+${{ matrix.features[0] }} ${{ matrix.role.tag }}+${{ matrix.features[1] || matrix.features[0] }}
           TEST_USERNAME: ${{ matrix.role.username }}
         
