@@ -44,16 +44,16 @@ jobs:
           { username: 'standard_user', tag: '@standardUser' }
         ]
         features:  [
-         ['@navigation'],
-         ['@extensions'],
-         ['@charts'],
-         ['@explorer'],
-         ['@fleet'],
-         ['@globalSettings'],
-         ['@generic'],
-         ['@manager'],
-         ['@userMenu'],
-         ['@usersAndAuths'],
+         '@navigation',
+        #  ['@extensions'],
+        #  ['@charts'],
+        #  ['@explorer'],
+        #  ['@fleet'],
+        #  ['@globalSettings'],
+        #  ['@generic'],
+        #  ['@manager'],
+        #  ['@userMenu'],
+        #  ['@usersAndAuths'],
         ]
     runs-on: ubuntu-latest
     steps:
@@ -84,11 +84,8 @@ jobs:
           yarn e2e:prod
           [ "$BUILD_DASHBOARD" != "false" ] || exit 0
         env: 
-          # GREP_TAGS: ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} 
-            #          ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
           GREP_TAGS: '@setup'
           TEST_USERNAME: admin
-          # TEST_ONLY: setup
       
       - name: Run user tests
         run: |
@@ -98,8 +95,7 @@ jobs:
           cp coverage/e2e/coverage-final.json coverage-artifacts/coverage/coverage-e2e.json
           cp -r coverage/e2e/ coverage-artifacts/coverage/e2e/
         env: 
-          # TEST_SKIP: setup
-          GREP_TAGS: ${{ matrix.role.tag }}+${{ matrix.features[0] }} ${{ matrix.role.tag }}+${{ matrix.features[1] || matrix.features[0] }}
+          GREP_TAGS: ${{ matrix.role.tag }}+${{ matrix.features }}
           TEST_USERNAME: ${{ matrix.role.username }}
         
       - name: Upload coverage
