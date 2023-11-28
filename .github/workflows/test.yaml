@@ -56,8 +56,16 @@ jobs:
       matrix:
 
         features:  [
-         '@navigation',
-
+          '@navigation',
+          '@extensions',
+          '@charts',
+          '@explorer',
+          '@fleet',
+          '@globalSettings',
+          '@generic',
+          '@manager',
+          '@userMenu',
+          '@usersAndAuths',
         ]
     runs-on: ubuntu-latest
     steps:
