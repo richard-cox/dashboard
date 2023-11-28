@@ -98,14 +98,14 @@ jobs:
         uses: actions/upload-artifact@v3
         if: env.BUILD_DASHBOARD != 'false'
         with:
-          name: ${{github.run_number}}-${{github.run_attempt}}-coverage-${{ matrix.role.tag }}+${{ matrix.features[0] }}
+          name: ${{github.run_number}}-${{github.run_attempt}}-coverage-${{ matrix.features }}
           path: coverage-artifacts/**/*
           
       - name: Upload screenshots
         uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
-          name: ${{github.run_number}}-${{github.run_attempt}}-screenshots-${{ matrix.role.tag }}
+          name: ${{github.run_number}}-${{github.run_attempt}}-screenshots-${{ matrix.features }}
           path: cypress/screenshots
 
   unit-test:
