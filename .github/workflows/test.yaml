@@ -27,9 +27,46 @@ env:
   # Build the dashboard to use in tests. When set to false it will grab `latest` from CDN (useful for running e2e tests quickly)
   BUILD_DASHBOARD: true
 
+
+#// ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
+
+#// ${{ matrix.role.tag }}Setup+${{ matrix.features[0] }} OR ${{ matrix.role.tag }}Setup+${{ matrix.features[1] || matrix.features[0] }}
+#// (@adminUserSetup AND @charts) OR (@adminUserSetup AND @charts)
+
+        # role: [
+        #   { username: 'admin', tag: '@adminUser' }, 
+        #   { username: 'standard_user', tag: '@standardUser' }
+        # ]
+
+                #  ['@extensions'],
+        #  ['@charts'],
+        #  ['@explorer'],
+        #  ['@fleet'],
+        #  ['@globalSettings'],
+        #  ['@generic'],
+        #  ['@manager'],
+        #  ['@userMenu'],
+        #  ['@usersAndAuths'],
+
 jobs:
   e2e-test:
     if: "!contains( github.event.pull_request.labels.*.name, 'ci/skip-e2e')"
+    strategy:
+      fail-fast: false
+      matrix:
+
+        features:  [
+          '@navigation',
+          '@extensions',
+          '@charts',
+          '@explorer',
+          '@fleet',
+          '@globalSettings',
+          '@generic',
+          '@manager',
+          '@userMenu',
+          '@usersAndAuths',
+        ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -39,6 +76,7 @@ jobs:
         with:
           node-version: '14.x'
 
+      # Installing fixed version of Chrome since latest version does not work
       - name: Install Chrome 116
         run: |
           sudo apt-get install -y wget
@@ -53,42 +91,33 @@ jobs:
       - name: Prepare build
         run: yarn e2e:pre-prod
       
-      - name: Run admin user tests
+      - name: Setup Rancher and Run Admin Tests
         run: |
           yarn e2e:prod
-          [ "$BUILD_DASHBOARD" != "false" ] || exit 0
-          mkdir -p coverage-artifacts/coverage
-          cp coverage/e2e/coverage-final.json coverage-artifacts/coverage/coverage-e2e-admin.json
-          cp -r coverage/e2e/ coverage-artifacts/coverage/e2e-admin/
         env: 
-          GREP_TAGS: '@adminUser'
+          GREP_TAGS: '@setup @adminUser+${{ matrix.features }}'
           TEST_USERNAME: admin
-
-      - name: Run standard user tests
-        if: ${{ success() || failure() }}
+      
+      - name: Run user tests
         run: |
           yarn e2e:prod
-          yarn docker:local:stop
           [ "$BUILD_DASHBOARD" != "false" ] || exit 0
-          mkdir -p coverage-artifacts/coverage
-          cp coverage/e2e/coverage-final.json coverage-artifacts/coverage/coverage-e2e-user.json
-          cp -r coverage/e2e/ coverage-artifacts/coverage/e2e-user/
         env: 
-          GREP_TAGS: '@standardUser'
+          GREP_TAGS: '@standardUser+${{ matrix.features }}'
           TEST_USERNAME: standard_user
         
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         if: env.BUILD_DASHBOARD != 'false'
         with:
-          name: ${{github.run_number}}-${{github.run_attempt}}-coverage
+          name: ${{github.run_number}}-${{github.run_attempt}}-coverage-${{ matrix.features }}
           path: coverage-artifacts/**/*
           
       - name: Upload screenshots
         uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
-          name: ${{github.run_number}}-${{github.run_attempt}}-screenshots
+          name: ${{github.run_number}}-${{github.run_attempt}}-screenshots-${{ matrix.features }}
           path: cypress/screenshots
 
   unit-test:
