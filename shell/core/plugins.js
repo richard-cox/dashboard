@@ -80,6 +80,8 @@ export default function({
           // Uninstall existing plugin if there is one. This ensures that last loaded plugin is not always used
           // (nav harv1-->harv2-->harv1 and harv2 would be shown)
           removed = this.removePlugin(oldPlugin.name).then(() => {
+            console.warn(!!window[oldPlugin.id], !!plugins[oldPlugin.id]);
+
             delete window[oldPlugin.id];
 
             delete plugins[oldPlugin.id];
@@ -107,7 +109,8 @@ export default function({
             window[id].default(plugin, this.internal());
 
             // Uninstall existing plugin if there is one
-            this.removePlugin(plugin.name); // Removing this causes the plugin to not load on refresh
+            // this.removePlugin(plugin.name); // Removing this causes the plugin to not load on refresh
+            // TODO: RC why? tested harveter manager, kube warden
 
             // Load all of the types etc from the plugin
             this.applyPlugin(plugin);
@@ -152,8 +155,7 @@ export default function({
       try {
         p.default(plugin, this.internal());
 
-        // Uninstall existing product if there is one
-        this.removePlugin(plugin.name);
+        // No need to uninstall the plugin via `removePlugin`... as we're just dealing with one's that are built in and known
 
         // Load all of the types etc from the plugin
         this.applyPlugin(plugin);
@@ -190,9 +192,13 @@ export default function({
     async removePlugin(name) {
       const plugin = Object.values(plugins).find((p) => p.name === name);
 
+      console.warn('core/plugins', 'removePlugin', 1, name, plugins);
       if (!plugin) {
+        console.warn('core/plugins', 'removePlugin', 2.1, 'abort');
+
         return;
       }
+      console.warn('core/plugins', 'removePlugin', 2.2, 'continue');
 
       const promises = [];
 
