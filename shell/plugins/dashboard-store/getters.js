@@ -193,7 +193,7 @@ export default {
     return out;
   },
 
-  defaultFor: (state, getters) => (type) => {
+  defaultFor: (state, getters) => async(type) => {
     const schema = getters['schemaFor'](type);
 
     if ( !schema ) {
@@ -201,6 +201,8 @@ export default {
     }
 
     const out = {};
+
+    await schema.fetchResourceFields();
 
     for ( const key in schema.resourceFields ) {
       const field = schema.resourceFields[key];
