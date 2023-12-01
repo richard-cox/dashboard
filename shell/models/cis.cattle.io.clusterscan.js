@@ -65,7 +65,7 @@ export default class ClusterScan extends SteveModel {
 
   canBeScheduled() {
     const schema = this.$getters['schemaFor'](this.type);
-    // TODO: RC resourceFields
+    // TODO: RC done resourceFields manually setup where this is used. where applyDefaults CruResource?
     const specSchema = this.$getters['schemaFor'](get(schema, 'resourceFields.spec.type') || '');
 
     if (!specSchema) {

@@ -1658,7 +1658,7 @@ export default class Resource {
       return errors;
     }
 
-    const fields = schema.resourceFields || {};// TODO: RC resourceFields
+    const fields = schema.resourceFields || {};// TODO: RC resourceFields fn should be marked as async!
     const keys = Object.keys(fields);
     let field, key, val, displayKey;
 

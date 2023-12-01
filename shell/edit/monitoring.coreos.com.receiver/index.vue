@@ -61,7 +61,7 @@ export default {
     });
 
     const specSchema = this.$store.getters['cluster/schemaFor'](MONITORING.SPOOFED.RECEIVER_SPEC);
-    const expectedFields = Object.keys(specSchema.resourceFields); // TODO: RC resourceFields
+    const expectedFields = Object.keys(specSchema.resourceFields); // TODO: RC copied resourceFields SPOOFED move to fetch
     const suffix = {};
 
     Object.keys(this.value.spec).forEach((key) => {

@@ -31,9 +31,10 @@ export default {
   computed: {
     // warning state and scheduling added in the same version of cis so a check for one is a check for the other
     hasWarningState() {
+      // /k8s/clusters/c-m-2wg6n674/v1/schemas/cis.cattle.io.clusterscan
       const specSchema = this.$store.getters['cluster/schemaFor'](get(this.schema, 'resourceFields.spec.type') || '');
 
-      // TODO: RC resourceFields
+      // TODO: RC fixed! resourceFields move to fetch
       if (!specSchema) {
         return false;
       }

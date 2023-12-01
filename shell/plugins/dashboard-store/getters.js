@@ -101,7 +101,7 @@ export default {
     while ( parts.length ) {
       const key = parts.shift();
 
-      // TODO: RC resourceFields
+      // TODO: RC resourceFields usages setup in fetch. DANGER. not set up, just missing anyway
       type = schema.resourceFields?.[key]?.type;
 
       if ( !type ) {
@@ -198,7 +198,7 @@ export default {
 
     const out = {};
 
-    // TODO: RC resourceFields
+    // TODO: RC resourceFields used in one place, async
     for ( const key in schema.resourceFields ) {
       const field = schema.resourceFields[key];
 
