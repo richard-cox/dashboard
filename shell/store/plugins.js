@@ -163,7 +163,7 @@ export const getters = {
     };
   },
 
-  fieldNamesForDriver(state, getters) {
+  fieldNamesForDriver(state, getters) { // TODO: RC Unable to test - rke-machine-config.cattle.io.openstackconfig returns resourceFields
     return (name) => {
       const schema = getters.schemaForDriver(name);
 
@@ -173,7 +173,7 @@ export const getters = {
 
         return [];
       }
-
+      // Why don't we need to get
       const out = Object.keys(schema?.resourceFields || {});
 
       removeObjects(out, ['apiVersion', 'dockerPort', 'kind', 'metadata']);
@@ -182,7 +182,7 @@ export const getters = {
     };
   },
 
-  fieldsForDriver(state, getters) {
+  fieldsForDriver(state, getters) { // TODO: RC Unable to test - rke-machine-config.cattle.io.openstackconfig returns resourceFields
     return async(name) => {
       const schema = getters.schemaForDriver(name);
       const names = getters.fieldNamesForDriver(name);
@@ -192,7 +192,7 @@ export const getters = {
       const out = {};
 
       for ( const n of names ) {
-        out[n] = schema.resourceFields[n]; // TODO: RC resourceFields
+        out[n] = schema.resourceFields[n];
       }
 
       return out;
