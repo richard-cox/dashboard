@@ -101,7 +101,7 @@ export function createYaml(
 
     rootSchema = schema;
 
-    schemaDefinitions = rootSchema.schemaDefinitions?.others;
+    schemaDefinitions = rootSchema.schemaDefinitions;
     schemaResourceFields = rootSchema.resourceFields;
 
     const attr = schema.attributes || {};
@@ -113,7 +113,7 @@ export function createYaml(
     rootSchema = findBy(schemas, 'id', rootType);
 
     if (rootSchema.requiresSchemaDefinitions) {
-      schemaDefinitions = rootSchema.schemaDefinitions.others;
+      schemaDefinitions = rootSchema.schemaDefinitions;
       schemaResourceFields = schemaDefinitions[type].resourceFields;
     } else {
       schema = findBy(schemas, 'id', type);
