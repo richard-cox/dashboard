@@ -45,7 +45,7 @@ export default {
         },
       });
 
-      // TODO: RC RANCHER resourceFields
+      // TODO: RC x RANCHER resourceFields
       for ( const k in schema.resourceFields ) {
         if ( !k.endsWith('Config') ) {
           continue;

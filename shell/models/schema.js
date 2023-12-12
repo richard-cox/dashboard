@@ -42,7 +42,7 @@ export default class Schema extends Resource {
       url:  `/v1/schemaDefinitions/${ this.id }` // TODO: Michael. url creation looks at links.collection. can have but no collectionMethods? determine local / kube id
     });
 
-    // TODO: RC resourceFields.x.create|update
+    // TODO: RC skipped resourceFields.x.create|update
     const resourceSchemaDefinitions = [];
     const schemaDefinitionForStore = [];
     let self;

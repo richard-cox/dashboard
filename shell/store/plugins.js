@@ -173,7 +173,7 @@ export const getters = {
 
         return [];
       }
-      // TODO: RC resourceFields 1 computed, 1 noram?
+      // TODO: RC done ooof resourceFields 1 computed, 1 noram?
       const out = Object.keys(schema?.resourceFields || {});
 
       removeObjects(out, ['apiVersion', 'dockerPort', 'kind', 'metadata']);
@@ -189,7 +189,7 @@ export const getters = {
 
       const out = {};
 
-      // TODO: RC resourceFields async fine
+      // TODO: RC done ooof resourceFields async fine
       for ( const n of names ) {
         out[n] = schema.resourceFields[n];
       }

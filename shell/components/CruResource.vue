@@ -180,7 +180,7 @@ export default {
       /**
        * Used in edit yaml
        */
-      initialYaml:     null, // TODO: RC showYaml
+      initialYaml:     null, // TODO: RC x showYaml
       abbrSizes:       {
         3: '24px',
         4: '18px',
@@ -282,7 +282,7 @@ export default {
 
   methods: {
     async initialiseYaml() {
-      // TODO: RC only do this when we need to (use want to view yaml). how wire in with initialYaml?
+      // TODO: RC x only do this when we need to (use want to view yaml). how wire in with initialYaml?
       const yaml = await this.createResourceYaml();
 
       this.resourceYaml = yaml;

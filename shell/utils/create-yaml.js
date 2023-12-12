@@ -77,7 +77,7 @@ export async function createYamlWithOptions(schemas, type, data, options) {
 }
 
 export async function createYaml( // TODO: RC lots of places call this...
-  schemas, // TODO: RC resourceFields
+  schemas, // TODO: RC done resourceFields
   type,
   data, // TODO: RC why 0, and why not rest schemas filled out?
   processAlwaysAdd = true,
