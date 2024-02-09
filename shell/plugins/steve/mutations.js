@@ -7,7 +7,7 @@ import {
   load,
   remove,
   batchChanges,
-  replace
+  replace,
 } from '@shell/plugins/dashboard-store/mutations';
 import { keyForSubscribe } from '@shell/plugins/steve/resourceWatcher';
 import { perfLoadAll } from '@shell/plugins/steve/performanceTesting';
@@ -170,6 +170,9 @@ export default {
     SteveSchema.reset(state.config.namespace);
   },
 
+  /**
+  * Load multiple different types of resources
+  */
   loadMulti(state, { data, ctx }) {
     for (const entry of data) {
       const resource = load(state, { data: entry, ctx });

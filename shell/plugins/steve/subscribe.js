@@ -31,7 +31,7 @@ import { escapeHtml } from '@shell/utils/string';
 import { keyForSubscribe } from '@shell/plugins/steve/resourceWatcher';
 import { waitFor } from '@shell/utils/async';
 import { WORKER_MODES } from './worker';
-import namespaceHandler from './subscribe-namespace-handler';
+import acceptOrRejectSocketMessage from './accept-or-reject-socket-message';
 import { BLANK_CLUSTER, STORE } from '@shell/store/store-types.js';
 
 // minimum length of time a disconnect notification is shown
@@ -130,7 +130,7 @@ export async function createWorker(store, ctx) {
       }
     },
     batchChanges: (batch) => {
-      dispatch('batchChanges', namespaceHandler.validateBatchChange(ctx, batch));
+      dispatch('batchChanges', acceptOrRejectSocketMessage.validateBatchChange(ctx, batch));
     },
     dispatch: (msg) => {
       dispatch(`ws.${ msg.name }`, msg);
@@ -217,7 +217,7 @@ function queueChange({ getters, state, rootGetters }, { data, revision }, load, 
 
   // console.log(`${ label } Event [${ state.config.namespace }]`, data.type, data.id); // eslint-disable-line no-console
 
-  if (!namespaceHandler.validChange({ getters, rootGetters }, type, data)) {
+  if (!acceptOrRejectSocketMessage.validChange({ getters, rootGetters }, type, data)) {
     return;
   }
 
@@ -361,7 +361,7 @@ const sharedActions = {
       type, selector, id, revision, namespace, stop, force
     } = params;
 
-    namespace = namespaceHandler.subscribeNamespace(namespace);
+    namespace = acceptOrRejectSocketMessage.subscribeNamespace(namespace);
     type = getters.normalizeType(type);
 
     if (rootGetters['type-map/isSpoofed'](type)) {
@@ -440,7 +440,7 @@ const sharedActions = {
     const { commit, getters, dispatch } = ctx;
 
     if (getters['schemaFor'](type)) {
-      namespace = namespaceHandler.subscribeNamespace(namespace);
+      namespace = acceptOrRejectSocketMessage.subscribeNamespace(namespace);
 
       const obj = {
         type,
