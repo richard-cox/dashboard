@@ -13,7 +13,7 @@ import stevePaginationUtils from '@shell/plugins/steve/steve-pagination-utils';
 import { parse } from '@shell/utils/url';
 import {
   STEVE_AGE_COL,
-  STEVE_ID_COL, STEVE_LIST_GROUPS, STEVE_NAMESPACE_COL, STEVE_NAME_COL, STEVE_STATE_COL
+  STEVE_ID_COL, STEVE_LIST_GROUPS, STEVE_NAMESPACE_COL, STEVE_STATE_COL
 } from '@shell/config/pagination-table-headers';
 import { createHeaders } from '@shell/store/type-map.utils';
 
