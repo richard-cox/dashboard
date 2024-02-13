@@ -7,7 +7,7 @@ mergeable:
         min:
           count: 1
         limit:
-          teams: ['rancher/UI']
+          teams: ['@rancher/UI']
   - when: pull_request.*, pull_request_review.*
     name: 'Has a milestone'
     validate:
