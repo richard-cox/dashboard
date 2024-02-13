@@ -7,7 +7,8 @@ mergeable:
         min:
           count: 1
         limit:
-          teams: ['richard-cox-org/richard-cox-team']
+          teams: ['rancher/ui']
+          users: ['izaac', 'kwwii', 'rak-phillip', 'nwmac', 'cnotv', 'gaktive', 'richard-cox', 'torchiaf', 'jordojordo', 'mantis-toboggan-md', 'codyrancher', 'scures', 'aalves08', 'edenhernandez-suse', 'yonasberhe23', 'eva-vashkevich', 'momesgin']
   - when: pull_request.*, pull_request_review.*
     name: 'Has a milestone'
     validate:
