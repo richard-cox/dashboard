@@ -8,7 +8,7 @@ mergeable:
           count: 1
         limit:
           teams: ['rancher/ui']
-  - when: pull_request.*, pull_request_review.*
+  - when: pull_request.*, pull_request_review.*, 'issues.*'
     name: 'Milestone check'
     validate:
       - do: milestone
