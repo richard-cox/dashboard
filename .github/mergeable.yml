@@ -6,6 +6,7 @@ mergeable:
       - do: approvals
         min:
           count: 1
+          message: 'Review from `rancher/ui` gh team member required'
         limit:
           teams: ['rancher/ui']
       # - do: milestone
