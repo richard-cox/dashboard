@@ -1,17 +1,16 @@
 version: 2
 mergeable:
   - when: pull_request.*, pull_request_review.*
-    name: 'Approval check'
+    name: 'Approved by rancher/ui team member'
     validate:
       - do: approvals
         min:
           count: 1
         limit:
-          teams: ['rancher/ui']
-  - when: pull_request.*, pull_request_review.*, 'issues.*'
-    name: 'Milestone check  '
+          teams: ['@rancher/ui', 'richard-cox-test']
+  - when: pull_request.*, pull_request_review.*
+    name: 'Has a milestone'
     validate:
       - do: milestone
         no_empty:
           enabled: true
-          message: 'Custom message...'
