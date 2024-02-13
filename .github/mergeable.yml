@@ -6,10 +6,12 @@ mergeable:
       - do: approvals
         min:
           count: 1
-          message: 'Review from `rancher/ui` gh team member required'
         limit:
           teams: ['rancher/ui']
-      # - do: milestone
-      #   no_empty:
-      #     enabled: true
-      #     message: 'Custom message...'
+  - when: pull_request.*, pull_request_review.*
+    name: 'Milestone check'
+    validate:
+      - do: milestone
+        no_empty:
+          enabled: true
+          message: 'Custom message...'
