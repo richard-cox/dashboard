@@ -147,6 +147,7 @@ export default {
      * Is Pagination supported and ready for this list?
      */
     pagination() {
+      console.warn(this.isResourceList)
       if (this.isResourceList) {
         return;
       }

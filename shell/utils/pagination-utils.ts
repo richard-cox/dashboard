@@ -12,13 +12,13 @@ import {
 
 // This are hardcoded atm, but will be changed via the `Performance` settings
 const settings: PaginationSettings = {
-  enabled: false,
+  enabled: true,
   stores:  {
     cluster: {
       resources: {
         enableAll:  false,
         enableSome: {
-          enabled: ['configmap', 'secret', 'pod'],
+          enabled: ['configmap', 'secret', 'pod', 'node'],
           generic: true,
         }
       }
@@ -46,6 +46,7 @@ class PaginationUtils {
       id: string,
     }
   }) {
+    debugger;
     // No setting, not enabled
     if (!settings?.enabled) {
       return false;

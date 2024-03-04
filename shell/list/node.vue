@@ -44,7 +44,21 @@ export default {
 
     const hash = { kubeNodes: this.$fetchType(this.resource) };
 
-    this.canViewPods = this.$store.getters[`cluster/schemaFor`](POD);
+
+    // Remove fetching all pods from node list
+    // Node List - node` podConsume --> ready pods per node in list
+    // Node Detail - node podConsume --> ready pods for node
+    // Node Detail - pods for node (paginatinated)
+
+    // List - requires updated list? fetch static when page changes
+    // Node Detail - needs paginated pods list.... but also filtered pods list
+
+    // Convert node list over. secondary resources... need to react to page change again. Populate store with filtered lists... so model getters just work as is?
+
+
+// TODO: RC all of this. if page changes get notified... fetch required resources
+//
+    this.canViewPods = this.$store.getters[`cluster/schemaFor`](POD) && !this.pagination;
 
     if (this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE)) {
       // Required for Drain/Cordon action
@@ -62,7 +76,7 @@ export default {
 
     if (this.canViewPods) {
       // Used for running pods metrics - we don't need to block on this to show the list of nodes
-      this.$fetchType(POD);
+      this.$fetchType(POD); // TODO: RC get pods on specific node? get pods on page?
     }
 
     await allHash(hash);
@@ -74,6 +88,7 @@ export default {
 
   beforeDestroy() {
     // Stop watching pods, nodes and node metrics
+    // TODO: RC
     this.$store.dispatch('cluster/forgetType', POD);
     this.$store.dispatch('cluster/forgetType', NODE);
     this.$store.dispatch('cluster/forgetType', METRIC.NODE);
@@ -87,6 +102,7 @@ export default {
     tableGroup: mapPref(GROUP_RESOURCES),
 
     parsedRows() {
+      // TODO: RC move to model
       this.rows.forEach((row) => {
         row.displayTaintsAndLabels = (row.spec.taints && row.spec.taints.length) || !!row.customLabelCount;
       });
@@ -122,10 +138,25 @@ export default {
           breakpoint: COLUMN_BREAKPOINTS.DESKTOP,
           getValue:   (row) => row.podConsumedUsage
         });
+
+        // Node List - node` podConsume --> ready pods per node in list
+        // Node Detail - node podConsume --> ready pods for node
+        // Node Detail - pods for node (paginatinated)
+
+        // Expects updates. for pod counts / consumed. 
+
+        // TODO: RC podConsumed / podConsumedUsage
+
+
+        // fetchType trigger / pagination settings change / page results changed
       }
       headers.push(AGE);
 
-      return headers;
+
+      const paginationHeaders = this.$store.getters['type-map/headersFor'](this.schema, true);
+    
+
+      return this.canPaginate ? paginationHeaders : headers;
     },
   },
 
@@ -148,6 +179,43 @@ export default {
     },
   }
 
+  watch: {
+    pagination(neu, old) {
+      if (neu && this.paginationEqual(neu, old)) {
+        
+if (this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE)) {
+      // Required for Drain/Cordon action
+      const opt = {
+        watch:            false,
+        force:            false,
+        // namespaced = this.namespaceFilter
+      };
+      // TODO: RC find specific norman nodes, not all norman nodes
+
+      hash.normanNodes = this.$fetchType(NORMAN.NODE, [], 'rancher');
+    }
+
+
+
+    if (this.$store.getters[`rancher/schemaFor`](NORMAN.NODE)) {
+      const opt = {
+        watch:            false,
+        force:            false,
+        // namespaced = this.namespaceFilter
+      };
+      // TODO: RC find set of mgmt nodes, find all?
+      //hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
+    }
+
+    if (this.$store.getters[`management/schemaFor`](CAPI.MACHINE)) {
+      // Required for ssh / download key actions
+      hash.machines = this.$fetchType(CAPI.MACHINE, [], 'management');
+    }
+
+      }
+    },
+  }
+
 };
 </script>
 
@@ -158,6 +226,7 @@ export default {
       color="info"
       :label="t('cluster.custom.registrationCommand.windowsWarning')"
     />
+    <br>node: {{canPaginate}}, {{isResourceList}} {{resource}}
     <ResourceTable
       v-bind="$attrs"
       :schema="schema"
@@ -168,6 +237,9 @@ export default {
       :use-query-params-for-simple-filtering="useQueryParamsForSimpleFiltering"
       :force-update-live-and-delayed="forceUpdateLiveAndDelayed"
       data-testid="cluster-node-list"
+      :external-pagination="canPaginate"
+      :external-pagination-result="paginationResult"
+      @pagination-changed="paginationChanged"
       v-on="$listeners"
     >
       <template #sub-row="{fullColspan, row, onRowMouseEnter, onRowMouseLeave}">

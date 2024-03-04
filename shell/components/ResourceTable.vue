@@ -524,6 +524,9 @@ export default {
 </script>
 
 <template>
+  <div>
+    {{externalPagination}}
+  <br><br>
   <SortableTable
     ref="table"
     v-bind="$attrs"
@@ -619,4 +622,5 @@ export default {
       />
     </template>
   </SortableTable>
+  </div>
 </template>
