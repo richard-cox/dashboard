@@ -166,7 +166,7 @@ export default {
       (
         getters['haveAll'](type) ||
         getters['haveAllNamespace'](type, opt.namespaced) ||
-        (opt.pagination ? getters['haveAllPaginated'](type, opt.pagination) : false)
+        (opt.pagination ? getters['havePaginatedPage'](type, opt.pagination) : false)
       )
     ) {
       const args = {
@@ -387,7 +387,7 @@ export default {
     }
 
     // No need to request the resources if we have them already
-    if (!opt.force && getters['haveAllPaginated'](type, opt.pagination)) {
+    if (!opt.force && getters['havePaginatedPage'](type, opt.pagination)) {
       return findAllGetter(getters, type, opt);
     }
 
