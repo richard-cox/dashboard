@@ -22,6 +22,9 @@ export default {
       pPagination:               null,
       // Avoid scenarios where namespace is updated just before other pagination changes come in
       debouncedSetPagination:    debounce(this.setPagination, 50),
+
+      // TODO: RC comment
+      // initialFetch: undefined,
     };
   },
 
@@ -102,17 +105,24 @@ export default {
     },
 
     paginationEqual(neu, old) {
-      if (!neu.page) {
-        // Not valid, don't bother
-        return false;
-      }
+      // return this.$store.getters[`${ this.currentProduct.inStore }/paginationEqual`](neu, old);
+
+      // if (!neu.page) {
+      //   // Not valid, don't bother
+      //   return false;
+      // }
 
       if (paginationUtils.paginationEqual(neu, old)) {
         // Same, nae bother
         return false;
       }
 
-      return true;
+      // if (this.$store.getters[`${ this.currentProduct.inStore }/paginationEqual`](neu, old)) {
+      //   // Same, nay bother
+      //   return false;
+      // }
+
+      // return true;
     }
   },
 
@@ -137,14 +147,14 @@ export default {
      * ResourceList imports resource-fetch --> this mixin
      * When there is no custom list this is fine (ResourceList with mixins --> ResourceTable)
      * When there is a custom list there are two instances of this mixin (ResourceList with mixins --> CustomList with mixins --> ResourceTable)
-     * - In this scenario, reduce churn by existing earlier if mixin is from parent ResourceList and leave work for CustomList mixins
+     * - In this scenario, reduce churn by exiting earlier if mixin is from parent ResourceList and leave work for CustomList mixins
      */
     isResourceList() {
       return !!this.hasListComponent;
     },
 
     /**
-     * Is Pagination supported and ready for this list?
+     * Is Pagination supported and has the table supplied pagination settings from the table?
      */
     pagination() {
       if (this.isResourceList) {
@@ -187,6 +197,14 @@ export default {
   },
 
   watch: {
+    // '$fetchState.pending'(neu) {
+    //   if (this.isResourceList) {
+    //     this.initialFetchCompleted = true;
+    //   } else {
+    //     this.initialFetchCompleted = typeof this.initialFetchCompleted !== 'undefined' ? this.initialFetchCompleted || !neu : !neu;
+    //   }
+    // },
+
     namespaceFilters: {
       immediate: true,
       async handler(neu, old) {
@@ -213,21 +231,22 @@ export default {
       }
     },
 
+    /**
+     * When a pagination is required and the user changes page / sort / filter, kick off a new set of API requests
+     */
     async pagination(neu, old) {
-      if (this.listComponent) {
-        return;
-      }
-
-      // When a pagination is required and the user changes page / sort / filter, kick off a new set of API requests
-      //
       // ResourceList has two modes
       // 1) ResourceList component handles API request to fetch resources
       // 2) Custom list component handles API request to fetch resources
       //
-      // This covers case 2
-      if (neu && this.$options.name !== ResourceListComponentName && !!this.$fetch && this.paginationEqual(neu, old)) {
-        await this.$fetch();
+      // This covers case 2, so ignore case 1
+      if (this.isResourceList) {
+        return;
+      }
+      console.warn('mixin', 'watch', 'pagination', neu, old);
 
+      if (neu && this.$options.name !== ResourceListComponentName && !!this.$fetch && !this.paginationEqual(neu, old)) {
+        await this.$fetch(false);
         // Ensure any live/delayed columns get updated
         this.forceUpdateLiveAndDelayed = new Date().getTime();
       }

@@ -26,7 +26,7 @@ class StevePaginationUtils {
     if (opt.pagination.pageSize) {
       params.push(`pagesize=${ opt.pagination.pageSize }`);
     } else {
-      throw new Error(`A pagination request is required but no 'page' property provided: ${ JSON.stringify(opt) }`);
+      throw new Error(`A pagination request is required but no 'pageSize' property provided: ${ JSON.stringify(opt) }`);
     }
 
     if (opt.pagination.sort?.length) {
@@ -44,9 +44,6 @@ class StevePaginationUtils {
 
       params.push(`filter=${ joined }`);
     }
-
-    // Note - There is a `limit` property that is by default 100,000. This can be disabled by using `limit=-1`,
-    // but we shouldn't be fetching any pages big enough to exceed the default
 
     return params.join('&');
   }

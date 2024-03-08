@@ -11,15 +11,18 @@ export interface OptPagination {
   filter: { field: string, value: string }[],
 }
 
+export interface StorePaginationResult {
+  count: number,
+  pages: number,
+  timestamp: number,
+}
+
 /**
  * Object persisted to store
  */
 export interface StorePagination {
   request: OptPagination,
-  result: {
-    count: number,
-    pages: number
-  }
+  result: StorePaginationResult
 }
 
 export type CoreFindOpt = {

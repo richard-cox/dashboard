@@ -166,7 +166,8 @@ export default {
       return this.$store.dispatch(`${ currStore }/findAll`, {
         type,
         opt
-      });
+      })
+        .finally(() => Vue.set(that, 'paginating', false));
     },
 
     __getCountForResources(resourceNames, namespace, storeType) {
