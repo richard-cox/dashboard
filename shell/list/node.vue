@@ -60,37 +60,32 @@ export default defineComponent({
       // Node List - node` podConsume --> ready pods per node in list
       // Node Detail - node podConsume --> ready pods for node
       // Node Detail - pods for node (paginatinated)
-
       // TODO: RC podConsumedUsage = podConsumed / podConsumedUsage. podConsumed --> pods. allPods.filter((pod) => pod.spec.nodeName === this.name)
+      // TODO: RC decide - fetching pods for current page could be a LOT still (300 per node, 100 nodes, 3000 in response)
+      this.canViewPods = this.$store.getters[`cluster/schemaFor`](POD); // && !this.pagination
+      this.canViewNormanNodes = this.$store.getters[`rancher/schemaFor`](NORMAN.NODE);
+      this.canViewMgmtNodes = this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE);
+      this.canViewMachines = this.$store.getters[`management/schemaFor`](CAPI.MACHINE);
 
-      // List - requires updated list? fetch static when page changes
-      // Node Detail - needs paginated pods list.... but also filtered pods list
+      if (!this.canPaginate) {
+        if (this.canViewNormanNodes) {
+          // Required for Drain/Cordon action
+          hash.normanNodes = this.$fetchType(NORMAN.NODE, [], 'rancher');
+        }
 
-      // Convert node list over. secondary resources... need to react to page change again. Populate store with filtered lists... so model getters just work as is?
-      // Could make http request on pag change? how to keep uo to date?
+        if (this.canViewMgmtNodes) {
+          hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
+        }
 
-      // TODO: RC all of this. if page changes get notified... fetch required resources
-      // fetchType trigger / pagination settings change / page results changed
+        if (this.canViewMachines) {
+          // Required for ssh / download key actions
+          hash.machines = this.$fetchType(CAPI.MACHINE, [], 'management');
+        }
 
-      this.canViewPods = this.$store.getters[`cluster/schemaFor`](POD) && !this.pagination;
-
-      // if (this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE)) {
-      //   // Required for Drain/Cordon action
-      //   hash.normanNodes = this.$fetchType(NORMAN.NODE, [], 'rancher');
-      // }
-
-      // if (this.$store.getters[`rancher/schemaFor`](NORMAN.NODE)) {
-      //   hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
-      // }
-
-      // if (this.$store.getters[`management/schemaFor`](CAPI.MACHINE)) {
-      //   // Required for ssh / download key actions
-      //   hash.machines = this.$fetchType(CAPI.MACHINE, [], 'management');
-      // }
-
-      if (this.canViewPods) {
-      // Used for running pods metrics - we don't need to block on this to show the list of nodes
-        this.$fetchType(POD); // TODO: RC get pods on specific node? get pods on page?
+        if (this.canViewPods) {
+          // Used for running pods metrics - we don't need to block on this to show the list of nodes
+          this.$fetchType(POD);
+        }
       }
 
       await allHash(hash);
@@ -105,7 +100,7 @@ export default defineComponent({
 
   beforeDestroy() {
     // Stop watching pods, nodes and node metrics
-    // TODO: RC
+    // TODO: RC stop if others
     if (this.canViewPods) {
       this.$store.dispatch('cluster/forgetType', POD);
     }
@@ -124,10 +119,22 @@ export default defineComponent({
     tableGroup: mapPref(GROUP_RESOURCES),
 
     headers() {
+      // TODO: RC tidy up
       if (this.canPaginate) {
-        const paginationHeaders = this.$store.getters['type-map/headersFor'](this.schema, true);
+        const paginationHeaders = [...this.$store.getters['type-map/headersFor'](this.schema, true)];
 
         if (paginationHeaders) {
+          if (this.canViewPods) {
+            debugger;
+            paginationHeaders.splice(paginationHeaders.length - 1, 0, {
+              ...PODS,
+              breakpoint: COLUMN_BREAKPOINTS.DESKTOP,
+              sort:       false,
+              search:     false,
+              getValue:   (row: any) => row.podConsumedUsage
+            });
+          }
+
           return paginationHeaders;
         } else {
           console.warn('Nodes list expects pagination headers but none found');
@@ -136,10 +143,10 @@ export default defineComponent({
         }
       }
 
-      const headers = this.$store.getters['type-map/headersFor'](this.schema, false); // TODO: RC TEST
+      const headers = [...this.$store.getters['type-map/headersFor'](this.schema, false)]; // TODO: RC TEST
 
       if (this.canViewPods) {
-        headers.slice(headers.length - 2, {
+        headers.splice(headers.length - 1, 0, {
           ...PODS,
           breakpoint: COLUMN_BREAKPOINTS.DESKTOP,
           getValue:   (row: any) => row.podConsumedUsage
@@ -246,8 +253,8 @@ export default defineComponent({
                   const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
 
                   return name ? {
-                    field: 'metadata.name',
-                    value: name,
+                    field: 'spec.nodeName',
+                    value: this.name,
                   } : null;
                 })
                 .filter((r: any) => !!r)
@@ -259,6 +266,33 @@ export default defineComponent({
             opt
           });
         }
+      }
+
+      if (this.canViewPods) {
+        // // Used for running pods metrics - we don't need to block on this to show the list of nodes
+        //   this.$fetchType(POD); // TODO: RC
+        const opt: ActionFindPageArgs = {
+          force:      false,
+          pagination: {
+            page:     1,
+            pageSize: -1,
+            sort:     [{ // TODO: RC remove sort from these?
+              field: 'metadata.name',
+              asc:   true,
+            }],
+            filter: this.rows
+              .map((r: any) => ({
+                field: 'spec.nodeName',
+                value: r.id,
+              }))
+              .filter((r: any) => !!r)
+          }
+        };
+
+        this.$store.dispatch(`cluster/findPage`, {
+          type: POD,
+          opt
+        });
       }
     },
   }
