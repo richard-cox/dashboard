@@ -1,11 +1,11 @@
 import projectAndNamespaceFilteringUtils from '@shell/plugins/steve/projectAndNamespaceFiltering.utils';
-import { FindPageOpt } from '@shell/types/store/dashboard-store.types';
+import { ActionFindPageArgs } from '@shell/types/store/dashboard-store.types';
 
 /**
  * Helper functions for steve pagination
  */
 class StevePaginationUtils {
-  checkAndCreateParam(opt: FindPageOpt): string | undefined {
+  checkAndCreateParam(opt: ActionFindPageArgs): string | undefined {
     if (!opt.pagination) {
       return;
     }
@@ -48,7 +48,7 @@ class StevePaginationUtils {
     return params.join('&');
   }
 
-  private createNamespacesParam(opt: FindPageOpt): string | undefined {
+  private createNamespacesParam(opt: ActionFindPageArgs): string | undefined {
     if (!opt.pagination?.namespaces) {
       return '';
     }

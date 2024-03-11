@@ -141,7 +141,11 @@ export default {
         return this.$store.dispatch(`${ currStore }/findPage`, {
           type,
           opt
-        }).finally(() => Vue.set(that, 'paginating', false));
+        })
+          .catch((hmmm) => {
+            console.error(hmmm);
+          })
+          .finally(() => Vue.set(that, 'paginating', false));
       }
 
       let incremental = 0;

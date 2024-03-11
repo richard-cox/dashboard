@@ -1,6 +1,6 @@
 <script lang="ts">
-import ResourceTable from '@shell/components/ResourceTable';
-import Tag from '@shell/components/Tag';
+import ResourceTable from '@shell/components/ResourceTable.vue';
+import Tag from '@shell/components/Tag.vue';
 import { Banner } from '@components/Banner';
 import {
   STATE, NAME, ROLES, VERSION, INTERNAL_EXTERNAL_IP, CPU, RAM, PODS, AGE, KUBE_NODE_OS
@@ -10,7 +10,7 @@ import metricPoller from '@shell/mixins/metric-poller';
 import { CAPI as CAPI_ANNOTATIONS, NODE_ROLES, RKE, SYSTEM_LABELS } from '@shell/config/labels-annotations.js';
 
 import { defineComponent, PropType } from 'vue';
-import { FindAllOpt, StorePaginationResult } from '@shell/types/store/dashboard-store.types';
+import { ActionFindAllArgs, ActionFindPageArgs, StorePaginationResult } from '@shell/types/store/dashboard-store.types';
 import {
   CAPI,
   MANAGEMENT, METRIC, NODE, NORMAN, POD
@@ -19,6 +19,7 @@ import { allHash } from '@shell/utils/promise';
 import { GROUP_RESOURCES, mapPref } from '@shell/store/prefs';
 import { COLUMN_BREAKPOINTS } from '@shell/components/SortableTable/index.vue';
 import ResourceFetch from '@shell/mixins/resource-fetch';
+import { mapGetters } from 'vuex';
 
 export default defineComponent({
   name:       'ListNode',
@@ -114,6 +115,7 @@ export default defineComponent({
   },
 
   computed: {
+    ...mapGetters(['currentCluster']),
     hasWindowsNodes() {
       // TODO: RC only valid for current page
       return (this.rows || []).some((node: any) => node.status.nodeInfo.operatingSystem === 'windows');
@@ -156,8 +158,7 @@ export default defineComponent({
 
       if (schema) {
         // TODO: RC HEEEEEERE
-        const opt: FindAllOpt = {
-          watch:      false,
+        const opt: ActionFindPageArgs = {
           force:      true,
           pagination: {
             page:     1,
@@ -173,9 +174,9 @@ export default defineComponent({
           }
         };
 
-        await this.$store.dispatch('cluster/findAll', {
+        await this.$store.dispatch('cluster/findPage', {
           type: METRIC.NODE,
-          opt:  { force: true }
+          opt
         });
 
         this.$forceUpdate();
@@ -200,9 +201,7 @@ export default defineComponent({
       if (canViewMgmtNodes && canViewNormanNodes) {
         // Norman node required for Drain/Cordon/Uncordon action
         // Mgmt Node required to find Norman node
-
-        const opt: FindAllOpt = {
-          watch:      false,
+        const opt: ActionFindPageArgs = {
           force:      false,
           pagination: {
             page:     1,
@@ -218,7 +217,7 @@ export default defineComponent({
           }
         };
 
-        this.$store.dispatch(`management/findAll`, {
+        this.$store.dispatch(`management/findPage`, {
           type: MANAGEMENT.NODE,
           opt
         });
@@ -227,38 +226,39 @@ export default defineComponent({
       }
 
       if (canViewCAPIMachines) {
-        const opt: FindAllOpt = {
-          watch:      false,
-          force:      false,
-          pagination: {
-            page:     1,
-            pageSize: -1,
-            sort:     [{
-              field: 'metadata.name',
-              asc:   true,
-            }],
-            filter: this.rows
-              .map((r: any) => {
-                const namespace = r.metadata?.annotations?.[CAPI_ANNOTATIONS.CLUSTER_NAMESPACE];
-                const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
+        const namespace = this.currentCluster.provClusterId?.split('/')[0];
 
-                return namespace && name ? {
-                  field: 'id',
-                  value: `${ namespace }/${ name }`,
-                } : null;
-              })
-              .filter((r: any) => !!r)
-            // filter: [{
-            //   field: 'metadata.name',
-            //   value: ''
-            // }]
-          }
-        };
+        if (namespace) {
+          const opt: ActionFindPageArgs = {
+            force:      false,
+            pagination: {
+              page:     1,
+              pageSize: -1,
+              sort:     [{ // TODO: RC remove sort from these?
+                field: 'metadata.name',
+                asc:   true,
+              }],
+              // Note - we cannot filter by (namespace and name) OR (namespace and name)
+              // All nodes should be in the same namespace, so use that here
+              namespaces: [namespace],
+              filter:     this.rows
+                .map((r: any) => {
+                  const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
 
-        this.$store.dispatch(`management/findAll`, {
-          type: CAPI.MACHINE,
-          opt
-        });
+                  return name ? {
+                    field: 'metadata.name',
+                    value: name,
+                  } : null;
+                })
+                .filter((r: any) => !!r)
+            }
+          };
+
+          this.$store.dispatch(`management/findPage`, {
+            type: CAPI.MACHINE,
+            opt
+          });
+        }
       }
     },
   }
@@ -285,7 +285,7 @@ export default defineComponent({
       :use-query-params-for-simple-filtering="useQueryParamsForSimpleFiltering"
       :force-update-live-and-delayed="forceUpdateLiveAndDelayed"
       data-testid="cluster-node-list"
-      :external-pagination="canPaginate"
+      :external-pagination-enabled="canPaginate"
       :external-pagination-result="paginationResult"
       @pagination-changed="paginationChanged"
       v-on="$listeners"

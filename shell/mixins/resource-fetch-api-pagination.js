@@ -113,14 +113,15 @@ export default {
       // }
 
       if (paginationUtils.paginationEqual(neu, old)) {
-        // Same, nae bother
-        return false;
+        return true;
       }
 
       // if (this.$store.getters[`${ this.currentProduct.inStore }/paginationEqual`](neu, old)) {
       //   // Same, nay bother
       //   return false;
       // }
+
+      return false;
 
       // return true;
     }
@@ -172,10 +173,12 @@ export default {
         return;
       }
 
-      return this.resource && paginationUtils.isEnabled({ rootGetters: this.$store.getters }, {
+      const a = this.resource && paginationUtils.isEnabled({ rootGetters: this.$store.getters }, {
         store:    this.currentProduct.inStore,
         resource: { id: this.resource.id || this.resource }
       });
+
+      return a;
     },
 
     paginationResult() {

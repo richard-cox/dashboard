@@ -172,6 +172,7 @@ export default {
      * This covers case 1
      */
     pagination(neu, old) {
+      debugger;
       if (neu && !this.componentWillFetch && !this.paginationEqual(neu, old)) {
         this.$fetchType(this.resource);
       }
@@ -236,6 +237,7 @@ export default {
     />
 
     <div v-if="hasListComponent">
+      RL: {{ canPaginate }} - {{ paginating }}
       <component
         :is="listComponent"
         :incremental-loading-indicator="showIncrementalLoadingIndicator"

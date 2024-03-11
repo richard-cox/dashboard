@@ -146,7 +146,7 @@ export default {
   /**
    *
    * @param {*} ctx
-   * @param { {type: string, opt: FindAllOpt} } opt
+   * @param { {type: string, opt: ActionFindPageArgs} } opt
    */
   async findAll(ctx, { type, opt }) {
     const {
@@ -419,8 +419,9 @@ export default {
       pagination: opt.pagination ? {
         request: opt.pagination,
         result:  {
-          count: out.count,
-          pages: out.pages
+          count:     out.count,
+          pages:     out.pages,
+          timestamp: new Date().getTime()
         }
       } : undefined,
     });

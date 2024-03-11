@@ -968,6 +968,7 @@ export default {
     ref="container"
     :data-testid="componentTestid + '-list-container'"
   >
+    SS: {{ externalPaginationEnabled }} - {{ externalPaginationResult }}
     <div
       :class="{'titled': $slots.title && $slots.title.length}"
       class="sortable-table-header"
