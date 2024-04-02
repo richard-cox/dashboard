@@ -135,45 +135,44 @@ class StevePaginationUtils extends NamespaceProjectFilters {
     // - When doing this for local pagination `getActiveNamespaces` provides a full list of applicable namespaces. Lists then filter resource locally
     // - Pagination cannot take this approach of 'gimme all resources in these namespaces' primarily for the 'Only User Namespaces' case
     //   - User could have 2k namespaces. This would result in 2k+ namespaces added to the url (namespace=1,namespace=2,namespace=3, etc)
-    // - Instead we do
+    // - Instead we do // TODO: RC
     //   - All but not given settings - Gimme resources NOT in system or obscure namespaces
     //   - Only System Namespaces - Gimme resources in the system namespaces (which shouldn't be many namespaces)
     //   - Only User Namespaces - Gimme resources NOT in system namespaces
     //   - User selection - Gimme resources in specific Projects or Namespaces
 
-    // We'd like to show all namespaces... but either the user shouldn't see
-    // - dynamic ones
-    // - system ones
-    const allButHidingSystemResources = isAllNamespaces && (!showDynamicRancherNamespaces || productHidesSystemNamespaces);
+    if (isAllNamespaces && (showDynamicRancherNamespaces && !productHidesSystemNamespaces)) {
+      // No-op. Everything is returned
+      return {
+        projectsOrNamespaces: [],
+        filters:              []
+      };
+    }
 
-    // used to return resources in project 1 OR namespace 2
+    // used to return resources in / not in projects/namespaces (entries are checked in both types)
     // &projectsornamespaces=project 1,namespace 2
     let projectsOrNamespaces: OptPaginationFilter[] = [];
-
+    // used to return resources in / not in namespaces
+    // &filter=metadata.namespace=abc
     let filters: OptPaginationFilter[] = [];
 
-    if (allButHidingSystemResources) {
+    if (!showDynamicRancherNamespaces || productHidesSystemNamespaces) {
+      // We need to hide dynamic namespaces ('c-', 'p-', etc) OR system namespaces
       filters = this.handlePrefAndSettingFilter(allNamespaces, showDynamicRancherNamespaces, productHidesSystemNamespaces);
-    } else if (selection.length === 1) {
-      const isAllSystem = selection[0] === NAMESPACE_FILTER_ALL_SYSTEM;
-      const isAllUser = selection[0] === NAMESPACE_FILTER_ALL_USER;
+    }
 
-      if (isAllSystem || isAllUser) {
-        // Filter by resources in system namespaces
-        filters = this.handleSystemOrUserFilter(allNamespaces, isAllSystem, isAllUser );
-      } else {
-        // User has one project or namespace
-        const res = this.handleSelectionFilter(selection, isLocalCluster);
+    const isAllSystem = selection[0] === NAMESPACE_FILTER_ALL_SYSTEM;
+    const isAllUser = selection[0] === NAMESPACE_FILTER_ALL_USER;
 
-        projectsOrNamespaces = res.projectsOrNamespaces;
-        filters = res.filters;
-      }
+    if (selection.length === 1 && (isAllSystem || isAllUser)) {
+      // Filter by resources either in or not in system namespaces
+      filters.push(...this.handleSystemOrUserFilter(allNamespaces, isAllSystem, isAllUser ));
     } else {
       // User has one or more projects or namespaces
       const res = this.handleSelectionFilter(selection, isLocalCluster);
 
       projectsOrNamespaces = res.projectsOrNamespaces;
-      filters = res.filters;
+      filters.push(...res.filters);
     }
 
     return {
