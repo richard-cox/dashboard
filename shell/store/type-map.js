@@ -37,6 +37,7 @@
 //   ifHaveType,              -- Show this product only if the given type exists in the store [inStore], This can also be specified as an object { type: TYPE, store: 'management' } if the type isn't in the current [inStore]
 //   ifHaveVerb,              -- In combination with ifHaveTYpe, show it only if the type also has this collectionMethod
 //   inStore,                 -- Which store to look at for if* above and the left-nav, defaults to "cluster"
+//   rootProduct,             -- Optional root (parent) product - if set, used to optimize navigation when product changes stays within root product
 //   inExplorer,              -- Determines if the product is to be scoped to the explorer
 //   public,                  -- If true, show to all users.  If false, only show when the Developer Tools pref is on (default true)
 //   category,                -- Group to show the product in for the nav hamburger menu
@@ -148,7 +149,7 @@ import isObject from 'lodash/isObject';
 import { normalizeType } from '@shell/plugins/dashboard-store/normalize';
 import { sortBy } from '@shell/utils/sort';
 
-import { haveV1Monitoring, haveV2Monitoring } from '@shell/utils/monitoring';
+import { haveV2Monitoring } from '@shell/utils/monitoring';
 import { NEU_VECTOR_NAMESPACE } from '@shell/config/product/neuvector';
 import { createHeaders, rowValueGetter } from '@shell/store/type-map.utils';
 
@@ -208,7 +209,6 @@ const instanceMethods = {};
 const graphConfigMap = {};
 
 export const IF_HAVE = {
-  V1_MONITORING:            'v1-monitoring',
   V2_MONITORING:            'v2-monitoring',
   PROJECT:                  'project',
   NO_PROJECT:               'no-project',
@@ -956,11 +956,11 @@ export const getters = {
         const virtualTypes = state.virtualTypes[product] || [];
         const spoofedTypes = state.spoofedTypes[product] || [];
         const allTypes = [...virtualTypes, ...spoofedTypes];
-        const virtSpoofedModes = [...nonUsedModes];
 
         for ( const type of allTypes ) {
           const item = clone(type);
           const id = item.name;
+          const virtSpoofedModes = [...nonUsedModes];
 
           // Is there a virtual/spoofed type override for schema type?
           // Currently used by harvester, this should be investigated and removed if possible
@@ -1419,6 +1419,10 @@ export const getters = {
       return !!prod;
     };
   },
+
+  productByName(state) {
+    return (productName) => state.products.find((p) => p.name === productName);
+  }
 };
 
 export const mutations = {
@@ -1478,12 +1482,27 @@ export const mutations = {
   },
 
   product(state, obj) {
-    const existing = findBy(state.products, 'name', obj.name);
+    let existing = state.products.find((p) => p.name === obj.name);
 
     if ( existing ) {
       Object.assign(existing, obj);
     } else {
       addObject(state.products, obj);
+      existing = state.products.find((p) => p.name === obj.name);
+    }
+
+    // Make sure deprecated `inExplorer` is synchronized with `rootProduct` (and vice-versa)
+    if (existing?.inExplorer) {
+      existing.rootProduct = EXPLORER;
+    } else if (existing?.rootProduct === EXPLORER) {
+      existing.inExplorer = true;
+    }
+
+    // We make an assumption that if the store for a product is 'cluster' it will be displayed within cluster explorer
+    // Detect that here and set rootProduct and inExporer in this case
+    if (!existing?.rootProduct && existing?.inStore === 'cluster') {
+      existing.rootProduct = EXPLORER;
+      existing.inExplorer = (existing.rootProduct === EXPLORER);
     }
   },
 
@@ -1831,9 +1850,6 @@ function ifHave(getters, option) {
   switch (option) {
   case IF_HAVE.V2_MONITORING: {
     return haveV2Monitoring(getters);
-  }
-  case IF_HAVE.V1_MONITORING: {
-    return haveV1Monitoring(getters);
   }
   case IF_HAVE.PROJECT: {
     return !!project(getters);

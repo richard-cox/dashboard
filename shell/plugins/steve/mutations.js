@@ -8,8 +8,8 @@ import {
   remove,
   batchChanges,
   replace,
+  loadAdd
 } from '@shell/plugins/dashboard-store/mutations';
-import { keyForSubscribe } from '@shell/plugins/steve/resourceWatcher';
 import { perfLoadAll } from '@shell/plugins/steve/performanceTesting';
 import Vue from 'vue';
 import { classify } from '@shell/plugins/dashboard-store/classify';
@@ -153,7 +153,11 @@ export default {
 
   forgetType(state, type) {
     if ( forgetType(state, type) ) {
-      delete state.inError[keyForSubscribe({ type })];
+      Object.keys(state.inError).forEach((key) => {
+        if (key.startsWith(type)) {
+          delete state.inError[key];
+        }
+      });
     }
   },
 
@@ -183,6 +187,16 @@ export default {
         addObject(cache.list, resource);
         cache.map.set(resource.id, resource);
       }
+    }
+  },
+
+  loadAdd(state, { type, data: allLatest, ctx }) {
+    loadAdd(state, {
+      type, data: allLatest, ctx
+    });
+
+    if (allLatest.length && allLatest[0].type === POD) {
+      updatePodsByNamespaceCache(state, ctx, allLatest, false);
     }
   },
 

@@ -339,6 +339,25 @@ export function loadAll(state, {
   return proxies;
 }
 
+/**
+ * Add a set of resources to the store for a given type
+ *
+ * Don't mark the 'haveAll' field - this is used for incremental loading
+ */
+export function loadAdd(state, { type, data: allLatest, ctx }) {
+  const { getters } = ctx;
+  const keyField = getters.keyFieldForType(type);
+  const cachedArgs = createLoadArgs(ctx, allLatest?.[0]?.type);
+
+  allLatest.forEach((entry) => {
+    const existing = state.types[type].map.get(entry[keyField]);
+
+    load(state, {
+      data: entry, ctx, existing, cachedArgs
+    });
+  });
+}
+
 export default {
   registerType,
   load,
@@ -407,21 +426,7 @@ export default {
     });
   },
 
-  // Add a set of resources to the store for a given type
-  // Don't mark the 'haveAll' field - this is used for incremental loading
-  loadAdd(state, { type, data: allLatest, ctx }) {
-    const { getters } = ctx;
-    const keyField = getters.keyFieldForType(type);
-    const cachedArgs = createLoadArgs(ctx, allLatest?.[0].type);
-
-    allLatest.forEach((entry) => {
-      const existing = state.types[type].map.get(entry[keyField]);
-
-      load(state, {
-        data: entry, ctx, existing, cachedArgs
-      });
-    });
-  },
+  loadAdd,
 
   loadPage(state, {
     type,

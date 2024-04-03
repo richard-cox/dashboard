@@ -1,12 +1,14 @@
 import {
   NAMESPACE_FILTER_ALL_SYSTEM, NAMESPACE_FILTER_ALL_USER, NAMESPACE_FILTER_ALL_ORPHANS, NAMESPACE_FILTER_NAMESPACED_YES, NAMESPACE_FILTER_NAMESPACED_NO, NAMESPACE_FILTER_ALL
 } from '@shell/utils/namespace-filter';
-import { NAMESPACE } from '@shell/config/types';
-import { ALL_NAMESPACES } from '@shell/store/prefs';
+import { NAMESPACE, NAMESPACE } from '@shell/config/types';
+import { ALL_NAMESPACES, ALL_NAMESPACES } from '@shell/store/prefs';
 import { mapGetters } from 'vuex';
 import { ResourceListComponentName } from '../components/ResourceList/resource-list.config';
 import paginationUtils from '@shell/utils/pagination-utils';
 import debounce from 'lodash/debounce';
+import { OptPaginationFilter, OptPaginationFilterField } from '@shell/types/store/dashboard-store.types';
+import stevePaginationUtils from '@shell/plugins/steve/steve-pagination-utils';
 
 /**
  * Companion mixin used with `resource-fetch` for `ResourceList` to determine if the user needs to filter the list by a single namespace
@@ -25,6 +27,13 @@ export default {
 
       // TODO: RC comment
       // initialFetch: undefined,
+      /**
+       * Apply these additional filters given the ns / project header selection
+       */
+      requestFilters: {
+        filters:              [],
+        projectsOrNamespaces: [],
+      },
     };
   },
 
@@ -34,6 +43,11 @@ export default {
     },
 
     paginationChanged(event) {
+      const searchFilters = event.filter.searchQuery ? event.filter.searchFields.map((field) => new OptPaginationFilterField({
+        field,
+        value: event.filter.searchQuery,
+      })) : [];
+
       this.debouncedSetPagination({
         ...this.pPagination,
         page:     event.page,
@@ -42,10 +56,11 @@ export default {
           field,
           asc: !event.descending
         })),
-        filter: event.filter.searchQuery ? event.filter.searchFields.map((field) => ({
-          field,
-          value: event.filter.searchQuery,
-        })) : []
+        projectsOrNamespaces: this.requestFilters.projectsOrNamespaces,
+        filter:               [
+          new OptPaginationFilter({ fields: searchFilters }),
+          ...this.requestFilters.filters, // Apply the additional filters. these aren't from the user but from ns filtering
+        ]
       });
     },
 
@@ -53,82 +68,43 @@ export default {
       if (!this.canPaginate || !this.schema?.attributes?.namespaced) {
         return;
       }
-      // This is a context specific version of ResourceTable filteredRows (local ns filtering)
 
-      // There is no user provided filter
-      const isAll = this.$store.getters['isAllNamespaces'];
-      // Links to ns.isObscure and covers things like `c-`, `user-`, etc (see OBSCURE_NAMESPACE_PREFIX)
-      const showDynamicRancherNamespaces = this.$store.getters['prefs/get'](ALL_NAMESPACES);
-      // Links to ns.isSystem and covers things like ns with system annotation, hardcoded list, etc
-      const productHidesSystemNamespaces = this.currentProduct.hideSystemResources;
-
-      // We'd like to show all namespaces... but either the user shouldn't see
-      // - dynamic ones
-      // - system ones
-      const allButHidingSystemResources = isAll && (!showDynamicRancherNamespaces || productHidesSystemNamespaces);
-
-      let namespaces;
-
-      const allNamespaces = this.$store.getters[`${ this.currentProduct.inStore }/all`](NAMESPACE);
-
-      if (allButHidingSystemResources) {
-        // Gather all system and obscure ns's and filter for resources NOT in them
-        // This avoids filtering by thousands of ns that aren't system or obscure
-        namespaces = allNamespaces
-          .filter((ns) => {
-            const hideObscure = showDynamicRancherNamespaces ? false : ns.isObscure;
-            const hideSystem = productHidesSystemNamespaces ? ns.isSystem : false;
-
-            return hideObscure || hideSystem;
-          })
-          .map((ns) => `-${ ns.name }`);
-      } else if (neu.length === 1) {
-        const allSystem = allNamespaces.filter((ns) => ns.isSystem);
-
-        if (neu[0] === NAMESPACE_FILTER_ALL_SYSTEM) {
-          // Filter by resources in system namespaces
-          namespaces = allSystem.map((ns) => `${ ns.name }`);
-        } else if (neu[0] === NAMESPACE_FILTER_ALL_USER) {
-          // Filter by resources NOT in system namespaces
-          namespaces = allSystem.map((ns) => `-${ ns.name }`);
-        } else {
-          namespaces = neu;
-        }
-      } else {
-        namespaces = neu;
-      }
-
-      this.debouncedSetPagination({
-        ...this.pPagination,
-        namespaces: namespaces.filter((n) => n !== NAMESPACE_FILTER_ALL_ORPHANS),
+      const {
+        projectsOrNamespaces,
+        filters
+      } = stevePaginationUtils.createParamsFromNsFilter({
+        allNamespaces:                this.$store.getters[`${ this.currentProduct?.inStore }/all`](NAMESPACE),
+        selection:                    neu,
+        isAllNamespaces:              this.isAllNamespaces,
+        isLocalCluster:               this.$store.getters['currentCluster'].isLocal,
+        showDynamicRancherNamespaces: this.showDynamicRancherNamespaces,
+        productHidesSystemNamespaces: this.productHidesSystemNamespaces,
       });
+
+      this.requestFilters.filters = filters;
+      this.requestFilters.projectsOrNamespaces = projectsOrNamespaces;
+
+      // Kick off a change
+      this.debouncedSetPagination({ ...this.pPagination });
     },
 
     paginationEqual(neu, old) {
-      // return this.$store.getters[`${ this.currentProduct.inStore }/paginationEqual`](neu, old);
-
-      // if (!neu.page) {
-      //   // Not valid, don't bother
-      //   return false;
-      // }
-
-      if (paginationUtils.paginationEqual(neu, old)) {
-        return true;
+      if (!neu.page) {
+        // Not valid, don't bother
+        return false;
       }
 
-      // if (this.$store.getters[`${ this.currentProduct.inStore }/paginationEqual`](neu, old)) {
-      //   // Same, nay bother
-      //   return false;
-      // }
+      if (paginationUtils.paginationEqual(neu, old)) {
+        // Same, nae bother
+        return false;
+      }
 
-      return false;
-
-      // return true;
+      return true;
     }
   },
 
   computed: {
-    ...mapGetters(['currentProduct', 'namespaceFilters']),
+    ...mapGetters(['currentProduct', 'namespaceFilters', 'isAllNamespaces']),
 
     /**
      * Does the user need to update the filter to supply valid options?
@@ -194,9 +170,22 @@ export default {
         return;
       }
 
-      return this.$store.getters[`${ this.currentProduct.inStore }/havePage`](this.resource);
+      return this.$store.getters[`${ this.currentProduct?.inStore }/havePage`](this.resource);
     },
 
+    /**
+      * Links to ns.isSystem and covers things like ns with system annotation, hardcoded list, etc
+      */
+    productHidesSystemNamespaces() {
+      return this.currentProduct?.hideSystemResources;
+    },
+
+    /**
+      * Links to ns.isObscure and covers things like `c-`, `user-`, etc (see OBSCURE_NAMESPACE_PREFIX)
+      */
+    showDynamicRancherNamespaces() {
+      return this.$store.getters['prefs/get'](ALL_NAMESPACES);
+    }
   },
 
   watch: {
@@ -208,10 +197,27 @@ export default {
     //   }
     // },
 
+    /**
+     * Monitor the rows to ensure deleting the last entry in a server-side paginated page doesn't
+     * result in an empty page
+     */
+    rows(neu) {
+      if (!this.pagination || this.isResourceList) {
+        return;
+      }
+
+      if (this.pagination.page > 1 && neu.length === 0) {
+        this.setPagination({
+          ...this.pagination,
+          page: this.pagination.page - 1
+        });
+      }
+    },
+
     namespaceFilters: {
       immediate: true,
       async handler(neu, old) {
-        if (this.listComponent) {
+        if (this.isResourceList) {
           return;
         }
 
@@ -220,7 +226,12 @@ export default {
         const oldEmpty = !old || old.length === 0 || old[0] === NAMESPACE_FILTER_ALL;
 
         if (neuEmpty && oldEmpty) {
-          return;
+          const allButHidingSystemResources = this.isAllNamespaces && (!this.showDynamicRancherNamespaces || this.productHidesSystemNamespaces);
+
+          // If we're showing all... and not hiding system or obscure ns then don't go through filter process
+          if (!allButHidingSystemResources) {
+            return;
+          }
         }
 
         // Transitioning to a ns filter that doesn't affect the list should be avoided

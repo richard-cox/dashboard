@@ -220,19 +220,12 @@ export function init(store) {
     ]
   );
 
-  const secretData = {
-    name:      'data',
-    labelKey:  'tableHeaders.data',
-    value:     'dataPreview',
-    formatter: 'SecretData'
-  };
-
   headers(SECRET, [
     STATE,
     NAME_COL,
     NAMESPACE_COL,
     SUB_TYPE,
-    secretData,
+    SECRET_DATA,
     AGE
   ], [
     STEVE_STATE_COL,
@@ -243,7 +236,7 @@ export function init(store) {
       sort:   'metadata.fields.1',
       search: 'metadata.fields.1',
     },
-    secretData,
+    SECRET_DATA,
     STEVE_AGE_COL
   ]);
 

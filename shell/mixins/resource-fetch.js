@@ -143,7 +143,7 @@ export default {
           opt
         })
           .catch((hmmm) => {
-            console.error(hmmm);
+            console.error(hmmm); // TODO: RC
           })
           .finally(() => Vue.set(that, 'paginating', false));
       }

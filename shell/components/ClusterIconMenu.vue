@@ -7,6 +7,10 @@ export default {
       type:     Object,
       required: true,
     },
+    routeCombo: {
+      type:    Boolean,
+      default: false
+    },
   },
   computed: {
     isEnabled() {
@@ -96,8 +100,12 @@ export default {
       </svg>
     </div>
     <i
-      v-if="cluster.pinned"
+      v-if="!routeCombo && cluster.pinned"
       class="icon icon-pin cluster-pin-icon"
+    />
+    <i
+      v-else-if="routeCombo"
+      class="icon icon-keyboard_tab key-combo-icon"
     />
   </div>
 </template>
@@ -107,7 +115,7 @@ export default {
     position: relative;
     align-items: center;
     display: flex;
-    height: 28px;
+    height: 32px;
     justify-content: center;
     width: 42px;
   }
@@ -119,6 +127,16 @@ export default {
     transform: scaleX(-1);
     color: var(--body-text);
   }
+  .key-combo-icon {
+    position: absolute;
+    top: -7px;
+    right: -8px;
+    font-size: 14px;
+    color: var(--body-text);
+    background-color: #dddee6;
+    padding: 2px;
+    border-radius: 2px;
+  }
 
   .cluster-local-logo {
     width: 20px;
@@ -126,7 +144,7 @@ export default {
 
   .cluster-badge-logo {
     width: 42px;
-    height: 28px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -154,5 +172,11 @@ export default {
       filter: grayscale(1);
       color: var(--muted);
     }
+  }
+</style>
+
+<style lang="scss">
+  .theme-dark .key-combo-icon  {
+    color: var(--body-bg);
   }
 </style>

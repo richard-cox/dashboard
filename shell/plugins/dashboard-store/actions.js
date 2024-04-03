@@ -12,7 +12,6 @@ import { addParam } from '@shell/utils/url';
 export const _ALL = 'all';
 export const _MERGE = 'merge';
 export const _MULTI = 'multi';
-export const _ALL_IF_AUTHED = 'allIfAuthed';
 export const _NONE = 'none';
 
 const SCHEMA_CHECK_RETRIES = 15;
@@ -169,15 +168,15 @@ export default {
         (opt.pagination ? getters['havePaginatedPage'](type, opt.pagination) : false)
       )
     ) {
-      const args = {
-        type,
-        revision:  '',
-        // watchNamespace - used sometimes when we haven't fetched the results of a single namespace
-        // namespaced - used when we have fetched the result of a single namespace (see https://github.com/rancher/dashboard/pull/7329/files)
-        namespace: opt.watchNamespace || opt.namespaced
-      };
-
       if (opt.watch !== false ) {
+        const args = {
+          type,
+          revision:  '',
+          // watchNamespace - used sometimes when we haven't fetched the results of a single namespace
+          // namespaced - used when we have fetched the result of a single namespace (see https://github.com/rancher/dashboard/pull/7329/files)
+          namespace: opt.watchNamespace || opt.namespaced
+        };
+
         dispatch('watch', args);
       }
 
@@ -188,14 +187,6 @@ export default {
 
     if ( opt.load === false || opt.load === _NONE ) {
       load = _NONE;
-    } else if ( opt.load === _ALL_IF_AUTHED ) {
-      const header = rootGetters['auth/fromHeader'];
-
-      if ( `${ header }` === 'true' || `${ header }` === 'none' ) {
-        load = _ALL;
-      } else {
-        load = _MULTI;
-      }
     }
 
     const typeOptions = rootGetters['type-map/optionsFor'](type);
@@ -212,6 +203,8 @@ export default {
     // on for a limit of 100, to quickly show data
     // another one with 1st page of the subset of the resource we are fetching
     // the default is 4 pages, but it can be changed on mixin/resource-fetch.js
+    let pageFetchOpts;
+
     if (opt.incremental) {
       commit('incrementLoadCounter', type);
 
@@ -219,7 +212,7 @@ export default {
         dispatch('resource-fetch/updateManualRefreshIsLoading', true, { root: true });
       }
 
-      const pageFetchOpts = {
+      pageFetchOpts = {
         ...opt,
         url: addParam(opt.url, 'limit', `${ opt.incremental }`),
       };
@@ -235,8 +228,6 @@ export default {
       if (opt.force) {
         commit('forgetType', type);
       }
-
-      dispatch('loadDataPage', { type, opt: pageFetchOpts });
     }
 
     let streamStarted = false;
@@ -334,10 +325,15 @@ export default {
             result:  {
               count:     out.count,
               pages:     out.pages,
-              timestamp: new Date().getTime()
+              timestamp: new Date().getTime() // TODO: RC hmmmm
             }
           } : undefined,
         });
+      }
+
+      if (opt.incremental) {
+        // This needs to come after the loadAll (which resets state) so supplements via loadDataPage aren't lost
+        dispatch('loadDataPage', { type, opt: pageFetchOpts });
       }
     }
 
@@ -421,7 +417,7 @@ export default {
         result:  {
           count:     out.count,
           pages:     out.pages,
-          timestamp: new Date().getTime()
+          timestamp: new Date().getTime() // TODO: RC hmmm
         }
       } : undefined,
     });
@@ -535,8 +531,13 @@ export default {
       const watchMsg = {
         type,
         id,
-        revision: res?.metadata?.resourceVersion,
-        force:    opt.forceWatch === true,
+        // Although not used by sockets, we need this for when resyncWatch calls find... which needs namespace to construct the url
+        namespace: opt.namespaced,
+        // Override the revision. Used in cases where we need to avoid using the resource's own revision which would be `too old`.
+        // For the above case opt.revision will be `null`. If left as `undefined` the subscribe mechanism will try to determine a revision
+        // from resources in store (which would be this one, with the too old revision)
+        revision:  typeof opt.revision !== 'undefined' ? opt.revision : res?.metadata?.resourceVersion,
+        force:     opt.forceWatch === true,
       };
 
       const idx = id.indexOf('/');
@@ -712,7 +713,7 @@ export default {
     let schema = null;
 
     while (!schema && tries > 0) {
-      // Schemas may not have been loaded, so don't error out if they aer not loaded yet
+      // Schemas may not have been loaded, so don't error out if they are not loaded yet
       // the wait here will wait for schemas to load and then for the desired schema to be available
       schema = getters['schemaFor'](type, false, false);
 

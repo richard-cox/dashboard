@@ -9,13 +9,13 @@ import {
   NAMESPACE_FILTER_NS_FULL_PREFIX,
   NAMESPACE_FILTER_P_FULL_PREFIX,
 } from '@shell/utils/namespace-filter';
-import { OptPagination, OptPaginationSort } from '@shell/types/store/dashboard-store.types';
+import { OptPagination, OptPaginationFilter, OptPaginationSort } from '@shell/types/store/dashboard-store.types';
 import { sameArrayObjects } from '@shell/utils/array';
 import { isEqual } from '@shell/utils/object';
 
 // This are hardcoded atm, but will be changed via the `Performance` settings
 const settings: PaginationSettings = {
-  enabled: true,
+  enabled: true, // TODO: RC
   stores:  {
     cluster: {
       resources: {
@@ -110,17 +110,39 @@ class PaginationUtils {
     return this.validNsProjectFilters.includes(nsProjectFilter);
   }
 
+  paginationFilterEqual(a: OptPaginationFilter, b: OptPaginationFilter): boolean {
+    if (a.param !== b.param || a.equals !== b.equals) {
+      return false;
+    }
+
+    return isEqual(a.fields, b.fields);
+  }
+
+  paginationFiltersEqual(a: OptPaginationFilter[], b: OptPaginationFilter[]): boolean {
+    if (!!a && a?.length !== b?.length) {
+      return false;
+    }
+
+    for (let i = 0; i < a.length; i++) {
+      if (!this.paginationFilterEqual(a[i], b[i])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   paginationEqual(a?: OptPagination, b?: OptPagination): boolean {
     const {
-      filter: aFilter = [], sort: aSort = [], namespaces: aNamespaces = [], ...aPrimitiveTypes
+      filter: aFilter = [], sort: aSort = [], projectsOrNamespaces: aPN = [], ...aPrimitiveTypes
     } = a || {};
     const {
-      filter: bFilter = [], sort: bSort = [], namespaces: bNamespaces = [], ...bPrimitiveTypes
+      filter: bFilter = [], sort: bSort = [], projectsOrNamespaces: bPN = [], ...bPrimitiveTypes
     } = b || {};
 
     return isEqual(aPrimitiveTypes, bPrimitiveTypes) &&
-      sameArrayObjects(aFilter, bFilter) &&
-      sameArrayObjects(aNamespaces, bNamespaces) &&
+      this.paginationFiltersEqual(aFilter, bFilter) &&
+      this.paginationFiltersEqual(aPN, bPN) &&
       sameArrayObjects<OptPaginationSort>(aSort, bSort);
   }
 }
