@@ -115,7 +115,7 @@ class PaginationUtils {
       return false;
     }
 
-    return isEqual(a.fields, b.fields);
+    return sameArrayObjects(a.fields, b.fields, true);
   }
 
   paginationFiltersEqual(a: OptPaginationFilter[], b: OptPaginationFilter[]): boolean {
@@ -140,10 +140,21 @@ class PaginationUtils {
       filter: bFilter = [], sort: bSort = [], projectsOrNamespaces: bPN = [], ...bPrimitiveTypes
     } = b || {};
 
+    // if (true) { // TODO: RC
+    //   console.warn('hmmm',
+    //     a,
+    //     b,
+    //     isEqual(aPrimitiveTypes, bPrimitiveTypes),
+    //     this.paginationFiltersEqual(aFilter, bFilter),
+    //     this.paginationFiltersEqual(aPN, bPN),
+    //     sameArrayObjects<OptPaginationSort>(aSort, bSort)
+    //   );
+    // }
+
     return isEqual(aPrimitiveTypes, bPrimitiveTypes) &&
       this.paginationFiltersEqual(aFilter, bFilter) &&
       this.paginationFiltersEqual(aPN, bPN) &&
-      sameArrayObjects<OptPaginationSort>(aSort, bSort);
+      sameArrayObjects<OptPaginationSort>(aSort, bSort, true);
   }
 }
 

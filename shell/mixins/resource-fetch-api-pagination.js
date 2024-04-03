@@ -1,8 +1,6 @@
-import {
-  NAMESPACE_FILTER_ALL_SYSTEM, NAMESPACE_FILTER_ALL_USER, NAMESPACE_FILTER_ALL_ORPHANS, NAMESPACE_FILTER_NAMESPACED_YES, NAMESPACE_FILTER_NAMESPACED_NO, NAMESPACE_FILTER_ALL
-} from '@shell/utils/namespace-filter';
-import { NAMESPACE, NAMESPACE } from '@shell/config/types';
-import { ALL_NAMESPACES, ALL_NAMESPACES } from '@shell/store/prefs';
+import { NAMESPACE_FILTER_NAMESPACED_YES, NAMESPACE_FILTER_NAMESPACED_NO, NAMESPACE_FILTER_ALL } from '@shell/utils/namespace-filter';
+import { NAMESPACE } from '@shell/config/types';
+import { ALL_NAMESPACES } from '@shell/store/prefs';
 import { mapGetters } from 'vuex';
 import { ResourceListComponentName } from '../components/ResourceList/resource-list.config';
 import paginationUtils from '@shell/utils/pagination-utils';
@@ -25,8 +23,6 @@ export default {
       // Avoid scenarios where namespace is updated just before other pagination changes come in
       debouncedSetPagination:    debounce(this.setPagination, 50),
 
-      // TODO: RC comment
-      // initialFetch: undefined,
       /**
        * Apply these additional filters given the ns / project header selection
        */
@@ -96,10 +92,10 @@ export default {
 
       if (paginationUtils.paginationEqual(neu, old)) {
         // Same, nae bother
-        return false;
+        return true;
       }
 
-      return true;
+      return false;
     }
   },
 

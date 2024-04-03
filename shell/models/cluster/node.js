@@ -452,7 +452,7 @@ export default class ClusterNode extends SteveModel {
   }
 
   get displayTaintsAndLabels() {
-    return !!this.spec.taints?.length || !!this.customLabelCount; // TODO: RC TEST
+    return !!this.spec.taints?.length || !!this.customLabelCount;
   }
 }
 

@@ -98,6 +98,17 @@ export class OptPaginationFilter {// implements OptPaginationFilter
     this.equals = equals;
     this.fields = fields;
   }
+
+  static basic(field: { field?: string; value: string; equals?: boolean; }): OptPaginationFilter {
+    return new OptPaginationFilter({ fields: [new OptPaginationFilterField(field)] });
+  }
+
+  static namespace(namespace: string): OptPaginationFilter {
+    return OptPaginationFilter.basic({
+      field: 'metadata.namespace',
+      value: namespace
+    });
+  }
 }
 
 /**
@@ -130,12 +141,12 @@ export class OptPaginationProjectOrNamespace extends OptPaginationFilter {
 /**
  * Pagination settings sent to actions and persisted to store
  */
-export interface OptPagination {
+export interface OptPagination { // TODO: RC rename pagination args
   page: number,
-  pageSize: number,
-  sort: OptPaginationSort[],
+  pageSize?: number, // TODO: RC Confirm - what happens if none supplied?
+  sort?: OptPaginationSort[],
   filter: OptPaginationFilter[],
-  projectsOrNamespaces: OptPaginationFilter[],
+  projectsOrNamespaces?: OptPaginationFilter[],
 }
 
 /**
@@ -170,7 +181,6 @@ export interface StorePagination {
  * Properties on all findX actions
  */
 export type ActionCoreFindArgs = {
-  type: string,
   force?: boolean,
 }
 

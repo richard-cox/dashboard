@@ -46,6 +46,7 @@ export default {
       paginating:                 null,
     };
   },
+
   beforeDestroy() {
     // make sure this only runs once, for the initialized instance
     if (this.init) {
@@ -77,6 +78,7 @@ export default {
       return this.rows.length ? false : this.$fetchState.pending;
     },
   },
+
   watch: {
     refreshFlag(neu) {
       // this is where the data assignment will trigger the update of the list view...
@@ -85,6 +87,7 @@ export default {
       }
     }
   },
+
   methods: {
     // this defines all the flags needed for the mechanism
     // to work. They should be defined based on the main list view
@@ -142,9 +145,6 @@ export default {
           type,
           opt
         })
-          .catch((hmmm) => {
-            console.error(hmmm); // TODO: RC
-          })
           .finally(() => Vue.set(that, 'paginating', false));
       }
 
@@ -170,8 +170,7 @@ export default {
       return this.$store.dispatch(`${ currStore }/findAll`, {
         type,
         opt
-      })
-        .finally(() => Vue.set(that, 'paginating', false));
+      });
     },
 
     __getCountForResources(resourceNames, namespace, storeType) {

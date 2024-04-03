@@ -1,4 +1,6 @@
-import { FindPageOpt, OptPaginationFilter, OptPaginationFilterField, OptPaginationProjectOrNamespace } from '@shell/types/store/dashboard-store.types';
+import {
+  ActionFindPageArgs, FindPageOpt, OptPaginationFilter, OptPaginationFilterField, OptPaginationProjectOrNamespace
+} from '@shell/types/store/dashboard-store.types';
 import { NAMESPACE_FILTER_ALL_SYSTEM, NAMESPACE_FILTER_ALL_USER, NAMESPACE_FILTER_P_FULL_PREFIX } from '@shell/utils/namespace-filter';
 import Namespace from '@shell/models/namespace';
 
@@ -201,8 +203,6 @@ class StevePaginationUtils extends NamespaceProjectFilters {
 
     if (opt.pagination.pageSize) {
       params.push(`pagesize=${ opt.pagination.pageSize }`);
-    } else {
-      throw new Error(`A pagination request is required but no 'pageSize' property provided: ${ JSON.stringify(opt) }`);
     }
 
     if (opt.pagination.sort?.length) {

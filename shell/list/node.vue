@@ -2,24 +2,27 @@
 import ResourceTable from '@shell/components/ResourceTable.vue';
 import Tag from '@shell/components/Tag.vue';
 import { Banner } from '@components/Banner';
-import {
-  STATE, NAME, ROLES, VERSION, INTERNAL_EXTERNAL_IP, CPU, RAM, PODS, AGE, KUBE_NODE_OS
-} from '@shell/config/table-headers';
+import { PODS } from '@shell/config/table-headers';
 import metricPoller from '@shell/mixins/metric-poller';
 
-import { CAPI as CAPI_ANNOTATIONS, NODE_ROLES, RKE, SYSTEM_LABELS } from '@shell/config/labels-annotations.js';
+import { CAPI as CAPI_ANNOTATIONS } from '@shell/config/labels-annotations.js';
 
-import { defineComponent, PropType } from 'vue';
-import { ActionFindAllArgs, ActionFindPageArgs, StorePaginationResult } from '@shell/types/store/dashboard-store.types';
+import { defineComponent } from 'vue';
+import { ActionFindPageArgs, OptPaginationFilter, OptPaginationFilterField, StorePaginationResult } from '@shell/types/store/dashboard-store.types';
 import {
   CAPI,
   MANAGEMENT, METRIC, NODE, NORMAN, POD
 } from '@shell/config/types';
 import { allHash } from '@shell/utils/promise';
 import { GROUP_RESOURCES, mapPref } from '@shell/store/prefs';
-import { COLUMN_BREAKPOINTS } from '@shell/components/SortableTable/index.vue';
+import { COLUMN_BREAKPOINTS } from '~/shell/types/store/type-map';
+
 import ResourceFetch from '@shell/mixins/resource-fetch';
 import { mapGetters } from 'vuex';
+
+// TODO: RC bulk actions are not updated on page load
+// TODO: RC test fetching pods here --> pods list
+// TODO: RC test non-paginationed world
 
 export default defineComponent({
   name:       'ListNode',
@@ -51,47 +54,42 @@ export default defineComponent({
   },
 
   async fetch() {
-    try {
-      this.$initializeFetchData(this.resource);
+    this.$initializeFetchData(this.resource);
 
-      const hash: any = { kubeNodes: this.$fetchType(this.resource) };
+    const hash: any = { kubeNodes: this.$fetchType(this.resource) };
 
-      // Remove fetching all pods from node list
-      // Node List - node` podConsume --> ready pods per node in list
-      // Node Detail - node podConsume --> ready pods for node
-      // Node Detail - pods for node (paginatinated)
-      // TODO: RC podConsumedUsage = podConsumed / podConsumedUsage. podConsumed --> pods. allPods.filter((pod) => pod.spec.nodeName === this.name)
-      // TODO: RC decide - fetching pods for current page could be a LOT still (300 per node, 100 nodes, 3000 in response)
-      this.canViewPods = this.$store.getters[`cluster/schemaFor`](POD); // && !this.pagination
-      this.canViewNormanNodes = this.$store.getters[`rancher/schemaFor`](NORMAN.NODE);
-      this.canViewMgmtNodes = this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE);
-      this.canViewMachines = this.$store.getters[`management/schemaFor`](CAPI.MACHINE);
+    // Pods required for `Pods` column's running pods metrics
+    // podConsumedUsage = podConsumed / podConsumedUsage. podConsumed --> pods. allPods.filter((pod) => pod.spec.nodeName === this.name)
+    this.canViewPods = this.$store.getters[`cluster/schemaFor`](POD);
+    // Norman node required for Drain/Cordon/Uncordon action
+    this.canViewNormanNodes = this.$store.getters[`rancher/schemaFor`](NORMAN.NODE);
+    // Mgmt Node required to find Norman node
+    this.canViewMgmtNodes = this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE);
+    // Required for ssh / download key actions
+    this.canViewMachines = this.$store.getters[`management/schemaFor`](CAPI.MACHINE);
+    // Required for CPU and RAM columns
+    this.canViewNodeMetrics = this.$store.getters['cluster/schemaFor'](METRIC.NODE);
 
-      if (!this.canPaginate) {
-        if (this.canViewNormanNodes) {
-          // Required for Drain/Cordon action
-          hash.normanNodes = this.$fetchType(NORMAN.NODE, [], 'rancher');
-        }
-
-        if (this.canViewMgmtNodes) {
-          hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
-        }
-
-        if (this.canViewMachines) {
-          // Required for ssh / download key actions
-          hash.machines = this.$fetchType(CAPI.MACHINE, [], 'management');
-        }
-
-        if (this.canViewPods) {
-          // Used for running pods metrics - we don't need to block on this to show the list of nodes
-          this.$fetchType(POD);
-        }
+    if (!this.canPaginate) {
+      if (this.canViewMgmtNodes) {
+        hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
       }
 
-      await allHash(hash);
-    } catch (e) {
-      console.error(e);
+      if (this.canViewNormanNodes) {
+        hash.normanNodes = this.$fetchType(NORMAN.NODE, [], 'rancher');
+      }
+
+      if (this.canViewMachines) {
+        hash.machines = this.$fetchType(CAPI.MACHINE, [], 'management');
+      }
+
+      if (this.canViewPods) {
+        // No need to block on this
+        this.$fetchType(POD);
+      }
     }
+
+    await allHash(hash);
   },
 
   data() {
@@ -100,7 +98,6 @@ export default defineComponent({
 
   beforeDestroy() {
     // Stop watching pods, nodes and node metrics
-    // TODO: RC stop if others
     if (this.canViewPods) {
       this.$store.dispatch('cluster/forgetType', POD);
     }
@@ -112,20 +109,20 @@ export default defineComponent({
   computed: {
     ...mapGetters(['currentCluster']),
     hasWindowsNodes() {
-      // TODO: RC only valid for current page
+      // Note if server side pagination is used this is only applicable to the current page
       return (this.rows || []).some((node: any) => node.status.nodeInfo.operatingSystem === 'windows');
     },
 
     tableGroup: mapPref(GROUP_RESOURCES),
 
     headers() {
-      // TODO: RC tidy up
+      // This is all about adding the pods column... if the user can see pods
+
       if (this.canPaginate) {
         const paginationHeaders = [...this.$store.getters['type-map/headersFor'](this.schema, true)];
 
         if (paginationHeaders) {
           if (this.canViewPods) {
-            debugger;
             paginationHeaders.splice(paginationHeaders.length - 1, 0, {
               ...PODS,
               breakpoint: COLUMN_BREAKPOINTS.DESKTOP,
@@ -137,13 +134,13 @@ export default defineComponent({
 
           return paginationHeaders;
         } else {
-          console.warn('Nodes list expects pagination headers but none found');
+          console.warn('Nodes list expects pagination headers but none found'); // eslint-disable-line no-console
 
           return [];
         }
       }
 
-      const headers = [...this.$store.getters['type-map/headersFor'](this.schema, false)]; // TODO: RC TEST
+      const headers = [...this.$store.getters['type-map/headersFor'](this.schema, false)];
 
       if (this.canViewPods) {
         headers.splice(headers.length - 1, 0, {
@@ -159,35 +156,29 @@ export default defineComponent({
 
   methods: {
     async loadMetrics() {
-      const schema = this.$store.getters['cluster/schemaFor'](METRIC.NODE);
-
-      // TODO: RC exclude metadata.fields not added
-
-      if (schema) {
-        // TODO: RC HEEEEEERE
-        const opt: ActionFindPageArgs = {
-          force:      true,
-          pagination: {
-            page:     1,
-            pageSize: -1,
-            sort:     [{
-              field: 'metadata.name',
-              asc:   true,
-            }],
-            filter: this.rows.map((r: any) => ({
-              field: 'status.nodeName',
-              value: r.id
-            })),
-          }
-        };
-
-        await this.$store.dispatch('cluster/findPage', {
-          type: METRIC.NODE,
-          opt
-        });
-
-        this.$forceUpdate();
+      if (!this.canViewNodeMetrics || !this.rows.length) {
+        return;
       }
+
+      const opt: ActionFindPageArgs = {
+        force:      true,
+        pagination: {
+          page:   1,
+          filter: [new OptPaginationFilter({
+            fields: this.rows.map((r: any) => new OptPaginationFilterField({
+              field: 'metadata.name',
+              value: r.id
+            }))
+          })]
+        }
+      };
+
+      await this.$store.dispatch('cluster/findPage', {
+        type: METRIC.NODE,
+        opt
+      });
+
+      this.$forceUpdate();
     },
 
     toggleLabels(row: any) {
@@ -206,58 +197,60 @@ export default defineComponent({
       const canViewCAPIMachines = this.$store.getters[`management/schemaFor`](CAPI.MACHINE);
 
       if (canViewMgmtNodes && canViewNormanNodes) {
-        // Norman node required for Drain/Cordon/Uncordon action
-        // Mgmt Node required to find Norman node
+        // We only fetch mgmt node to get norman node. We only fetch node to get node actions
+        // See https://github.com/rancher/dashboard/issues/10743
         const opt: ActionFindPageArgs = {
           force:      false,
           pagination: {
-            page:     1,
-            pageSize: -1,
-            sort:     [{
-              field: 'metadata.name',
-              asc:   true,
-            }],
-            filter: this.rows.map((r: any) => ({
-              field: 'status.nodeName',
-              value: r.id
-            })),
+            page:   1,
+            filter: [
+              new OptPaginationFilter({
+                fields: this.rows.map((r: any) => new OptPaginationFilterField({
+                  field: 'status.nodeName',
+                  value: r.id
+                }))
+              })
+            ],
           }
         };
 
         this.$store.dispatch(`management/findPage`, {
           type: MANAGEMENT.NODE,
           opt
+        }).then(() => {
+          this.$store.dispatch(`rancher/findAll`, { type: NORMAN.NODE });
         });
-
-        this.$store.dispatch(`rancher/findAll`, { type: NORMAN.NODE });
       }
 
       if (canViewCAPIMachines) {
         const namespace = this.currentCluster.provClusterId?.split('/')[0];
 
         if (namespace) {
+          const filterByNamespace = OptPaginationFilter.namespace(namespace); // TODO: RC add this back in to pag object as conveinecne
+          const filterBySpecificMachines = new OptPaginationFilter({
+            fields: this.rows.reduce((res: OptPaginationFilterField[], r: any ) => {
+              const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
+
+              // TODO: RC get all paths used in filter... pass on to backend
+              if (name) {
+                res.push(new OptPaginationFilterField({
+                  field: 'metadata.name',
+                  value: name,
+                }));
+              }
+
+              return res;
+            }, [])
+          });
+
           const opt: ActionFindPageArgs = {
             force:      false,
             pagination: {
-              page:     1,
-              pageSize: -1,
-              sort:     [{ // TODO: RC remove sort from these?
-                field: 'metadata.name',
-                asc:   true,
-              }],
-              // Note - we cannot filter by (namespace and name) OR (namespace and name)
-              // All nodes should be in the same namespace, so use that here
-              namespaces: [namespace],
-              filter:     this.rows
-                .map((r: any) => {
-                  const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
-
-                  return name ? {
-                    field: 'spec.nodeName',
-                    value: this.name,
-                  } : null;
-                })
-                .filter((r: any) => !!r)
+              page:   1,
+              filter: [
+                filterByNamespace,
+                filterBySpecificMachines
+              ]
             }
           };
 
@@ -269,23 +262,17 @@ export default defineComponent({
       }
 
       if (this.canViewPods) {
-        // // Used for running pods metrics - we don't need to block on this to show the list of nodes
-        //   this.$fetchType(POD); // TODO: RC
+        // Note - fetching pods for current page could be a LOT still (probably max of 3k - 300 pods per node x 100 nodes in a page)
         const opt: ActionFindPageArgs = {
           force:      false,
           pagination: {
-            page:     1,
-            pageSize: -1,
-            sort:     [{ // TODO: RC remove sort from these?
-              field: 'metadata.name',
-              asc:   true,
-            }],
-            filter: this.rows
-              .map((r: any) => ({
+            page:   1,
+            filter: [new OptPaginationFilter({
+              fields: this.rows.map((r: any) => new OptPaginationFilterField({
                 field: 'spec.nodeName',
                 value: r.id,
               }))
-              .filter((r: any) => !!r)
+            })]
           }
         };
 
@@ -294,6 +281,9 @@ export default defineComponent({
           opt
         });
       }
+
+      // Fetch metrics given the current page
+      this.loadMetrics();
     },
   }
 
@@ -308,7 +298,7 @@ export default defineComponent({
       color="info"
       :label="t('cluster.custom.registrationCommand.windowsWarning')"
     />
-    <br>node: {{ canPaginate }}, {{ isResourceList }} {{ resource }}
+    <br>node: canPaginate:{{ canPaginate }}, isResourceList:{{ isResourceList }} resource:{{ resource }}
     <ResourceTable
       v-bind="$attrs"
       :schema="schema"
