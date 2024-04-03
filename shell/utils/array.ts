@@ -191,7 +191,6 @@ export function sameArrayObjects<T>(aryA: T[], aryB: T[], positionAgnostic = fal
   }
 
   if (positionAgnostic) {
-    debugger;
     const consumedB: { [pos: number]: boolean } = {};
 
     aryB.forEach((_, index) => {

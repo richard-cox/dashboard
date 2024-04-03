@@ -41,7 +41,7 @@ export default {
     const parsedUrl = parse(url);
     const isSteve = steveRegEx.test(parsedUrl.path);
 
-    const stevePagination = stevePaginationUtils.checkAndCreateParam(opt);
+    const stevePagination = stevePaginationUtils.createParamsForPagination(opt);
 
     if (stevePagination) {
       url += `${ (url.includes('?') ? '&' : '?') + stevePagination }`;

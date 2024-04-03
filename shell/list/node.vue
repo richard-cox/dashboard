@@ -8,7 +8,7 @@ import metricPoller from '@shell/mixins/metric-poller';
 import { CAPI as CAPI_ANNOTATIONS } from '@shell/config/labels-annotations.js';
 
 import { defineComponent } from 'vue';
-import { ActionFindPageArgs, OptPaginationFilter, OptPaginationFilterField, StorePaginationResult } from '@shell/types/store/dashboard-store.types';
+import { ActionFindPageArgs, PaginationFilterField, PaginationParamFilter, StorePaginationResult } from '@shell/types/store/dashboard-store.types';
 import {
   CAPI,
   MANAGEMENT, METRIC, NODE, NORMAN, POD
@@ -23,6 +23,7 @@ import { mapGetters } from 'vuex';
 // TODO: RC bulk actions are not updated on page load
 // TODO: RC test fetching pods here --> pods list
 // TODO: RC test non-paginationed world
+// TODO: RC find all `PaginationFilterField` fields and get them indexed
 
 export default defineComponent({
   name:       'ListNode',
@@ -163,9 +164,9 @@ export default defineComponent({
       const opt: ActionFindPageArgs = {
         force:      true,
         pagination: {
-          page:   1,
-          filter: [new OptPaginationFilter({
-            fields: this.rows.map((r: any) => new OptPaginationFilterField({
+          page:    1,
+          filters: [new PaginationParamFilter({
+            fields: this.rows.map((r: any) => new PaginationFilterField({
               field: 'metadata.name',
               value: r.id
             }))
@@ -202,14 +203,12 @@ export default defineComponent({
         const opt: ActionFindPageArgs = {
           force:      false,
           pagination: {
-            page:   1,
-            filter: [
-              new OptPaginationFilter({
-                fields: this.rows.map((r: any) => new OptPaginationFilterField({
-                  field: 'status.nodeName',
-                  value: r.id
-                }))
-              })
+            page:    1,
+            filters: [
+              PaginationParamFilter.createMultipleFields(this.rows.map((r: any) => new PaginationFilterField({
+                field: 'status.nodeName',
+                value: r.id
+              })))
             ],
           }
         };
@@ -226,14 +225,13 @@ export default defineComponent({
         const namespace = this.currentCluster.provClusterId?.split('/')[0];
 
         if (namespace) {
-          const filterByNamespace = OptPaginationFilter.namespace(namespace); // TODO: RC add this back in to pag object as conveinecne
-          const filterBySpecificMachines = new OptPaginationFilter({
-            fields: this.rows.reduce((res: OptPaginationFilterField[], r: any ) => {
+          const filterByNamespace = PaginationParamFilter.createNamespaceField(namespace); // TODO: RC add this back in to pag object as conveinecne
+          const filterBySpecificMachines = PaginationParamFilter.createMultipleFields(
+            this.rows.reduce((res: PaginationFilterField[], r: any ) => {
               const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
 
-              // TODO: RC get all paths used in filter... pass on to backend
               if (name) {
-                res.push(new OptPaginationFilterField({
+                res.push(new PaginationFilterField({
                   field: 'metadata.name',
                   value: name,
                 }));
@@ -241,13 +239,28 @@ export default defineComponent({
 
               return res;
             }, [])
-          });
+          );
+
+          // new PaginationParamFilter(
+          //   fields: this.rows.reduce((res: PaginationFilterField[], r: any ) => {
+          //     const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
+
+          //     if (name) {
+          //       res.push(new PaginationFilterField({
+          //         field: 'metadata.name',
+          //         value: name,
+          //       }));
+          //     }
+
+          //     return res;
+          //   }, [])
+          // });
 
           const opt: ActionFindPageArgs = {
             force:      false,
             pagination: {
-              page:   1,
-              filter: [
+              page:    1,
+              filters: [
                 filterByNamespace,
                 filterBySpecificMachines
               ]
@@ -266,13 +279,22 @@ export default defineComponent({
         const opt: ActionFindPageArgs = {
           force:      false,
           pagination: {
-            page:   1,
-            filter: [new OptPaginationFilter({
-              fields: this.rows.map((r: any) => new OptPaginationFilterField({
-                field: 'spec.nodeName',
-                value: r.id,
-              }))
-            })]
+            page:    1,
+            filters: [
+              PaginationParamFilter.createMultipleFields(
+                this.rows.map((r: any) => new PaginationFilterField({
+                  field: 'spec.nodeName',
+                  value: r.id,
+                }))
+              )
+            ]
+
+            // filters: [new PaginationParamFilter({
+            //   fields: this.rows.map((r: any) => new PaginationFilterField({
+            //     field: 'spec.nodeName',
+            //     value: r.id,
+            //   }))
+            // })]
           }
         };
 
@@ -291,7 +313,6 @@ export default defineComponent({
 </script>
 
 <template>
-  <!-- v-if="initialFetchCompleted" -->
   <div>
     <Banner
       v-if="hasWindowsNodes"
@@ -299,6 +320,7 @@ export default defineComponent({
       :label="t('cluster.custom.registrationCommand.windowsWarning')"
     />
     <br>node: canPaginate:{{ canPaginate }}, isResourceList:{{ isResourceList }} resource:{{ resource }}
+    <!-- TODO: RC above -->
     <ResourceTable
       v-bind="$attrs"
       :schema="schema"

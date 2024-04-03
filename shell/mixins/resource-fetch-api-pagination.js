@@ -5,7 +5,7 @@ import { mapGetters } from 'vuex';
 import { ResourceListComponentName } from '../components/ResourceList/resource-list.config';
 import paginationUtils from '@shell/utils/pagination-utils';
 import debounce from 'lodash/debounce';
-import { OptPaginationFilter, OptPaginationFilterField } from '@shell/types/store/dashboard-store.types';
+import { PaginationParamFilter, PaginationFilterField } from '@shell/types/store/dashboard-store.types';
 import stevePaginationUtils from '@shell/plugins/steve/steve-pagination-utils';
 
 /**
@@ -39,7 +39,7 @@ export default {
     },
 
     paginationChanged(event) {
-      const searchFilters = event.filter.searchQuery ? event.filter.searchFields.map((field) => new OptPaginationFilterField({
+      const searchFilters = event.filter.searchQuery ? event.filter.searchFields.map((field) => new PaginationFilterField({
         field,
         value: event.filter.searchQuery,
       })) : [];
@@ -53,8 +53,8 @@ export default {
           asc: !event.descending
         })),
         projectsOrNamespaces: this.requestFilters.projectsOrNamespaces,
-        filter:               [
-          new OptPaginationFilter({ fields: searchFilters }),
+        filters:              [
+          new PaginationParamFilter({ fields: searchFilters }),
           ...this.requestFilters.filters, // Apply the additional filters. these aren't from the user but from ns filtering
         ]
       });

@@ -5,7 +5,7 @@ import { NAMESPACE_FILTER_NS_FULL_PREFIX, NAMESPACE_FILTER_P_FULL_PREFIX } from 
  *
  * For more information see https://github.com/rancher/steve?tab=readme-ov-file#sort
  */
-export interface OptPaginationSort {
+export interface PaginationSort {
   /**
    * Name of field within the object to sort by
    */
@@ -23,14 +23,20 @@ export interface OptPaginationSort {
  *
  * For more information see https://github.com/rancher/steve?tab=readme-ov-file#query-parameters
  */
-export class OptPaginationFilterField {
+export class PaginationFilterField {
   /**
-   * Name of field within the object to sort by
+   * Name of field within the object to filter by for example the x of x=y
    *
    * This can be optional for some (projectsornamespaces)
    */
   field?: string;
+  /**
+   * Value of field within the object to filter by for example the y of x=y
+   */
   value: string;
+  /**
+   * Equality field within the object to filter by for example the `=` or `!=` of x=y
+   */
   equals: boolean;
 
   constructor(
@@ -44,35 +50,64 @@ export class OptPaginationFilterField {
 }
 
 /**
- * Filter the pagination result by a number of fields
+ * Represents filter like params, for example
  *
- * OptPaginationFilter can be used in two ways
+ * - `filter=abc!=xyz&def=123`
+ * - `projectsornamespace!=p-3456`
  *
- * 1) OR'd together
- *  - a=1 OR b=2 OR c=3
-    - Query Param - filter=a=1,b=2,c=3
- *  - Object structure - [
- *      [a,1],[b,2],[c,3]
- *    ]
+ * ### Params
+ * #### Filter
+ * - For more information see https://github.com/rancher/steve?tab=readme-ov-file#filter
  *
- * 2) AND'd together
-  *- a=1 AND b=2 AND c=3
- *  - Query Param - filter=a=1&filter=b=2&filter=c=3
- *  - Object structure - [
- *      [a,1]
- *    ],
- *    [
- *      [b,2]
- *    ],
- *    [
- *      [c,3]
- *    ]
+ * #### Projects Or Namespace
+ * - For more information see https://github.com/rancher/steve?tab=readme-ov-file#projectsornamespaces
  *
- * This structure should give enough flexibility to cover all uses
+ * ### Combining Params
+ * Params can be combined in two logical ways
  *
- * For more information see https://github.com/rancher/steve?tab=readme-ov-file#filter
+ * 1) AND
+ *    - Used when you would like to filter by something like a=1 AND b=2 AND c=3
+ *    - To do this multiple instances of `PaginationParam` are used in an array
+ *      - Object Structure
+ *        ```
+ *        [
+ *          PaginationParam,
+ *          PaginationParam,
+ *          PaginationParam
+ *        ]
+ *        ```
+ *      - Results in url
+ *        ```
+ *        filter=a=1&filter=b=2&filter=c=3
+ *        ```
+ *      - Examples
+ *        - `filter=metadata.namespace=abc&filter=metadata.name=123,property=123`
+ * 2) OR
+ *    - Used when you would like to filter by something like a=1 OR b=2 OR c=3
+ *    - To do this multiple fields within a single PaginationParam is used
+ *      - Object Structure
+ *        ```
+ *        [
+ *          PaginationParam {
+ *            PaginationFilterField,
+ *            PaginationFilterField,
+ *            PaginationFilterField
+ *          }
+ *        ]
+ *        ```
+ *      - Results in url
+ *        ```
+ *        filter=a=1,b=2,c=3
+ *        ```
+ *
+ *      - For example `filter=a=1,b=2,c=3`
+ *
+ *
+ * This structure should give enough flexibility to cover all uses.
+ *
+ *
  */
-export class OptPaginationFilter {// implements OptPaginationFilter
+export abstract class PaginationParam {
   /**
    * Query Param. For example `filter` or `projectsornamespaces`
    */
@@ -88,23 +123,58 @@ export class OptPaginationFilter {// implements OptPaginationFilter
    *
    * For example metadata.namespace=abc OR metadata.namespace=xyz
    */
-  fields: OptPaginationFilterField[];
+  fields: PaginationFilterField[];
 
   constructor(
-    { param = 'filter', equals = true, fields = [] }:
-    { param?: string; equals?: boolean; fields?: OptPaginationFilterField[];
+    { param, equals = true, fields = [] }:
+    { param: string; equals?: boolean; fields?: PaginationFilterField[];
   }) {
     this.param = param;
     this.equals = equals;
     this.fields = fields;
   }
+}
 
-  static basic(field: { field?: string; value: string; equals?: boolean; }): OptPaginationFilter {
-    return new OptPaginationFilter({ fields: [new OptPaginationFilterField(field)] });
+/**
+ * This is a convenience class for the `filter` param which works some magic, adds defaults and converts to the required PaginationParam format
+ *
+ * See description for {@link `PaginationParam`} for how multiple of these can be combined together to AND or OR together
+ *
+ * For more information see https://github.com/rancher/steve?tab=readme-ov-file#filter
+ */
+export class PaginationParamFilter extends PaginationParam {
+  constructor(
+    { equals = true, fields = [] }:
+    { equals?: boolean; fields?: PaginationFilterField[]; }
+  ) {
+    super({
+      param: 'filter',
+      equals,
+      fields
+    });
   }
 
-  static namespace(namespace: string): OptPaginationFilter {
-    return OptPaginationFilter.basic({
+  /**
+   * Convenience method when you just want a simple `filter=x=y` param
+   */
+  static createSingleField(field: { field?: string; value: string; equals?: boolean; }): PaginationParam {
+    return new PaginationParamFilter({ fields: [new PaginationFilterField(field)] });
+  }
+
+  /**
+   * Convenience method when you just want a simple `filter=a=1,b=2,c=3` PaginationParam
+   *
+   * These will be OR'd together
+   */
+  static createMultipleFields(fields: PaginationFilterField[]): PaginationParam {
+    return new PaginationParamFilter({ fields });
+  }
+
+  /**
+   * Convenience method when you just want a simple `filter=metadata.namespace=a` PaginationParam
+   */
+  static createNamespaceField(namespace: string): PaginationParam {
+    return PaginationParamFilter.createSingleField({
       field: 'metadata.namespace',
       value: namespace
     });
@@ -112,16 +182,18 @@ export class OptPaginationFilter {// implements OptPaginationFilter
 }
 
 /**
- * This is a convenience class which works some magic, adds defaults and converts to the required OptPaginationFilter format
+ * This is a convenience class for the `projectsornamespaces` param which works some magic, adds defaults and converts to the required PaginationParam format
+ *
+ * See description for {@link `PaginationParam`} for how multiple of these can be combined together to AND or OR together
  *
  * For more information see https://github.com/rancher/steve?tab=readme-ov-file#projectsornamespaces
  */
-export class OptPaginationProjectOrNamespace extends OptPaginationFilter {
+export class PaginationParamProjectOrNamespace extends PaginationParam {
   constructor(
-    { equals = true, fields = [] }:
-    { equals?: boolean; fields?: OptPaginationFilterField[]; }
+    { equals = true, projectOrNamespace = [] }:
+    { equals?: boolean; projectOrNamespace?: PaginationFilterField[]; }
   ) {
-    const safeFields = fields.map((f) => {
+    const safeFields = projectOrNamespace.map((f) => {
       return {
         ...f,
         value: f.value
@@ -141,12 +213,12 @@ export class OptPaginationProjectOrNamespace extends OptPaginationFilter {
 /**
  * Pagination settings sent to actions and persisted to store
  */
-export interface OptPagination { // TODO: RC rename pagination args
+export interface PaginationArgs {
   page: number,
   pageSize?: number, // TODO: RC Confirm - what happens if none supplied?
-  sort?: OptPaginationSort[],
-  filter: OptPaginationFilter[],
-  projectsOrNamespaces?: OptPaginationFilter[],
+  sort?: PaginationSort[],
+  filters: PaginationParamFilter[],
+  projectsOrNamespaces?: PaginationParamProjectOrNamespace[],
 }
 
 /**
@@ -154,7 +226,7 @@ export interface OptPagination { // TODO: RC rename pagination args
  *
  * Should not contain actual resources but overall stats (count, pages, etc)
  */
-export interface StorePaginationResult {
+export interface StorePaginationResult { // TODO: RC BUG ccheck coutn page not empy
   count: number,
   pages: number,
   timestamp: number,
@@ -170,7 +242,7 @@ export interface StorePagination {
     /**
    * This set of pagination settings that created the result
    */
-  request: OptPagination,
+  request: PaginationArgs,
     /**
    * Information in the response outside of the actual resources returned
    */
@@ -199,6 +271,6 @@ export interface ActionFindAllArgs extends ActionCoreFindArgs {
  * Args used for findPage action
  */
 export interface ActionFindPageArgs extends ActionCoreFindArgs {
-  pagination: OptPagination,
+  pagination: PaginationArgs,
   hasManualRefresh?: boolean,
 }
