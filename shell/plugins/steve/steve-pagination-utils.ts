@@ -1,6 +1,5 @@
-import {
-  ActionFindPageArgs, PaginationParam, PaginationFilterField, PaginationParamProjectOrNamespace, PaginationParamFilter
-} from '@shell/types/store/dashboard-store.types';
+import { ActionFindPageArgs } from '@shell/types/store/dashboard-store.types';
+import { PaginationParam, PaginationFilterField, PaginationParamProjectOrNamespace, PaginationParamFilter } from '@shell/types/store/pagination.types';
 import { NAMESPACE_FILTER_ALL_SYSTEM, NAMESPACE_FILTER_ALL_USER, NAMESPACE_FILTER_P_FULL_PREFIX } from '@shell/utils/namespace-filter';
 import Namespace from '@shell/models/namespace';
 
