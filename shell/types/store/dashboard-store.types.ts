@@ -28,5 +28,6 @@ export interface ActionFindPageArgs extends ActionCoreFindArgs {
    * This is stored and can be used to compare in new request to determine if we already have this page
    */
   pagination: PaginationArgs,
+  namespaced?: string,
   hasManualRefresh?: boolean,
 }

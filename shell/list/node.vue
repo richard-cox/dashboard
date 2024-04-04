@@ -28,7 +28,8 @@ import { mapGetters } from 'vuex';
 // TODO: RC find all `PaginationFilterField` fields and get them indexed
 
 // TODO: RC comment
-// Pagination changes that don't affect the current page (sorting) should not kick off requests for secondary resources
+// Pagination changes that don't affect the current page (sorting) should not kick off requests for secondary resources (metrics aside)
+// Refresh should fetch all secondary resources as well
 
 export default defineComponent({
   name:       'ListNode',
@@ -225,29 +226,24 @@ export default defineComponent({
         const namespace = this.currentCluster.provClusterId?.split('/')[0];
 
         if (namespace) {
-          const filterByNamespace = PaginationParamFilter.createNamespaceField(namespace); // TODO: RC add this back in to pag object as conveinecne
-          const filterBySpecificMachines = PaginationParamFilter.createMultipleFields(
-            this.rows.reduce((res: PaginationFilterField[], r: any ) => {
-              const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
-
-              if (name) {
-                res.push(new PaginationFilterField({
-                  field: 'metadata.name',
-                  value: name,
-                }));
-              }
-
-              return res;
-            }, [])
-          );
-
           const opt: ActionFindPageArgs = {
             force,
+            namespaced: namespace,
             pagination: new PaginationArgs({
-              filters: [
-                filterByNamespace,
-                filterBySpecificMachines
-              ]
+              filters: PaginationParamFilter.createMultipleFields(
+                this.rows.reduce((res: PaginationFilterField[], r: any ) => {
+                  const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
+
+                  if (name) {
+                    res.push(new PaginationFilterField({
+                      field: 'metadata.name',
+                      value: name,
+                    }));
+                  }
+
+                  return res;
+                }, [])
+              )
             })
           };
 

@@ -203,16 +203,6 @@ export class PaginationParamFilter extends PaginationParam {
   static createMultipleFields(fields: PaginationFilterField[]): PaginationParam {
     return new PaginationParamFilter({ fields });
   }
-
-  /**
-   * Convenience method when you just want an instance of {@link PaginationParamFilter} with a simple `filter=metadata.namespace=a` PaginationParam
-   */
-  static createNamespaceField(namespace: string): PaginationParam {
-    return PaginationParamFilter.createSingleField({
-      field: 'metadata.namespace',
-      value: namespace
-    });
-  }
 }
 
 /**
@@ -260,7 +250,7 @@ export class PaginationParamProjectOrNamespace extends PaginationParam {
 /**
  * Pagination settings sent to actions and persisted to store
  */
-export class PaginationArgs { // implements IPaginationArgs
+export class PaginationArgs {
   /**
    * Page number to fetch
    */
@@ -353,7 +343,13 @@ export class PaginationArgs { // implements IPaginationArgs
 export interface StorePaginationResult { // TODO: RC BUG ccheck coutn page not empy
   count: number,
   pages: number,
+  namespace: string,
   timestamp: number,
+}
+
+export interface StorePaginationRequest {
+  namespace?: string,
+  pagination: PaginationArgs
 }
 
 /**
@@ -363,10 +359,11 @@ export interface StorePaginationResult { // TODO: RC BUG ccheck coutn page not e
  * Object persisted to store
  */
 export interface StorePagination {
-  /**
-   * This set of pagination settings that created the result
+    /**
+   * This set of pagination settings that created the result // TODO: RC
    */
-  request: PaginationArgs,
+  request: StorePaginationRequest,
+
   /**
    * Information in the response outside of the actual resources returned
    */

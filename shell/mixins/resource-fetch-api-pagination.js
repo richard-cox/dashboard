@@ -85,6 +85,9 @@ export default {
       this.debouncedSetPagination({ ...this.pPagination });
     },
 
+    /**
+     * Compare two {@link: PaginationArgs}
+     */
     paginationEqual(neu, old) {
       if (!neu.page) {
         // Not valid, don't bother

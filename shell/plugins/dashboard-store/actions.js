@@ -123,7 +123,7 @@ export default {
           }
         });
       } else {
-      // We have everything!
+        // We have everything!
         if (opt.hasManualRefresh) {
           dispatch('resource-fetch/updateManualRefreshIsLoading', false, { root: true });
         }
@@ -164,8 +164,7 @@ export default {
       !opt.force &&
       (
         getters['haveAll'](type) ||
-        getters['haveAllNamespace'](type, opt.namespaced) ||
-        (opt.pagination ? getters['havePaginatedPage'](type, opt.pagination) : false)
+        getters['haveAllNamespace'](type, opt.namespaced)
       )
     ) {
       if (opt.watch !== false ) {
@@ -384,7 +383,7 @@ export default {
     }
 
     // No need to request the resources if we have them already
-    if (!opt.force && getters['havePaginatedPage'](type, opt.pagination)) {
+    if (!opt.force && getters['havePaginatedPage'](type, opt)) {
       return findAllGetter(getters, type, opt);
     }
 
@@ -413,8 +412,11 @@ export default {
       type,
       data:       out.data,
       pagination: opt.pagination ? {
-        request: opt.pagination,
-        result:  {
+        request: {
+          namespace:  opt.namespaced,
+          pagination: opt.pagination
+        },
+        result: {
           count:     out.count, // TODO: RC check this is working
           pages:     out.pages,
           timestamp: new Date().getTime() // TODO: RC hmmm
