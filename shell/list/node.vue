@@ -27,6 +27,9 @@ import { mapGetters } from 'vuex';
 // TODO: RC test non-paginationed world
 // TODO: RC find all `PaginationFilterField` fields and get them indexed
 
+// TODO: RC comment
+// Pagination changes that don't affect the current page (sorting) should not kick off requests for secondary resources
+
 export default defineComponent({
   name:       'ListNode',
   components: {
@@ -61,18 +64,6 @@ export default defineComponent({
 
     const hash: any = { kubeNodes: this.$fetchType(this.resource) };
 
-    // Pods required for `Pods` column's running pods metrics
-    // podConsumedUsage = podConsumed / podConsumedUsage. podConsumed --> pods. allPods.filter((pod) => pod.spec.nodeName === this.name)
-    this.canViewPods = this.$store.getters[`cluster/schemaFor`](POD);
-    // Norman node required for Drain/Cordon/Uncordon action
-    this.canViewNormanNodes = this.$store.getters[`rancher/schemaFor`](NORMAN.NODE);
-    // Mgmt Node required to find Norman node
-    this.canViewMgmtNodes = this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE);
-    // Required for ssh / download key actions
-    this.canViewMachines = this.$store.getters[`management/schemaFor`](CAPI.MACHINE);
-    // Required for CPU and RAM columns
-    this.canViewNodeMetrics = this.$store.getters['cluster/schemaFor'](METRIC.NODE);
-
     if (!this.canPaginate) {
       if (this.canViewMgmtNodes) {
         hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
@@ -96,7 +87,19 @@ export default defineComponent({
   },
 
   data() {
-    return { canViewPods: false };
+    return {
+      // Pods required for `Pods` column's running pods metrics
+      // podConsumedUsage = podConsumed / podConsumedUsage. podConsumed --> pods. allPods.filter((pod) => pod.spec.nodeName === this.name)
+      canViewPods:        !!this.$store.getters[`cluster/schemaFor`](POD),
+      // Norman node required for Drain/Cordon/Uncordon action
+      canViewNormanNodes: !!this.$store.getters[`rancher/schemaFor`](NORMAN.NODE),
+      // Mgmt Node required to find Norman node
+      canViewMgmtNodes:   !!this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE),
+      // Required for ssh / download key actions
+      canViewMachines:    !!this.$store.getters[`management/schemaFor`](CAPI.MACHINE),
+      // Required for CPU and RAM columns
+      canViewNodeMetrics: !!this.$store.getters['cluster/schemaFor'](METRIC.NODE),
+    };
   },
 
   beforeDestroy() {
@@ -186,23 +189,24 @@ export default defineComponent({
     toggleLabels(row: any) {
       this.$set(row, 'displayLabels', !row.displayLabels);
     },
-  },
 
-  watch: {
-    paginationResult(neu: StorePaginationResult, old: StorePaginationResult) {
-      if (!neu || neu.timestamp === old?.timestamp || !this.rows?.length) {
+    /**
+     * Nodes columns need other resources in order to show data in some columns
+     *
+     * In the paginated world we want to resrict the fetch of those resources to only the one's we need
+     *
+     * So when we have a page.... use those entries as filters when fetching the other resources
+     */
+    fetchPageSecondaryResources(force = false) {
+      if (!this.rows?.length) {
         return;
       }
 
-      const canViewMgmtNodes = this.$store.getters[`management/schemaFor`](MANAGEMENT.NODE);
-      const canViewNormanNodes = this.$store.getters[`rancher/schemaFor`](NORMAN.NODE);
-      const canViewCAPIMachines = this.$store.getters[`management/schemaFor`](CAPI.MACHINE);
-
-      if (canViewMgmtNodes && canViewNormanNodes) {
+      if (this.canViewMgmtNodes && this.canViewNormanNodes) {
         // We only fetch mgmt node to get norman node. We only fetch node to get node actions
         // See https://github.com/rancher/dashboard/issues/10743
         const opt: ActionFindPageArgs = {
-          force:      false,
+          force,
           pagination: new PaginationArgs({
             filters: PaginationParamFilter.createMultipleFields(this.rows.map((r: any) => new PaginationFilterField({
               field: 'status.nodeName',
@@ -211,15 +215,13 @@ export default defineComponent({
           })
         };
 
-        this.$store.dispatch(`management/findPage`, {
-          type: MANAGEMENT.NODE,
-          opt
-        }).then(() => {
-          this.$store.dispatch(`rancher/findAll`, { type: NORMAN.NODE });
-        });
+        this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE, opt })
+          .then(() => {
+            this.$store.dispatch(`rancher/findAll`, { type: NORMAN.NODE, opt: { force } });
+          });
       }
 
-      if (canViewCAPIMachines) {
+      if (this.canViewMachines) {
         const namespace = this.currentCluster.provClusterId?.split('/')[0];
 
         if (namespace) {
@@ -240,7 +242,7 @@ export default defineComponent({
           );
 
           const opt: ActionFindPageArgs = {
-            force:      false,
+            force,
             pagination: new PaginationArgs({
               filters: [
                 filterByNamespace,
@@ -249,17 +251,14 @@ export default defineComponent({
             })
           };
 
-          this.$store.dispatch(`management/findPage`, {
-            type: CAPI.MACHINE,
-            opt
-          });
+          this.$store.dispatch(`management/findPage`, { type: CAPI.MACHINE, opt });
         }
       }
 
       if (this.canViewPods) {
         // Note - fetching pods for current page could be a LOT still (probably max of 3k - 300 pods per node x 100 nodes in a page)
         const opt: ActionFindPageArgs = {
-          force:      false,
+          force,
           pagination: new PaginationArgs({
             filters: PaginationParamFilter.createMultipleFields(
               this.rows.map((r: any) => new PaginationFilterField({
@@ -270,15 +269,22 @@ export default defineComponent({
           })
         };
 
-        this.$store.dispatch(`cluster/findPage`, {
-          type: POD,
-          opt
-        });
+        this.$store.dispatch(`cluster/findPage`, { type: POD, opt });
       }
 
       // Fetch metrics given the current page
       this.loadMetrics();
     },
+  },
+
+  watch: {
+    paginationResult(neu: StorePaginationResult, old: StorePaginationResult) {
+      if (!neu || neu.timestamp === old?.timestamp) {
+        return;
+      }
+
+      this.fetchPageSecondaryResources();
+    }
   }
 
 });
@@ -291,7 +297,7 @@ export default defineComponent({
       color="info"
       :label="t('cluster.custom.registrationCommand.windowsWarning')"
     />
-    <br>node: canPaginate:{{ canPaginate }}, isResourceList:{{ isResourceList }} resource:{{ resource }}
+    <br>node: canPaginate:{{ canPaginate }}, isResourceList:{{ isResourceList }} resource:{{ resource }}, canViewNormanNodes: {{ !!canViewNormanNodes }}
     <!-- TODO: RC remove above -->
     <ResourceTable
       v-bind="$attrs"

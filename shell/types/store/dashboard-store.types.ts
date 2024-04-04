@@ -1,3 +1,5 @@
+import { PaginationArgs } from '@shell/types/store/pagination.types';
+
 /**
  * Properties on all findX actions
  */
