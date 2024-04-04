@@ -415,7 +415,7 @@ export default {
       pagination: opt.pagination ? {
         request: opt.pagination,
         result:  {
-          count:     out.count,
+          count:     out.count, // TODO: RC check this is working
           pages:     out.pages,
           timestamp: new Date().getTime() // TODO: RC hmmm
         }

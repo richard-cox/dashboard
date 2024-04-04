@@ -83,7 +83,7 @@ class NamespaceProjectFilters {
     // return resources in project 1 OR namespace 2
     // &projectsornamespaces=project 1,namespace 2
     const projectsOrNamespaces = [
-      new PaginationParamProjectOrNamespace({ projectOrNamespace: neu.map((selection) => new PaginationFilterField({ value: selection })) })
+      new PaginationParamProjectOrNamespace({ projectOrNamespace: neu })
     ];
 
     if (isLocalCluster) {
@@ -161,7 +161,6 @@ class StevePaginationUtils extends NamespaceProjectFilters {
     //   - Only System Namespaces - Gimme resources in the system namespaces (which shouldn't be many namespaces)
     //   - Only User Namespaces - Gimme resources NOT in system namespaces
     //   - User selection - Gimme resources in specific Projects or Namespaces
-
     if (isAllNamespaces && (showDynamicRancherNamespaces && !productHidesSystemNamespaces)) {
       // No-op. Everything is returned
       return {

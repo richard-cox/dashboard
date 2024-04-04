@@ -5,7 +5,7 @@ import { mapGetters } from 'vuex';
 import { ResourceListComponentName } from '../components/ResourceList/resource-list.config';
 import paginationUtils from '@shell/utils/pagination-utils';
 import debounce from 'lodash/debounce';
-import { PaginationParamFilter, PaginationFilterField } from '@shell/types/store/dashboard-store.types';
+import { PaginationParamFilter, PaginationFilterField, PaginationArgs } from '@shell/types/store/dashboard-store.types';
 import stevePaginationUtils from '@shell/plugins/steve/steve-pagination-utils';
 
 /**
@@ -44,8 +44,7 @@ export default {
         value: event.filter.searchQuery,
       })) : [];
 
-      this.debouncedSetPagination({
-        ...this.pPagination,
+      const pagination = new PaginationArgs({
         page:     event.page,
         pageSize: event.perPage,
         sort:     event.sort?.map((field) => ({
@@ -58,6 +57,8 @@ export default {
           ...this.requestFilters.filters, // Apply the additional filters. these aren't from the user but from ns filtering
         ]
       });
+
+      this.debouncedSetPagination(pagination);
     },
 
     namespaceFilterChanged(neu) {
@@ -185,14 +186,6 @@ export default {
   },
 
   watch: {
-    // '$fetchState.pending'(neu) {
-    //   if (this.isResourceList) {
-    //     this.initialFetchCompleted = true;
-    //   } else {
-    //     this.initialFetchCompleted = typeof this.initialFetchCompleted !== 'undefined' ? this.initialFetchCompleted || !neu : !neu;
-    //   }
-    // },
-
     /**
      * Monitor the rows to ensure deleting the last entry in a server-side paginated page doesn't
      * result in an empty page
@@ -253,7 +246,6 @@ export default {
       if (this.isResourceList) {
         return;
       }
-      console.warn('mixin', 'watch', 'pagination', neu, old);
 
       if (neu && this.$options.name !== ResourceListComponentName && !!this.$fetch && !this.paginationEqual(neu, old)) {
         await this.$fetch(false);

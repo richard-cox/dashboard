@@ -8,7 +8,9 @@ import metricPoller from '@shell/mixins/metric-poller';
 import { CAPI as CAPI_ANNOTATIONS } from '@shell/config/labels-annotations.js';
 
 import { defineComponent } from 'vue';
-import { ActionFindPageArgs, PaginationFilterField, PaginationParamFilter, StorePaginationResult } from '@shell/types/store/dashboard-store.types';
+import {
+  ActionFindPageArgs, PaginationArgs, PaginationFilterField, PaginationParamFilter, StorePaginationResult
+} from '@shell/types/store/dashboard-store.types';
 import {
   CAPI,
   MANAGEMENT, METRIC, NODE, NORMAN, POD
@@ -163,15 +165,14 @@ export default defineComponent({
 
       const opt: ActionFindPageArgs = {
         force:      true,
-        pagination: {
-          page:    1,
-          filters: [new PaginationParamFilter({
+        pagination: new PaginationArgs({
+          filters: new PaginationParamFilter({
             fields: this.rows.map((r: any) => new PaginationFilterField({
               field: 'metadata.name',
               value: r.id
             }))
-          })]
-        }
+          })
+        })
       };
 
       await this.$store.dispatch('cluster/findPage', {
@@ -202,15 +203,12 @@ export default defineComponent({
         // See https://github.com/rancher/dashboard/issues/10743
         const opt: ActionFindPageArgs = {
           force:      false,
-          pagination: {
-            page:    1,
-            filters: [
-              PaginationParamFilter.createMultipleFields(this.rows.map((r: any) => new PaginationFilterField({
-                field: 'status.nodeName',
-                value: r.id
-              })))
-            ],
-          }
+          pagination: new PaginationArgs({
+            filters: PaginationParamFilter.createMultipleFields(this.rows.map((r: any) => new PaginationFilterField({
+              field: 'status.nodeName',
+              value: r.id
+            }))),
+          })
         };
 
         this.$store.dispatch(`management/findPage`, {
@@ -241,30 +239,14 @@ export default defineComponent({
             }, [])
           );
 
-          // new PaginationParamFilter(
-          //   fields: this.rows.reduce((res: PaginationFilterField[], r: any ) => {
-          //     const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
-
-          //     if (name) {
-          //       res.push(new PaginationFilterField({
-          //         field: 'metadata.name',
-          //         value: name,
-          //       }));
-          //     }
-
-          //     return res;
-          //   }, [])
-          // });
-
           const opt: ActionFindPageArgs = {
             force:      false,
-            pagination: {
-              page:    1,
+            pagination: new PaginationArgs({
               filters: [
                 filterByNamespace,
                 filterBySpecificMachines
               ]
-            }
+            })
           };
 
           this.$store.dispatch(`management/findPage`, {
@@ -278,24 +260,14 @@ export default defineComponent({
         // Note - fetching pods for current page could be a LOT still (probably max of 3k - 300 pods per node x 100 nodes in a page)
         const opt: ActionFindPageArgs = {
           force:      false,
-          pagination: {
-            page:    1,
-            filters: [
-              PaginationParamFilter.createMultipleFields(
-                this.rows.map((r: any) => new PaginationFilterField({
-                  field: 'spec.nodeName',
-                  value: r.id,
-                }))
-              )
-            ]
-
-            // filters: [new PaginationParamFilter({
-            //   fields: this.rows.map((r: any) => new PaginationFilterField({
-            //     field: 'spec.nodeName',
-            //     value: r.id,
-            //   }))
-            // })]
-          }
+          pagination: new PaginationArgs({
+            filters: PaginationParamFilter.createMultipleFields(
+              this.rows.map((r: any) => new PaginationFilterField({
+                field: 'spec.nodeName',
+                value: r.id,
+              }))
+            )
+          })
         };
 
         this.$store.dispatch(`cluster/findPage`, {
@@ -320,7 +292,7 @@ export default defineComponent({
       :label="t('cluster.custom.registrationCommand.windowsWarning')"
     />
     <br>node: canPaginate:{{ canPaginate }}, isResourceList:{{ isResourceList }} resource:{{ resource }}
-    <!-- TODO: RC above -->
+    <!-- TODO: RC remove above -->
     <ResourceTable
       v-bind="$attrs"
       :schema="schema"
