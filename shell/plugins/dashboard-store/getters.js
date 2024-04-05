@@ -39,7 +39,7 @@ export const urlFor = (state, getters) => (type, id, opt) => {
     url = `${ baseUrl }/${ url }`;
   }
 
-  url = getters.urlOptions(url, opt);
+  url = getters.urlOptions(url, opt, type);
 
   return url;
 };
@@ -352,7 +352,7 @@ export default {
 
   urlFor,
 
-  urlOptions: () => (url, opt) => {
+  urlOptions: () => (url, opt, type) => {
     return url;
   },
 

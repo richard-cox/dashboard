@@ -36,12 +36,12 @@ const GC_IGNORE_TYPES = {
 const steveRegEx = new RegExp('(/v1)|(\/k8s\/clusters\/[a-z0-9-]+\/v1)');
 
 export default {
-  urlOptions: () => (url, opt) => {
+  urlOptions: () => (url, opt, type) => {
     opt = opt || {};
     const parsedUrl = parse(url);
     const isSteve = steveRegEx.test(parsedUrl.path);
 
-    const stevePagination = stevePaginationUtils.createParamsForPagination(opt);
+    const stevePagination = stevePaginationUtils.createParamsForPagination(type, opt);
 
     if (stevePagination) {
       url += `${ (url.includes('?') ? '&' : '?') + stevePagination }`;

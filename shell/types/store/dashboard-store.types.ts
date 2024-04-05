@@ -28,6 +28,9 @@ export interface ActionFindPageArgs extends ActionCoreFindArgs {
    * This is stored and can be used to compare in new request to determine if we already have this page
    */
   pagination: PaginationArgs,
+  /**
+   * The single namespace to filter by (used in url path, not part of pagination params)
+   */
   namespaced?: string,
   hasManualRefresh?: boolean,
 }

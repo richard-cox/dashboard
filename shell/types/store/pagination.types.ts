@@ -1,10 +1,35 @@
 import { NAMESPACE_FILTER_NS_FULL_PREFIX, NAMESPACE_FILTER_P_FULL_PREFIX } from '@shell/utils/namespace-filter';
 
-// TODO: RC
-// why classes? adds obvious typing to js files (double check) (instead of random json blob)
-// adds convienens ways to construct without having to be explicit. a lot of times probably don't want advanced cases
-// adds defaults. simplified construction
-// conviences. jsdoc (note link#property does not work)
+// Pagination Typing
+// These structures are designed to offer both convenience and flexibility based on a common structure and are
+// converted to the url param format as per https://github.com/rancher/steve.
+//
+// Simple use cases such as filtering by a single param should be easy to use.
+// More complex filtering (and'ing and 'or'ing multiple fields) is also supported.
+//
+// The top level object `PaginationArgs` contains all properties that will be converted to url params
+//
+// The two important / complex params are currently
+// - `filter` https://github.com/rancher/steve?tab=readme-ov-file#filter
+//   - represented by `PaginationParamFilter extends PaginationParam`
+//   - Examples
+//     - filter=metadata.name=123
+//     - filter=metadata.name=123,metadata.name=456 (name is 123 OR 456)
+//     - filter=metadata.name=123&filter=metadata.namespace=abc (name 123 AND namespace abc)
+// - `projectsornamespaces` https://github.com/rancher/steve?tab=readme-ov-file#projectsornamespaces
+//   - represented by `PaginationParamProjectOrNamespace extends PaginationParam`
+//   - Examples
+//     - projectsornamespaces=123
+//     - projectsornamespaces=123,456 (projects or namespaces that have id 123 OR 456)
+//
+//
+// Some of the types below are defined using classes instead of TS types/interfaces
+// - Avoid making complex json objects by using clearer instance constructors
+//   - Better documented
+//   - Defaults (a lot of the time convenience > utility)
+// - Adds some kind of typing in pure js docs
+//   - class ctor links to definition, instead of object just being a random json blob)
+//   - helps VSCode jsdoc highlighting
 
 /**
  * Sort the pagination result
@@ -257,10 +282,8 @@ export class PaginationArgs {
   page: number;
   /**
    * Number of results in the page
-   *
-   * Defaults to -1 // TODO: RC Confirm - what happens if none supplied?
    */
-  pageSize: number;
+  pageSize?: number;
   /**
    * Sort the results
    *
@@ -287,7 +310,7 @@ export class PaginationArgs {
    */
   constructor({
     page = 1,
-    pageSize = -1,
+    pageSize = 10,
     sort = [],
     filters = [],
     projectsOrNamespaces = [],
@@ -301,7 +324,7 @@ export class PaginationArgs {
     /**
      * For definition see {@link PaginationArgs} `pageSize`
      */
-    pageSize?: number, // TODO: RC Confirm - what happens if none supplied?
+    pageSize?: number,
     /**
      * For definition see {@link PaginationArgs} `sort`
      */
@@ -338,17 +361,25 @@ export class PaginationArgs {
 /**
  * Overall result of a pagination request.
  *
- * Should not contain actual resources but overall stats (count, pages, etc)
+ * Does not contain actual resources but overall stats (count, pages, etc)
  */
-export interface StorePaginationResult { // TODO: RC BUG ccheck coutn page not empy
+export interface StorePaginationResult {
   count: number,
   pages: number,
-  namespace: string,
+  /**
+   * The last time the resource was updated. Used to assist list watching for changes
+   */
   timestamp: number,
 }
 
 export interface StorePaginationRequest {
+  /**
+   * The single namespace to filter results by (as part of url path, not pagination params)
+   */
   namespace?: string,
+  /**
+   * The set of pagination args used to create the request
+   */
   pagination: PaginationArgs
 }
 
@@ -356,11 +387,12 @@ export interface StorePaginationRequest {
  * Pagination settings
  * - what was requested
  * - what was received (minus actual resources)
- * Object persisted to store
+ *
+ * Object is persisted to store
  */
 export interface StorePagination {
-    /**
-   * This set of pagination settings that created the result // TODO: RC
+  /**
+   * Collection of args that is used to make the request
    */
   request: StorePaginationRequest,
 

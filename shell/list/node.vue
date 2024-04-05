@@ -9,7 +9,7 @@ import { CAPI as CAPI_ANNOTATIONS } from '@shell/config/labels-annotations.js';
 
 import { defineComponent } from 'vue';
 import { ActionFindPageArgs } from '@shell/types/store/dashboard-store.types';
-import { PaginationArgs, PaginationFilterField, PaginationParamFilter, StorePaginationResult } from '@shell/types/store/pagination.types';
+import { PaginationArgs, PaginationFilterField, PaginationParamFilter } from '@shell/types/store/pagination.types';
 
 import {
   CAPI,
@@ -21,15 +21,6 @@ import { COLUMN_BREAKPOINTS } from '~/shell/types/store/type-map';
 
 import ResourceFetch from '@shell/mixins/resource-fetch';
 import { mapGetters } from 'vuex';
-
-// TODO: RC bulk actions are not updated on page load
-// TODO: RC test fetching pods here --> pods list
-// TODO: RC test non-paginationed world
-// TODO: RC find all `PaginationFilterField` fields and get them indexed
-
-// TODO: RC comment
-// Pagination changes that don't affect the current page (sorting) should not kick off requests for secondary resources (metrics aside)
-// Refresh should fetch all secondary resources as well
 
 export default defineComponent({
   name:       'ListNode',
@@ -63,28 +54,10 @@ export default defineComponent({
   async fetch() {
     this.$initializeFetchData(this.resource);
 
-    const hash: any = { kubeNodes: this.$fetchType(this.resource) };
-
-    if (!this.canPaginate) {
-      if (this.canViewMgmtNodes) {
-        hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
-      }
-
-      if (this.canViewNormanNodes) {
-        hash.normanNodes = this.$fetchType(NORMAN.NODE, [], 'rancher');
-      }
-
-      if (this.canViewMachines) {
-        hash.machines = this.$fetchType(CAPI.MACHINE, [], 'management');
-      }
-
-      if (this.canViewPods) {
-        // No need to block on this
-        this.$fetchType(POD);
-      }
-    }
-
-    await allHash(hash);
+    await allHash({
+      kubeNodes: this.$fetchType(this.resource),
+      ...this.fetchSecondaryResources(),
+    });
   },
 
   data() {
@@ -170,6 +143,7 @@ export default defineComponent({
       const opt: ActionFindPageArgs = {
         force:      true,
         pagination: new PaginationArgs({
+          page:    -1,
           filters: new PaginationParamFilter({
             fields: this.rows.map((r: any) => new PaginationFilterField({
               field: 'metadata.name',
@@ -191,6 +165,35 @@ export default defineComponent({
       this.$set(row, 'displayLabels', !row.displayLabels);
     },
 
+    fetchSecondaryResources(): { [key: string]: Promise<any>} {
+      if (this.canPaginate) {
+        return {};
+      }
+
+      const hash: { [key: string]: Promise<any>} = {};
+
+      if (!this.canPaginate) {
+        if (this.canViewMgmtNodes) {
+          hash.mgmtNodes = this.$fetchType(MANAGEMENT.NODE, [], 'management');
+        }
+
+        if (this.canViewNormanNodes) {
+          hash.normanNodes = this.$fetchType(NORMAN.NODE, [], 'rancher');
+        }
+
+        if (this.canViewMachines) {
+          hash.machines = this.$fetchType(CAPI.MACHINE, [], 'management');
+        }
+
+        if (this.canViewPods) {
+          // No need to block on this
+          this.$fetchType(POD);
+        }
+      }
+
+      return hash;
+    },
+
     /**
      * Nodes columns need other resources in order to show data in some columns
      *
@@ -198,7 +201,7 @@ export default defineComponent({
      *
      * So when we have a page.... use those entries as filters when fetching the other resources
      */
-    fetchPageSecondaryResources(force = false) {
+    async fetchPageSecondaryResources(force = false) {
       if (!this.rows?.length) {
         return;
       }
@@ -209,6 +212,7 @@ export default defineComponent({
         const opt: ActionFindPageArgs = {
           force,
           pagination: new PaginationArgs({
+            page:    -1,
             filters: PaginationParamFilter.createMultipleFields(this.rows.map((r: any) => new PaginationFilterField({
               field: 'status.nodeName',
               value: r.id
@@ -230,6 +234,7 @@ export default defineComponent({
             force,
             namespaced: namespace,
             pagination: new PaginationArgs({
+              page:    -1,
               filters: PaginationParamFilter.createMultipleFields(
                 this.rows.reduce((res: PaginationFilterField[], r: any ) => {
                   const name = r.metadata?.annotations?.[CAPI_ANNOTATIONS.MACHINE_NAME];
@@ -256,6 +261,7 @@ export default defineComponent({
         const opt: ActionFindPageArgs = {
           force,
           pagination: new PaginationArgs({
+            page:    -1,
             filters: PaginationParamFilter.createMultipleFields(
               this.rows.map((r: any) => new PaginationFilterField({
                 field: 'spec.nodeName',
@@ -272,17 +278,6 @@ export default defineComponent({
       this.loadMetrics();
     },
   },
-
-  watch: {
-    paginationResult(neu: StorePaginationResult, old: StorePaginationResult) {
-      if (!neu || neu.timestamp === old?.timestamp) {
-        return;
-      }
-
-      this.fetchPageSecondaryResources();
-    }
-  }
-
 });
 </script>
 
@@ -293,8 +288,6 @@ export default defineComponent({
       color="info"
       :label="t('cluster.custom.registrationCommand.windowsWarning')"
     />
-    <br>node: canPaginate:{{ canPaginate }}, isResourceList:{{ isResourceList }} resource:{{ resource }}, canViewNormanNodes: {{ !!canViewNormanNodes }}
-    <!-- TODO: RC remove above -->
     <ResourceTable
       v-bind="$attrs"
       :schema="schema"

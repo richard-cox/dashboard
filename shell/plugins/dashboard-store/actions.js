@@ -324,7 +324,7 @@ export default {
             result:  {
               count:     out.count,
               pages:     out.pages,
-              timestamp: new Date().getTime() // TODO: RC hmmmm
+              timestamp: new Date().getTime()
             }
           } : undefined,
         });
@@ -417,9 +417,9 @@ export default {
           pagination: opt.pagination
         },
         result: {
-          count:     out.count, // TODO: RC check this is working
+          count:     out.count,
           pages:     out.pages,
-          timestamp: new Date().getTime() // TODO: RC hmmm
+          timestamp: new Date().getTime()
         }
       } : undefined,
     });

@@ -5,7 +5,7 @@ import { mapGetters } from 'vuex';
 import { ResourceListComponentName } from '../components/ResourceList/resource-list.config';
 import paginationUtils from '@shell/utils/pagination-utils';
 import debounce from 'lodash/debounce';
-import { PaginationParamFilter, PaginationFilterField, PaginationArgs } from '@shell/types/store/pagination.types';
+import { PaginationParamFilter, PaginationFilterField, PaginationArgs, StorePaginationResult } from '@shell/types/store/pagination.types';
 import stevePaginationUtils from '@shell/plugins/steve/steve-pagination-utils';
 
 /**
@@ -34,8 +34,13 @@ export default {
   },
 
   methods: {
+    /**
+     * @param {PaginationArgs} pagination
+     */
     setPagination(pagination) {
-      this.pPagination = pagination;
+      if (pagination) {
+        this.pPagination = pagination;
+      }
     },
 
     paginationChanged(event) {
@@ -82,20 +87,22 @@ export default {
       this.requestFilters.projectsOrNamespaces = projectsOrNamespaces;
 
       // Kick off a change
-      this.debouncedSetPagination({ ...this.pPagination });
+      if (this.pPagination) {
+        this.debouncedSetPagination({ ...this.pPagination });
+      }
     },
 
     /**
-     * Compare two {@link: PaginationArgs}
+     * @param {PaginationArgs} neu
+     * @param {PaginationArgs} old
      */
     paginationEqual(neu, old) {
       if (!neu.page) {
-        // Not valid, don't bother
+        // Not valid, count as not equal
         return false;
       }
 
       if (paginationUtils.paginationEqual(neu, old)) {
-        // Same, nae bother
         return true;
       }
 
@@ -239,6 +246,9 @@ export default {
 
     /**
      * When a pagination is required and the user changes page / sort / filter, kick off a new set of API requests
+     *
+     * @param {StorePaginationResult} neu
+     * @param {StorePaginationResult} old
      */
     async pagination(neu, old) {
       // ResourceList has two modes
@@ -257,5 +267,25 @@ export default {
       }
     },
 
+    /**
+     * If the pagination result has changed fetch secondary resources
+     *
+     * Lists should implement fetchPageSecondaryResources to fetch them
+     *
+     * @param {StorePaginationResult} neu
+     * @param {StorePaginationResult} old
+     */
+    async paginationResult(neu, old) {
+      if (!this.fetchPageSecondaryResources || !neu ) { // || neu.timestamp === old?.timestamp
+        return;
+      }
+
+      if (neu.timestamp === old?.timestamp) {
+        // This occurrs when the user returns to the page... and pagination hasn't actually changed
+        return;
+      }
+
+      await this.fetchPageSecondaryResources();
+    }
   },
 };

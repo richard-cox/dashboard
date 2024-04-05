@@ -270,7 +270,7 @@ export function init(store) {
     ]);
 
   headers(NODE,
-    [ // TODO: RC TEST with pag off
+    [
       STATE,
       NAME,
       ROLES,
