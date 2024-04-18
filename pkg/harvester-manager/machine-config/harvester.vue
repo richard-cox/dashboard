@@ -1004,7 +1004,7 @@ export default {
       }
 
       this.$refs.userDataYamlEditor.updateValue(userDataYaml);
-      this.$set(this, 'userData', userDataYaml);
+      this['userData'] = userDataYaml;
     },
   }
 };
@@ -1089,7 +1089,7 @@ export default {
         <transition-group>
           <div
             v-for="(disk, i) in disks"
-            :key="`${disk.bootOrder}${i}`"
+            :key="i"
           >
             <InfoBox
               class="box"
@@ -1121,7 +1121,7 @@ export default {
                     label-key="cluster.credential.harvester.image"
                     :placeholder="t('cluster.harvester.machinePool.image.placeholder')"
                     @on-open="onOpen"
-                    @input="update"
+                    @update:modelValue="update"
                   />
 
                   <LabeledSelect
@@ -1132,7 +1132,7 @@ export default {
                     :mode="mode"
                     :disabled="disabled"
                     :required="true"
-                    @input="update"
+                    @update:modelValue="update"
                   />
                 </div>
 
@@ -1147,7 +1147,7 @@ export default {
                     :disabled="disabled"
                     required
                     :placeholder="t('cluster.harvester.machinePool.disk.placeholder')"
-                    @input="update"
+                    @update:modelValue="update"
                   />
                 </div>
               </div>
@@ -1237,7 +1237,7 @@ export default {
                 :required="true"
                 label-key="cluster.credential.harvester.network.networkName"
                 :placeholder="t('cluster.harvester.machinePool.network.placeholder')"
-                @input="update"
+                @update:modelValue="update"
               />
             </div>
 
@@ -1246,7 +1246,7 @@ export default {
                 v-model="network.macAddress"
                 label-key="cluster.credential.harvester.network.macAddress"
                 :mode="mode"
-                @input="update"
+                @update:modelValue="update"
               />
             </div> -->
           </div>
@@ -1274,7 +1274,7 @@ export default {
             label-key="cluster.credential.harvester.userData.label"
             :mode="mode"
             :disabled="disabled"
-            @input="updateUserData"
+            @update:modelValue="updateUserData"
           />
 
           <YamlEditor
@@ -1291,7 +1291,7 @@ export default {
             type="checkbox"
             label-key="cluster.credential.harvester.installGuestAgent"
             :mode="mode"
-            @input="updateAgent"
+            @update:modelValue="updateAgent"
           />
         </div>
 
@@ -1312,7 +1312,7 @@ export default {
             :key="networkData"
             class="yaml-editor mb-10"
             :editor-mode="mode === 'view' ? 'VIEW_CODE' : 'EDIT_CODE'"
-            :value="networkData"
+            :modelValue="networkData"
             :disabled="disabled"
             @onInput="valuesChanged($event, 'networkData')"
           />
@@ -1325,8 +1325,8 @@ export default {
         </h3>
         <NodeAffinity
           :mode="mode"
-          :value="vmAffinity.affinity.nodeAffinity"
-          @input="updateNodeScheduling"
+          :modelValue="vmAffinity.affinity.nodeAffinity"
+          @update:modelValue="updateNodeScheduling"
         />
 
         <h3 class="mt-20">
@@ -1334,7 +1334,7 @@ export default {
         </h3>
         <PodAffinity
           :mode="mode"
-          :value="vmAffinity"
+          :modelValue="vmAffinity"
           :nodes="allNodeObjects"
           :namespaces="namespaces"
           :overwrite-labels="affinityLabels"
@@ -1362,7 +1362,7 @@ export default {
 <style lang="scss" scoped>
 $yaml-height: 200px;
 
-::v-deep .yaml-editor {
+:deep() .yaml-editor {
   flex: 1;
   min-height: $yaml-height;
   & .code-mirror .CodeMirror {
@@ -1372,7 +1372,7 @@ $yaml-height: 200px;
   }
 }
 
-::v-deep .info-box {
+:deep() .info-box {
   margin-bottom: 10px;
 }
 

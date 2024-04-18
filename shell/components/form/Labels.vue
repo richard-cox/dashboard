@@ -100,14 +100,14 @@ export default {
             <template>
               <KeyValue
                 key="labels"
-                :value="value.labels"
+                :modelValue="value.labels"
                 :protected-keys="value.systemLabels || []"
                 :toggle-filter="toggler"
                 :add-label="t('labels.addLabel')"
                 :mode="mode"
                 :read-allowed="false"
                 :value-can-be-empty="true"
-                @input="value.setLabels($event)"
+                @update:modelValue="value.setLabels($event)"
               />
             </template>
           </slot>
@@ -121,14 +121,14 @@ export default {
     >
       <KeyValue
         key="annotations"
-        :value="value.annotations"
+        :modelValue="value.annotations"
         :add-label="t('labels.addAnnotation')"
         :mode="mode"
         :title="t('labels.annotations.title')"
         :title-protip="annotationTitleTooltip"
         :read-allowed="false"
         :value-can-be-empty="true"
-        @input="value.setAnnotations($event)"
+        @update:modelValue="value.setAnnotations($event)"
       />
     </div>
   </div>

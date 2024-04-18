@@ -161,7 +161,7 @@ export default {
               min="1"
               max="65535"
               placeholder="e.g. 8080"
-              @input="queueUpdate"
+              @update:modelValue="queueUpdate"
             >
           </td>
           <td class="protocol">
@@ -169,24 +169,24 @@ export default {
             <select
               v-else
               v-model="row.protocol"
-              @input="queueUpdate"
+              @update:modelValue="queueUpdate"
             >
-              <option value="HTTP">
+              <option modelValue="HTTP">
                 HTTP
               </option>
-              <option value="HTTP2">
+              <option modelValue="HTTP2">
                 HTTP/2
               </option>
-              <option value="TCP">
+              <option modelValue="TCP">
                 TCP
               </option>
-              <option value="UDP">
+              <option modelValue="UDP">
                 UDP
               </option>
-              <option value="SCTP">
+              <option modelValue="SCTP">
                 SCTP
               </option>
-              <option value="GRPC">
+              <option modelValue="GRPC">
                 GRPC
               </option>
             </select>
@@ -200,7 +200,7 @@ export default {
               min="1"
               max="65535"
               placeholder="e.g. 80"
-              @input="queueUpdate"
+              @update:modelValue="queueUpdate"
             >
           </td>
           <td class="expose">
@@ -209,7 +209,7 @@ export default {
               v-else
               v-model="row.expose"
               type="checkbox"
-              @input="queueUpdate"
+              @update:modelValue="queueUpdate"
             />
           </td>
           <td class="hostPort">
@@ -218,7 +218,7 @@ export default {
               v-else
               v-model="row.hostPort"
               type="checkbox"
-              @input="queueUpdate"
+              @update:modelValue="queueUpdate"
             />
           </td>
           <td

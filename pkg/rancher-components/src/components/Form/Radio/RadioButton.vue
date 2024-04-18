@@ -103,7 +103,7 @@ export default defineComponent({
     },
 
     hasLabelSlot(): boolean {
-      return !!this.$slots.label || !!this.$scopedSlots.label;
+      return !!this.$slots.label || !!this.$slots.label();
     }
   },
 
@@ -144,7 +144,7 @@ export default defineComponent({
       :id="randomString"
       :disabled="isDisabled"
       :name="name"
-      :value="''+val"
+      :modelValue="''+val"
       :checked="isChecked"
       type="radio"
       :tabindex="-1"

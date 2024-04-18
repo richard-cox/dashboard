@@ -301,8 +301,7 @@ export default {
     <form v-if="selectedRoles">
       <div
         v-for="(sortedRole, roleType) in sortedRoles"
-        :key="getUnique(roleType)"
-        class="role-group mb-10"
+        :key="roleType"
       >
         <Card
           v-if="Object.keys(sortedRole).length"
@@ -323,19 +322,17 @@ export default {
               :class="'checkbox-section--' + roleType"
             >
               <div
-                v-for="role in sortedRoles[roleType]"
-                :key="getUnique(roleType, role.id)"
-                class="checkbox mb-10 mr-10"
+                v-for="(role, i) in sortedRoles[roleType]"
+                :key="i"
               >
                 <Checkbox
-                  :key="getUnique(roleType, role.id, 'checkbox')"
                   v-model="selectedRoles"
                   :value-when-true="role.id"
                   :disabled="!!assignOnlyRoles[role.id]"
                   :label="role.nameDisplay"
                   :description="role.descriptionDisplay"
                   :mode="mode"
-                  @input="checkboxChanged"
+                  @update:modelValue="checkboxChanged"
                 >
                   <template #label>
                     <div class="checkbox-label-slot">

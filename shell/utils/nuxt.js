@@ -1,7 +1,8 @@
-import Vue from 'vue';
+import { createApp } from 'vue';
 import {
   isSamePath as _isSamePath, joinURL, normalizeURL, withQuery, withoutTrailingSlash
 } from 'ufo';
+const vueApp = createApp({});
 
 // window.{{globals.loadedCallback}} hook
 // Useful for jsdom testing or plugins (https://github.com/tmpvar/jsdom#dealing-with-asynchronous-script-loading)

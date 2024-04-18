@@ -11,17 +11,21 @@ describe('component: Type', () => {
   describe('should not use highlight class', () => {
     it('given no hash', () => {
       const wrapper = mount(Type, {
-        propsData: { type: { route: 'something else' } },
-        stubs:     { nLink: RouterLinkStub },
-        mocks:     {
-          $route:  { path: 'whatever' },
-          $router: { resolve: () => ({ route: { path: 'whatever' } }) },
-          $store:  {
-            getters: {
-              currentStore:    () => 'cluster',
-              'cluster/count': () => 1,
+        props: { type: { route: 'something else' } },
+
+        global: {
+          mocks:     {
+            $route:  { path: 'whatever' },
+            $router: { resolve: () => ({ route: { path: 'whatever' } }) },
+            $store:  {
+              getters: {
+                currentStore:    () => 'cluster',
+                'cluster/count': () => 1,
+              }
             }
-          }
+          },
+
+          stubs:     { nLink: RouterLinkStub },
         },
       });
 
@@ -32,17 +36,21 @@ describe('component: Type', () => {
 
     it('given no path', () => {
       const wrapper = mount(Type, {
-        propsData: { type: { route: 'something else' } },
-        stubs:     { nLink: RouterLinkStub },
-        mocks:     {
-          $route:  { hash: 'whatever' },
-          $router: { resolve: () => ({ route: { path: 'whatever' } }) },
-          $store:  {
-            getters: {
-              currentStore:    () => 'cluster',
-              'cluster/count': () => 1,
+        props: { type: { route: 'something else' } },
+
+        global: {
+          mocks:     {
+            $route:  { hash: 'whatever' },
+            $router: { resolve: () => ({ route: { path: 'whatever' } }) },
+            $store:  {
+              getters: {
+                currentStore:    () => 'cluster',
+                'cluster/count': () => 1,
+              }
             }
-          }
+          },
+
+          stubs:     { nLink: RouterLinkStub },
         },
       });
 
@@ -53,14 +61,18 @@ describe('component: Type', () => {
 
     it('given no matching values', () => {
       const wrapper = mount(Type, {
-        propsData: { type: {} },
-        stubs:     { nLink: RouterLinkStub },
-        mocks:     {
-          $route: {
-            hash: 'hash',
-            path: 'path',
+        props: { type: {} },
+
+        global: {
+          mocks:     {
+            $route: {
+              hash: 'hash',
+              path: 'path',
+            },
+            $router: { resolve: () => ({ route: { path: 'whatever' } }) },
           },
-          $router: { resolve: () => ({ route: { path: 'whatever' } }) },
+
+          stubs:     { nLink: RouterLinkStub },
         },
       });
 
@@ -71,20 +83,24 @@ describe('component: Type', () => {
 
     it('given navigation path is bigger than current page route path', () => {
       const wrapper = mount(Type, {
-        propsData: { type: { route: 'not empty' } },
-        stubs:     { nLink: RouterLinkStub },
-        mocks:     {
-          $route: {
-            hash: 'not empty',
-            path: 'whatever',
-          },
-          $router: { resolve: () => ({ route: { path: 'many/parts' } }) },
-          $store:  {
-            getters: {
-              currentStore:    () => 'cluster',
-              'cluster/count': () => 1,
+        props: { type: { route: 'not empty' } },
+
+        global: {
+          mocks:     {
+            $route: {
+              hash: 'not empty',
+              path: 'whatever',
+            },
+            $router: { resolve: () => ({ route: { path: 'many/parts' } }) },
+            $store:  {
+              getters: {
+                currentStore:    () => 'cluster',
+                'cluster/count': () => 1,
+              }
             }
-          }
+          },
+
+          stubs:     { nLink: RouterLinkStub },
         },
       });
 
@@ -111,20 +127,24 @@ describe('component: Type', () => {
       ],
     ])('given different current path %p and menu path %p', (currentPath, menuPath) => {
       const wrapper = mount(Type, {
-        propsData: { type: { route: 'not empty' } },
-        stubs:     { nLink: RouterLinkStub },
-        mocks:     {
-          $route: {
-            hash: 'not empty',
-            path: currentPath,
-          },
-          $router: { resolve: () => ({ route: { path: menuPath } }) },
-          $store:  {
-            getters: {
-              currentStore:    () => 'cluster',
-              'cluster/count': () => 1,
+        props: { type: { route: 'not empty' } },
+
+        global: {
+          mocks:     {
+            $route: {
+              hash: 'not empty',
+              path: currentPath,
+            },
+            $router: { resolve: () => ({ route: { path: menuPath } }) },
+            $store:  {
+              getters: {
+                currentStore:    () => 'cluster',
+                'cluster/count': () => 1,
+              }
             }
-          }
+          },
+
+          stubs:     { nLink: RouterLinkStub },
         },
       });
 
@@ -142,20 +162,24 @@ describe('component: Type', () => {
       ],
     ])('given same current path %p and menu path %p (on first load)', (currentPath, menuPath) => {
       const wrapper = mount(Type, {
-        propsData: { type: { route: 'not empty' } },
-        stubs:     { nLink: RouterLinkStub },
-        mocks:     {
-          $route: {
-            hash: 'not empty',
-            path: currentPath,
-          },
-          $router: { resolve: () => ({ route: { path: menuPath } }) },
-          $store:  {
-            getters: {
-              currentStore:    () => 'cluster',
-              'cluster/count': () => 1,
+        props: { type: { route: 'not empty' } },
+
+        global: {
+          mocks:     {
+            $route: {
+              hash: 'not empty',
+              path: currentPath,
+            },
+            $router: { resolve: () => ({ route: { path: menuPath } }) },
+            $store:  {
+              getters: {
+                currentStore:    () => 'cluster',
+                'cluster/count': () => 1,
+              }
             }
-          }
+          },
+
+          stubs:     { nLink: RouterLinkStub },
         },
       });
 

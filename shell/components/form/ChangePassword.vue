@@ -326,7 +326,7 @@ export default {
           type="text"
           name="username"
           autocomplete="username"
-          :value="username"
+          :modelValue="username"
           tabindex="-1"
           :data-lpignore="!isChange"
         >
@@ -335,7 +335,7 @@ export default {
           type="password"
           name="password"
           autocomplete="password"
-          :value="password"
+          :modelValue="password"
           tabindex="-1"
           :data-lpignore="!isChange"
         >
@@ -405,9 +405,6 @@ export default {
         <Banner
           v-for="(err, i) in errorMessages"
           :key="i"
-          color="error"
-          :label="err"
-          class="mb-0"
         />
       </div>
     </div>

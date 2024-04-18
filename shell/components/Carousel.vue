@@ -111,7 +111,7 @@ export default {
     },
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.autoScrollSlideInterval) {
       clearInterval(this.autoScrollSlideInterval);
     }
@@ -168,9 +168,7 @@ export default {
       <component
         :is="asLink ? 'a' : 'div'"
         v-for="(slide, i) in sliders"
-        :id="`slide` + i"
-        ref="slide"
-        :key="get(slide, keyField)"
+        :key="i"
         class="slide"
         :class="{'singleSlide': sliders.length === 1}"
         :href="asLink ? get(slide, linkField) : null"
@@ -200,9 +198,6 @@ export default {
       <div
         v-for="(slide, i) in slider"
         :key="i"
-        class="control-item"
-        :class="{'active': activeItemId === i}"
-        @click="scrollSlide(i, slider.length)"
       />
     </div>
     <div

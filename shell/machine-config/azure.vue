@@ -179,7 +179,7 @@ export default {
       if (this.mode === _EDIT && !this.value?.location) {
         for (const key in this.defaultConfig) {
           if (this.value[key] === undefined) {
-            this.$set(this.value, key, this.defaultConfig[key]);
+            this.value[key] = this.defaultConfig[key];
           }
         }
       }
@@ -410,7 +410,7 @@ export default {
     if (this.mode === 'create') {
       for (const key in this.defaultConfig) {
         if (this.value[key] === undefined) {
-          this.$set(this.value, key, this.defaultConfig[key]);
+          this.value[key] = this.defaultConfig[key];
         }
       }
       merge(this.value, this.defaultConfig);
@@ -485,7 +485,7 @@ export default {
         ary.push(k, tags[k]);
       }
 
-      this.$set(this.value, 'tags', ary.join(','));
+      this.value['tags'] = ary.join(',');
     },
     handleAzChange() {
       if (this.value.availabilitySet) {
@@ -519,7 +519,7 @@ export default {
     <div class="row mt-20">
       <div class="col span-6">
         <LabeledSelect
-          :value="value.location"
+          :modelValue="value.location"
           :mode="mode"
           :options="locationOptionsInDropdown"
           option-key="name"
@@ -528,7 +528,7 @@ export default {
           :required="true"
           :label="t('cluster.machineConfig.azure.location.label')"
           :disabled="disabled"
-          @input="setLocation"
+          @update:modelValue="setLocation"
         />
       </div>
       <div>
@@ -581,7 +581,7 @@ export default {
           :label="t('cluster.machineConfig.azure.availabilityZone.label')"
           :tooltip="t('cluster.machineConfig.azure.availabilityZone.description')"
           :disabled="disabled || !!vmAvailabilityZoneWarning"
-          @input="handleAzChange"
+          @update:modelValue="handleAzChange"
         />
         <Banner
           v-if="vmAvailabilityZoneWarning"
@@ -872,14 +872,14 @@ export default {
         <div class="col span-12">
           <h3><t k="cluster.machineConfig.azure.tags.label" /></h3>
           <KeyValue
-            :value="tags"
+            :modelValue="tags"
             :mode="mode"
             :read-allowed="false"
             :label="t('cluster.machineConfig.amazonEc2.tagTitle')"
             :add-label="t('labels.addTag')"
             :initial-empty-row="true"
             :disabled="disabled"
-            @input="updateTags"
+            @update:modelValue="updateTags"
           />
         </div>
       </div>

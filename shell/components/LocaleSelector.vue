@@ -77,8 +77,6 @@ export default {
               <li
                 v-for="(label, name) in availableLocales"
                 :key="name"
-                class="hand"
-                @click="switchLocale(name)"
               >
                 {{ label }}
               </li>
@@ -89,9 +87,9 @@ export default {
     </div>
     <div v-else>
       <Select
-        :value="selectedOption"
+        :modelValue="selectedOption"
         :options="localesOptions"
-        @input="switchLocale($event)"
+        @update:modelValue="switchLocale($event)"
       />
     </div>
   </div>

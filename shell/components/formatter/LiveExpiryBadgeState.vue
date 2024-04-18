@@ -30,7 +30,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timer);
   },
 
@@ -62,5 +62,5 @@ export default {
 </script>
 
 <template>
-  <BadgeState :value="stateValue" />
+  <BadgeState :modelValue="stateValue" />
 </template>

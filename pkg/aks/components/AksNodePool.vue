@@ -73,8 +73,8 @@ export default defineComponent({
         delete this.pool.minCount;
         delete this.pool.maxCount;
       } else {
-        this.$set(this.pool, 'minCount', 1);
-        this.$set(this.pool, 'maxCount', 3);
+        this.pool['minCount'] = 1;
+        this.pool['maxCount'] = 3;
       }
     },
 
@@ -85,7 +85,7 @@ export default defineComponent({
     },
 
     validAZ(neu) {
-      this.$set(this.pool, '_validAZ', neu);
+      this.pool['_validAZ'] = neu;
       this.$emit('input');
     }
   },
@@ -105,13 +105,13 @@ export default defineComponent({
   methods: {
     addTaint(): void {
       this.taints.push({ taint: '', _id: randomStr() });
-      this.$set(this.pool, 'nodeTaints', this.taints.map((keyedTaint: any) => keyedTaint.taint));
+      this.pool['nodeTaints'] = this.taints.map((keyedTaint: any) => keyedTaint.taint);
       this.$emit('input');
     },
 
     updateTaint(keyedTaint: any, idx: any): void {
       this.taints[idx] = keyedTaint;
-      this.$set(this.pool, 'nodeTaints', this.taints.map((keyedTaint: any) => keyedTaint.taint));
+      this.pool['nodeTaints'] = this.taints.map((keyedTaint: any) => keyedTaint.taint);
       this.$emit('input');
     },
 
@@ -175,7 +175,7 @@ export default defineComponent({
           :disabled="!pool._isNewOrUnprovisioned"
           :row="true"
           label-key="generic.mode"
-          @input="$emit('validationChanged')"
+          @update:modelValue="$emit('validationChanged')"
         >
           <template #label>
             <span class="text-label">{{ t('aks.nodePools.mode.label') }}</span>
@@ -297,11 +297,7 @@ export default defineComponent({
           <template v-if="taints && taints.length">
             <Taint
               v-for="(keyedTaint, i) in taints"
-              :key="keyedTaint._id"
-              :taint="keyedTaint.taint"
-              :mode="mode"
-              @input="e=>updateTaint({_id:keyedTaint._id, taint: e}, i)"
-              @remove="removeTaint(i)"
+              :key="i"
             />
           </template>
           <template v-else>
@@ -363,7 +359,7 @@ export default defineComponent({
 }
 .taints {
   width: 100%;
-  th,::v-deep td{
+  th,:deep() td{
     text-align: left;
     padding-right: 10px;
     font-weight: inherit;

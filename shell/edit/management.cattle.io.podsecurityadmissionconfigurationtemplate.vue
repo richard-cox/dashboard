@@ -93,7 +93,7 @@ export default defineComponent({
     @cancel="done"
   >
     <NameNsDescription
-      :value="value"
+      :modelValue="value"
       :namespaced="false"
       :mode="mode"
       description-key="description"

@@ -60,7 +60,7 @@ export default {
         class="mb-20"
       >
         <DetailText
-          :value="row.value"
+          :modelValue="row.value"
           :label="row.key"
           :binary="row.binary"
         />

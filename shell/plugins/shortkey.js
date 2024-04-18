@@ -1,4 +1,5 @@
-import Vue from 'vue';
+import { createApp } from 'vue';
 import ShortKey from 'vue-shortkey';
+const vueApp = createApp({});
 
-Vue.use(ShortKey, { prevent: ['input', 'textarea', 'select'] });
+vueApp.use(ShortKey, { prevent: ['input', 'textarea', 'select'] });

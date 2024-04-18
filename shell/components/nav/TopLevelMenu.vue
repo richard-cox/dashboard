@@ -271,7 +271,7 @@ export default {
     document.addEventListener('keyup', this.handler);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener('keyup', this.handler);
   },
 
@@ -527,9 +527,8 @@ export default {
               </a>
             </div>
             <div
-              v-for="a in hciApps"
-              :key="a.label"
-              @click="hide()"
+              v-for="(a, i) in hciApps"
+              :key="i"
             >
               <router-link
                 class="option"
@@ -558,9 +557,8 @@ export default {
                 class="clustersPinned"
               >
                 <div
-                  v-for="c in pinFiltered"
-                  :key="c.id"
-                  @click="hide()"
+                  v-for="(c, i) in pinFiltered"
+                  :key="i"
                 >
                   <button
                     v-if="c.ready"
@@ -633,9 +631,7 @@ export default {
               <div class="clustersList">
                 <div
                   v-for="(c, index) in clustersFiltered"
-                  :key="c.id"
-                  :data-testid="`top-level-menu-cluster-${index}`"
-                  @click="hide()"
+                  :key="index"
                 >
                   <button
                     v-if="c.ready"
@@ -738,9 +734,8 @@ export default {
                 </span>
               </div>
               <div
-                v-for="a in multiClusterApps"
-                :key="a.label"
-                @click="hide()"
+                v-for="(a, i) in multiClusterApps"
+                :key="i"
               >
                 <router-link
                   class="option"
@@ -766,9 +761,8 @@ export default {
                 </span>
               </div>
               <div
-                v-for="a in legacyApps"
-                :key="a.label"
-                @click="hide()"
+                v-for="(a, i) in legacyApps"
+                :key="i"
               >
                 <router-link
                   class="option"
@@ -796,9 +790,8 @@ export default {
                 </span>
               </div>
               <div
-                v-for="a in configurationApps"
-                :key="a.label"
-                @click="hide()"
+                v-for="(a, i) in configurationApps"
+                :key="i"
               >
                 <router-link
                   class="option"
@@ -1412,15 +1405,15 @@ export default {
   }
 
   .localeSelector {
-    ::v-deep .popover-inner {
+    :deep() .popover-inner {
       padding: 50px 0;
     }
 
-    ::v-deep .popover-arrow {
+    :deep() .popover-arrow {
       display: none;
     }
 
-    ::v-deep .popover:focus {
+    :deep() .popover:focus {
       outline: 0;
     }
 

@@ -9,13 +9,15 @@ describe('component: AsyncButton', () => {
 
     const wrapper: Wrapper<InstanceType<typeof AsyncButton> & { [key: string]: any }> = mount(AsyncButton, {
       directives: { cleanHtmlDirective },
-      mocks:      {
-        $store: {
-          getters: {
-            'i18n/exists': mockExists,
-            'i18n/t':      mockT
+      global: {
+        mocks:      {
+          $store: {
+            getters: {
+              'i18n/exists': mockExists,
+              'i18n/t':      mockT
+            }
           }
-        }
+        },
       }
     });
 
@@ -46,13 +48,15 @@ describe('component: AsyncButton', () => {
     jest.useFakeTimers();
 
     const wrapper: Wrapper<InstanceType<typeof AsyncButton> & { [key: string]: any }> = mount(AsyncButton, {
-      mocks: {
-        $store: {
-          getters: {
-            'i18n/exists': jest.fn(),
-            'i18n/t':      jest.fn()
+      global: {
+        mocks: {
+          $store: {
+            getters: {
+              'i18n/exists': jest.fn(),
+              'i18n/t':      jest.fn()
+            }
           }
-        }
+        },
       }
     });
 
@@ -83,13 +87,15 @@ describe('component: AsyncButton', () => {
     jest.useFakeTimers();
 
     const wrapper: Wrapper<InstanceType<typeof AsyncButton> & { [key: string]: any }> = mount(AsyncButton, {
-      mocks: {
-        $store: {
-          getters: {
-            'i18n/exists': jest.fn(),
-            'i18n/t':      jest.fn()
+      global: {
+        mocks: {
+          $store: {
+            getters: {
+              'i18n/exists': jest.fn(),
+              'i18n/t':      jest.fn()
+            }
           }
-        }
+        },
       }
     });
 
@@ -115,13 +121,15 @@ describe('component: AsyncButton', () => {
 
   it('click on async button should emit click and update state properly ::: CB "cancelled"', () => {
     const wrapper: Wrapper<InstanceType<typeof AsyncButton> & { [key: string]: any }> = mount(AsyncButton, {
-      mocks: {
-        $store: {
-          getters: {
-            'i18n/exists': jest.fn(),
-            'i18n/t':      jest.fn()
+      global: {
+        mocks: {
+          $store: {
+            getters: {
+              'i18n/exists': jest.fn(),
+              'i18n/t':      jest.fn()
+            }
           }
-        }
+        },
       }
     });
 

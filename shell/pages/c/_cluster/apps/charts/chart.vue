@@ -162,17 +162,15 @@ export default {
           <span v-clean-html="osWarning" />
         </Banner>
         <Banner
-          v-for="msg in requires"
-          :key="msg"
-          color="error"
+          v-for="(msg, i) in requires"
+          :key="i"
         >
           <span v-clean-html="msg" />
         </Banner>
 
         <Banner
-          v-for="msg in warnings"
-          :key="msg"
-          color="warning"
+          v-for="(msg, i) in warnings"
+          :key="i"
         >
           <span v-clean-html="msg" />
         </Banner>
@@ -230,7 +228,7 @@ export default {
               {{ vers.originalVersion === currentVersion ? t('catalog.install.versions.current', { ver: currentVersion }): vers.shortLabel }}
             </a>
             <DateFormatter
-              :value="vers.created"
+              :modelValue="vers.created"
               :show-time="false"
             />
           </div>

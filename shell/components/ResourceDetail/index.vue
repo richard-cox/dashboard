@@ -376,7 +376,7 @@ export default {
     <Masthead
       v-if="showMasthead"
       :resource="resource"
-      :value="liveModel"
+      :modelValue="liveModel"
       :mode="mode"
       :real-mode="realMode"
       :as="as"
@@ -390,7 +390,7 @@ export default {
     >
       <DetailTop
         v-if="isView && isDetail"
-        :value="liveModel"
+        :modelValue="liveModel"
       />
     </Masthead>
 
@@ -421,8 +421,8 @@ export default {
       :done-params="doneParams"
       :done-route="doneRoute"
       :mode="mode"
-      :initial-value="initialModel"
-      :live-value="liveModel"
+      :initial-modelValue="initialModel"
+      :live-modelValue="liveModel"
       :real-mode="realMode"
       :class="{'flex-content': flexContent}"
       @set-subtype="setSubtype"

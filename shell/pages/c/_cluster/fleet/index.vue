@@ -277,13 +277,13 @@ export default {
       return tooltipData;
     },
     toggleCollapse(val, key) {
-      this.$set(this.isCollapsed, key, val);
+      this.isCollapsed[key] = val;
     },
     toggleAll(action) {
       const val = action !== 'expand';
 
       Object.keys(this.isCollapsed).forEach((key) => {
-        this.$set(this.isCollapsed, key, val);
+        this.isCollapsed[key] = val;
       });
     }
   },
@@ -291,7 +291,7 @@ export default {
   watch: {
     fleetWorkspaces(value) {
       value?.filter((ws) => ws.repos?.length).forEach((ws) => {
-        this.$set(this.isCollapsed, ws.id, false);
+        this.isCollapsed[ws.id] = false;
       });
     }
   }
@@ -371,12 +371,8 @@ export default {
         </p>
       </div>
       <CollapsibleCard
-        v-for="ws in workspacesData"
-        :key="ws.id"
-        class="mt-20 mb-40"
-        :title="`${t('resourceDetail.masthead.workspace')}: ${ws.nameDisplay}`"
-        :is-collapsed="isCollapsed[ws.id]"
-        :is-title-clickable="true"
+        v-for="(ws, i) in workspacesData"
+        :key="i"
         :data-testid="`collapsible-card-${ ws.id }`"
         @toggleCollapse="toggleCollapse($event, ws.id)"
         @titleClick="setWorkspaceFilterAndLinkToGitRepo(ws.id)"
@@ -406,7 +402,6 @@ export default {
             key-field="_key"
             :search="false"
             :table-actions="false"
-            v-on="$listeners"
           >
             <template #cell:clustersReady="{row}">
               <span v-if="ws.type === 'namespace'"> - </span>
@@ -416,7 +411,7 @@ export default {
                 :tooltip-text="getTooltipInfo('clusters', row)"
                 :badge-class="getStatusInfo('clusters', row).badgeClass"
                 :icon="getStatusInfo('clusters', row).icon"
-                :value="`${ row.clusterInfo.ready }/${ row.clusterInfo.total }`"
+                :modelValue="`${ row.clusterInfo.ready }/${ row.clusterInfo.total }`"
               />
             </template>
             <template #cell:bundlesReady="{row}">
@@ -427,7 +422,7 @@ export default {
                 :tooltip-text="getTooltipInfo('bundles', row)"
                 :badge-class="getStatusInfo('bundles', row).badgeClass"
                 :icon="getStatusInfo('bundles', row).icon"
-                :value="`${ row.bundlesReady.length || 0 }/${ row.bundles.length }`"
+                :modelValue="`${ row.bundlesReady.length || 0 }/${ row.bundles.length }`"
               />
             </template>
             <template #cell:resourcesReady="{row}">
@@ -436,7 +431,7 @@ export default {
                 :tooltip-text="getTooltipInfo('resources', row)"
                 :badge-class="getStatusInfo('resources', row).badgeClass"
                 :icon="getStatusInfo('resources', row).icon"
-                :value="`${ row.status.resourceCounts.ready }/${ row.status.resourceCounts.desiredReady }`"
+                :modelValue="`${ row.status.resourceCounts.ready }/${ row.status.resourceCounts.desiredReady }`"
               />
             </template>
 

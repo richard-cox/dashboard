@@ -136,20 +136,14 @@ export default {
     <g
       v-for="(set, i) in dataSets"
       :key="i"
-      :class="`lines--${i}`"
     >
       <path
-        :key="i"
         :d="lines[i]"
         class="line"
       />
       <circle
         v-for="(point, index) in set.points"
-        :key="`${index}--circle`"
-        class="data-circle"
-        r="4"
-        :cx="scaleX([0, 10], index)"
-        :cy="scaleY(set.domain, point)"
+        :key="index"
       />
     </g>
     <g

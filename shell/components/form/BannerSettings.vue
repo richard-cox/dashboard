@@ -155,8 +155,8 @@ export default ({
             {{ t('banner.bannerDecoration.label') }}
           </h3>
           <div
-            v-for="o in textDecorationOptions"
-            :key="o.style"
+            v-for="(o, i) in textDecorationOptions"
+            :key="i"
           >
             <Checkbox
               v-model="value[bannerType][o.style]"
@@ -182,7 +182,7 @@ export default ({
         <div class="col span-6">
           <ColorInput
             v-model="value[bannerType].color"
-            :default-value="themeVars.bannerTextColor"
+            :default-modelValue="themeVars.bannerTextColor"
             :label="t('banner.textColor')"
             :mode="mode"
           />
@@ -190,7 +190,7 @@ export default ({
         <div class="col span-6">
           <ColorInput
             v-model="value[bannerType].background"
-            :default-value="themeVars.bannerBgColor"
+            :default-modelValue="themeVars.bannerBgColor"
             :label="t('banner.background')"
             :mode="mode"
           />

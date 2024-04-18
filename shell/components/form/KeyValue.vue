@@ -60,8 +60,8 @@ export default {
 
     protip: {
       type: [String, Boolean],
-      default() {
-        return this.$store.getters['i18n/t']('keyValue.protip', null, true);
+      default(props) {
+        return props.$store.getters['i18n/t']('keyValue.protip', null, true);
       },
     },
     // For asMap=false, the name of the field that goes into the row objects
@@ -71,8 +71,8 @@ export default {
     },
     keyLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.key');
+      default(props) {
+        return props.$store.getters['i18n/t']('generic.key');
       },
     },
     keyEditable: {
@@ -95,8 +95,8 @@ export default {
     },
     keyPlaceholder: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('keyValue.keyPlaceholder');
+      default(props) {
+        return props.$store.getters['i18n/t']('keyValue.keyPlaceholder');
       },
     },
     /**
@@ -124,14 +124,14 @@ export default {
     },
     valueLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.value');
+      default(props) {
+        return props.$store.getters['i18n/t']('generic.value');
       },
     },
     valuePlaceholder: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('keyValue.valuePlaceholder');
+      default(props) {
+        return props.$store.getters['i18n/t']('keyValue.valuePlaceholder');
       },
     },
     valueCanBeEmpty: {
@@ -186,8 +186,8 @@ export default {
     },
     addLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.add');
+      default(props) {
+        return props.$store.getters['i18n/t']('generic.add');
       },
     },
     addIcon: {
@@ -200,8 +200,8 @@ export default {
     },
     readLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.readFromFile');
+      default(props) {
+        return props.$store.getters['i18n/t']('generic.readFromFile');
       },
     },
     readIcon: {
@@ -427,7 +427,7 @@ export default {
         return (row.value.length || row.key.length);
       });
 
-      this.$set(this, 'rows', cleaned);
+      this['rows'] = cleaned;
     },
     onFileSelected(file) {
       const { name, value } = this.fileModifier(file.name, file.value);
@@ -565,7 +565,7 @@ export default {
      * Set focus on CodeMirror fields
      */
     onFocusMarkdownMultiline(idx, value) {
-      this.$set(this.codeMirrorFocus, idx, value);
+      this.codeMirrorFocus[idx] = value;
     },
     onValueFileSelected(idx, file) {
       const { name, value } = file;
@@ -615,8 +615,8 @@ export default {
           {{ valueLabel }}
         </label>
         <label
-          v-for="c in extraColumns"
-          :key="c"
+          v-for="(c, i) in extraColumns"
+          :key="i"
         >
           <slot :name="'label:'+c">{{ c }}</slot>
         </label>
@@ -637,11 +637,11 @@ export default {
       </template>
       <template
         v-for="(row,i) in filteredRows"
+        :key="i"
         v-else
       >
         <!-- Key -->
         <div
-          :key="i+'key'"
           class="kv-item key"
         >
           <slot
@@ -663,7 +663,7 @@ export default {
               :taggable="keyTaggable"
               :options="calculateOptions(row[keyName])"
               :data-testid="`select-kv-item-key-${i}`"
-              @input="queueUpdate"
+              @update:modelValue="queueUpdate"
             />
             <input
               v-else
@@ -672,7 +672,7 @@ export default {
               :disabled="isView || disabled || !keyEditable || isProtected(row.key)"
               :placeholder="keyPlaceholder"
               :data-testid="`input-kv-item-key-${i}`"
-              @input="queueUpdate"
+              @update:modelValue="queueUpdate"
               @paste="onPaste(i, $event)"
             >
           </slot>
@@ -680,7 +680,6 @@ export default {
 
         <!-- Value -->
         <div
-          :key="i+'value'"
           :data-testid="`kv-item-value-${i}`"
           class="kv-item value"
         >
@@ -708,7 +707,7 @@ export default {
                 ref="cm"
                 data-testid="code-mirror-multiline-field"
                 :class="{['focus']: codeMirrorFocus[i]}"
-                :value="row[valueName]"
+                :modelValue="row[valueName]"
                 :as-text-area="true"
                 :mode="mode"
                 @onInput="onInputMarkdownMultiline(i, $event)"
@@ -724,7 +723,7 @@ export default {
                 :placeholder="valuePlaceholder"
                 :min-height="40"
                 :spellcheck="false"
-                @input="queueUpdate"
+                @update:modelValue="queueUpdate"
               />
               <input
                 v-else
@@ -736,7 +735,7 @@ export default {
                 autocapitalize="off"
                 spellcheck="false"
                 :data-testid="`input-kv-item-value-${i}`"
-                @input="queueUpdate"
+                @update:modelValue="queueUpdate"
               >
               <FileSelector
                 v-if="parseValueFromFile && readAllowed && !isView && isValueFieldEmpty(row[valueName])"
@@ -749,9 +748,8 @@ export default {
           </slot>
         </div>
         <div
-          v-for="c in extraColumns"
-          :key="i + c"
-          class="kv-item extra"
+          v-for="(c, i) in extraColumns"
+          :key="i"
         >
           <slot
             :name="'col:' + c"

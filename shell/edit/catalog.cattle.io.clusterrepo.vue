@@ -1,5 +1,5 @@
 <script>
-import Vue from 'vue';
+import { createApp } from 'vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import Footer from '@shell/components/form/Footer';
 import { LabeledInput } from '@components/Form/LabeledInput';
@@ -8,6 +8,7 @@ import NameNsDescription from '@shell/components/form/NameNsDescription';
 import Labels from '@shell/components/form/Labels';
 import SelectOrCreateAuthSecret from '@shell/components/form/SelectOrCreateAuthSecret';
 import { MANAGEMENT, NAMESPACE } from '@shell/config/types';
+const vueApp = createApp({});
 
 export default {
   name: 'CruCatalogRepo',
@@ -48,12 +49,12 @@ export default {
     onTargetChange(isGit) {
       // reset entered value when switching options
       if (isGit) {
-        Vue.set(this.value.spec, 'url', '');
+        this.value.spec['url'] = '';
       } else {
-        Vue.set(this.value.spec, 'gitRepo', '');
+        this.value.spec['gitRepo'] = '';
 
         if (!!this.value.spec.gitBranch) {
-          Vue.set(this.value.spec, 'gitBranch', '');
+          this.value.spec['gitBranch'] = '';
         }
       }
     }
@@ -79,7 +80,7 @@ export default {
           :labels="[t('catalog.repo.target.http'), t('catalog.repo.target.git')]"
           :mode="mode"
           data-testid="clusterrepo-radio-input"
-          @input="onTargetChange"
+          @update:modelValue="onTargetChange"
         />
       </div>
     </div>
@@ -132,7 +133,7 @@ export default {
 
     <Labels
       default-section-class="mt-20"
-      :value="value"
+      :modelValue="value"
       :mode="mode"
       :display-side-by-side="false"
     />

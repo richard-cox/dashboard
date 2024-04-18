@@ -30,7 +30,7 @@ describe('edit: management.cattle.io.setting should', () => {
     jest.spyOn(FormValidation.computed, 'fvUnreportedValidationErrors').mockReturnValue(MOCKED_ERRORS);
 
     const wrapper = mount(Monitoring, {
-      propsData: {
+      props: {
         canYaml:  false,
         mode:     _EDIT,
         resource: {},

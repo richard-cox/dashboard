@@ -3,13 +3,13 @@ import { purifyHTML } from './clean-html';
 const app = createApp({});
 
 export const cleanHtmlDirective = {
-  inserted(el, binding) {
+  mounted(el, binding) {
     el.innerHTML = purifyHTML(binding.value);
   },
-  componentUpdated(el, binding) {
+  updated(el, binding) {
     el.innerHTML = purifyHTML(binding.value);
   },
-  unbind(el) {
+  unmounted(el) {
     el.innerHTML = '';
   }
 };

@@ -399,7 +399,7 @@ export default {
       <Select
         :searchable="false"
         :options="repoOptionsForDropdown"
-        :value="flattenedRepoNames"
+        :modelValue="flattenedRepoNames"
         class="checkbox-select"
         :close-on-select="false"
         data-testid="charts-filter-repos"
@@ -410,7 +410,7 @@ export default {
         </template>
         <template #option="repo">
           <Checkbox
-            :value="repo.enabled"
+            :modelValue="repo.enabled"
             :label="repo.label"
             class="pull-left repo in-select"
             :class="{ [repo.color]: true}"
@@ -468,10 +468,8 @@ export default {
     </div>
 
     <Banner
-      v-for="err in loadingErrors"
-      :key="err"
-      color="error"
-      :label="err"
+      v-for="(err, i) in loadingErrors"
+      :key="i"
     />
 
     <div v-if="allCharts.length">
@@ -565,7 +563,7 @@ export default {
   padding: 7px 0 6px 13px;
   width: calc(100% + 10px);
 
-  ::v-deep .checkbox-label {
+  :deep() .checkbox-label {
     display: flex;
     align-items: center;
 
@@ -580,7 +578,7 @@ export default {
     }
   }
 
-  &:hover ::v-deep .checkbox-label {
+  &:hover :deep() .checkbox-label {
       color: var(--body-text);
     }
 
@@ -588,7 +586,7 @@ export default {
       &:hover {
       background: var(--app-rancher-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-rancher-accent-text);
     }
     & i {
@@ -600,7 +598,7 @@ export default {
       &:hover {
       background: var(--app-partner-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-partner-accent-text);
     }
     & i {
@@ -612,7 +610,7 @@ export default {
     &:hover {
       background: var(--app-color1-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-color1-accent-text);
     }
     & i {
@@ -623,7 +621,7 @@ export default {
     &:hover {
       background: var(--app-color2-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-color2-accent-text);
     }
     & i {
@@ -634,7 +632,7 @@ export default {
     &:hover {
       background: var(--app-color3-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-color3-accent-text);
     }
     & i {
@@ -645,7 +643,7 @@ export default {
     &:hover {
       background: var(--app-color4-accent);
     }
-    &:hover ::v-deep.checkbox-label {
+    &:hover :deep().checkbox-label {
       color: var(--app-color4-accent-text);
     }
     & i {
@@ -656,7 +654,7 @@ export default {
     &:hover {
       background: var(--app-color5-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-color5-accent-text);
     }
     & i {
@@ -667,7 +665,7 @@ export default {
     &:hover {
       background: var(--app-color6-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-color6-accent-text);
     }
     & i {
@@ -678,7 +676,7 @@ export default {
     &:hover {
       background: var(--app-color7-accent);
     }
-    &:hover ::v-deep .checkbox-label {
+    &:hover :deep() .checkbox-label {
       color: var(--app-color7-accent-text);
     }
     & i {

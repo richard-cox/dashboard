@@ -108,7 +108,7 @@ export default {
   <div class="mt-20">
     <FleetSummary
       v-if="gitRepoHasClusters"
-      :value="value"
+      :modelValue="value"
       :bundles="bundles"
       class="mb-20"
     />
@@ -131,14 +131,14 @@ export default {
         name="bundles"
         :weight="30"
       >
-        <FleetBundles :value="value" />
+        <FleetBundles :modelValue="value" />
       </Tab>
       <Tab
         label="Resources"
         name="resources"
         :weight="20"
       >
-        <FleetResources :value="value" />
+        <FleetResources :modelValue="value" />
       </Tab>
     </ResourceTabs>
   </div>

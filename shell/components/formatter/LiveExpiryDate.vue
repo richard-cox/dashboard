@@ -30,7 +30,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timer);
   },
 
@@ -66,13 +66,13 @@ export default {
     class="text-error"
   >
     <LiveDate
-      :value="stateValue.expiresAt"
+      :modelValue="stateValue.expiresAt"
       :add-suffix="true"
     />
   </span>
   <LiveDate
     v-else-if="stateValue.expiresAt"
-    :value="stateValue.expiresAt"
+    :modelValue="stateValue.expiresAt"
     :add-suffix="false"
   />
   <span

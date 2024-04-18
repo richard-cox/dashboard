@@ -1,6 +1,6 @@
 // Taken from @nuxt/vue-app/template/App.js
 
-import Vue from 'vue';
+import { createApp } from 'vue';
 
 import {
   getMatchedComponentsInstances, getChildrenComponentInstancesUsingFetch, promisify, globalHandleError, sanitizeComponent
@@ -9,6 +9,7 @@ import NuxtError from '../components/templates/error.vue';
 import NuxtLoading from '../components/nav/GlobalLoading.vue';
 
 import '../assets/styles/app.scss';
+const vueApp = createApp({});
 
 export default {
   render(h) {
@@ -111,7 +112,7 @@ export default {
             promisify(page.$options.asyncData, this.context)
               .then((newData) => {
                 for (const key in newData) {
-                  Vue.set(page.$data, key, newData[key]);
+                  page.$data[key] = newData[key];
                 }
               })
           );

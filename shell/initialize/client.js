@@ -1,6 +1,6 @@
 // Taken from @nuxt/vue-app/template/client.js
 
-import Vue from 'vue';
+import { createApp } from 'vue';
 import fetch from 'unfetch';
 import middleware from '../config/middleware.js';
 import {
@@ -24,18 +24,19 @@ import fetchMixin from '../mixins/fetch.client';
 import { nuxtLinkAlias } from '../components/nuxt/nuxt-link.client.js'; // should be included after ./index.js
 import { updatePageTitle } from '@shell/utils/title';
 import { getVendor } from '@shell/config/private-label';
+const vueApp = createApp({});
 
 // Mimic old @nuxt/vue-app/template/client.js
 const isDev = process.env.dev;
 const debug = isDev;
 
 // Fetch mixin
-Vue.mixin(fetchMixin);
+vueApp.mixin(fetchMixin);
 
 // Component: <NuxtLink>
 // TODO: #9541 Remove for Vue 3 migration
-Vue.component('NuxtLink', nuxtLinkAlias('NuxtLink'));
-Vue.component('NLink', nuxtLinkAlias('NLink'));
+vueApp.component('NuxtLink', nuxtLinkAlias('NuxtLink'));
+vueApp.component('NLink', nuxtLinkAlias('NLink'));
 
 if (!global.fetch) {
   global.fetch = fetch;
@@ -54,10 +55,10 @@ if ($config._app) {
   __webpack_public_path__ = urlJoin($config._app.cdnURL, $config._app.assetsPath); // eslint-disable-line camelcase, no-undef
 }
 
-Object.assign(Vue.config, { silent: false, performance: true });
+Object.assign(vueApp.config, { silent: false, performance: true });
 
 if (debug) {
-  const defaultErrorHandler = Vue.config.errorHandler;
+  const defaultErrorHandler = vueApp.config.errorHandler;
 
   vueApp.config.errorHandler = async(err, vm, info, ...rest) => {
     // Call other handler if exist
@@ -95,7 +96,7 @@ if (debug) {
   };
 }
 
-const errorHandler = Vue.config.errorHandler || console.error; // eslint-disable-line no-console
+const errorHandler = vueApp.config.errorHandler || console.error; // eslint-disable-line no-console
 
 // Create and mount App
 extendApp(NUXT.publicRuntimeConfig).then(mountApp).then(({ store }) => vueApp.use(store)).catch(errorHandler); // eslint-disable-line no-undef
@@ -463,7 +464,7 @@ function fixPrepatch(to, ___) {
   const instances = getMatchedComponentsInstances(to);
   const Components = getMatchedComponents(to);
 
-  Vue.nextTick(() => {
+  nextTick(() => {
     instances.forEach((instance, i) => {
       if (!instance || instance._isDestroyed) {
         return;
@@ -478,7 +479,7 @@ function fixPrepatch(to, ___) {
         const newData = instance.constructor.options.data.call(instance);
 
         for (const key in newData) {
-          Vue.set(instance.$data, key, newData[key]);
+          instance.$data[key] = newData[key];
         }
       }
     });
@@ -543,7 +544,7 @@ function addHotReload($component, depth) {
 
   $component.$vnode.context.$forceUpdate = async() => {
     const Components = getMatchedComponents(configRouter.currentRoute);
-    let Component = Components[depth];
+    const Component = Components[depth];
 
     if (!Component) {
       return _forceUpdate();
@@ -611,7 +612,7 @@ async function mountApp(__app) {
   configRouter = __app.router;
 
   // Create Vue instance
-  const _app = new Vue(configApp);
+  const _app = createApp(configApp);
 
   // Mounts Vue app to DOM element
   const mount = () => {
@@ -623,7 +624,7 @@ async function mountApp(__app) {
     configRouter.afterEach(fixPrepatch.bind(_app));
 
     // Listen for first Vue update
-    Vue.nextTick(() => {
+    nextTick(() => {
       // Call window.{{globals.readyCallback}} callbacks
       nuxtReady(_app);
 

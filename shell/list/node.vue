@@ -72,7 +72,7 @@ export default {
     return { canViewPods: false };
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     // Stop watching pods, nodes and node metrics
     this.$store.dispatch('cluster/forgetType', POD);
     this.$store.dispatch('cluster/forgetType', NODE);
@@ -144,7 +144,7 @@ export default {
     },
 
     toggleLabels(row) {
-      this.$set(row, 'displayLabels', !row.displayLabels);
+      row['displayLabels'] = !row.displayLabels;
     },
   }
 
@@ -168,7 +168,6 @@ export default {
       :use-query-params-for-simple-filtering="useQueryParamsForSimpleFiltering"
       :force-update-live-and-delayed="forceUpdateLiveAndDelayed"
       data-testid="cluster-node-list"
-      v-on="$listeners"
     >
       <template #sub-row="{fullColspan, row, onRowMouseEnter, onRowMouseLeave}">
         <tr
@@ -184,9 +183,8 @@ export default {
               <span v-if="row.spec.taints && row.spec.taints.length">
                 {{ t('node.list.nodeTaint') }}:
                 <Tag
-                  v-for="taint in row.spec.taints"
-                  :key="taint.key + taint.value + taint.effect"
-                  class="mr-5 mt-2"
+                  v-for="(taint, i) in row.spec.taints"
+                  :key="i"
                 >
                   {{ taint.key }}={{ taint.value }}:{{ taint.effect }}
                 </Tag>
@@ -198,7 +196,6 @@ export default {
                 <span
                   v-for="(label, i) in row.customLabels"
                   :key="i"
-                  class="mt-5 labels"
                 >
                   <Tag
                     v-if="i < 7"

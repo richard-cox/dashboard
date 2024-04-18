@@ -2,7 +2,7 @@ import { createApp } from 'vue';
 const app = createApp({});
 
 app.directive('intNumber', {
-  inserted(el) {
+  mounted(el) {
     el.addEventListener('keypress', (e) => {
       e = e || window.event;
       const charcode = typeof e.charCode === 'number' ? e.charCode : e.keyCode;

@@ -444,7 +444,7 @@ export default {
             <BadgeState
               v-if="!isCreate && parent.showState"
               class="masthead-state"
-              :value="value"
+              :modelValue="value"
             />
             <span
               v-if="!isCreate && value.injectionEnabled"
@@ -477,7 +477,7 @@ export default {
           </span>
           <span v-if="parent.showAge">{{ t("resourceDetail.masthead.age") }}: <LiveDate
             class="live-date"
-            :value="value.creationTimestamp"
+            :modelValue="value.creationTimestamp"
           /></span>
           <span v-if="value.showPodRestarts">{{ t("resourceDetail.masthead.restartCount") }}:<span class="live-data"> {{ value.restartCount }}</span></span>
         </div>
@@ -496,11 +496,11 @@ export default {
             </button>
             <ButtonGroup
               v-if="showSensitiveToggle"
-              :value="!!hideSensitiveData"
+              :modelValue="!!hideSensitiveData"
               icon-size="lg"
               :options="sensitiveOptions"
               class="mr-10"
-              @input="toggleSensitiveData"
+              @update:modelValue="toggleSensitiveData"
             />
 
             <ButtonGroup

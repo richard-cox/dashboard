@@ -2,7 +2,7 @@ import { createApp } from 'vue';
 const app = createApp({});
 
 app.directive('focus', {
-  inserted(_el, _binding, vnode) {
+  mounted(_el, _binding, vnode) {
     const element = getElement(vnode);
 
     if (element) {

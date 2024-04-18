@@ -41,7 +41,7 @@ export default {
 
   mixins: [CreateEditView],
   data() {
-    this.$set(this.value, 'automountServiceAccountToken', this.value.automountServiceAccountToken || false);
+    this.value.automountServiceAccountToken = this.value.automountServiceAccountToken || false;
 
     return { allSecrets: [] };
   },
@@ -56,7 +56,7 @@ export default {
     imagePullSecrets: {
       get() {
         if (!this.value.imagePullSecrets) {
-          this.$set(this.value, 'imagePullSecrets', []);
+          this.value.imagePullSecrets = [];
         }
         const { imagePullSecrets } = this.value;
 
@@ -97,7 +97,7 @@ export default {
     @cancel="done"
   >
     <NameNsDescription
-      :value="value"
+      :modelValue="value"
       :mode="mode"
     />
 
@@ -141,7 +141,7 @@ export default {
       >
         <Labels
           default-container-class="labels-and-annotations-container"
-          :value="value"
+          :modelValue="value"
           :mode="mode"
           :display-side-by-side="false"
         />

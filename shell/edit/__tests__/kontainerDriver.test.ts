@@ -1,3 +1,4 @@
+import { nextTick } from 'vue';
 /* eslint-disable jest/no-hooks */
 import { mount } from '@vue/test-utils';
 import KontainerDriverEdit from '@shell/edit/kontainerDriver.vue';
@@ -42,7 +43,7 @@ describe('view: kontainerdriver should', () => {
   });
 
   afterEach(() => {
-    wrapper.destroy();
+    wrapper.unmount();
   });
 
   it('have "Create" button disabled before fields are filled in', () => {
@@ -57,7 +58,7 @@ describe('view: kontainerdriver should', () => {
 
     urlField.setValue(url);
 
-    await wrapper.vm.$nextTick();
+    await nextTick();
 
     expect(saveButton.disabled).toBe(false);
   });
@@ -97,11 +98,11 @@ describe('view: kontainerdriver should', () => {
 
     for (const testCase of testCases) {
       urlField.setValue(testCase.url);
-      await wrapper.vm.$nextTick();
+      await nextTick();
       uiurlField.setValue(testCase.uiurl);
-      await wrapper.vm.$nextTick();
+      await nextTick();
       checksumField.setValue(testCase.checksum);
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
       expect(saveButton.disabled).toBe(testCase.result);
     }

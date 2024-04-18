@@ -309,7 +309,7 @@ export default {
               type="hidden"
               name="username"
               autocomplete="username"
-              :value="username"
+              :modelValue="username"
             >
             <div class="mb-20">
               <RadioGroup
@@ -384,8 +384,6 @@ export default {
                 <Banner
                   v-for="(err, i) in fvGetPathErrors(['serverUrl'])"
                   :key="i"
-                  color="error"
-                  :label="err"
                 />
                 <LabeledInput
                   v-model="serverUrl"
@@ -393,7 +391,7 @@ export default {
                   data-testid="setup-server-url"
                   :rules="fvGetAndReportPathRules('serverUrl')"
                   :required="true"
-                  @input="onServerUrlChange"
+                  @update:modelValue="onServerUrlChange"
                 />
               </div>
             </template>
@@ -445,9 +443,8 @@ export default {
 
           <div class="setup-errors mt-20">
             <h4
-              v-for="err in errors"
-              :key="err"
-              class="text-error text-center"
+              v-for="(err, i) in errors"
+              :key="i"
             >
               {{ err }}
             </h4>
@@ -514,7 +511,7 @@ export default {
     }
 
     .setup-title {
-      ::v-deep code {
+      :deep() code {
         font-size: 12px;
         padding: 0;
       }

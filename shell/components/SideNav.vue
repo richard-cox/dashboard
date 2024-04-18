@@ -406,10 +406,11 @@ export default {
   <nav class="side-nav">
     <!-- Actual nav -->
     <div class="nav">
-      <template v-for="(g) in groups">
+      <template  v-for="g in groups"
+                 :key="g.name"
+      >
         <Group
           ref="groups"
-          :key="g.name"
           id-prefix=""
           class="package"
           :group="g"
@@ -423,7 +424,6 @@ export default {
     <!-- Cluster tools -->
     <router-link
       v-if="showClusterTools"
-      tag="div"
       class="tools"
       :to="{name: 'c-cluster-explorer-tools', params: {cluster: clusterId}}"
     >
@@ -477,8 +477,6 @@ export default {
               <li
                 v-for="(label, name) in availableLocales"
                 :key="name"
-                class="hand"
-                @click="switchLocale(name)"
               >
                 {{ label }}
               </li>
@@ -527,7 +525,7 @@ export default {
     overflow-y: auto;
 
     // h6 is used in Group element
-    ::v-deep h6 {
+    :deep() h6 {
       margin: 0;
       letter-spacing: normal;
       line-height: 15px;

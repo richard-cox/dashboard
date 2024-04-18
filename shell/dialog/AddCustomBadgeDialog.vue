@@ -143,11 +143,11 @@ export default {
           delete norman.annotations[CLUSTER_BADGE.TEXT];
 
           if (this.badgeAsIcon) {
-            this.$set(norman.annotations, CLUSTER_BADGE.COLOR, this.badgeBgColor);
-            this.$set(norman.annotations, CLUSTER_BADGE.ICON_TEXT, this.letter.toUpperCase());
+            norman.annotations[CLUSTER_BADGE.COLOR] = this.badgeBgColor;
+            norman.annotations[CLUSTER_BADGE.ICON_TEXT] = this.letter.toUpperCase();
             // If the user has a custom comment, set it as the badge text
             if (this.useCustomComment) {
-              this.$set(norman.annotations, CLUSTER_BADGE.TEXT, this.badgeComment);
+              norman.annotations[CLUSTER_BADGE.TEXT] = this.badgeComment;
             }
           }
 
@@ -236,7 +236,7 @@ export default {
           <ColorInput
             v-model="badgeBgColor"
             :disabled="!badgeAsIcon"
-            :default-value="badgeBgColor"
+            :default-modelValue="badgeBgColor"
             :label="t('clusterBadge.modal.badgeBgColor')"
           />
         </div>
@@ -273,8 +273,6 @@ export default {
       <Banner
         v-for="(err, i) in errors"
         :key="i"
-        color="error"
-        :label="err"
       />
       <div class="buttons">
         <button
@@ -342,7 +340,7 @@ export default {
       }
     }
 
-    ::v-deep .badge-icon-text input {
+    :deep() .badge-icon-text input {
       text-transform: uppercase;
     }
   }

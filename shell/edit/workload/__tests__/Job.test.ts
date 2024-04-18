@@ -12,7 +12,7 @@ describe('component: Job', () => {
     ])('should emit an update on %p input', (field) => {
       const wrapper = mount(Job, {
         directives: { cleanHtmlDirective },
-        propsData:  {
+        props:  {
           mode: _EDIT,
           type: WORKLOAD_TYPES.CRON_JOB
         }
@@ -30,7 +30,7 @@ describe('component: Job', () => {
       'suspend',
     ])('should emit an update on %p radio option change', (field) => {
       const wrapper = mount(Job, {
-        propsData: {
+        props: {
           mode: _EDIT,
           type: WORKLOAD_TYPES.CRON_JOB
         }
@@ -57,7 +57,7 @@ describe('component: Job', () => {
       'activeDeadlineSeconds',
     ])('should emit an update on %p input and blur', (field) => {
       const wrapper = mount(Job, {
-        propsData: {
+        props: {
           mode: _EDIT,
           type
         }

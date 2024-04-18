@@ -1,9 +1,10 @@
-import Vue from 'vue';
+import { createApp } from 'vue';
 import { mapGetters } from 'vuex';
 import { COUNT, MANAGEMENT } from '@shell/config/types';
 import { SETTING, DEFAULT_PERF_SETTING } from '@shell/config/settings';
 import ResourceFetchNamespaced from '@shell/mixins/resource-fetch-namespaced';
 import ResourceFetchApiPagination from '@shell/mixins/resource-fetch-api-pagination';
+const vueApp = createApp({});
 
 // Number of pages to fetch when loading incrementally
 const PAGES = 4;
@@ -134,14 +135,14 @@ export default {
           force:            this.paginating !== null // Fix for manual refresh (before ripped out).
         };
 
-        Vue.set(this, 'paginating', true);
+        this['paginating'] = true;
 
         const that = this;
 
         return this.$store.dispatch(`${ currStore }/findPage`, {
           type,
           opt
-        }).finally(() => Vue.set(that, 'paginating', false));
+        }).finally(() => (that['paginating'] = false));
       }
 
       let incremental = 0;

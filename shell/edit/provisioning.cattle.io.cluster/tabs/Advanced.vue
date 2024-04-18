@@ -1,11 +1,12 @@
 <script>
-import Vue from 'vue';
+import { createApp } from 'vue';
 import { _VIEW } from '@shell/config/query-params';
 import { Banner } from '@components/Banner';
 import ArrayListGrouped from '@shell/components/form/ArrayListGrouped';
 import MatchExpressions from '@shell/components/form/MatchExpressions';
 import ArrayList from '@shell/components/form/ArrayList';
 import { Checkbox } from '@components/Form/Checkbox';
+const vueApp = createApp({});
 
 export default {
   components: {
@@ -99,7 +100,7 @@ export default {
         :mode="mode"
         :add-label="t('cluster.advanced.argInfo.machineSelector.label')"
         :can-remove="canRemoveKubeletRow"
-        :default-add-value="{machineLabelSelector: { matchExpressions: [], matchLabels: {} }, config: {'kubelet-arg': []}}"
+        :default-add-modelValue="{machineLabelSelector: { matchExpressions: [], matchLabels: {} }, config: {'kubelet-arg': []}}"
       >
         <template #default="{row, i}">
           <template v-if="row.value.machineLabelSelector">
@@ -193,10 +194,10 @@ export default {
         <div class="col span-12">
           <Checkbox
             data-testid="protect-kernel-defaults"
-            :value="protectKernelDefaults"
+            :modelValue="protectKernelDefaults"
             :mode="mode"
             :label="t('cluster.advanced.agentArgs.label')"
-            @input="onInputProtectKernelDefaults($event)"
+            @update:modelValue="onInputProtectKernelDefaults($event)"
           />
         </div>
       </div>
