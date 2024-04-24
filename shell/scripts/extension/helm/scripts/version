@@ -12,6 +12,7 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     fi
 
     COMMIT=$(git rev-parse --short HEAD)
+    # TODO: RC
     GIT_TAG=${DRONE_TAG:-$(git tag -l --contains HEAD | head -n 1)}
 
     if [[ -z "$DIRTY" && -n "$GIT_TAG" ]]; then

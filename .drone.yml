@@ -1,23 +1,23 @@
----
-kind: pipeline
-name: test
+# ---
+# kind: pipeline
+# name: test
 
-trigger:
-  event:
-  - push
-  - tag
+# trigger:
+#   event:
+#   - push
+#   - tag
 
-platform:
-  os: linux
-  arch: amd64
+# platform:
+#   os: linux
+#   arch: amd64
 
-steps:
-- name: test
-  pull: default
-  image: node:14
-  commands:
-  - scripts/ci
-
+# steps:
+# - name: test
+#   pull: default
+#   image: node:14
+#   commands:
+#   - scripts/ci
+# TODO To Remove
 ---
 kind: pipeline
 name: hosted-master
