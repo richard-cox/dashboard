@@ -1,8 +1,8 @@
-import '@shell/plugins/extend-router';
+// import '@shell/plugins/extend-router';
 import '@shell/plugins/formatters';
 import '@shell/plugins/global-formatters';
 import '@shell/plugins/i18n';
-import '@shell/plugins/vue-js-modal';
+// import '@shell/plugins/vue-js-modal';
 import '@shell/plugins/js-yaml';
 import '@shell/plugins/portal-vue.js';
 import '@shell/plugins/resize';

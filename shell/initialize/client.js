@@ -543,7 +543,7 @@ function addHotReload($component, depth) {
   const _forceUpdate = $component.$forceUpdate.bind($component.$parent);
 
   $component.$vnode.context.$forceUpdate = async() => {
-    const Components = getMatchedComponents(configRouter.currentRoute);
+    const Components = getMatchedComponents(configRouter.currentRoute.value);
     const Component = Components[depth];
 
     if (!Component) {
@@ -561,7 +561,7 @@ function addHotReload($component, depth) {
     };
 
     await setContext(configApp, {
-      route: configRouter.currentRoute,
+      route: configRouter.currentRoute.value,
       isHMR: true,
       next:  next.bind(this)
     });
@@ -639,7 +639,7 @@ async function mountApp(__app) {
   const Components = await Promise.all(resolveComponents(configApp.context.route));
 
   if (Components.length) {
-    _lastPaths = configRouter.currentRoute.matched.map((route) => compile(route.path)(configRouter.currentRoute.params));
+    _lastPaths = configRouter.currentRoute.value.matched.map((route) => compile(route.path)(configRouter.currentRoute.value.params));
   }
 
   // Initialize error handler
@@ -669,7 +669,7 @@ async function mountApp(__app) {
 
   // First render on client-side
   const clientFirstMount = () => {
-    normalizeComponents(configRouter.currentRoute, configRouter.currentRoute);
+    normalizeComponents(configRouter.currentRoute.value, configRouter.currentRoute.value);
     checkForErrors(_app);
     // Don't call fixPrepatch.call(_app, configRouter.currentRoute, configRouter.currentRoute) since it's first render
     mount();
@@ -677,7 +677,7 @@ async function mountApp(__app) {
 
   // fix: force next tick to avoid having same timestamp when an error happen on spa fallback
   await new Promise((resolve) => setTimeout(resolve, 0));
-  render.call(_app, configRouter.currentRoute, configRouter.currentRoute, (path) => {
+  render.call(_app, configRouter.currentRoute.value, configRouter.currentRoute.value, (path) => {
     // If not redirected
     if (!path) {
       clientFirstMount();

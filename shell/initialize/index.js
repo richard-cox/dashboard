@@ -142,7 +142,8 @@ async function extendApp(config = {}) {
   // Wait for async component to be resolved first
   await new Promise((resolve, reject) => {
     // Ignore 404s rather than blindly replacing URL in browser
-    const { route } = router.currentRoute.value;
+    // const { route } = router.currentRoute.value;
+    const route = router.currentRoute.value;
 
     if (!route.matched.length) {
       return resolve();
