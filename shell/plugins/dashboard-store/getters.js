@@ -126,6 +126,12 @@ export default {
     }
   },
 
+  page: (_, getters) => (type) => {
+    type = getters.normalizeType(type);
+
+    return getters.havePage(type) ? getters.all(type) : [];
+  },
+
   /**
    * Checks a schema for the given path
    *

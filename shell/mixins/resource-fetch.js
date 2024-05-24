@@ -65,7 +65,7 @@ export default {
       const currResource = this.fetchedResourceType.find((item) => item.type === this.resource);
 
       if (currResource) {
-        return this.$store.getters[`${ currResource.currStore }/all`](this.resource);
+        return this.canPaginate ? this.$store.getters[`${ currResource.currStore }/page`](this.resource) : this.$store.getters[`${ currResource.currStore }/all`](this.resource);
       } else {
         return [];
       }

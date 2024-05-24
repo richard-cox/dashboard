@@ -48,14 +48,14 @@ export default {
 
     const method = (opt.method || 'get').toLowerCase();
     const headers = (opt.headers || {});
-    const key = JSON.stringify(headers) + method + opt.url;
+    const key = `${ opt.url }___%___${ method }___%___${ JSON.stringify(headers) }`;
     let waiting;
 
     if ( (method === 'get') ) {
       waiting = state.deferredRequests[key];
 
       if ( waiting ) {
-        const later = deferred();
+        const later = deferred('hmmm', { url: opt.url, method });
 
         waiting.push(later);
 
@@ -126,7 +126,7 @@ export default {
           out = responseObject(res);
         }
 
-        finishDeferred(key, 'resolve', out);
+        out = finishDeferred(key, 'resolve', out) || out;
 
         handleKubeApiHeaderWarnings(res, dispatch, rootGetters, opt.method);
 
@@ -135,6 +135,17 @@ export default {
     }
 
     function finishDeferred(key, action = 'resolve', res) {
+      if ( (method === 'get') ) {
+        const hmmm = state.deferredRequests[key];
+
+        if (!hmmm) {
+          const message = 'forgeeeet about it';
+
+          console.debug(message);
+
+          return Promise.reject(new Error(message));
+        }
+      }
       const waiting = state.deferredRequests[key] || [];
 
       // console.log('Resolving deferred for', key, waiting.length);

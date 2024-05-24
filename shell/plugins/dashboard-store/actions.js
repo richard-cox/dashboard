@@ -366,7 +366,9 @@ export default {
    * @param { {type: string, opt: FindPageOpt} } opt
    */
   async findPage(ctx, { type, opt }) {
-    const { getters, commit, dispatch } = ctx;
+    const {
+      getters, commit, dispatch, state
+    } = ctx;
 
     opt = opt || {};
 
@@ -382,10 +384,46 @@ export default {
       commit('registerType', type);
     }
 
+    const method = (opt.method || 'get').toLowerCase();
+    if (method === 'get') {
+
+    }
+
+    const stale = Object.entries(state.deferredRequests).find(([k, deferredRequests]) => {
+      // const other types
+      console.warn(k);
+      const { details } = deferredRequests;
+      
+      if (details.method === 'get') {
+        const url = new URL(details.url);
+        if (url.path) // TODO: RC HEEERE. how to tell conflicting request (pass in url, check for same paths?? avoid urlFor if can)
+      }
+      if (k.indexOf('/v1/pods?exclude=metadata.managedFields') >= 0) {
+        return true;
+      }
+    });
+
+    if (stale) {
+      const waiting = state.deferredRequests[stale[0]];
+
+      while ( waiting.length ) {
+        waiting.pop().reject('asdsad');
+      }
+
+      delete state.deferredRequests[stale[0]];
+
+      console.warn('!!!!!!!!! triggered');
+
+    }
+
     // No need to request the resources if we have them already
     if (!opt.force && getters['havePaginatedPage'](type, opt)) {
+      console.warn('action', 'findPage', 'already have...');
+
       return findAllGetter(getters, type, opt);
     }
+
+    console.warn('action', 'findPage', 'fetching...');
 
     console.log(`Find Page: [${ ctx.state.config.namespace }] ${ type }. Page: ${ opt.pagination.page }. Size: ${ opt.pagination.pageSize }`); // eslint-disable-line no-console
     opt = opt || {};
@@ -406,7 +444,7 @@ export default {
 
       return Promise.reject(e);
     }
-
+    console.warn('loadPage', type, opt.pagination);
     commit('loadPage', {
       ctx,
       type,

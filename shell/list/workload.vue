@@ -131,7 +131,7 @@ export default {
     loadHeathResources() {
       // Fetch these in the background to populate workload health
       if ( this.allTypes ) {
-        this.$fetchType(POD);
+        this.$fetchType(POD); // TODO: RC
         this.$fetchType(WORKLOAD_TYPES.JOB);
       } else {
         const type = this.$route.params.resource;
@@ -144,7 +144,7 @@ export default {
         if (type === WORKLOAD_TYPES.CRON_JOB) {
           this.$fetchType(WORKLOAD_TYPES.JOB);
         } else {
-          this.$fetchType(POD);
+          this.$fetchType(POD); // TODO: RC
         }
       }
     }

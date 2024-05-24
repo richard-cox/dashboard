@@ -463,7 +463,7 @@ export default {
 
     loading(neu) {
       // Always ensure the Refresh button phase aligns with loading state (to ensure external phase changes which can then reset the internal phase changed by click)
-      this.refreshButtonPhase = !neu ? ASYNC_BUTTON_STATES.WAITING : ASYNC_BUTTON_STATES.ACTION;
+      this.refreshButtonPhase = neu ? ASYNC_BUTTON_STATES.WAITING : ASYNC_BUTTON_STATES.ACTION;
 
       if (this.altLoading) {
         // Delay setting the actual loading indicator. This should avoid flashing up the indicator if the API responds quickly
@@ -1215,7 +1215,7 @@ export default {
       />
 
       <!-- Don't display anything if we're loading and the delay has yet to pass -->
-      <div v-if="pLoading && !loadingDelay" />
+      <div v-if="loading && !loadingDelay" />
 
       <tbody v-else-if="pLoading && !altLoading">
         <slot name="loading">
@@ -1232,7 +1232,7 @@ export default {
           </tr>
         </slot>
       </tbody>
-      <tbody v-else-if="noRows">
+      <tbody v-else-if="noRows && (!loading && !altLoading)">
         <slot name="no-rows">
           <tr class="no-rows">
             <td :colspan="fullColspan">
@@ -1462,7 +1462,7 @@ export default {
       <button
         type="button"
         class="btn btn-sm role-multi-action"
-        :disabled="page == 1"
+        :disabled="page == 1 || loading"
         @click="goToPage('first')"
       >
         <i class="icon icon-chevron-beginning" />
@@ -1470,7 +1470,7 @@ export default {
       <button
         type="button"
         class="btn btn-sm role-multi-action"
-        :disabled="page == 1"
+        :disabled="page == 1 || loading"
         @click="goToPage('prev')"
       >
         <i class="icon icon-chevron-left" />
@@ -1481,7 +1481,7 @@ export default {
       <button
         type="button"
         class="btn btn-sm role-multi-action"
-        :disabled="page == totalPages"
+        :disabled="page == totalPages || loading"
         @click="goToPage('next')"
       >
         <i class="icon icon-chevron-right" />
@@ -1489,7 +1489,7 @@ export default {
       <button
         type="button"
         class="btn btn-sm role-multi-action"
-        :disabled="page == totalPages"
+        :disabled="page == totalPages || loading"
         @click="goToPage('last')"
       >
         <i class="icon icon-chevron-end" />

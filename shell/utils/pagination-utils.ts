@@ -16,16 +16,25 @@ import { STEVE_CACHE } from '@shell/store/features';
 import { getPerformanceSetting } from '@shell/utils/settings';
 import { DEFAULT_PERF_SETTING } from '@shell/config/settings';
 
+// TODO: RC done blip of pag controls
+// TODO: RC secrets to service accounts --> shows old content
+// TODO: RC on nav to list
+
+// - on first visit used to show loading indicator, now hav
+// - navigate from page with all pods to pag pods
+//   - showed all pods before showing page
+//   - quickly flick between the two, stop at pag pods, slower all pods http request comes in second and replaces content
+
 /**
  * Given the vai cache changes haven't merged, work around the settings that are blocked by it
  *
  * Once cache is merged (pre 2.9.0) this will be removed
  */
-export const TEMP_VAI_CACHE_MERGED = false;
+export const TEMP_VAI_CACHE_MERGED = true;
 /**
  * Given above, just a dev thing
  */
-const TEMP_PERF_ENABLED = false;
+const TEMP_PERF_ENABLED = true;
 
 /**
  * Helper functions for server side pagination
