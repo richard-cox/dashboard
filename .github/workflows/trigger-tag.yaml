@@ -1,0 +1,15 @@
+name: Trigger Tag
+on:
+  push:
+    tags:
+      - tag-*
+
+jobs:
+  output:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Tag
+        run: |
+          echo "Trigger Tag"
+          echo "github.event.head_commit: ${{github.event.head_commit}}"
+          echo "github.event.ref: ${{github.event.ref}}"

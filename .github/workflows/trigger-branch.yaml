@@ -1,0 +1,15 @@
+name: Trigger Branch
+on:
+  push:
+    branches:
+      - branch-*
+
+jobs:
+  output:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Branch
+        run: |
+          echo "Trigger Branch"
+          echo "github.event.head_commit: ${{github.event.head_commit}}"
+          echo "github.event.ref: ${{github.event.ref}}"
