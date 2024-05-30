@@ -10,6 +10,7 @@ jobs:
     steps:
       - name: Trigger Branch
         run: |
-          echo "Trigger Branch"
-          echo "github.event.head_commit: ${{github.event.head_commit}}"
+          echo "Trigger Tag"
           echo "github.event.ref: ${{github.event.ref}}"
+          echo "github.event.head_commit.id: ${{github.event.head_commit.id}}"
+          echo "github.event.head_commit.tree_id: ${{github.event.head_commit.tree_id}}"

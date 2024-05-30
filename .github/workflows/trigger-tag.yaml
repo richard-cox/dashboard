@@ -11,5 +11,6 @@ jobs:
       - name: Trigger Tag
         run: |
           echo "Trigger Tag"
-          echo "github.event.head_commit: ${{github.event.head_commit}}"
           echo "github.event.ref: ${{github.event.ref}}"
+          echo "github.event.head_commit.id: ${{github.event.head_commit.id}}"
+          echo "github.event.head_commit.tree_id: ${{github.event.head_commit.tree_id}}"
