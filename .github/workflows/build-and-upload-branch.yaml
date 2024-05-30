@@ -6,6 +6,7 @@ on:
       - 'release-*'
       - '*-dev'
 
+      
 jobs:
   build-validation:
     name: Build Test
