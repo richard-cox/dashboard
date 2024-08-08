@@ -339,7 +339,13 @@ export default {
     externalPaginationResult: {
       type:    Object,
       default: null
+    },
+
+    manualRefreshButtonSize: {
+      type:    String,
+      default: ''
     }
+
   },
 
   data() {
@@ -1120,6 +1126,7 @@ export default {
             v-if="isTooManyItemsToAutoUpdate"
             class="manual-refresh"
             mode="manual-refresh"
+            :size="manualRefreshButtonSize"
             :current-phase="refreshButtonPhase"
             @click="debouncedRefreshTableData"
           />
@@ -1545,9 +1552,10 @@ export default {
     pointer-events: none;
   }
 
-  .manual-refresh {
-    height: 40px;
-  }
+  // TODO: RC TEST with <ResourceList :has-advanced-filtering="true" />
+  // .manual-refresh {
+  //   height: 40px;
+  // }
   .advanced-filter-group {
     position: relative;
     margin-left: 10px;
