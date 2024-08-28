@@ -11,5 +11,6 @@ updates:
   - package-ecosystem: "npm"
     directories:
       - '/'
+      - '!storybook'
     schedule:
       interval: "weekly"
