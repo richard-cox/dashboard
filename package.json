@@ -144,7 +144,7 @@
     "@babel/plugin-transform-nullish-coalescing-operator": "7.23.4",
     "@babel/preset-typescript": "7.16.7",
     "@cypress/code-coverage": "3.10.4",
-    "@cypress/grep": "3.1.5",
+    "@cypress/grep": "4.1.0",
     "@cypress/vue": "5.0.5",
     "@cypress/webpack-dev-server": "3.4.1",
     "@types/copy-webpack-plugin": "5.0.3",
