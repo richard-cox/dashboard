@@ -88,7 +88,7 @@
     "dompurify": "2.4.5",
     "element-matches": "^0.1.2",
     "event-target-shim": "5.0.1",
-    "express": "4.17.1",
+    "express": "4.20.0",
     "file-saver": "2.0.2",
     "floating-vue": "5.2.2",
     "https": "1.0.0",
