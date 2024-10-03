@@ -17,6 +17,8 @@ export default {
   mixins: [Brand, BrowserTabVisibility],
 
   data() {
+
+    ?error=abc
     const store = this.$store;
 
     if (!store.state.error && !store.state.cameFromError) {

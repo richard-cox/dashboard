@@ -9,6 +9,8 @@ export const loadDebugger = (vueApp) => {
     const defaultErrorHandler = vueApp.config.errorHandler;
 
     vueApp.config.errorHandler = async(err, vm, info, ...rest) => {
+      debugger;
+
       // Call other handler if exist
       let handled = null;
 
@@ -29,6 +31,10 @@ export const loadDebugger = (vueApp) => {
 
           vueApp.error(err);
         }
+      }
+
+      if (vm?._component?.methods?.handleError) {
+        vm._component.methods.handleError();
       }
 
       if (typeof defaultErrorHandler === 'function') {

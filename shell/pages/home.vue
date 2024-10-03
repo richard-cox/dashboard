@@ -81,12 +81,14 @@ export default {
       },
     ];
 
-    return {
-      HIDE_HOME_PAGE_CARDS,
-      fullVersion,
-      pageActions,
-      vendor: getVendor(),
-    };
+    throw new Error('on no....');
+
+    // return {
+    //   HIDE_HOME_PAGE_CARDS,
+    //   fullVersion,
+    //   pageActions,
+    //   vendor: getVendor(),
+    // };
   },
 
   computed: {

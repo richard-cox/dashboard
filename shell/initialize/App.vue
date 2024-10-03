@@ -48,6 +48,10 @@ export default {
   },
 
   methods: {
+    handleError(error) {
+      this.$store.dispatch('loadingError', new Error(this.t('nav.failWhale.resourceListNotFound', { resource }, true)));
+    },
+
     refreshOnlineStatus() {
       if (typeof window.navigator.onLine === 'undefined') {
         // If the browser doesn't support connection status reports
