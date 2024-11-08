@@ -14,6 +14,8 @@ import { checkSchemasForFindAllHash } from '@shell/utils/auth';
 export default {
   name: 'DetailGitRepo',
 
+  emits: ['input'],
+
   components: {
     Loading,
     FleetResources,
@@ -40,7 +42,7 @@ export default {
   },
   computed: {
     gitRepoHasClusters() {
-      return this.value?.clusterResourceStatus?.length;
+      return this.value.status.desiredReadyClusters;
     },
     clusterSchema() {
       return this.$store.getters['management/schemaFor'](FLEET.CLUSTER);
@@ -126,10 +128,11 @@ export default {
       {{ t('fleet.fleetSummary.noClustersGitRepo') }}
     </Banner>
     <ResourceTabs
-      v-model="value"
+      :value="value"
       mode="view"
       class="mt-20"
       :need-related="false"
+      @update:value="$emit('input', $event)"
     >
       <Tab
         v-if="!!allBundles.length"

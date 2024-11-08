@@ -62,14 +62,14 @@ const maxSize = (ctx: CruEKSContext) => {
 };
 
 const minSize = (ctx: CruEKSContext) => {
-  return (size: number): null | string => {
-    const msg = ctx.t('eks.errors.greaterThanZero', { key: ctx.t('eks.nodeGroups.minSize.label') });
+  return (size?: number): null | string => {
+    const msg = ctx.t('eks.errors.atLeastZero', { key: ctx.t('eks.nodeGroups.minSize.label') });
 
     if (size !== undefined) {
-      return size > 0 ? null : msg;
+      return size >= 0 ? null : msg;
     }
 
-    return !!ctx.nodeGroups.find((group) => !group.minSize || group.minSize <= 0) ? msg : null;
+    return !!ctx.nodeGroups.find((group) => (!group.minSize && group.minSize !== 0) || group.minSize < 0) ? msg : null;
   };
 };
 
@@ -161,6 +161,14 @@ const minLessThanMax = (ctx: CruEKSContext) => {
   };
 };
 
+const nodeGroupsRequired = (ctx: CruEKSContext) => {
+  return (): string | undefined => {
+    const nodeGroups = ctx.nodeGroups || [];
+
+    return !nodeGroups.length ? ctx.t('eks.errors.nodeGroupsRequired') : undefined;
+  };
+};
+
 export default {
   clusterNameRequired,
   nodeGroupNamesRequired,
@@ -173,5 +181,6 @@ export default {
   subnets,
   publicPrivateAccess,
   minMaxDesired,
-  minLessThanMax
+  minLessThanMax,
+  nodeGroupsRequired
 };

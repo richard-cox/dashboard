@@ -10,6 +10,7 @@ import ExtensionPanel from '@shell/components/ExtensionPanel';
 import Masthead from '@shell/components/ResourceList/Masthead';
 import { mapPref, GROUP_RESOURCES, ALL_NAMESPACES } from '@shell/store/prefs';
 import MoveModal from '@shell/components/MoveModal';
+import ButtonMultiAction from '@shell/components/ButtonMultiAction.vue';
 
 import { NAMESPACE_FILTER_ALL_ORPHANS } from '@shell/utils/namespace-filter';
 import ResourceFetch from '@shell/mixins/resource-fetch';
@@ -18,7 +19,11 @@ import DOMPurify from 'dompurify';
 export default {
   name:       'ListProjectNamespace',
   components: {
-    ExtensionPanel, Masthead, MoveModal, ResourceTable
+    ExtensionPanel,
+    Masthead,
+    MoveModal,
+    ResourceTable,
+    ButtonMultiAction,
   },
   mixins: [ResourceFetch],
 
@@ -358,7 +363,7 @@ export default {
 </script>
 
 <template>
-  <div class="project-namespaces">
+  <div class="project-namespaces outlet">
     <Masthead
       :schema="projectSchema"
       :type-display="t('projectNamespaces.label')"
@@ -372,7 +377,7 @@ export default {
     >
       <template
         v-if="showCreateNsButton"
-        slot="extraActions"
+        #extraActions
       >
         <router-link
           :to="createNamespaceLocationFlatList()"
@@ -391,8 +396,8 @@ export default {
     />
     <ResourceTable
       ref="table"
+      v-bind="{...$attrs, class: null }"
       class="table project-namespaces-table"
-      v-bind="$attrs"
       :schema="schema"
       :headers="headers"
       :rows="filteredRows"
@@ -401,7 +406,6 @@ export default {
       :loading="loading"
       group-tooltip="resourceTable.groupBy.project"
       key-field="_key"
-      v-on="$listeners"
     >
       <template #group-by="group">
         <div
@@ -431,14 +435,12 @@ export default {
             >
               {{ t('projectNamespaces.createNamespace') }}
             </router-link>
-            <button
-              type="button"
-              class="project-action btn btn-sm role-multi-action actions mr-10"
-              :class="{invisible: !showProjectActionButton(group.group)}"
+            <ButtonMultiAction
+              class="project-action mr-10"
+              :borderless="true"
+              :invisible="!showProjectActionButton(group.group)"
               @click="showProjectAction($event, group.group)"
-            >
-              <i class="icon icon-actions" />
-            </button>
+            />
           </div>
         </div>
       </template>
@@ -473,26 +475,26 @@ export default {
         </div>
       </template>
       <template
-        v-for="project in projectsWithoutNamespaces"
-        v-slot:[slotName(project)]
+        v-for="(project, i) in projectsWithoutNamespaces"
+        :key="i"
+        #[slotName(project)]="{ fullColspan }"
       >
         <tr
-          :key="project.id"
           class="main-row"
         >
           <td
             class="empty text-center"
-            colspan="5"
+            :colspan="fullColspan"
           >
             {{ t('projectNamespaces.noNamespaces') }}
           </td>
         </tr>
       </template>
-      <template #main-row:fake-empty>
+      <template #main-row:fake-empty="{ fullColspan }">
         <tr class="main-row">
           <td
             class="empty text-center"
-            colspan="5"
+            :colspan="fullColspan"
           >
             {{ t('projectNamespaces.noProjectNoNamespaces') }}
           </td>
@@ -504,7 +506,7 @@ export default {
 </template>
 <style lang="scss" scoped>
 .project-namespaces {
-  & ::v-deep {
+  & :deep() {
     .project-namespaces-table table {
       table-layout: fixed;
     }

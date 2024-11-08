@@ -39,7 +39,7 @@ export default defineComponent({
     BadgeState,
     CommunityLinks,
     SingleClusterInfo,
-    TabTitle
+    TabTitle,
   },
 
   mixins: [PageHeaderActions],
@@ -231,7 +231,7 @@ export default defineComponent({
   },
 
   // Forget the types when we leave the page
-  beforeDestroy() {
+  beforeUnmount() {
     this.$store.dispatch('management/forgetType', CAPI.MACHINE);
     this.$store.dispatch('management/forgetType', MANAGEMENT.NODE);
     this.$store.dispatch('management/forgetType', MANAGEMENT.NODE_POOL);
@@ -276,14 +276,14 @@ export default defineComponent({
       if ( this.canViewMgmtClusters ) {
         const opt: ActionFindPageArgs = {
           force,
-          pagination: new FilterArgs({}),
+          // pagination: new FilterArgs({}),
           // TODO: RC API blocked on missing id
-          // pagination: new FilterArgs({
-          //   filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
-          //     field: 'id',
-          //     value: r.status?.clusterName // TODO: handle empty status
-          //   }))),
-          // })
+          pagination: new FilterArgs({
+            filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
+              field: 'id',
+              value: r.status?.clusterName // TODO: handle empty status
+            }))),
+          })
         };
 
         this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.CLUSTER, opt });
@@ -292,14 +292,14 @@ export default defineComponent({
       if ( this.canViewMgmtClusters ) {
         const opt: ActionFindPageArgs = {
           force,
-          pagination: new FilterArgs({}),
+          // pagination: new FilterArgs({}),
           // TODO: RC API blocked on missing spec.clusterName
-          // pagination: new FilterArgs({
-          //   filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
-          //     field: 'spec.clusterName',// TODO: handle empty spec
-          //     value: r.metadata.name
-          //   }))),
-          // })
+          pagination: new FilterArgs({
+            filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
+              field: 'spec.clusterName', // TODO: handle empty spec
+              value: r.metadata.name
+            }))),
+          })
         };
 
         this.$store.dispatch(`management/findPage`, { type: CAPI.MACHINE, opt });
@@ -308,14 +308,14 @@ export default defineComponent({
       if ( this.canViewMgmtNodes ) {
         const opt: ActionFindPageArgs = {
           force,
-          pagination: new FilterArgs({}),
+          // pagination: new FilterArgs({}),
           // TODO: RC API blocked on missing id
-          // pagination: new FilterArgs({
-          //   filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
-          //     field: 'id',
-          //     value: r.mgmtClusterId (partial)
-          //   }))),
-          // })
+          pagination: new FilterArgs({
+            filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
+              field: 'id',
+              value: r.mgmtClusterId(partial)
+            }))),
+          })
         };
 
         this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE, opt });
@@ -325,37 +325,37 @@ export default defineComponent({
       if ( this.canViewMgmtPools && this.canViewMgmtTemplates) {
         const poolOpt: ActionFindPageArgs = {
           force,
-          pagination: new FilterArgs({}),
+          // pagination: new FilterArgs({}),
           // TODO: RC API blocked on missing spec.clusterName
-          // pagination: new FilterArgs({
-          //   filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
-          //     field: 'spec.clusterName',
-          //     value: r.status?.clusterName// TODO: handle empty spec
-          //   }))),
-          // })
+          pagination: new FilterArgs({
+            filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
+              field: 'spec.clusterName',
+              value: r.status?.clusterName// TODO: handle empty spec
+            }))),
+          })
         };
 
         this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE_POOL, opt: poolOpt });
 
         const templateOpt: ActionFindPageArgs = {
           force,
-          pagination: new FilterArgs({}),
+          // pagination: new FilterArgs({}),
           // TODO: RC API blocked on missing spec.clusterName
-          // pagination: new FilterArgs({
-          //   filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
-          //     field: 'spec.clusterName',
-          //     value: r.status?.clusterName// TODO: handle empty spec
-          //   }))),
-          // })
+          pagination: new FilterArgs({
+            filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
+              field: 'spec.clusterName',
+              value: r.status?.clusterName// TODO: handle empty spec
+            }))),
+          })
         };
 
         this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE_TEMPLATE, opt: templateOpt });
       }
     },
 
-    filterRows(rows: ProvCluster[] = []) {
-      return filterHiddenLocalCluster(filterOnlyKubernetesClusters(rows, this.$store), this.$store);
-    },
+    // filterRows(rows: ProvCluster[] = []) {
+    //   return filterHiddenLocalCluster(filterOnlyKubernetesClusters(rows, this.$store), this.$store);
+    // },
 
     /**
      * Define actions for each navigation link
@@ -657,7 +657,7 @@ export default defineComponent({
   }
 
   .set-login-page, .whats-new {
-    > ::v-deep .banner__content {
+    > :deep() .banner__content {
       display: flex;
 
       > div {

@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import { COUNT, MANAGEMENT } from '@shell/config/types';
 import { SETTING, DEFAULT_PERF_SETTING } from '@shell/config/settings';
@@ -14,6 +13,8 @@ export default {
     ResourceFetchNamespaced,
     ResourceFetchApiPagination
   ],
+
+  inheritAttrs: false,
 
   data() {
     // fetching the settings related to manual refresh from global settings
@@ -47,7 +48,7 @@ export default {
     };
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     // make sure this only runs once, for the initialized instance
     if (this.init) {
       // clear up the store to make sure we aren't storing anything that might interfere with the next rendered list view
@@ -153,7 +154,7 @@ export default {
           force:            this.paginating !== null // Fix for manual refresh (before ripped out).
         };
 
-        Vue.set(this, 'paginating', true);
+        this['paginating'] = true;
 
         const that = this;
 
@@ -161,7 +162,7 @@ export default {
           type,
           opt
         })
-          .finally(() => Vue.set(that, 'paginating', false));
+          .finally(() => (that['paginating'] = false));
       }
 
       let incremental = 0;

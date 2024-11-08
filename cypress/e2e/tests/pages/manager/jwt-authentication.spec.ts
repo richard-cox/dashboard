@@ -1,6 +1,8 @@
 
-import JWTAuthenticationPagePo from '@/cypress/e2e/po/pages/cluster-manager/jwt-authentication.po';
 import HomePagePo from '@/cypress/e2e/po/pages/home.po';
+import ProductNavPo from '@/cypress/e2e/po/side-bars/product-side-nav.po';
+import ClusterManagerListPagePo from '@/cypress/e2e/po/pages/cluster-manager/cluster-manager-list.po';
+import JWTAuthenticationPagePo from '@/cypress/e2e/po/pages/cluster-manager/jwt-authentication.po';
 
 describe('JWT Authentication', { testIsolation: 'off', tags: ['@manager', '@adminUser', '@jenkins'] }, () => {
   const jwtAuthenticationPage = new JWTAuthenticationPagePo();
@@ -85,11 +87,12 @@ describe('JWT Authentication', { testIsolation: 'off', tags: ['@manager', '@admi
     JWTAuthenticationPagePo.navTo();
     jwtAuthenticationPage.waitForPage();
 
-    cy.intercept('DELETE', `/v1/management.cattle.io.clusterproxyconfigs/**`).as('disableJWT');
+    cy.intercept('PUT', `/v1/management.cattle.io.clusterproxyconfigs/**`).as('disableJWT');
     jwtAuthenticationPage.list().clickRowActionMenuItem(instance0, 'Disable');
 
     cy.wait('@disableJWT', { requestTimeout: 10000 }).then(({ request, response }) => {
-      expect(response?.statusCode).to.eq(204);
+      expect(response?.statusCode).to.eq(200);
+      expect(request.body.enabled).to.equal(false);
     });
 
     jwtAuthenticationPage.list().state(instance0).should('contain', 'Disabled');
@@ -98,7 +101,7 @@ describe('JWT Authentication', { testIsolation: 'off', tags: ['@manager', '@admi
   it('should be able to enable JWT Authentication in bulk', () => {
     JWTAuthenticationPagePo.navTo();
     jwtAuthenticationPage.waitForPage();
-    cy.intercept('POST', `/v1/management.cattle.io.clusterproxyconfigs`).as('enableJWT');
+    cy.intercept('PUT', `/v1/management.cattle.io.clusterproxyconfigs/**`).as('enableJWT');
 
     jwtAuthenticationPage.list().resourceTable().sortableTable().rowSelectCtlWithName(instance0)
       .set();
@@ -107,7 +110,7 @@ describe('JWT Authentication', { testIsolation: 'off', tags: ['@manager', '@admi
     jwtAuthenticationPage.list().activate();
 
     cy.wait('@enableJWT', { requestTimeout: 10000 }).then(({ request, response }) => {
-      expect(response?.statusCode).to.eq(201);
+      expect(response?.statusCode).to.eq(200);
       expect(request.body.enabled).to.equal(true);
     });
     jwtAuthenticationPage.list().state(instance0).should('contain', 'Enabled');
@@ -117,7 +120,7 @@ describe('JWT Authentication', { testIsolation: 'off', tags: ['@manager', '@admi
   it('should be able to disable JWT Authentication in bulk', () => {
     JWTAuthenticationPagePo.navTo();
     jwtAuthenticationPage.waitForPage();
-    cy.intercept('DELETE', `/v1/management.cattle.io.clusterproxyconfigs/**`).as('disableJWT');
+    cy.intercept('PUT', `/v1/management.cattle.io.clusterproxyconfigs/**`).as('disableJWT');
 
     jwtAuthenticationPage.list().resourceTable().sortableTable().rowSelectCtlWithName(instance0)
       .set();
@@ -126,7 +129,8 @@ describe('JWT Authentication', { testIsolation: 'off', tags: ['@manager', '@admi
     jwtAuthenticationPage.list().deactivate();
 
     cy.wait('@disableJWT', { requestTimeout: 10000 }).then(({ request, response }) => {
-      expect(response?.statusCode).to.eq(204);
+      expect(response?.statusCode).to.eq(200);
+      expect(request.body.enabled).to.equal(false);
     });
 
     jwtAuthenticationPage.list().state(instance0).should('contain', 'Disabled');
@@ -148,5 +152,26 @@ describe('JWT Authentication', { testIsolation: 'off', tags: ['@manager', '@admi
         removeCluster1 = false;
       });
     }
+  });
+});
+
+describe('JWT Authentication (Standard User)', { testIsolation: 'off', tags: ['@manager', '@standardUser', '@jenkins'] }, () => {
+  before(() => {
+    cy.login();
+    HomePagePo.goTo();
+  });
+
+  it('should not have JWT Authentication side menu entry', () => {
+    const homePage = new HomePagePo();
+    const clusterManagerPage = new ClusterManagerListPagePo('_');
+
+    homePage.manageButton().click();
+    clusterManagerPage.waitForPage();
+
+    // Check navigation does not exist
+    const sideNav = new ProductNavPo();
+
+    sideNav.navToSideMenuGroupByLabel('Advanced');
+    sideNav.checkSideMenuEntryByLabel('JWT Authentication', 'not.exist');
   });
 });

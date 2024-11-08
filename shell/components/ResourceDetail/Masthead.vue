@@ -85,6 +85,11 @@ export default {
       type:    String,
       default: null,
     },
+
+    canViewYaml: {
+      type:    Boolean,
+      default: false,
+    }
   },
 
   data() {
@@ -437,7 +442,7 @@ export default {
             <span v-if="value.detailPageHeaderActionOverride && value.detailPageHeaderActionOverride(realMode)">{{ value.detailPageHeaderActionOverride(realMode) }}</span>
             <t
               v-else
-              class="mastehead-resource-title"
+              class="masthead-resource-title"
               :k="'resourceDetail.header.' + realMode"
               :subtype="resourceSubtype"
               :name="displayName"
@@ -503,12 +508,12 @@ export default {
               icon-size="lg"
               :options="sensitiveOptions"
               class="mr-10"
-              @input="toggleSensitiveData"
+              @update:value="toggleSensitiveData"
             />
 
             <ButtonGroup
               v-if="viewOptions && isView"
-              v-model="currentView"
+              v-model:value="currentView"
               :options="viewOptions"
               class="mr-10"
             />
@@ -516,6 +521,7 @@ export default {
             <button
               v-if="isView"
               ref="actions"
+              data-testid="masthead-action-menu"
               aria-haspopup="true"
               type="button"
               class="btn role-multi-action actions"
@@ -579,7 +585,7 @@ export default {
       flex-direction: row;
       align-items: center;
 
-      .mastehead-resource-title {
+      .masthead-resource-title {
         padding: 0 8px;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -597,7 +603,8 @@ export default {
     }
 
     .live-data {
-      color: var(--body-text)
+      color: var(--body-text);
+      margin-left: 3px;
     }
   }
 
