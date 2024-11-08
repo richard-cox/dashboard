@@ -240,31 +240,32 @@ export default defineComponent({
 
   methods: {
     fetchSecondaryResources(opts: FetchSecondaryResourcesOpts) {
-      if ( this.canViewMgmtClusters ) {
-        this.$store.dispatch('management/findAll', { type: MANAGEMENT.CLUSTER });
-      }
+      // if ( this.canViewMgmtClusters ) {
+      //   this.$store.dispatch('management/findAll', { type: MANAGEMENT.CLUSTER });
+      // }
 
-      if ( this.canViewMachine ) {
-        this.$store.dispatch('management/findAll', { type: CAPI.MACHINE });
-      }
+      // if ( this.canViewMachine ) {
+      //   this.$store.dispatch('management/findAll', { type: CAPI.MACHINE });
+      // }
 
-      if ( this.canViewMgmtNodes ) {
-        this.$store.dispatch('management/findAll', { type: MANAGEMENT.NODE });
-      }
+      // if ( this.canViewMgmtNodes ) {
+      //   this.$store.dispatch('management/findAll', { type: MANAGEMENT.NODE });
+      // }
 
-      // We need to fetch node pools and node templates in order to correctly show the provider for RKE1 clusters
-      if ( this.canViewMgmtPools ) {
-        this.$store.dispatch('management/findAll', { type: MANAGEMENT.NODE_POOL });
-      }
+      // // We need to fetch node pools and node templates in order to correctly show the provider for RKE1 clusters
+      // if ( this.canViewMgmtPools ) {
+      //   this.$store.dispatch('management/findAll', { type: MANAGEMENT.NODE_POOL });
+      // }
 
-      if ( this.canViewMgmtTemplates ) {
-        this.$store.dispatch('management/findAll', { type: MANAGEMENT.NODE_TEMPLATE });
-      }
+      // if ( this.canViewMgmtTemplates ) {
+      //   this.$store.dispatch('management/findAll', { type: MANAGEMENT.NODE_TEMPLATE });
+      // }
     },
 
     async fetchPageSecondaryResources({
       canPaginate, force, page, pagResult
     }: FetchPageSecondaryResourcesOpts) {
+      debugger;
       if (!canPaginate || !page?.length) {
         this.clusterCount = 0;
 
@@ -276,12 +277,10 @@ export default defineComponent({
       if ( this.canViewMgmtClusters ) {
         const opt: ActionFindPageArgs = {
           force,
-          // pagination: new FilterArgs({}),
-          // TODO: RC API blocked on missing id
           pagination: new FilterArgs({
             filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
               field: 'id',
-              value: r.status?.clusterName // TODO: handle empty status
+              value: r.mgmtClusterId
             }))),
           })
         };
@@ -289,7 +288,7 @@ export default defineComponent({
         this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.CLUSTER, opt });
       }
 
-      if ( this.canViewMgmtClusters ) {
+      if ( this.canViewMachine ) {
         const opt: ActionFindPageArgs = {
           force,
           // pagination: new FilterArgs({}),
@@ -313,7 +312,7 @@ export default defineComponent({
           pagination: new FilterArgs({
             filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
               field: 'id',
-              value: r.mgmtClusterId(partial)
+              value: r.mgmtClusterId
             }))),
           })
         };

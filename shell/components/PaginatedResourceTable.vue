@@ -96,6 +96,7 @@ export default defineComponent({
 
 <template>
   <div>
+    <br>canPaginate:{{ canPaginate }}<br>
     <ResourceTable
       v-bind="$attrs"
       :schema="schema"
@@ -109,11 +110,12 @@ export default defineComponent({
       :external-pagination-enabled="canPaginate"
       :external-pagination-result="paginationResult"
       @pagination-changed="paginationChanged"
-      v-on="$listeners"
     >
       <!-- Pass down templates provided by the caller -->
+      <!-- TODO: RC v-on="$listeners" -->
+      <!-- // TODO: RC scopedSlots -->
       <template
-        v-for="(_, slot) of $scopedSlots"
+        v-for="(_, slot) of $slots"
         v-slot:[slot]="scope"
       >
         <slot
