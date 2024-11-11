@@ -60,15 +60,15 @@ export default {
     }
   },
 
-  props: {
-    /**
-     * Add additional filtering to the rows
-     */
-    filterRows: {
-      type:    Function,
-      default: null,
-    },
-  },
+  // props: {
+  //   /**
+  //    * Add additional filtering to the rows
+  //    */
+  //   filterRows: {
+  //     type:    Function,
+  //     default: null,
+  //   },
+  // },
 
   computed: {
     ...mapGetters({ refreshFlag: 'resource-fetch/refreshFlag' }),
@@ -78,10 +78,19 @@ export default {
       if (currResource) {
         const rows = this.$store.getters[`${ currResource.currStore }/all`](this.resource);
 
-        return this.filterRows ? this.filterRows(rows) : rows;
-      } else {
+        if (this.canPaginate) {
+          if (this.havePaginated) {
+            return rows;
+          }
+        } else {
+          return rows;
+        }
+
+        // return this.filterRows ? this.filterRows(rows) : rows;
         return [];
       }
+
+      return [];
     },
     loading() {
       if (this.canPaginate) {

@@ -5,6 +5,7 @@ import { normalizeType, keyFieldFor } from '@shell/plugins/dashboard-store/norma
 import { addSchemaIndexFields } from '@shell/plugins/steve/schema.utils';
 import { classify } from '@shell/plugins/dashboard-store/classify';
 import garbageCollect from '@shell/utils/gc/gc';
+import devConsole from 'utils/dev-console';
 
 function registerType(state, type) {
   let cache = state.types[type];
@@ -318,6 +319,10 @@ export function loadAll(state, {
   namespace,
   revision
 }) {
+  if (type === 'provisioning.cattle.io.cluster') {
+    devConsole.warn('loadAll', data);
+  }
+
   const { getters } = ctx;
 
   if (!data) {
@@ -470,6 +475,10 @@ export default {
     ctx,
     pagination,
   }) {
+    if (type === 'provisioning.cattle.io.cluster') {
+      devConsole.warn('loadPage', data);
+    }
+
     if (!data) {
       return;
     }

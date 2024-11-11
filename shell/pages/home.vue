@@ -20,13 +20,14 @@ import { getVendor } from '@shell/config/private-label';
 import { mapFeature, MULTI_CLUSTER } from '@shell/store/features';
 import { BLANK_CLUSTER } from '@shell/store/store-types.js';
 import { filterOnlyKubernetesClusters, filterHiddenLocalCluster, paginationFilterOnlyKubeClusters } from '@shell/utils/cluster';
-import TabTitle from '@shell/components/TabTitle';
+import TabTitle from '@shell/components/TabTitle.vue';
 import { ActionFindPageArgs } from '@shell/types/store/dashboard-store.types';
 
 import { RESET_CARDS_ACTION, SET_LOGIN_ACTION } from '@shell/config/page-actions';
 import { STEVE_NAME_COL, STEVE_STATE_COL } from 'config/pagination-table-headers';
 import { PaginationParamFilter, FilterArgs, PaginationFilterField } from 'types/store/pagination.types';
 import ProvCluster from 'models/provisioning.cattle.io.cluster';
+import devConsole from 'utils/dev-console';
 
 export default defineComponent({
   name:       'Home',
@@ -157,7 +158,7 @@ export default defineComponent({
           ...STEVE_NAME_COL,
           canBeVariable: true,
           // TODO: RC ISSUE describe. search sort on prov meta namespace
-          getValue:      (row: ProvCluster) => row.mgmt?.nameDisplay
+          // getValue:      (row: ProvCluster) => row.mgmt?.nameDisplay || row.metadata?.name
         },
         {
           label:     this.t('landing.clusters.provider'),
@@ -166,13 +167,14 @@ export default defineComponent({
           name:      'Provider',
           sort:      false,
           search:    false,
-          // TODO: RC ISSUE describe. search sort on prov meta namespace
           formatter: 'ClusterProvider'
         },
         {
           label:    this.t('landing.clusters.kubernetesVersion'),
           subLabel: this.t('landing.clusters.architecture'),
           name:     'kubernetesVersion',
+          sort:     false,
+          search:   false,
         },
         {
           label:  this.t('tableHeaders.cpu'),
@@ -200,6 +202,8 @@ export default defineComponent({
       ],
 
       clusterCount: 0,
+
+      initialProvClusterLoaded: false,
     };
   },
 
@@ -222,6 +226,18 @@ export default defineComponent({
     showSetLoginBanner() {
       return this.homePageCards?.setLoginPage;
     },
+
+    ready() {
+      // devConsole.warn(this.managementReady, this.$store.getters['management/haveAll'](CAPI.RANCHER_CLUSTER));
+
+      // if (!this.initialProvClusterLoaded && this.$store.getters['management/haveAll'](CAPI.RANCHER_CLUSTER)) {
+      //   this.initialProvClusterLoaded = true;
+      // }
+
+      // return this.managementReady && this.initialProvClusterLoaded;
+
+      return true;
+    }
   },
 
   async created() {
@@ -265,7 +281,6 @@ export default defineComponent({
     async fetchPageSecondaryResources({
       canPaginate, force, page, pagResult
     }: FetchPageSecondaryResourcesOpts) {
-      debugger;
       if (!canPaginate || !page?.length) {
         this.clusterCount = 0;
 
@@ -291,11 +306,10 @@ export default defineComponent({
       if ( this.canViewMachine ) {
         const opt: ActionFindPageArgs = {
           force,
-          // pagination: new FilterArgs({}),
-          // TODO: RC API blocked on missing spec.clusterName
+          // TODO: RC Validate
           pagination: new FilterArgs({
             filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
-              field: 'spec.clusterName', // TODO: handle empty spec
+              field: 'spec.clusterName',
               value: r.metadata.name
             }))),
           })
@@ -307,8 +321,7 @@ export default defineComponent({
       if ( this.canViewMgmtNodes ) {
         const opt: ActionFindPageArgs = {
           force,
-          // pagination: new FilterArgs({}),
-          // TODO: RC API blocked on missing id
+          // TODO: RC Validate
           pagination: new FilterArgs({
             filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
               field: 'id',
@@ -324,8 +337,7 @@ export default defineComponent({
       if ( this.canViewMgmtPools && this.canViewMgmtTemplates) {
         const poolOpt: ActionFindPageArgs = {
           force,
-          // pagination: new FilterArgs({}),
-          // TODO: RC API blocked on missing spec.clusterName
+          // TODO: RC Validate
           pagination: new FilterArgs({
             filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
               field: 'spec.clusterName',
@@ -339,7 +351,7 @@ export default defineComponent({
         const templateOpt: ActionFindPageArgs = {
           force,
           // pagination: new FilterArgs({}),
-          // TODO: RC API blocked on missing spec.clusterName
+          // TODO: RC Validate
           pagination: new FilterArgs({
             filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
               field: 'spec.clusterName',
@@ -498,8 +510,10 @@ export default defineComponent({
               v-if="mcm"
               class="col span-12"
             >
+              {{ ready }}
               <!-- // TODO: RC check loading indicator when pagination off -->
-              <PaginatedResourceTable
+              <!-- <PaginatedResourceTable
+                v-if="false"
                 :schema="provClusterSchema"
                 :table-actions="false"
                 :row-actions="false"
@@ -615,15 +629,15 @@ export default defineComponent({
                     &mdash;
                   </td>
                 </template>
-                <!-- <template #cell:explorer="{row}">
+                !!!!<template #cell:explorer="{row}">
                   <router-link v-if="row && row.isReady" class="btn btn-sm role-primary" :to="{name: 'c-cluster', params: {cluster: row.id}}">
                     {{ t('landing.clusters.explore') }}
                   </router-link>
                   <button v-else :disabled="true" class="btn btn-sm role-primary">
                     {{ t('landing.clusters.explore') }}
                   </button>
-                </template> -->
-              </PaginatedResourceTable>
+                </template> !!!!
+              </PaginatedResourceTable> -->
             </div>
             <div
               v-else

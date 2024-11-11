@@ -20,6 +20,7 @@ export function paginationFilterOnlyKubeClusters(store) {
   }
 
   // TODO: RC ISSUE describe
+  // TODO: RC TEST
 
   return PaginationParamFilter.createMultipleFields([
     new PaginationFilterField({

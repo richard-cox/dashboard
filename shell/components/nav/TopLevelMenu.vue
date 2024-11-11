@@ -4,8 +4,8 @@ import ClusterIconMenu from '@shell/components/ClusterIconMenu';
 import IconOrSvg from '../IconOrSvg';
 import { BLANK_CLUSTER } from '@shell/store/store-types.js';
 import { mapGetters } from 'vuex';
-import { CAPI, MANAGEMENT } from '@shell/config/types';
-import { MENU_MAX_CLUSTERS } from '@shell/store/prefs';
+import { CAPI, COUNT, MANAGEMENT } from '@shell/config/types';
+import { MENU_MAX_CLUSTERS, PINNED_CLUSTERS } from '@shell/store/prefs';
 import { sortBy } from '@shell/utils/sort';
 import { ucFirst } from '@shell/utils/string';
 import { KEY } from '@shell/utils/platform';
@@ -16,6 +16,7 @@ import { getProductFromRoute } from '@shell/utils/router';
 import { isRancherPrime } from '@shell/config/version';
 import Pinned from '@shell/components/nav/Pinned';
 import { getGlobalBannerFontSizes } from '@shell/utils/banners';
+import TopLevelMenuHelper from 'components/nav/TopLevelMenu.helper';
 
 export default {
   components: {
@@ -30,34 +31,49 @@ export default {
     const hasProvCluster = this.$store.getters[`management/schemaFor`](CAPI.RANCHER_CLUSTER);
 
     return {
-      shown:             false,
+      shown:              false,
       displayVersion,
       fullVersion,
-      clusterFilter:     '',
+      clusterFilter:      '',
       hasProvCluster,
-      maxClustersToShow: MENU_MAX_CLUSTERS,
-      emptyCluster:      BLANK_CLUSTER,
-      showPinClusters:   false,
-      searchActive:      false,
-      routeCombo:        false,
+      maxClustersToShow:  MENU_MAX_CLUSTERS,
+      emptyCluster:       BLANK_CLUSTER,
+      showPinClusters:    false,
+      searchActive:       false,
+      routeCombo:         false,
+      pClustersPinned:    [],
+      pClustersNotPinned: [],
+      helper:             new TopLevelMenuHelper({
+        ctx: {
+          rootGetters: this.$store.getters,
+          dispatch:    this.$store.dispatch
+        }
+      }),
     };
   },
 
   fetch() {
-    if (this.hasProvCluster) {
-      this.$store.dispatch('management/findAll', { type: CAPI.RANCHER_CLUSTER });
-    }
+    // this.helper.update({});
+    // if (this.hasProvCluster) {
+    //   this.$store.dispatch('management/findAll', { type: CAPI.RANCHER_CLUSTER });
+    // }
   },
 
   computed: {
     ...mapGetters(['clusterId']),
     ...mapGetters(['clusterReady', 'isRancher', 'currentCluster', 'currentProduct', 'isRancherInHarvester']),
     ...mapGetters({ features: 'features/get' }),
-    value: {
-      get() {
-        return this.$store.getters['productId'];
-      },
+
+    pinnedIds() {
+      return this.$store.getters['prefs/get'](PINNED_CLUSTERS);
     },
+
+    // value: {
+    //   get() {
+    //     return this.$store.getters['productId'];
+    //   },
+    // },
+
     sideMenuStyle() {
       const globalBannerSettings = getGlobalBannerFontSizes(this.$store);
 
@@ -68,8 +84,19 @@ export default {
     },
 
     showClusterSearch() {
-      return this.clusters.length > this.maxClustersToShow;
+      return this.allClustersCount > this.maxClustersToShow;
     },
+
+    allClustersCount() {
+      const counts = this.$store.getters[`management/all`](COUNT)?.[0]?.counts || {};
+      const count = counts[MANAGEMENT.CLUSTER] || {};
+
+      return count?.summary.count;
+    },
+
+    // clusters() {
+    //   return [];
+    // },
 
     /**
      * Filter mgmt clusters by
@@ -79,7 +106,7 @@ export default {
      *
      * Convert remaining clusters to special format
      */
-    clusters() {
+    clusters_dead() {
       if (!this.hasProvCluster) {
         // We're filtering out mgmt clusters without prov clusters, so if the user can't see any prov clusters at all
         // exit early
@@ -127,10 +154,18 @@ export default {
       }, []);
     },
 
+    clustersFiltered() {
+      return this.search ? [
+        ...this.pClustersPinned,
+        ...this.pClustersNotPinned
+      ] : this.pClustersNotPinned;
+    },
+
     /**
      * Filter clusters by
+     * 1. Includes search term
+     * OR
      * 1. Not pinned
-     * 2. Includes search term
      *
      * Sort remaining clusters
      *
@@ -138,7 +173,7 @@ export default {
      *
      * Important! This is used to show unpinned clusters OR results of search
      */
-    clustersFiltered() {
+    clustersFiltered_dead() {
       const search = (this.clusterFilter || '').toLowerCase();
       let localCluster = null;
 
@@ -186,10 +221,13 @@ export default {
       return sorted;
     },
 
+    pinFiltered() {
+      return this.pClustersPinned;
+    },
+
     /**
      * Filter clusters by
-     * 1. Not pinned
-     * 2. Includes search term
+     * 1. pinned
      *
      * Sort remaining clusters
      *
@@ -197,7 +235,7 @@ export default {
      *
      * Important! This is hidden if there's a filter (user searching)
      */
-    pinFiltered() {
+    pinFiltered_dead() {
       let localCluster = null;
       const filtered = this.clusters.filter((c) => {
         if (!c.pinned) {
@@ -232,7 +270,7 @@ export default {
       return `min-height: ${ height }px`;
     },
     clusterFilterCount() {
-      return this.clusterFilter ? this.clustersFiltered.length : this.clusters.length;
+      return this.clusterFilter ? this.clustersFiltered.length : this.allClustersCount;
     },
 
     multiClusterApps() {
@@ -363,6 +401,28 @@ export default {
   watch: {
     $route() {
       this.shown = false;
+    },
+
+    'helper.clustersFiltered'(neu) {
+      pinFiltered;
+    },
+
+    'helper.clustersOthers'(neu) {
+
+    },
+
+    'helper.localCluster'(neu) {
+
+    },
+
+    pinnedIds: {
+      immediate: true,
+      handler(ids) {
+        this.helper.update({
+          pinnedIds:  ids,
+          searchTerm: this.search
+        });
+      }
     }
   },
 
@@ -493,6 +553,7 @@ export default {
   }
 };
 </script>
+
 <template>
   <div>
     <!-- Overlay -->
@@ -632,7 +693,8 @@ export default {
           </template>
 
           <!-- Cluster menu -->
-          <template v-if="clusters && !!clusters.length">
+          <!-- <template v-if="clusters && !!clusters.length"> -->
+          <template v-if="!!allClustersCount">
             <div
               ref="clusterList"
               class="clusters"
@@ -800,7 +862,7 @@ export default {
 
             <!-- See all clusters -->
             <router-link
-              v-if="clusters.length > maxClustersToShow"
+              v-if="allClustersCount > maxClustersToShow"
               class="clusters-all"
               :to="{name: 'c-cluster-product-resource', params: {
                 cluster: emptyCluster,

@@ -7,7 +7,8 @@ import {
   CAPI,
   CONFIG_MAP, MANAGEMENT, NAMESPACE, NODE, POD
 } from '@shell/config/types';
-import { Schema } from 'plugins/steve/schema';
+import { CAPI as CAPI_LABELS } from '@shell/config/labels-annotations';
+import { Schema } from '@shell/plugins/steve/schema';
 
 class NamespaceProjectFilters {
   /**
@@ -108,8 +109,8 @@ class StevePaginationUtils extends NamespaceProjectFilters {
     '': [// all types
       { field: 'metadata.name' },
       { field: 'metadata.namespace' },
-      // { field: 'id' }, // Pending API support
-      // { field: 'metadata.state.name' }, // Pending API support
+      { field: 'id' },
+      { field: 'metadata.state.name' },
       { field: 'metadata.creationTimestamp' },
     ],
     [NODE]: [
@@ -124,10 +125,10 @@ class StevePaginationUtils extends NamespaceProjectFilters {
       { field: 'status.nodeName' },
     ],
     [MANAGEMENT.NODE_POOL]: [
-      // { field: 'spec.clusterName' },  // Pending API support // TODO: RC
+      { field: 'spec.clusterName' }, // Pending API support // TODO: RC
     ],
     [MANAGEMENT.NODE_TEMPLATE]: [
-      // { field: 'spec.clusterName' },  // Pending API support // TODO: RC
+      { field: 'spec.clusterName' }, // Pending API support // TODO: RC
     ],
     [CONFIG_MAP]: [
       { field: 'metadata.labels[harvesterhci.io/cloud-init-template]' }
@@ -136,14 +137,14 @@ class StevePaginationUtils extends NamespaceProjectFilters {
       { field: 'metadata.labels[field.cattle.io/projectId]' }
     ],
     [CAPI.MACHINE]: [
-      // { field: 'spec.clusterName' } // Pending API support // TODO: RC
+      { field: 'spec.clusterName' } // Pending API support // TODO: RC
     ],
     [CAPI.RANCHER_CLUSTER]: [
-      // { field: `metadata.labels."${ CAPI.PROVIDER }"` } // Pending API support // TODO: RC
-      // { field: `status.provider` } // Pending API support // TODO: RC
-      // { field: 'status.allocatable.cpu' } // Pending API support // TODO: RC
-      // { field: 'status.allocatable.memory' } // Pending API support // TODO: RC
-      // { field: 'status.allocatable.pods' } // Pending API support // TODO: RC
+      { field: `metadata.labels."${ CAPI_LABELS.PROVIDER }"` }, // Pending API support // TODO: RC
+      { field: `status.provider` }, // Pending API support // TODO: RC
+      { field: 'status.allocatable.cpu' }, // Pending API support // TODO: RC
+      { field: 'status.allocatable.memory' }, // Pending API support // TODO: RC
+      { field: 'status.allocatable.pods' }, // Pending API support // TODO: RC
     ]
   }
 
