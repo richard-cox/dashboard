@@ -1,287 +1,349 @@
-import { MANAGEMENT } from 'config/types';
+import { CAPI, MANAGEMENT } from 'config/types';
 import { PaginationParam, PaginationParamFilter, PaginationSort } from 'types/store/pagination.types';
-import { paginationFilterOnlyKubeClusters } from 'utils/cluster';
+import { VuexStore } from 'types/store/vuex';
+import { paginationFilterClusters, paginationFilterOnlyKubernetesClusters } from 'utils/cluster';
 import devConsole from 'utils/dev-console';
 import PaginationWrapper from 'utils/pagination-wrapper';
+import { allHash } from 'utils/promise';
 
-interface Cluster {
-
+interface TopLevelMenuCluster {
+  id: string,
+  label: string,
+  ready: boolean
+  osLogo: string,
+  providerNavLogo: string,
+  badge: string,
+  isLocal: boolean,
+  isHarvester: boolean,
+  pinned: boolean,
+  description: string,
+  pin: () => void,
+  unpin: () => void,
+  clusterRoute: any, // TODO: RC route
 }
 
 interface UpdateArgs {
-    searchTerm: string,
-    pinnedIds: string[]
+  searchTerm: string,
+  pinnedIds: string[],
+  unPinnedMax?: number, // TODO: RC finish off
 }
 
-interface CTX {
-  rootGetters: any,
-  dispatch: any,
+type MgmtCluster = {
+  [key: string]: any
+}
+
+type ProvCluster = {
+  [key: string]: any
 }
 
 class TopLevelMenuHelper {
-  private ctx: CTX;
+  private $store: VuexStore;
   private args?: UpdateArgs;
 
-  // public clusters: Array<Cluster> = [];
-  // Shown on own
-  // public clustersFiltered: Array<Cluster> = [];
-  // private clustersFilteredWrapper: PaginationWrapper;
-
-  // Shown together
-  public clustersPinned: Array<Cluster> = [];
+  /**
+    * Filter mgmt clusters by
+    * 1. If harvester or not (filterOnlyKubernetesClusters)
+    * 2. If local or not (filterHiddenLocalCluster)
+    * 3. Is pinned
+    *
+    * Sort By
+    * 1. is local cluster (appears at top)
+    * 2. ready // TODO: RC
+    * 3. metadata.name // TODO: RC change to  spec.displayName
+    */
+  public clustersPinned: Array<TopLevelMenuCluster> = [];
   private clustersPinnedWrapper: PaginationWrapper;
 
-  public clustersNotPinned: Array<Cluster> = [];
-  private clustersNotPinnedWrapper: PaginationWrapper;
-
-  private localCluster: any = undefined;
-  private localClusterWrapper: PaginationWrapper;
-
-  private harvesterFilters: PaginationParam | null;
-
   /**
-   *
-   */
-  constructor({ ctx }: {
-      ctx: CTX,
-  }) {
-    this.ctx = ctx;
-
-    this.harvesterFilters = paginationFilterOnlyKubeClusters({ getters: this.ctx.rootGetters });
-
-    // this.clustersFilteredWrapper = new PaginationWrapper({
-    //   ctx,
-    //   onUpdate: (res) => {
-    //     this.onUpdate();
-    //   },
-    //   enabledFor: {
-    //     store:    'management',
-    //     resource: {
-    //       id:      MANAGEMENT.CLUSTER,
-    //       context: 'aaaaa',
-    //     }
-    //   }
-    // });
-    this.clustersPinnedWrapper = new PaginationWrapper({
-      ctx,
-      onUpdate: (res) => {
-        this.onUpdate();
-      },
-      enabledFor: {
-        store:    'management',
-        resource: {
-          id:      MANAGEMENT.CLUSTER,
-          context: 'aaaaa',
-        }
-      }
-    });
-    this.clustersNotPinnedWrapper = new PaginationWrapper({
-      ctx,
-      onUpdate: (res) => {
-        this.onUpdate();
-      },
-      enabledFor: {
-        store:    'management',
-        resource: {
-          id:      MANAGEMENT.CLUSTER,
-          context: 'aaaaa',
-        }
-      }
-    });
-    this.localClusterWrapper = new PaginationWrapper({
-      ctx,
-      onUpdate: (res) => {
-        this.localCluster = res.data?.[0];
-        this.onUpdate();
-      },
-      enabledFor: {
-        store:    'management',
-        resource: {
-          id:      MANAGEMENT.CLUSTER,
-          context: 'aaaaa',
-        }
-      }
-    });
-  }
-
-  async onUpdate() {
-    if (this.localCluster) {
-      // TODO: RC on search term???
-      if (this.localCluster.pinned) {
-        this.clustersPinned.push(this.localCluster);
-      } else {
-        this.clustersNotPinned.push(this.localCluster);
-      }
-    }
-
-    // if (this.args?.searchTerm) {
-    //   this.clustersPinned.length = 0;
-    //   this.clustersNotPinned.length = 0;
-
-    //   // this.clustersFiltered.length = 0;
-
-    //   if (this.localCluster) {
-    //     this.clustersFiltered.push(this.localCluster);
-    //   }
-    // } else {
-    //   this.clustersPinned.length = 0;
-    //   this.clustersNotPinned.length = 0;
-
-    //   // this.clustersFiltered.length = 0;
-
-    //   // if (this.localCluster) {
-    //   //   if (this.localCluster.pinned) {
-    //   //     this.clustersPinned.push(this.localCluster);
-    //   //   } else {
-    //   //     this.clustersNotPinned.push(this.localCluster);
-    //   //   }
-    //   // }
-    // }
-  }
-
-  async update(args: UpdateArgs) {
-    this.args = args;
-    const promises = [
-      this.fetchLocal()
-    ];
-
-    // if (args.searchTerm) {
-    //   promises.push(this.updateFiltered(args));
-    // } else {
-    promises.push(this.updatePinned(args));
-    promises.push(this.updateNotPinned(args));
-    // }
-
-    await Promise.all(promises);
-  }
+    * Filter mgmt clusters by
+    * 1. If harvester or not (filterOnlyKubernetesClusters)
+    * 2. If local or not (filterHiddenLocalCluster)
+    * 3.
+    * a) if search term, filter on it
+    * b) if no search term, filter on pinned
+    *
+    * Sort By
+    * 1. is local cluster (appears at top)
+    * 2. ready // TODO: RC
+    * 3. metadata.name // TODO: RC change to  spec.displayName
+    */
+  public clustersOthers: Array<TopLevelMenuCluster> = [];
+  private clustersOthersWrapper: PaginationWrapper;
 
   private static DEFAULT_SORT: Array<PaginationSort> = [
+    // Put local cluster at top of list - https://github.com/rancher/dashboard/issues/10975
     // {
-  //   asc: true,
-  //   field: 'isReady' // TODO: RC
-  // }
+    //   asc:   true,
+    //   field: 'spec.internal', // Pending API support https://github.com/rancher/rancher/issues/48011
+    // },
+    // TODO: RC REGRESSION mgmtCluster.isReady && !pCluster?.hasError,
+    // {
+    //   asc:   true,
+    //   field: 'status.conditions[0].status' // TODO: RC not currently possible 1) order of conditions is not fixed 2) api cannot do sort by value in a given another value in a
+    // },
     {
       asc:   true,
       field: 'metadata.name'
     },
   ];
 
-  private addHarvesterParams(params: PaginationParam[]): PaginationParam[] {
-    const filters: PaginationParam[] = [];
+  private provClusterWrapper: PaginationWrapper;
 
-    if (this.harvesterFilters) {
-      filters.push(this.harvesterFilters);
+  private commonClusterFilters: PaginationParam[];
+
+  /**
+   *
+   */
+  constructor({ $store }: {
+      $store: VuexStore,
+  }) {
+    this.$store = $store;
+
+    this.commonClusterFilters = paginationFilterClusters({ getters: this.$store.getters });
+
+    this.clustersPinnedWrapper = new PaginationWrapper({
+      $store,
+      onUpdate: (res) => {
+        // TODO: RC test
+        devConsole.warn('clustersPinned onUpdate', this.clustersPinned);
+
+        if (this.args) {
+          this.update(this.args);
+        }
+      },
+      enabledFor: {
+        store:    'management',
+        resource: {
+          id:      MANAGEMENT.CLUSTER,
+          context: 'aaaaa',
+        }
+      }
+    });
+    this.clustersOthersWrapper = new PaginationWrapper({
+      $store,
+      onUpdate: (res) => {
+        // TODO: RC test
+        devConsole.warn('clustersNotPinnedWrapper onUpdate', this.clustersOthers);
+
+        if (this.args) {
+          this.update(this.args);
+        }
+      },
+      enabledFor: {
+        store:    'management',
+        resource: {
+          id:      MANAGEMENT.CLUSTER,
+          context: 'aaaaa',
+        }
+      }
+    });
+    this.provClusterWrapper = new PaginationWrapper({
+      $store,
+      onUpdate: (res) => {
+        // TODO: RC test
+        // if a prov cluster is deleted it should get removed from list...
+      },
+      enabledFor: {
+        store:    'management',
+        resource: {
+          id:      CAPI.RANCHER_CLUSTER,
+          context: 'aaaaa',
+        }
+      }
+    });
+  }
+
+  // ---------- handle requests
+  async update(args: UpdateArgs) {
+    this.args = args;
+    const promises = {
+      pinned:    this.updatePinned(args),
+      notPinned: this.updateOthers(args)
+    };
+
+    const res: {
+      pinned: MgmtCluster[],
+      notPinned: MgmtCluster[]
+    } = await allHash(promises) as any;
+    const provClusters = await this.updateProvCluster(res.notPinned, res.pinned);
+
+    devConsole.warn('update', 'res', res.pinned, res.notPinned, provClusters);
+
+    const provClustersByMgmtId = provClusters.reduce((res: { [mgmtId: string]: ProvCluster}, provCluster: ProvCluster) => {
+      if (provCluster.mgmtClusterId) {
+        res[provCluster.mgmtClusterId] = provCluster;
+      }
+
+      return res;
+    }, {} as { [mgmtId: string]: ProvCluster});
+
+    devConsole.warn('update', 'provClustersByMgmtId', provClustersByMgmtId);
+
+    const _clustersNotPinned = res.notPinned
+      .filter((mgmtCluster) => !!provClustersByMgmtId[mgmtCluster.id])
+      .map((mgmtCluster) => this.convertToCluster(mgmtCluster, provClustersByMgmtId[mgmtCluster.id]));
+
+    this.clustersOthers.length = 0;
+    this.clustersOthers.push(..._clustersNotPinned);
+
+    const _clustersPinned = res.pinned
+      .filter((mgmtCluster) => !!provClustersByMgmtId[mgmtCluster.id])
+      .map((mgmtCluster) => this.convertToCluster(mgmtCluster, provClustersByMgmtId[mgmtCluster.id]));
+
+    this.clustersPinned.length = 0;
+    this.clustersPinned.push(..._clustersPinned);
+
+    devConsole.warn('update', 'end', this.clustersPinned, this.clustersOthers);
+  }
+
+  private constructParams({
+    pinnedIds,
+    searchTerm,
+    includeLocal,
+    includeSearchTerm,
+    includePinned,
+    excludePinned,
+  }: {
+    pinnedIds?: string[],
+    searchTerm?: string,
+    includeLocal?: boolean,
+    includeSearchTerm?: boolean,
+    includePinned?: boolean,
+    excludePinned?: boolean,
+  }): PaginationParam[] {
+    const filters: PaginationParam[] = [...this.commonClusterFilters];
+
+    if (pinnedIds) {
+      if (includePinned) {
+        // cluster id is 1 OR 2 OR 3 OR 4...
+        filters.push(PaginationParamFilter.createMultipleFields(
+          pinnedIds.map((id) => ({
+            field: 'id', value: id, equals: true, exact: true
+          }))
+        ));
+      }
+
+      if (excludePinned) {
+        // cluster id is NOT 1 AND NOT 2 OR 3 OR 4...
+        filters.push(...pinnedIds.map((id) => PaginationParamFilter.createSingleField({
+          field: 'id', equals: false, value: id
+        })));
+      }
     }
 
-    filters.push(...params);
+    if (searchTerm && includeSearchTerm) {
+      // Pending API support https://github.com/rancher/rancher/issues/48011
+      // filters.push(PaginationParamFilter.createSingleField({
+      //   field: 'spec.displayName', exact: false, value: searchTerm
+      // }));
+    }
+
+    if (includeLocal) {
+      filters.push(PaginationParamFilter.createSingleField({ field: 'id', value: 'local' }));
+    }
 
     return filters;
   }
 
   /**
-   * Filter On
-   * 1. Harvester type 1 (filterOnlyKubernetesClusters)
-   * 2. Harvester type 2 (filterHiddenLocalCluster)
-   * 3. Search Term
-   * Sort On
-   * 1. Pinned???
-   * 2. Ready???
-   * 3. metadata.name
+   * See `clustersPinned` description for details
    */
-  // private updateFiltered(args: UpdateArgs) {
-  //   devConsole.warn('updateFiltered', args);
-
-  //   const filters = this.addHarvesterParams([
-  //     PaginationParamFilter.createSingleField({ field: 'metadata.name', value: args.searchTerm })
-  //   ]);
-
-  //   this.clustersFilteredWrapper.setPagination({
-  //     type:       MANAGEMENT.CLUSTER,
-  //     pagination: {
-  //       filters,
-  //       page:                 1,
-  //       sort:                 TopLevelMenuHelper.DEFAULT_SORT,
-  //       projectsOrNamespaces: []
-  //     }
-  //   });
-  // }
-
-  /**
-   * Filter On
-   * 1. Harvester type 1 (filterOnlyKubernetesClusters)
-   * 2. Harvester type 2 (filterHiddenLocalCluster)
-   * 3. Search Term
-   * 4. Pinned
-   * Sort On
-   * 1. Ready???
-   * 2. metadata.name
-   */
-  private updatePinned(args: UpdateArgs) {
+  private async updatePinned(args: UpdateArgs): Promise<MgmtCluster[]> {
     devConsole.warn('updatePinned', args);
 
-    // TODO: RC if pinned arg.pinnedIds includes 'local' AND search term....
-
-    const filters = this.addHarvesterParams([
-      PaginationParamFilter.createMultipleFields(
-        args.pinnedIds.map((id) => ({
-          field: 'id', value: id, equals: true, exact: true
-        }))
-      )
-    ]);
-
-    this.clustersPinnedWrapper.setPagination({
+    return this.clustersPinnedWrapper.request({
       type:       MANAGEMENT.CLUSTER,
       pagination: {
-        filters,
+        filters: this.constructParams({
+          pinnedIds:     args.pinnedIds,
+          includePinned: true,
+        }),
         page:                 1,
         sort:                 TopLevelMenuHelper.DEFAULT_SORT,
         projectsOrNamespaces: []
-      }
-    });
+      },
+      classify: true,
+    }).then((r) => r.data);
   }
 
   /**
    * Filter On
    * 1. Harvester type 1 (filterOnlyKubernetesClusters)
-   * 2. Harvester type 2 (filterHiddenLocalCluster)
+   * 2. Cluster type 2 (filterHiddenLocalCluster)
    * 3. Search Term
-   * 4. Pinned
+   * 4. Not Pinned
    * Sort On
    * 1. Ready???
    * 2. metadata.name
    */
-  private updateNotPinned(args: UpdateArgs) {
-    devConsole.warn('updateNotPinned', args);
+  private async updateOthers(args: UpdateArgs): Promise<MgmtCluster[]> {
+    devConsole.warn('updateOthers', args);
 
-    const filters = this.addHarvesterParams(args.pinnedIds.map((id) => PaginationParamFilter.createSingleField({
-      field: 'id', equals: false, value: id
-    })));
-
-    this.clustersNotPinnedWrapper.setPagination({
+    return this.clustersOthersWrapper.request({
       type:       MANAGEMENT.CLUSTER,
       pagination: {
-        filters,
+        filters: this.constructParams({
+          searchTerm:        args.searchTerm,
+          includeSearchTerm: !!args.searchTerm,
+          pinnedIds:         args.pinnedIds,
+          excludePinned:     !args.searchTerm,
+        }),
         page:                 1,
-        pageSize:             10,
+        pageSize:             args.unPinnedMax,
         sort:                 TopLevelMenuHelper.DEFAULT_SORT,
         projectsOrNamespaces: []
-      }
-    });
+      },
+      classify: true,
+    }).then((r) => r.data);
   }
 
-  private fetchLocal() {
-    devConsole.warn('fetchLocal');
+  private async updateProvCluster(notPinned: MgmtCluster[], pinned: MgmtCluster[]): Promise<ProvCluster[]> {
+    devConsole.warn('updateProvCluster', pinned, notPinned);
 
-    this.localClusterWrapper.setPagination({
-      type:       MANAGEMENT.CLUSTER,
+    return this.provClusterWrapper.request({
+      type:       CAPI.RANCHER_CLUSTER,
       pagination: {
-        filters:              [PaginationParamFilter.createSingleField({ field: 'metadata.name', value: 'local' })],
+        filters:              [],
+        // Pending API support https://github.com/rancher/rancher/issues/48011
+        // filters: [
+        //   PaginationParamFilter.createMultipleFields(
+        //     [...notPinned, ...pinned]
+        //       .map((mgmtCluster) => ({
+        //         field: 'status.clusterName', value: mgmtCluster.id, equals: true, exact: true
+        //       }))
+        //   )
+        // ],
         page:                 1,
-        pageSize:             1,
         sort:                 [],
         projectsOrNamespaces: []
-      }
-    });
+      },
+      classify: true,
+    }).then((r) => r.data);
+  }
+
+  // ---------- handle responses
+
+  private convertToCluster(mgmtCluster: MgmtCluster, provCluster: ProvCluster): TopLevelMenuCluster {
+    // const clusters: Cluster[] = [];
+    const pCluster = provCluster;
+
+    return {
+
+      // TODO: RC are all these needed now?
+      id:              mgmtCluster.id,
+      label:           mgmtCluster.nameDisplay,
+      ready:           mgmtCluster.isReady && !pCluster?.hasError,
+      osLogo:          mgmtCluster.providerOsLogo,
+      providerNavLogo: mgmtCluster.providerMenuLogo,
+      badge:           mgmtCluster.badge,
+      isLocal:         mgmtCluster.isLocal,
+      isHarvester:     mgmtCluster.isHarvester,
+      pinned:          mgmtCluster.pinned,
+      description:     pCluster?.description || mgmtCluster.description,
+      pin:             () => mgmtCluster.pin(),
+      unpin:           () => mgmtCluster.unpin(),
+      clusterRoute:    { name: 'c-cluster-explorer', params: { cluster: mgmtCluster.id } }
+    };
   }
 }
 

@@ -19,7 +19,7 @@ import PageHeaderActions from '@shell/mixins/page-actions';
 import { getVendor } from '@shell/config/private-label';
 import { mapFeature, MULTI_CLUSTER } from '@shell/store/features';
 import { BLANK_CLUSTER } from '@shell/store/store-types.js';
-import { filterOnlyKubernetesClusters, filterHiddenLocalCluster, paginationFilterOnlyKubeClusters } from '@shell/utils/cluster';
+import { paginationFilterClusters } from '@shell/utils/cluster';
 import TabTitle from '@shell/components/TabTitle.vue';
 import { ActionFindPageArgs } from '@shell/types/store/dashboard-store.types';
 
@@ -46,6 +46,8 @@ export default defineComponent({
   mixins: [PageHeaderActions],
 
   data() {
+    const paginationRequestFilters = paginationFilterClusters(this.$store);
+
     return {
       HIDE_HOME_PAGE_CARDS,
       fullVersion: getVersionInfo(this.$store).fullVersion,
@@ -63,7 +65,7 @@ export default defineComponent({
       ],
       vendor: getVendor(),
 
-      paginationRequestFilters: paginationFilterOnlyKubeClusters(this.$store),
+      paginationRequestFilters,
 
       provClusterSchema: this.$store.getters['management/schemaFor'](CAPI.RANCHER_CLUSTER),
 

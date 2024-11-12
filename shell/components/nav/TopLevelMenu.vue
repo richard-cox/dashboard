@@ -11,12 +11,12 @@ import { ucFirst } from '@shell/utils/string';
 import { KEY } from '@shell/utils/platform';
 import { getVersionInfo } from '@shell/utils/version';
 import { SETTING } from '@shell/config/settings';
-import { filterOnlyKubernetesClusters, filterHiddenLocalCluster } from '@shell/utils/cluster';
 import { getProductFromRoute } from '@shell/utils/router';
 import { isRancherPrime } from '@shell/config/version';
 import Pinned from '@shell/components/nav/Pinned';
 import { getGlobalBannerFontSizes } from '@shell/utils/banners';
 import TopLevelMenuHelper from 'components/nav/TopLevelMenu.helper';
+import devConsole from 'utils/dev-console';
 
 export default {
   components: {
@@ -31,32 +31,16 @@ export default {
     const hasProvCluster = this.$store.getters[`management/schemaFor`](CAPI.RANCHER_CLUSTER);
 
     return {
-      shown:              false,
+      shown:             false,
       displayVersion,
       fullVersion,
-      clusterFilter:      '',
+      clusterFilter:     '',
       hasProvCluster,
-      maxClustersToShow:  MENU_MAX_CLUSTERS,
-      emptyCluster:       BLANK_CLUSTER,
-      showPinClusters:    false,
-      searchActive:       false,
-      routeCombo:         false,
-      pClustersPinned:    [],
-      pClustersNotPinned: [],
-      helper:             new TopLevelMenuHelper({
-        ctx: {
-          rootGetters: this.$store.getters,
-          dispatch:    this.$store.dispatch
-        }
-      }),
+      maxClustersToShow: MENU_MAX_CLUSTERS,
+      emptyCluster:      BLANK_CLUSTER,
+      routeCombo:        false,
+      helper:            new TopLevelMenuHelper({ $store: this.$store }),
     };
-  },
-
-  fetch() {
-    // this.helper.update({});
-    // if (this.hasProvCluster) {
-    //   this.$store.dispatch('management/findAll', { type: CAPI.RANCHER_CLUSTER });
-    // }
   },
 
   computed: {
@@ -67,12 +51,6 @@ export default {
     pinnedIds() {
       return this.$store.getters['prefs/get'](PINNED_CLUSTERS);
     },
-
-    // value: {
-    //   get() {
-    //     return this.$store.getters['productId'];
-    //   },
-    // },
 
     sideMenuStyle() {
       const globalBannerSettings = getGlobalBannerFontSizes(this.$store);
@@ -94,173 +72,41 @@ export default {
       return count?.summary.count;
     },
 
-    // clusters() {
-    //   return [];
-    // },
+    // TODO: RC wire in socket updates to pagination wrapper
+    // TODO: RC test search properly
+    // TODO: RC loading indicators?
 
-    /**
-     * Filter mgmt clusters by
-     * 1. Harvester type 1 (filterOnlyKubernetesClusters)
-     * 2. Harvester type 2 (filterHiddenLocalCluster)
-     * 3. There's a matching prov cluster
-     *
-     * Convert remaining clusters to special format
-     */
-    clusters_dead() {
-      if (!this.hasProvCluster) {
-        // We're filtering out mgmt clusters without prov clusters, so if the user can't see any prov clusters at all
-        // exit early
-        return [];
-      }
-
-      const all = this.$store.getters['management/all'](MANAGEMENT.CLUSTER);
-      const mgmtClusters = filterHiddenLocalCluster(filterOnlyKubernetesClusters(all, this.$store), this.$store);
-      const provClusters = this.$store.getters['management/all'](CAPI.RANCHER_CLUSTER);
-      const provClustersByMgmtId = provClusters.reduce((res, provCluster) => {
-        if (provCluster.mgmt?.id) {
-          res[provCluster.mgmt.id] = provCluster;
-        }
-
-        return res;
-      }, {});
-
-      return (mgmtClusters || []).reduce((res, mgmtCluster) => {
-        // Filter to only show mgmt clusters that exist for the available provisioning clusters
-        // Addresses issue where a mgmt cluster can take some time to get cleaned up after the corresponding
-        // provisioning cluster has been deleted
-        if (!provClustersByMgmtId[mgmtCluster.id]) {
-          return res;
-        }
-
-        const pCluster = provClustersByMgmtId[mgmtCluster.id];
-
-        res.push({
-          id:              mgmtCluster.id,
-          label:           mgmtCluster.nameDisplay,
-          ready:           mgmtCluster.isReady && !pCluster?.hasError,
-          osLogo:          mgmtCluster.providerOsLogo,
-          providerNavLogo: mgmtCluster.providerMenuLogo,
-          badge:           mgmtCluster.badge,
-          isLocal:         mgmtCluster.isLocal,
-          isHarvester:     mgmtCluster.isHarvester,
-          pinned:          mgmtCluster.pinned,
-          description:     pCluster?.description || mgmtCluster.description,
-          pin:             () => mgmtCluster.pin(),
-          unpin:           () => mgmtCluster.unpin(),
-          clusterRoute:    { name: 'c-cluster-explorer', params: { cluster: mgmtCluster.id } }
-        });
-
-        return res;
-      }, []);
+    // New
+    search() {
+      return (this.clusterFilter || '').toLowerCase();
     },
 
-    clustersFiltered() {
-      return this.search ? [
-        ...this.pClustersPinned,
-        ...this.pClustersNotPinned
-      ] : this.pClustersNotPinned;
+    // New
+    showPinClusters() {
+      return !this.search;
+    },
+
+    // New
+    searchActive() {
+      return !!this.search;
     },
 
     /**
-     * Filter clusters by
-     * 1. Includes search term
-     * OR
-     * 1. Not pinned
+     * Only Clusters that are pinned
      *
-     * Sort remaining clusters
-     *
-     * Reduce number of clusters if too many too show
-     *
-     * Important! This is used to show unpinned clusters OR results of search
+     * (see description of helper.clustersPinned for more details)
      */
-    clustersFiltered_dead() {
-      const search = (this.clusterFilter || '').toLowerCase();
-      let localCluster = null;
-
-      const filtered = this.clusters.filter((c) => {
-        // If we're searching we don't care if pinned or not
-        if (search) {
-          if (!c.label?.toLowerCase().includes(search)) {
-            return false;
-          }
-        } else if (c.pinned) {
-          // Not searching, not pinned, don't care
-          return false;
-        }
-
-        if (!localCluster && c.id === 'local') {
-          // Local cluster is a special case, we're inserting it at top so don't include in the middle
-          localCluster = c;
-
-          return false;
-        }
-
-        return true;
-      });
-
-      const sorted = sortBy(filtered, ['ready:desc', 'label']);
-
-      // put local cluster on top of list always - https://github.com/rancher/dashboard/issues/10975
-      if (localCluster) {
-        sorted.unshift(localCluster);
-      }
-
-      if (search) {
-        this.showPinClusters = false;
-        this.searchActive = !sorted.length > 0;
-
-        return sorted;
-      }
-      this.showPinClusters = true;
-      this.searchActive = false;
-
-      if (sorted.length >= this.maxClustersToShow) {
-        return sorted.slice(0, this.maxClustersToShow);
-      }
-
-      return sorted;
-    },
-
     pinFiltered() {
-      return this.pClustersPinned;
+      return this.hasProvCluster ? this.helper.clustersPinned : [];
     },
 
     /**
-     * Filter clusters by
-     * 1. pinned
+     * Used to shown unpinned clusters OR results of text search
      *
-     * Sort remaining clusters
-     *
-     * Reduce number of clusters if too many too show
-     *
-     * Important! This is hidden if there's a filter (user searching)
+     * (see description of helper.clustersOthers for more details)
      */
-    pinFiltered_dead() {
-      let localCluster = null;
-      const filtered = this.clusters.filter((c) => {
-        if (!c.pinned) {
-          // We only care about pinned clusters
-          return false;
-        }
-
-        if (c.id === 'local') {
-          // Special case, we're going to add this at the start so filter out
-          localCluster = c;
-
-          return false;
-        }
-
-        return true;
-      });
-
-      const sorted = sortBy(filtered, ['ready:desc', 'label']);
-
-      // put local cluster on top of list always - https://github.com/rancher/dashboard/issues/10975
-      if (localCluster) {
-        sorted.unshift(localCluster);
-      }
-
-      return sorted;
+    clustersFiltered() {
+      return this.hasProvCluster ? this.helper.clustersOthers : [];
     },
 
     pinnedClustersHeight() {
@@ -403,26 +249,23 @@ export default {
       this.shown = false;
     },
 
-    'helper.clustersFiltered'(neu) {
-      pinFiltered;
-    },
-
-    'helper.clustersOthers'(neu) {
-
-    },
-
-    'helper.localCluster'(neu) {
-
-    },
-
     pinnedIds: {
       immediate: true,
       handler(ids) {
         this.helper.update({
-          pinnedIds:  ids,
-          searchTerm: this.search
+          pinnedIds:   ids,
+          searchTerm:  this.search,
+          unPinnedMax: this.maxClustersToShow
         });
       }
+    },
+
+    search() {
+      this.helper.update({
+        pinnedIds:   this.pinnedIds,
+        searchTerm:  this.search,
+        unPinnedMax: this.maxClustersToShow
+      });
     }
   },
 

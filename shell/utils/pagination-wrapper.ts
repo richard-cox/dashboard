@@ -1,36 +1,28 @@
 import paginationUtils from '@shell/utils/pagination-utils';
 import { PaginationArgs, StorePagination, StorePaginationResult } from 'types/store/pagination.types';
+import { VuexStore } from 'types/store/vuex';
 
 interface Result<T> {
-    data: Array<T>
+  data: Array<T>
   pagination: StorePagination
 }
 
-// TODO: RC
-interface CTX {
-  rootGetters: any,
-  dispatch: any,
-}
-
 class PaginationWrapper<T = any> {
-    private ctx: CTX;
+    private $store: VuexStore;
     private inStore: string;
-    private onUpdate: (out: Result<T>) => void;
+    private onUpdate: (out: Result<T>) => void; // TODO: RC wire in to web socket
 
     public isEnabled: boolean;
 
-    // public result?: StorePaginationResult;
-    // public rows?: Array<T>;
-
     /**
-    *
+    * // TODO: RC descriptions everywhere...
     */
     constructor({
-      ctx,
+      $store,
       enabledFor,
       onUpdate,
     }: {
-        ctx: CTX,
+        $store: VuexStore,
         onUpdate: (res: Result<T>) => void,
         enabledFor: {
             store: string,
@@ -41,27 +33,32 @@ class PaginationWrapper<T = any> {
           }
         },
     ) {
-      this.ctx = ctx;
-      this.isEnabled = paginationUtils.isEnabled(ctx, enabledFor);
+      this.$store = $store;
+      this.isEnabled = paginationUtils.isEnabled({ rootGetters: $store.getters }, enabledFor);
       this.inStore = enabledFor.store;
       this.onUpdate = onUpdate;
     }
 
-    async setPagination(args: {
+    async request(args: {
         type: string,
-        pagination: PaginationArgs
-    }) {
-    //   const type = type = this.ctx.getters[`${ inStore }/normalizeType`](type);
-      const { type, pagination } = args;
+        pagination: PaginationArgs,
+        classify?: boolean,
+    }): Promise<Result<T>> {
+      const { type, pagination, classify: doClassify } = args;
       const opt = {
         transient: true,
         pagination
       };
 
-      //   const out = await this.ctx.dispatch(`${ inStore }/request`, { opt, type });
-      const out = await this.ctx.dispatch(`${ this.inStore }/findPage`, { opt, type });
+      const out: Result<T> = await this.$store.dispatch(`${ this.inStore }/findPage`, { opt, type });
 
-      this.onUpdate(out);
+      if (doClassify) {
+        for (let i = 0; i < out.data.length; i++) {
+          out.data[i] = await this.$store.dispatch(`${ this.inStore }/create`, out.data[i]);
+        }
+      }
+
+      return out;
     }
 }
 
