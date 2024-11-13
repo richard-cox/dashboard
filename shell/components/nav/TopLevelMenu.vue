@@ -15,8 +15,9 @@ import { getProductFromRoute } from '@shell/utils/router';
 import { isRancherPrime } from '@shell/config/version';
 import Pinned from '@shell/components/nav/Pinned';
 import { getGlobalBannerFontSizes } from '@shell/utils/banners';
-import TopLevelMenuHelper from 'components/nav/TopLevelMenu.helper';
+import { TopLevelMenuHelperPagination, TopLevelMenuHelperLegacy } from 'components/nav/TopLevelMenu.helper';
 import devConsole from 'utils/dev-console';
+import { debounce } from 'lodash';
 
 export default {
   components: {
@@ -30,6 +31,19 @@ export default {
     const { displayVersion, fullVersion } = getVersionInfo(this.$store);
     const hasProvCluster = this.$store.getters[`management/schemaFor`](CAPI.RANCHER_CLUSTER);
 
+    const canPagination = this.$store.getters[`management/paginationEnabled`]({
+      id:      MANAGEMENT.CLUSTER,
+      context: 'side-bar',
+    }) && this.$store.getters[`management/paginationEnabled`]({
+      id:      CAPI.RANCHER_CLUSTER,
+      context: 'side-bar',
+    });
+    const helper = canPagination ? new TopLevelMenuHelperPagination({ $store: this.$store }) : new TopLevelMenuHelperLegacy({ $store: this.$store });
+    const provClusters = !canPagination && hasProvCluster ? this.$store.getters[`management/all`](CAPI.RANCHER_CLUSTER) : [];
+    const mgmtClusters = !canPagination ? this.$store.getters[`management/all`](MANAGEMENT.CLUSTER) : [];
+
+    devConsole.warn(provClusters, mgmtClusters);
+
     return {
       shown:             false,
       displayVersion,
@@ -39,7 +53,12 @@ export default {
       maxClustersToShow: MENU_MAX_CLUSTERS,
       emptyCluster:      BLANK_CLUSTER,
       routeCombo:        false,
-      helper:            new TopLevelMenuHelper({ $store: this.$store }),
+
+      canPagination,
+      helper,
+      debouncedHelperUpdate: debounce((...args) => this.helper.update(...args), 200),
+      provClusters,
+      mgmtClusters,
     };
   },
 
@@ -252,21 +271,30 @@ export default {
     pinnedIds: {
       immediate: true,
       handler(ids) {
-        this.helper.update({
-          pinnedIds:   ids,
-          searchTerm:  this.search,
-          unPinnedMax: this.maxClustersToShow
-        }).catch((e) => console.error('Failed to fetch clusters for side bar', e));
+        this.updateClusters(ids);
       }
     },
 
     search() {
-      this.helper.update({
-        pinnedIds:   this.pinnedIds,
-        searchTerm:  this.search,
-        unPinnedMax: this.maxClustersToShow
-      }).catch((e) => console.error('Failed to fetch clusters for side bar', e));
-    }
+      this.updateClusters(this.pinnedIds);
+    },
+
+    provClusters: {
+      handler() {
+        // Shouldn't get here if SSP
+        this.updateClusters(this.pinnedIds);
+      },
+      deep: true
+    },
+
+    mgmtClusters: {
+      handler() {
+        // Shouldn't get here if SSP
+        this.updateClusters(this.pinnedIds);
+      },
+      deep: true
+    },
+
   },
 
   mounted() {
@@ -393,6 +421,14 @@ export default {
         popperClass
       };
     },
+
+    updateClusters(pinnedIds) {
+      this.debouncedHelperUpdate({
+        pinnedIds,
+        searchTerm:  this.search,
+        unPinnedMax: this.maxClustersToShow
+      });
+    }
   }
 };
 </script>
