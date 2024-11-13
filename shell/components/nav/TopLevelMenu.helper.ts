@@ -1,4 +1,3 @@
-import { Cluster } from 'cluster';
 import { CAPI, MANAGEMENT } from 'config/types';
 import { PaginationParam, PaginationParamFilter, PaginationSort } from 'types/store/pagination.types';
 import { VuexStore } from 'types/store/vuex';
@@ -7,8 +6,7 @@ import devConsole from 'utils/dev-console';
 import PaginationWrapper from 'utils/pagination-wrapper';
 import { allHash } from 'utils/promise';
 import { sortBy } from 'utils/sort';
-
-// TODO: RC Trigger update on websocket resources.changed message
+import { LocationAsRelativeRaw } from 'vue-router';
 
 interface TopLevelMenuCluster {
   id: string,
@@ -21,13 +19,13 @@ interface TopLevelMenuCluster {
   description: string,
   pin: () => void,
   unpin: () => void,
-  clusterRoute: any, // TODO: RC route
+  clusterRoute: LocationAsRelativeRaw,
 }
 
 interface UpdateArgs {
   searchTerm: string,
   pinnedIds: string[],
-  unPinnedMax?: number, // TODO: RC finish off
+  unPinnedMax?: number,
 }
 
 type MgmtCluster = {
@@ -51,7 +49,7 @@ const DEFAULT_SORT: Array<PaginationSort> = [
   // },
   // {
   //   asc:   true,
-  //   field: 'status.conditions[0].status' // TODO: RC not currently possible 1) order of conditions is not fixed 2) api cannot do sort by value in a given another value in a
+  //   field: 'status.conditions[0].status' // Pending API changes https://github.com/rancher/rancher/issues/48092
   // },
   // {
   //   asc:   true,
@@ -345,16 +343,18 @@ export class TopLevelMenuHelperPagination extends BaseTopLevelMenuHelper impleme
   private async updateProvCluster(notPinned: MgmtCluster[], pinned: MgmtCluster[]): Promise<ProvCluster[]> {
     return this.provClusterWrapper.request({
       pagination: {
-        filters:              [],
-        // Pending API support https://github.com/rancher/rancher/issues/48011
-        // filters: [
-        //   PaginationParamFilter.createMultipleFields(
-        //     [...notPinned, ...pinned]
-        //       .map((mgmtCluster) => ({
-        //         field: 'status.clusterName', value: mgmtCluster.id, equals: true, exact: true
-        //       }))
-        //   )
-        // ],
+
+        filters: [
+          PaginationParamFilter.createMultipleFields(
+            [...notPinned, ...pinned]
+              .map((mgmtCluster) => ({
+                // Pending API support https://github.com/rancher/rancher/issues/48011
+                // field: 'status.clusterName', value: mgmtCluster.id, equals: true, exact: true
+                field: 'metadata.name', value: 'local', equals: true, exact: true
+              }))
+          )
+        ],
+
         page:                 1,
         sort:                 [],
         projectsOrNamespaces: []

@@ -26,8 +26,8 @@ import { ActionFindPageArgs } from '@shell/types/store/dashboard-store.types';
 import { RESET_CARDS_ACTION, SET_LOGIN_ACTION } from '@shell/config/page-actions';
 import { STEVE_NAME_COL, STEVE_STATE_COL } from 'config/pagination-table-headers';
 import { PaginationParamFilter, FilterArgs, PaginationFilterField } from 'types/store/pagination.types';
-import ProvCluster from 'models/provisioning.cattle.io.cluster';
 import devConsole from 'utils/dev-console';
+import ProvCluster from 'models/provisioning.cattle.io.cluster';
 
 export default defineComponent({
   name:       'Home',
@@ -161,6 +161,7 @@ export default defineComponent({
           canBeVariable: true,
           // TODO: RC ISSUE describe. search sort on prov meta namespace
           // getValue:      (row: ProvCluster) => row.mgmt?.nameDisplay || row.metadata?.name
+          getValue:      (row: ProvCluster) => row.metadata?.name
         },
         {
           label:     this.t('landing.clusters.provider'),
@@ -204,8 +205,6 @@ export default defineComponent({
       ],
 
       clusterCount: 0,
-
-      initialProvClusterLoaded: false,
     };
   },
 
@@ -228,18 +227,6 @@ export default defineComponent({
     showSetLoginBanner() {
       return this.homePageCards?.setLoginPage;
     },
-
-    ready() {
-      // devConsole.warn(this.managementReady, this.$store.getters['management/haveAll'](CAPI.RANCHER_CLUSTER));
-
-      // if (!this.initialProvClusterLoaded && this.$store.getters['management/haveAll'](CAPI.RANCHER_CLUSTER)) {
-      //   this.initialProvClusterLoaded = true;
-      // }
-
-      // return this.managementReady && this.initialProvClusterLoaded;
-
-      return true;
-    }
   },
 
   async created() {
@@ -511,7 +498,6 @@ export default defineComponent({
             >
               <!-- // TODO: RC check loading indicator when pagination off -->
               <PaginatedResourceTable
-                v-if="false"
                 :schema="provClusterSchema"
                 :table-actions="false"
                 :row-actions="false"
@@ -533,7 +519,7 @@ export default defineComponent({
                     </h2>
                     <BadgeState
                       v-if="clusterCount"
-                      :label="clusterCount"
+                      :label="clusterCount.toString()"
                       color="role-tertiary ml-20 mr-20"
                     />
                   </div>

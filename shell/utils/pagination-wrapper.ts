@@ -10,7 +10,7 @@ interface Result<T> {
 class PaginationWrapper<T = any> {
     private $store: VuexStore;
     private enabledFor: PaginationResourceContext;
-    private onUpdate: (out: Result<T>) => void; // TODO: RC wire in to web socket
+    private onUpdate: (out: Result<T>) => void; // TODO: RC wire in to web socket (when new socket stuff is available)
 
     public isEnabled: boolean;
 
@@ -24,7 +24,6 @@ class PaginationWrapper<T = any> {
         enabledFor: PaginationResourceContext,
     }) {
       this.$store = $store;
-      debugger;
       this.isEnabled = paginationUtils.isEnabled({ rootGetters: $store.getters }, enabledFor);
       this.enabledFor = enabledFor;
       this.onUpdate = onUpdate;

@@ -19,6 +19,10 @@ import { TopLevelMenuHelperPagination, TopLevelMenuHelperLegacy } from 'componen
 import devConsole from 'utils/dev-console';
 import { debounce } from 'lodash';
 
+// TODO: RC wire in socket updates to pagination wrapper
+// TODO: RC test search properly
+// TODO: RC loading indicators?
+
 export default {
   components: {
     BrandImage,
@@ -90,10 +94,6 @@ export default {
 
       return count?.summary.count;
     },
-
-    // TODO: RC wire in socket updates to pagination wrapper
-    // TODO: RC test search properly
-    // TODO: RC loading indicators?
 
     // New
     search() {
