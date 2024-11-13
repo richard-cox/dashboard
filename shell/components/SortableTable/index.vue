@@ -361,7 +361,13 @@ export default {
     externalPaginationResult: {
       type:    Object,
       default: null
+    },
+
+    manualRefreshButtonSize: {
+      type:    String,
+      default: ''
     }
+
   },
 
   data() {
@@ -571,9 +577,9 @@ export default {
     showHeaderRow() {
       return this.search ||
         this.tableActions ||
-        this.$slots['header-left']?.() ||
-        this.$slots['header-middle']?.() ||
-        this.$slots['header-right']?.();
+        this.$slots['header-left'] ||
+        this.$slots['header-middle'] ||
+        this.$slots['header-right'];
     },
 
     columns() {
@@ -1140,8 +1146,8 @@ export default {
           <slot name="header-right" />
           <AsyncButton
             v-if="isTooManyItemsToAutoUpdate"
-            class="manual-refresh"
             mode="manual-refresh"
+            :size="manualRefreshButtonSize"
             :current-phase="refreshButtonPhase"
             @click="debouncedRefreshTableData"
           />
@@ -1567,10 +1573,6 @@ export default {
   .sortable-table.alt-loading {
     opacity: 0.5;
     pointer-events: none;
-  }
-
-  .manual-refresh {
-    height: 40px;
   }
   .advanced-filter-group {
     position: relative;
