@@ -95,6 +95,9 @@ export default class MgmtCluster extends SteveModel {
   }
 
   get machineProvider() {
+    // if (this.id === 'c-xmtdn') {
+    //   console.warn('!!!!', 'Mgmt', 'getter', 'machineProvider', this.id, this.machinePools.length)
+    // }
     const kind = this.machinePools?.[0]?.provider;
 
     if ( kind ) {

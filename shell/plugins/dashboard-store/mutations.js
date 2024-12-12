@@ -471,6 +471,7 @@ export default {
     data,
     ctx,
     pagination,
+    revision
   }) {
     if (!data) {
       return;
@@ -482,6 +483,7 @@ export default {
 
     clear(cache.list);
     cache.map.clear();
+    cache.revision = revision || 0;
     cache.generation++;
 
     addObjects(cache.list, proxies);

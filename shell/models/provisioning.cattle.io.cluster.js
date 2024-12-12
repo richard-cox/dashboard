@@ -1,5 +1,5 @@
 import {
-  CAPI, MANAGEMENT, NAMESPACE, NORMAN, SNAPSHOT, HCI, LOCAL_CLUSTER
+  CAPI, MANAGEMENT, NAMESPACE, NORMAN, SNAPSHOT, HCI, LOCAL_CLUSTER, FLEET
 } from '@shell/config/types';
 import SteveModel from '@shell/plugins/steve/steve-class';
 import { findBy } from '@shell/utils/array';
@@ -10,12 +10,14 @@ import { compare } from '@shell/utils/version';
 import { AS, MODE, _VIEW, _YAML } from '@shell/config/query-params';
 import { HARVESTER_NAME as HARVESTER } from '@shell/config/features';
 import { CAPI as CAPI_ANNOTATIONS, NODE_ARCHITECTURE } from '@shell/config/labels-annotations';
+import { computed, ref, watch } from 'vue';
 
 /**
  * Class representing Cluster resource.
  * @extends SteveModel
  */
 export default class ProvCluster extends SteveModel {
+
   get details() {
     const out = [
       {
@@ -352,9 +354,122 @@ export default class ProvCluster extends SteveModel {
     return this.status?.clusterName;
   }
 
+  // _mgmt = null;
+  // mgmtFn() {
+  //   if (this.mgmtClusterId === 'c-xmtdn') {
+  //     const a= this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, this.mgmtClusterId);
+  //     if (!!a) {
+  //       debugger;
+  //     }
+  //     console.warn('!!!!', 'getter', 'mgmt', this.mgmtClusterId, a)
+  //   }
+
+  //   // this.mgmtTrigger.value = this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, this.mgmtClusterId);
+  //   return this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, this.mgmtClusterId)
+  // }
+  // get mgmt() {
+  //   return this._mgmt;
+  // }
+
+  // get reactiveMgmtValue() {
+  //   const v = this.reactiveMgmt?.value;
+  //   if (this.mgmtClusterId === 'c-xmtdn') {
+  //     console.warn('!!!!', 'getter', 'reactiveMgmtValue', v)
+  //   }
+
+  //   return v && Object.keys(v).length > 0 ? v : undefined
+  // }
+
+
+  // _internalValue = null;
+  // trigger = ref(false); // A reactive trigger
+  // get mgmt() {
+  //   this.trigger; // Depend on `trigger`
+  //   return this._internalValue;
+  // }
+
+  // set mgmt(value) {
+  //   this._internalValue = value;
+  //   this.trigger.value = !this.trigger.value; // Manually trigger reactivity
+  // }
+
+  // if (this.mgmtClusterId === 'c-xmtdn') {
+  //   const a= this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, this.mgmtClusterId);
+  //   if (!!a) {
+  //     debugger;
+  //   }
+  //   console.warn('!!!!', 'getter', 'mgmt', this.mgmtClusterId, a)
+  // }
+  // if (this.mgmtClusterId === 'c-xmtdn') {
+  //   debugger;
+  //   console.warn('!!!!', 'getter', 'machineProvider', this.mgmtClusterId, this.mgmt?.machineProvider)
+  // }
+
+  reactiveMgmt = computed(() => this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, this.mgmtClusterId)); // Computed tracks `state.value`
+
   get mgmt() {
-    return this.mgmtClusterId ? this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, this.mgmtClusterId) : null;
+    // this.mgmtGeneration; // Depend on `trigger`
+    return this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, this.mgmtClusterId);
   }
+
+  get mgmtGeneration() {
+    return this.$rootGetters['management/generation'](MANAGEMENT.CLUSTER)
+  }
+
+  get machineProvider() {
+    // First check annotation - useful for clusters created by extension providers
+    const fromAnnotation = this.annotations?.[CAPI_ANNOTATIONS.UI_CUSTOM_PROVIDER];
+
+    if (fromAnnotation) {
+      return fromAnnotation;
+    }
+
+    if (this.isHarvester) {
+      return HARVESTER;
+    } else if ( this.isImported ) {
+      return null;
+    } else if ( this.isRke2 ) {
+      const kind = this.spec?.rkeConfig?.machinePools?.[0]?.machineConfigRef?.kind?.toLowerCase();
+
+      if ( kind ) {
+        return kind.replace(/config$/i, '').toLowerCase();
+      }
+
+      return null;
+    } else if ( this.mgmt ) {
+      return this.mgmt.machineProvider?.toLowerCase();
+    }
+
+    return null;
+  }
+
+  // _internalValue = null;
+  // trigger = ref(false); // A reactive trigger
+  constructor(...args) {
+    super(...args);
+
+    // watch(
+    //   () => {
+    //     const a = this.$rootGetters['management/generation'](FLEET.CLUSTER) || 99;
+    //     console.warn('!!!!!1', a)
+    //     return a || 999999
+    //   },
+    //   (newValue, oldValue) => {
+    //     console.warn('!!!!!2', newValue, oldValue)
+    //     // this.trigger.value = !this.trigger.value;
+    //   }
+    // );
+  }
+
+  // reactiveFleetCluster = computed(() => this.$rootGetters['management/byId'](FLEET.CLUSTER, 'fleet-local/local')); // Computed tracks `state.value`
+  // get fleetCluster() {
+  //   // const a = this.fleetGeneration; // Depend on `trigger`
+  //   // const b = this.$rootGetters['management/generation'](FLEET.CLUSTER)
+  //   return this.$rootGetters['management/byId'](FLEET.CLUSTER, 'fleet-local/local');
+  // }
+  // get fleetGeneration() {
+  //   return this.$rootGetters['management/generation'](FLEET.CLUSTER)
+  // }
 
   get isReady() {
     return !!this.mgmt?.isReady;
@@ -468,32 +583,36 @@ export default class ProvCluster extends SteveModel {
     }
   }
 
-  get machineProvider() {
-    // First check annotation - useful for clusters created by extension providers
-    const fromAnnotation = this.annotations?.[CAPI_ANNOTATIONS.UI_CUSTOM_PROVIDER];
+  // get machineProvider() {
+  //   if (this.mgmtClusterId === 'c-xmtdn') {
+  //     console.warn('!!!3', this.mgmtClusterId, this.mgmt)
+  //   }
 
-    if (fromAnnotation) {
-      return fromAnnotation;
-    }
+  //   // First check annotation - useful for clusters created by extension providers
+  //   const fromAnnotation = this.annotations?.[CAPI_ANNOTATIONS.UI_CUSTOM_PROVIDER];
 
-    if (this.isHarvester) {
-      return HARVESTER;
-    } else if ( this.isImported ) {
-      return null;
-    } else if ( this.isRke2 ) {
-      const kind = this.spec?.rkeConfig?.machinePools?.[0]?.machineConfigRef?.kind?.toLowerCase();
+  //   if (fromAnnotation) {
+  //     return fromAnnotation;
+  //   }
 
-      if ( kind ) {
-        return kind.replace(/config$/i, '').toLowerCase();
-      }
+  //   if (this.isHarvester) {
+  //     return HARVESTER;
+  //   } else if ( this.isImported ) {
+  //     return null;
+  //   } else if ( this.isRke2 ) {
+  //     const kind = this.spec?.rkeConfig?.machinePools?.[0]?.machineConfigRef?.kind?.toLowerCase();
 
-      return null;
-    } else if ( this.mgmt?.machineProvider ) {
-      return this.mgmt.machineProvider.toLowerCase();
-    }
+  //     if ( kind ) {
+  //       return kind.replace(/config$/i, '').toLowerCase();
+  //     }
 
-    return null;
-  }
+  //     return null;
+  //   } else if ( this.mgmt ) {
+  //     return this.mgmt.machineProvider.toLowerCase();
+  //   }
+
+  //   return null;
+  // }
 
   get machineProviderDisplay() {
     if ( this.isImported ) {

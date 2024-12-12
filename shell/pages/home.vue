@@ -9,7 +9,7 @@ import { BadgeState } from '@components/BadgeState';
 import CommunityLinks from '@shell/components/CommunityLinks.vue';
 import SingleClusterInfo from '@shell/components/SingleClusterInfo.vue';
 import { mapGetters, mapState } from 'vuex';
-import { MANAGEMENT, CAPI } from '@shell/config/types';
+import { MANAGEMENT, CAPI, FLEET } from '@shell/config/types';
 import { NAME as MANAGER } from '@shell/config/product/manager';
 import { STATE } from '@shell/config/table-headers';
 import { MODE, _IMPORT } from '@shell/config/query-params';
@@ -151,6 +151,7 @@ export default defineComponent({
       paginationHeaders: [
         STEVE_STATE_COL,
         {
+          // TODO: RC BUG - rke1 cluster's prov cluster metadata.name is the mgmt cluster id rather than true name
           ...STEVE_NAME_COL,
           canBeVariable: true,
           getValue:      (row: ProvCluster) => row.metadata?.name
@@ -239,8 +240,14 @@ export default defineComponent({
     /**
      * Of type FetchSecondaryResources
      */
-    fetchSecondaryResources(opts: FetchSecondaryResourcesOpts): Promise<any> {
+    async fetchSecondaryResources(opts: FetchSecondaryResourcesOpts): Promise<any> {
+      
       if (opts.canPaginate) {
+        setTimeout(() => {
+     this.$store.dispatch('management/findAll', { type: FLEET.CLUSTER });
+
+        }, 5000);
+
         return Promise.resolve({});
       }
 
@@ -290,7 +297,10 @@ export default defineComponent({
           })
         };
 
-        this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.CLUSTER, opt });
+        setTimeout(() => {
+          this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.CLUSTER, opt });
+        }, 1000)
+        // await this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.CLUSTER, opt });
       }
 
       if ( this.canViewMachine ) {
@@ -323,34 +333,29 @@ export default defineComponent({
       }
 
       // We need to fetch node pools and node templates in order to correctly show the provider for RKE1 clusters
-      if ( this.canViewMgmtPools && this.canViewMgmtTemplates) {
-        const filters = PaginationParamFilter.createMultipleFields(page
+      if ( this.canViewMgmtPools) {
+        const nodePoolFilters = PaginationParamFilter.createMultipleFields(page
           .filter((p: any) => p.status?.clusterName)
           .map((r: any) => new PaginationFilterField({
             field: 'spec.clusterName',
             value: r.status?.clusterName
           })));
-
-        const poolOpt: ActionFindPageArgs = {
+        const nodePools = await this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE_POOL, opt: {
           force,
-          // TODO: RC test with rke2 cluster
-          pagination: new FilterArgs({ filters })
-        };
-
-        this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE_POOL, opt: poolOpt });
-
-        const templateOpt: ActionFindPageArgs = {
+          pagination: new FilterArgs({ filters: nodePoolFilters })
+        } });
+        
+        const templateOpt = PaginationParamFilter.createMultipleFields(nodePools
+          .filter((np: any) => !!np.nodeTemplateId)
+          .map((np: any) => new PaginationFilterField({
+            field: 'id',
+            value: np.nodeTemplateId,
+            exact: true,
+          })));
+        this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE_TEMPLATE, opt: {
           force,
-          // TODO: RC test with rke2 cluster
-          pagination: new FilterArgs({
-            filters: PaginationParamFilter.createMultipleFields(page.map((r: any) => new PaginationFilterField({
-              field: 'spec.clusterName',
-              value: r.status?.clusterName
-            }))),
-          })
-        };
-
-        this.$store.dispatch(`management/findPage`, { type: MANAGEMENT.NODE_TEMPLATE, opt: templateOpt });
+          pagination: new FilterArgs({ filters: templateOpt })
+        } });
       }
     },
 
@@ -471,7 +476,7 @@ export default defineComponent({
 
 <template>
   <div
-    v-if="managementReady"
+    v-if="managementReady && !$fetchState.pending"
     class="home-page"
   >
     <TabTitle
