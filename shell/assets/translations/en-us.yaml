@@ -120,6 +120,7 @@ locale:
   none: (None)
 
 nav:
+  expandCollapseAppBar: Expand/Collapse the Application Bar
   harvesterDashboard: Harvester Dashboard
   backToRancher: Cluster Manager
   tools: Tools
@@ -7561,6 +7562,7 @@ performance:
     resources:
       generic: most resources in the cluster's 'More Resources' section
       all: All Resources
+    populateDefaults: Populate with latest pagination defaults
 banner:
   label: Fixed Banners
   settingName: Banners

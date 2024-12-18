@@ -85,6 +85,7 @@ export default {
       type:    Function,
       default: null,
     },
+
   },
 
   computed: {

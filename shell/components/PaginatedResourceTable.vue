@@ -10,6 +10,8 @@ export type FetchSecondaryResources = (opts: FetchSecondaryResourcesOpts) => Pro
 export type FetchPageSecondaryResourcesOpts = { canPaginate: boolean, force: boolean, page: any[], pagResult: StorePaginationResult }
 export type FetchPageSecondaryResources = (opts: FetchPageSecondaryResourcesOpts) => Promise<any>
 
+// export const PAGINATED_RESOURCE_TABLE_NAME = 'PaginatedResourceTable';
+
 /**
  * This is meant to enable ResourceList like capabilities outside of List pages / components
  *
@@ -21,6 +23,7 @@ export type FetchPageSecondaryResources = (opts: FetchPageSecondaryResourcesOpts
  *
  */
 export default defineComponent({
+  // name: PAGINATED_RESOURCE_TABLE_NAME,
   name: 'PaginatedResourceTable',
 
   components: { ResourceTable },
@@ -93,8 +96,8 @@ export default defineComponent({
   },
 
   computed: {
-    safeHeaders() {
-      const customHeaders = this.canPaginate ? this.paginationHeaders : this.headers;
+    safeHeaders(): any[] {
+      const customHeaders: any[] = this.canPaginate ? this.paginationHeaders : this.headers;
 
       return customHeaders || this.$store.getters['type-map/headersFor'](this.schema, this.canPaginate);
     }
@@ -124,6 +127,7 @@ export default defineComponent({
       <template
         v-for="(_, slot) of $slots"
         v-slot:[slot]="scope"
+        :key="slot"
       >
         <slot
           :name="slot"
