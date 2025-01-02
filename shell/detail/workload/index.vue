@@ -113,7 +113,7 @@ export default {
       allIngresses:                    [],
       matchingServices:                [],
       matchingIngresses:               [],
-      matchingPods: [],
+      matchingPods:                    [],
       allJobs:                         [],
       allNodes:                        [],
       WORKLOAD_METRICS_DETAIL_URL,

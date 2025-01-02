@@ -346,7 +346,7 @@ export default class Workload extends WorkloadService {
 
     const detailItem = {
       restarts: {
-        label: this.t('resourceDetail.masthead.restartCount'),
+        label:   this.t('resourceDetail.masthead.restartCount'),
         content: this.restartCount
       },
       endpoint: {
@@ -566,8 +566,9 @@ export default class Workload extends WorkloadService {
   }
 
   get pods() {
-    console.warn('Anything using this must be updated to ????!!!')
-    return []
+    console.warn('Anything using this must be updated to ????!!!');
+
+    return [];
   }
 
   // get pods() {
@@ -591,10 +592,9 @@ export default class Workload extends WorkloadService {
   get podSelector() {
     const relationships = this.metadata?.relationships || [];
     const selector = relationships.filter((relationship) => relationship.toType === POD)[0]?.selector;
+
     if (typeof selector === 'string') {
-      return {
-        matchExpressions: parse(selector)
-      }
+      return { matchExpressions: parse(selector) };
     }
 
     return selector;
@@ -630,18 +630,16 @@ export default class Workload extends WorkloadService {
   async fetchPods() {
     const podSelector = this.podSelector;
 
-      if (podSelector) {
-        const findPageArgs = { // Of type ActionFindPageArgs
-          namespaced: this.metadata.namespace,
-          pagination: new FilterArgs({
-            labelSelector: podSelector
-          }),
-        };
+    if (podSelector) {
+      const findPageArgs = { // Of type ActionFindPageArgs
+        namespaced: this.metadata.namespace,
+        pagination: new FilterArgs({ labelSelector: podSelector }),
+      };
 
-        return this.$dispatch('findPage', { type: POD, opt: findPageArgs });
-      }
+      return this.$dispatch('findPage', { type: POD, opt: findPageArgs });
+    }
 
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }
 
   // Job Specific
