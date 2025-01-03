@@ -263,7 +263,7 @@ export default {
       const { value: { spec: { selector = { } } } } = this;
 
       const counts = this.$store.getters[`${ this.inStore }/all`](COUNT)?.[0]?.counts || {};
-      const namespaceCount = counts[SERVICE].namespaces[this.value?.metadata?.namespace]?.count || 0;
+      const namespaceCount = counts[POD].namespaces[this.value?.metadata?.namespace]?.count || 0;
 
       if (isEmpty(selector) || namespaceCount === 0) {
         this.matchingPods = {
