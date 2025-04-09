@@ -4503,6 +4503,7 @@ plugins:
   labels:
     builtin: Built-in
     experimental: Experimental
+    rancher: Rancher
     third-party: Third-Party
     image: Image
     installing: Installing ...
@@ -4512,6 +4513,7 @@ plugins:
   descriptions:
     experimental: This Extension is marked as experimental
     third-party: This Extension is provided by a Third-Party
+    rancher: This Extension is provided by Rancher
     built-in: This Extension is built-in
     image: This Extension Image has been loaded manually
   error:

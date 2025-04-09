@@ -261,7 +261,8 @@ export default {
           installed:    false,
           builtin:      false,
           experimental: uiPluginHasAnnotation(chart, CATALOG_ANNOTATIONS.EXPERIMENTAL, 'true'),
-          certified:    uiPluginHasAnnotation(chart, CATALOG_ANNOTATIONS.CERTIFIED, CATALOG_ANNOTATIONS._RANCHER)
+          certified:    uiPluginHasAnnotation(chart, CATALOG_ANNOTATIONS.CERTIFIED, CATALOG_ANNOTATIONS._RANCHER),
+          rancher:      this.extensionIsRancher(chart, false),
         };
 
         item.versions = [...chart.versions];
@@ -324,6 +325,7 @@ export default {
           // A plugin is loaded, but there is no chart, so add an item so that it shows up
           const rancher = typeof p.metadata?.rancher === 'object' ? p.metadata.rancher : {};
           const label = rancher.annotations?.[UI_PLUGIN_CHART_ANNOTATIONS.DISPLAY_NAME] || p.name;
+          debugger;
           const item = {
             name:           p.name,
             label,
@@ -334,6 +336,7 @@ export default {
             displayVersion: p.metadata?.version || '-',
             installed:      true,
             builtin:        !!p.builtin,
+            rancher:  this.extensionIsRancher(chart, !!p.builtin),
           };
 
           // Built-in plugins can chose to be hidden - used where we implement as extensions
@@ -361,6 +364,7 @@ export default {
             chart.upgrade = chart.installableVersions[0].version;
           }
         } else {
+          debugger;
           // No chart, so add a card for the plugin based on its Custom resource being present
           const item = {
             name:           p.name,
@@ -373,6 +377,7 @@ export default {
             installing:     false,
             builtin:        false,
             uiplugin:       p,
+            rancher:  this.extensionIsRancher(chart, false),
           };
 
           all.push(item);
@@ -494,6 +499,10 @@ export default {
   },
 
   methods: {
+    extensionIsRancher(chart, builtIn) {
+      return this.$store.getters['management/byId'](CATALOG.CLUSTER_REPO, chart.repoName)?.spec.gitRepo === UI_PLUGINS_REPOS.OFFICIAL.URL || builtIn
+    },
+
     async refreshCharts(forceChartsUpdate = false) {
       // we might need to force the request, so that we know at all times if what's the status of the offical and partners repos (installed or not)
       // tied to the SetupUIPlugins, AddExtensionRepos checkboxes
@@ -907,6 +916,12 @@ export default {
                     v-clean-tooltip="t('plugins.descriptions.experimental')"
                   >
                     {{ t('plugins.labels.experimental') }}
+                  </div>
+                  <div
+                    v-if="plugin.rancher"
+                    v-clean-tooltip="t('plugins.descriptions.rancher')"
+                  >
+                  {{ t('plugins.labels.rancher') }}
                   </div>
                 </div>
                 <div class="plugin-spacer" />
