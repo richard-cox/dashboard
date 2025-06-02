@@ -213,7 +213,7 @@ export function equivalentWatch(a, b) {
   return true;
 }
 
-function queueChange({ getters, state, rootGetters }, { data, revision }, load, label) {
+function queueChange({ getters, state, rootGetters }, { data, revision, mode }, load, label) {
   const type = getters.normalizeType(data.type);
 
   const entry = getters.typeEntry(type);
@@ -230,11 +230,15 @@ function queueChange({ getters, state, rootGetters }, { data, revision }, load, 
     return;
   }
 
+  if (data.type === 'event') {
+    debugger;
+  }
   if ( load ) {
     state.queue.push({
       action: 'dispatch',
       event:  'load',
-      body:   data
+      body:   data,
+      mode,
     });
   } else {
     const obj = getters.byId(data.type, data.id);
@@ -489,8 +493,6 @@ const sharedActions = {
       dispatch('unwatchIncompatible', messageMeta);
     }
 
-    // Watch errors mean we make a http request to get latest revision (which is still missing) and try to re-watch with it...
-    // etc
     if (typeof revision === 'undefined') {
       revision = getters.nextResourceVersion(type, id);
     }
@@ -509,7 +511,15 @@ const sharedActions = {
       }
     }
 
-    if ( revision ) {
+    // 1. Without dependent backend changes there's likely no `revision` in the http response.
+    // 2. UI will then grab latest revision from the resources themselves
+    // 3. latest revision from resources is likely `too old`
+    // 4. `too old` flow makes a http request to get latest `revision`.. which it does not supply
+    // 5. GOTO 2 (repeats)
+    // validRevision will be removed ????????????
+    const validRevision = !paginationUtils.isSteveCacheEnabled({ rootGetters });
+
+    if ( revision && validRevision ) {
       msg.resourceVersion = `${ revision }`;
     }
 
@@ -646,14 +656,16 @@ const defaultActions = {
 
     state.debugSocket && console.debug(`Subscribe Flush [${ getters.storeName }]`, queue.length, 'items'); // eslint-disable-line no-console
 
-    for ( const { action, event, body } of queue ) {
+    for ( const {
+      action, event, body, mode
+    } of queue ) {
       if ( action === 'dispatch' && event === 'load' ) {
         // Group loads into one loadMulti when possible
         toLoad.push(body);
       } else {
         // When we hit a different kind of event, process all the previous loads, then the other event.
         if ( toLoad.length ) {
-          await dispatch('loadMulti', toLoad);
+          await dispatch('loadMulti', toLoad, mode !== STEVE_WATCH_MODE.RESOURCE_CHANGES);
           toLoad = [];
         }
 

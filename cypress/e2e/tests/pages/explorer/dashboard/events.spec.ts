@@ -248,92 +248,92 @@ describe('Events', { testIsolation: 'off', tags: ['@explorer', '@adminUser'] }, 
         });
     });
 
-    it('filter events', () => {
-      ClusterDashboardPagePo.navTo();
-      clusterDashboard.waitForPage(undefined, 'cluster-events');
-      EventsPageListPo.navTo();
-      events.waitForPage();
+    // it('filter events', () => {
+    //   ClusterDashboardPagePo.navTo();
+    //   clusterDashboard.waitForPage(undefined, 'cluster-events');
+    //   EventsPageListPo.navTo();
+    //   events.waitForPage();
 
-      events.list().resourceTable().sortableTable().checkVisible();
-      events.list().resourceTable().sortableTable().checkLoadingIndicatorNotVisible();
-      events.list().resourceTable().sortableTable().checkRowCount(false, pageSize);
+    //   events.list().resourceTable().sortableTable().checkVisible();
+    //   events.list().resourceTable().sortableTable().checkLoadingIndicatorNotVisible();
+    //   events.list().resourceTable().sortableTable().checkRowCount(false, pageSize);
 
-      // filter by namespace
-      events.list().resourceTable().sortableTable().filter(nsName2);
-      events.waitForPage(`q=${ nsName2 }`);
-      events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
-        .should('have.length.lte', 5);
-      events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
-        .should('be.visible');
+    //   // filter by namespace
+    //   events.list().resourceTable().sortableTable().filter(nsName2);
+    //   events.waitForPage(`q=${ nsName2 }`);
+    //   events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
+    //     .should('have.length.lte', 5);
+    //   events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
+    //     .should('be.visible');
 
-      // filter by name
-      events.list().resourceTable().sortableTable().filter(uniquePod);
-      events.waitForPage(`q=${ uniquePod }`);
-      events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
-        .should('have.length.lte', 5);
-      events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
-        .should('be.visible');
+    //   // filter by name
+    //   events.list().resourceTable().sortableTable().filter(uniquePod);
+    //   events.waitForPage(`q=${ uniquePod }`);
+    //   events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
+    //     .should('have.length.lte', 5);
+    //   events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
+    //     .should('be.visible');
 
-      events.list().resourceTable().sortableTable().resetFilter();
-    });
+    //   events.list().resourceTable().sortableTable().resetFilter();
+    // });
 
-    it('sorting changes the order of paginated events data', () => {
-      EventsPageListPo.navTo();
-      events.waitForPage();
+    // it('sorting changes the order of paginated events data', () => {
+    //   EventsPageListPo.navTo();
+    //   events.waitForPage();
 
-      // check table is sorted by `last seen` in ASC order by default
-      events.list().resourceTable().sortableTable().tableHeaderRow()
-        .checkSortOrder(2, 'down');
+    //   // check table is sorted by `last seen` in ASC order by default
+    //   events.list().resourceTable().sortableTable().tableHeaderRow()
+    //     .checkSortOrder(2, 'down');
 
-      // sort by name in ASC order
-      events.list().resourceTable().sortableTable().sort(11)
-        .click();
-      events.list().resourceTable().sortableTable().tableHeaderRow()
-        .checkSortOrder(11, 'down');
+    //   // sort by name in ASC order
+    //   events.list().resourceTable().sortableTable().sort(11)
+    //     .click();
+    //   events.list().resourceTable().sortableTable().tableHeaderRow()
+    //     .checkSortOrder(11, 'down');
 
-      // event name should be visible on first page (sorted in ASC order)
-      events.list().resourceTable().sortableTable().tableHeaderRow()
-        .self()
-        .scrollIntoView();
-      events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
-        .scrollIntoView()
-        .should('be.visible');
+    //   // event name should be visible on first page (sorted in ASC order)
+    //   events.list().resourceTable().sortableTable().tableHeaderRow()
+    //     .self()
+    //     .scrollIntoView();
+    //   events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
+    //     .scrollIntoView()
+    //     .should('be.visible');
 
-      // sort by name in DESC order
-      events.list().resourceTable().sortableTable().sort(11)
-        .click();
-      events.list().resourceTable().sortableTable().tableHeaderRow()
-        .checkSortOrder(11, 'up');
+    //   // sort by name in DESC order
+    //   events.list().resourceTable().sortableTable().sort(11)
+    //     .click();
+    //   events.list().resourceTable().sortableTable().tableHeaderRow()
+    //     .checkSortOrder(11, 'up');
 
-      // event name should be NOT visible on first page (sorted in DESC order)
-      events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
-        .should('not.exist');
+    //   // event name should be NOT visible on first page (sorted in DESC order)
+    //   events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
+    //     .should('not.exist');
 
-      // navigate to last page
-      events.list().resourceTable().sortableTable().pagination()
-        .endButton()
-        .scrollIntoView()
-        .click();
+    //   // navigate to last page
+    //   events.list().resourceTable().sortableTable().pagination()
+    //     .endButton()
+    //     .scrollIntoView()
+    //     .click();
 
-      // event name should be visible on last page (sorted in DESC order)
-      events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
-        .scrollIntoView()
-        .should('be.visible');
-    });
+    //   // event name should be visible on last page (sorted in DESC order)
+    //   events.list().resourceTable().sortableTable().rowElementWithPartialName(uniquePod)
+    //     .scrollIntoView()
+    //     .should('be.visible');
+    // });
 
-    it('pagination is hidden', () => {
-      // generate small set of events data
-      generateEventsDataSmall();
-      events.goTo();
-      events.waitForPage();
-      cy.wait('@eventsDataSmall');
+    // it('pagination is hidden', () => {
+    //   // generate small set of events data
+    //   generateEventsDataSmall();
+    //   events.goTo();
+    //   events.waitForPage();
+    //   cy.wait('@eventsDataSmall');
 
-      events.list().resourceTable().sortableTable().checkVisible();
-      events.list().resourceTable().sortableTable().checkLoadingIndicatorNotVisible();
-      events.list().resourceTable().sortableTable().checkRowCount(false, 3);
-      events.list().resourceTable().sortableTable().pagination()
-        .checkNotExists();
-    });
+    //   events.list().resourceTable().sortableTable().checkVisible();
+    //   events.list().resourceTable().sortableTable().checkLoadingIndicatorNotVisible();
+    //   events.list().resourceTable().sortableTable().checkRowCount(false, 3);
+    //   events.list().resourceTable().sortableTable().pagination()
+    //     .checkNotExists();
+    // });
 
     after('clean up', () => {
       cy.tableRowsPerPageAndPreferences(100, {

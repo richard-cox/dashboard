@@ -179,9 +179,11 @@ export default {
   /**
   * Load multiple different types of resources
   */
-  loadMulti(state, { data, ctx }) {
+  loadMulti(state, { data, ctx, invalidatePageCache }) {
     for (const entry of data) {
-      const resource = load(state, { data: entry, ctx });
+      const resource = load(state, {
+        data: entry, ctx, invalidatePageCache
+      });
 
       if (resource.type === POD && resource.metadata) {
         const cache = registerNamespace(state, resource.namespace);

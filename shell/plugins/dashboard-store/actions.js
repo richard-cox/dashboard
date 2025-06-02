@@ -736,12 +736,13 @@ export default {
     return getters['byId'](type, id);
   },
 
-  loadMulti(ctx, data) {
+  loadMulti(ctx, data, invalidatePageCache) {
     const { commit } = ctx;
 
     commit('loadMulti', {
       data,
       ctx,
+      invalidatePageCache
     });
   },
 

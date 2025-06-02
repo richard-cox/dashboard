@@ -412,11 +412,13 @@ export default {
   /**
    * Load multiple different types of resources
    */
-  loadMulti(state, { data, ctx }) {
+  loadMulti(state, { data, ctx, invalidatePageCache }) {
     // console.log('### Mutation loadMulti', data?.length);
 
     for ( const entry of data ) {
-      load(state, { data: entry, ctx });
+      load(state, {
+        data: entry, ctx, invalidatePageCache
+      });
     }
   },
 
