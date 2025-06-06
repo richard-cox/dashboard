@@ -59,6 +59,7 @@ export default {
     const editCloudCred = this.mode === _EDIT && this.value._type === TYPES.CLOUD_CREDENTIAL;
     const cloneCloudCred = this.realMode === _CLONE && this.liveValue._type === TYPES.CLOUD_CREDENTIAL;
     const isCloud = newCloudCred || editCloudCred || cloneCloudCred;
+    const isHelm = this.value._type === TYPES.HELM_RELEASE;
 
     if ( newCloudCred ) {
       this.value.metadata.namespace = DEFAULT_WORKSPACE;
@@ -89,6 +90,7 @@ export default {
 
     return {
       isCloud,
+      isHelm,
       nodeDrivers:       null,
       secretTypes,
       secretType:        this.value._type,
@@ -113,6 +115,7 @@ export default {
       case TYPES.BASIC: return 'basic';
       case TYPES.DOCKER_JSON: return 'registry';
       case TYPES.SSH: return 'ssh';
+      case TYPES.HELM_RELEASE: return 'helm';
       }
 
       return 'generic';

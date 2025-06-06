@@ -2,7 +2,7 @@ import r from 'jsrsasign';
 import { CERTMANAGER, KUBERNETES } from '@shell/config/labels-annotations';
 import { base64Decode, base64Encode } from '@shell/utils/crypto';
 import { removeObjects } from '@shell/utils/array';
-import { SERVICE_ACCOUNT } from '@shell/config/types';
+import { SECRET, SERVICE_ACCOUNT } from '@shell/config/types';
 import { set } from '@shell/utils/object';
 import { NAME as MANAGER } from '@shell/config/product/manager';
 import SteveModel from '@shell/plugins/steve/steve-class';
@@ -469,5 +469,22 @@ export default class Secret extends SteveModel {
     // ref: https://kubernetes.io/docs/concepts/configuration/secret/#secret-types
 
     return steveCleanForDownload(yaml, { rootKeys: ['id', 'links', 'actions'] });
+  }
+
+  /**
+   * TODO: RC
+   */
+  async fetchHelmData() {
+    const selfWithHelmData = await this.$dispatch('find', {
+      type: SECRET,
+      id:   this.id,
+      opt:  {
+        transient: true,
+        watch:     false,
+        params:    { includeHelmData: true }
+      }
+    });
+
+    return selfWithHelmData.data;
   }
 }

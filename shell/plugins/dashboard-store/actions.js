@@ -525,7 +525,7 @@ export default {
     console.log(`Find: [${ ctx.state.config.namespace }] ${ type } ${ id }`); // eslint-disable-line no-console
     let out;
 
-    if ( opt.force !== true ) {
+    if (!opt.transient && opt.force !== true ) {
       out = getters.byId(type, id);
 
       if ( out ) {
@@ -538,7 +538,9 @@ export default {
 
     const res = await dispatch('request', { opt, type });
 
-    await dispatch('load', { data: res });
+    if (!opt.transient) {
+      await dispatch('load', { data: res });
+    }
 
     if ( opt.watch !== false ) {
       const watchMsg = {
@@ -563,7 +565,7 @@ export default {
       dispatch('watch', watchMsg);
     }
 
-    out = getters.byId(type, id);
+    out = opt.transient ? res : getters.byId(type, id);
 
     garbageCollect.gcUpdateLastAccessed(ctx, type);
 
