@@ -42,6 +42,7 @@ export default {
 </script>
 
 <template>
+  <!-- TODO: RC -->
   <ResourceTable
     :schema="schema"
     :rows="filteredRows"

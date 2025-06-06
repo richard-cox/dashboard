@@ -5,6 +5,8 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import DetailText from '@shell/components/DetailText';
 import Tab from '@shell/components/Tabbed/Tab';
+import CodeMirror from '@shell/components/CodeMirror';
+import Loading from '@shell/components/Loading.vue';
 
 const types = [
   TYPES.OPAQUE,
@@ -24,6 +26,8 @@ export default {
     ResourceTabs,
     DetailText,
     Tab,
+    CodeMirror,
+    Loading,
   },
 
   mixins: [CreateEditView],
@@ -102,7 +106,16 @@ export default {
       key,
       crt,
       relatedServices: [],
+      helmData:        undefined,
     };
+  },
+
+  async fetch() {
+    if ( this.value._type === TYPES.HELM_RELEASE ) {
+      const helmData = await this.value.fetchHelmData();
+
+      this.helmData = JSON.stringify(helmData, null, ' ');
+    }
   },
 
   computed: {
@@ -120,6 +133,10 @@ export default {
 
     isSsh() {
       return this.value._type === TYPES.SSH;
+    },
+
+    isHelm() {
+      return this.value._type === TYPES.HELM_RELEASE;
     },
 
     showKnownHosts() {
@@ -169,7 +186,9 @@ export default {
 </script>
 
 <template>
+  <Loading v-if="$fetchState.pending" />
   <ResourceTabs
+    v-else
     :value="value"
     :mode="mode"
     @update:value="$emit('input', $event)"
@@ -262,6 +281,28 @@ export default {
             :conceal="true"
           />
         </div>
+      </div>
+
+      <div
+        v-else-if="isHelm && helmData"
+        class="row"
+      >
+        <CodeMirror
+          class="mt-20 promql-input"
+          :value="helmData"
+          :options="{
+            readOnly: true,
+            gutters: ['CodeMirror-foldgutter'],
+            mode: 'application/json',
+            lint: false,
+            lineNumbers: true,
+            styleActiveLine: false,
+            tabSize: 2,
+            indentWithTabs: false,
+            cursorBlinkRate: -1,
+          }"
+          mode="view"
+        />
       </div>
 
       <div v-else>

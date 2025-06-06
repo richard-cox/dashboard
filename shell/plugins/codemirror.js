@@ -7,6 +7,7 @@ import CodeMirror from 'codemirror';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/yaml/yaml.js';
+// import 'codemirror/mode/json/json.js';
 import 'codemirror/mode/javascript/javascript.js';
 
 import 'codemirror/theme/base16-light.css';
@@ -19,6 +20,7 @@ import 'codemirror/keymap/sublime.js';
 import 'codemirror/addon/lint/lint.css';
 import 'codemirror/addon/lint/lint.js';
 import 'codemirror/addon/lint/yaml-lint.js';
+// import 'codemirror/addon/lint/json-lint.js'; // This provides the actual JSON linting logic
 
 import 'codemirror/addon/fold/foldgutter.css';
 import 'codemirror/addon/fold/foldgutter.js';
@@ -28,6 +30,7 @@ import 'codemirror/addon/hint/show-hint.js';
 import 'codemirror/addon/hint/anyword-hint.js';
 
 import { strPad } from '@shell/utils/string';
+import myLogger from '@shell/utils/my-logger';
 
 function isLineComment(cm, lineNo) {
   return /\bcomment\b/.test(cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0)));
@@ -357,3 +360,61 @@ function update(cm) {
     }
   }
 }
+
+export function customJsonLinter(text, options, cm) {
+  myLogger.warn('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  const found = [];
+
+  try {
+    JSON.parse(text);
+  } catch (e) {
+    if (e instanceof SyntaxError) {
+      // Basic attempt to extract line and column from the error message.
+      // This is highly dependent on the browser's error message format.
+      // For example: "Unexpected token '}' at position 123" or "Unexpected token } in JSON at position 123"
+      const message = e.message;
+      let line = 0;
+      let ch = 0;
+      let from = 0;
+      let to = text.length; // Default to highlighting the whole document
+
+      // Attempt to parse "at position X"
+      const positionMatch = message.match(/at position (\d+)/);
+
+      if (positionMatch) {
+        const charIndex = parseInt(positionMatch[1], 10);
+        const pos = cm.posFromIndex(charIndex);
+
+        line = pos.line;
+        ch = pos.ch;
+        from = charIndex;
+        to = charIndex + 1; // Highlight just the character at the reported position
+      } else {
+        // Fallback for more generic error messages that might include line/column
+        // (less reliable for JSON.parse errors compared to other linters)
+        const lineMatch = message.match(/line (\d+)/);
+        const colMatch = message.match(/column (\d+)/);
+
+        if (lineMatch && colMatch) {
+          line = parseInt(lineMatch[1], 10) - 1; // CodeMirror lines are 0-indexed
+          ch = parseInt(colMatch[1], 10) - 1; // CodeMirror characters are 0-indexed
+          const startPos = cm.Pos(line, ch);
+
+          from = cm.indexFromPos(startPos);
+          to = from + 1;
+        }
+      }
+
+      found.push({
+        from:     cm.Pos(line, ch),
+        to:       cm.Pos(line, ch + 1), // Highlight one character at the error location
+        message,
+        severity: 'error', // Can be 'error', 'warning', or 'info'
+      });
+    }
+  }
+
+  return found;
+}
+
+CodeMirror.registerHelper('lint', 'application/json', customJsonLinter);

@@ -149,6 +149,7 @@ export default {
       </template>
     </Masthead>
 
+    <!-- TODO: RC -->
     <ResourceTable
       :schema="schema"
       :rows="users"

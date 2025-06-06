@@ -11,6 +11,7 @@ import {
 } from '@shell/config/table-headers';
 import { allHash } from 'utils/promise';
 import { Banner } from '@components/Banner';
+import { GROUP_RESOURCES, mapPref } from '@shell/store/prefs';
 
 export default {
   components: {
@@ -41,6 +42,16 @@ export default {
       allCredentials: null,
       resource:       NORMAN.CLOUD_CREDENTIAL,
       schema:         this.$store.getters['rancher/schemaFor'](NORMAN.CLOUD_CREDENTIAL),
+      groupOptions:   [{
+        tooltipKey: 'resourceTable.groupBy.none',
+        icon:       'icon-list-flat',
+        value:      'none',
+      }, {
+        tooltipKey: 'Group By Provider',
+        icon:       'icon-service',
+        value:      'providerDisplay',
+        field:      'providerDisplay',
+      }]
     };
   },
 
@@ -137,12 +148,15 @@ export default {
       :label="expiredData.expired"
     />
 
+    <!-- group-by="providerDisplay" -->
     <ResourceTable
       :schema="schema"
       :rows="rows"
       :headers="headers"
       :namespaced="false"
-      group-by="providerDisplay"
+
+      :group-options="groupOptions"
+      :groupable="true"
     >
       <template #cell:id="{row}">
         {{ row.id.replace('cattle-global-data:', '') }}
