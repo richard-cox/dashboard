@@ -169,10 +169,10 @@ export default {
   },
 
   mounted() {
+    if (!this.alertmanagerConfigResource.spec.receivers) {
+      this.alertmanagerConfigResource.spec.receivers = [];
+    }
     if (this.mode === this.create) {
-      if (!this.alertmanagerConfigResource.spec.receivers) {
-        this.alertmanagerConfigResource.spec.receivers = [];
-      }
       this.alertmanagerConfigResource.spec.receivers.push(this.value);
     }
   },
@@ -195,7 +195,7 @@ export default {
       return {
         duplicateName: () => {
           const receiversArray = this.alertmanagerConfigResource.spec.receivers;
-          const receiverNamesArray = receiversArray.map((R) => R.name);
+          const receiverNamesArray = receiversArray?.map((R) => R.name) || [];
           const receiversSet = new Set(receiverNamesArray);
 
           if (receiversArray.length !== receiversSet.size) {
