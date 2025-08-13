@@ -575,7 +575,7 @@ const sharedActions = {
     // TODO: RC remove
     if (type === 'batch.job') {
       if (counter < 5) {
-        console.error(`Overriding revision ${ revision } with junk`);
+        console.error(`Overriding revision '${ revision }' with junk`); // eslint-disable-line no-console
         revision = 'aaa';
         counter += 1;
       }
