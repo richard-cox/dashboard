@@ -1,4 +1,4 @@
-name: Notify Slack on Milestone Change
+name: Check for Unexpected Milestone Change
 
 on:
   issues:
@@ -6,7 +6,6 @@ on:
 
 permissions:
   issues: read
-  organization_projects: read # Needed for some GitHub API calls related to teams
 
 env:
   TEAM_NAME: "rancher/ui"
