@@ -17,7 +17,9 @@ import {
   PluginRouteRecordRaw, RegisterStore, UnregisterStore, CoreStoreSpecifics, CoreStoreConfig,
   NavHooks, OnNavToPackage, OnNavAwayFromPackage, OnLogIn, OnLogOut,
   PaginationTableColumn,
-  ExtensionEnvironment
+  ExtensionEnvironment,
+  ServerSidePaginationExtensionPoints,
+  ServerSidePaginationExtensionConfig
 } from './types';
 import coreStore, { coreStoreModule, coreStoreState } from '@shell/plugins/dashboard-store';
 import { defineAsyncComponent, markRaw, Component } from 'vue';
@@ -358,6 +360,11 @@ export class Plugin implements IPlugin {
       this._onLogOut = onLogOut || (() => Promise.resolve());
       this.onLogIn = onLogIn || (() => Promise.resolve());
     }
+  }
+
+  public enableServerSidePagination(config: ServerSidePaginationExtensionConfig) {
+    // TODO: RC log
+    this.register(ServerSidePaginationExtensionPoints.RESOURCES, this.id, () => config);
   }
 
   public async onLogOut(store: any) {

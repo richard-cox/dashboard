@@ -1,23 +1,24 @@
-
 export interface PaginationSettingsStore {
-  [name: string]: {
-    resources: {
+  resources: {
+    /**
+     * Enable for all resources in this store
+     */
+    enableAll?: boolean,
+    enableSome?: {
       /**
-       * Enable for all resources in this store
+       * Specific resource type to enable
        */
-      enableAll: boolean,
-      enableSome: {
-        /**
-         * Specific resource type to enable
-         */
-        enabled: (string | { resource: string, context: string[]})[],
-        /**
-         * There's no hardcoded headers or custom list for the resource type, headers will be generated from schema attributes.columns
-         */
-        generic: boolean,
-      },
-    }
+      enabled: (string | { resource: string, context: string[]})[],
+      /**
+       * There's no hardcoded headers or custom list for the resource type, headers will be generated from schema attributes.columns
+       */
+      generic?: boolean,
+    },
   }
+}
+
+export interface PaginationSettingsStores {
+  [store: string]: PaginationSettingsStore
 }
 
 export type PaginationFeature = 'listAutoRefreshToggle' | 'listManualRefresh'
@@ -33,7 +34,7 @@ export interface PaginationSettings {
   /**
    * Should pagination be enabled for resources in a store
    */
-  stores?: PaginationSettingsStore,
+  stores?: PaginationSettingsStores,
 
   /**
    * List of specific features that can be enabled / disabled

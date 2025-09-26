@@ -1,4 +1,4 @@
-import { PaginationFeature, PaginationSettings, PaginationSettingsStore } from '@shell/types/resources/settings';
+import { PaginationFeature, PaginationSettings, PaginationSettingsStore, PaginationSettingsStores } from '@shell/types/resources/settings';
 import {
   NAMESPACE_FILTER_ALL_USER as ALL_USER,
   NAMESPACE_FILTER_ALL as ALL,
@@ -16,6 +16,10 @@ import { STEVE_CACHE } from '@shell/store/features';
 import { getPerformanceSetting } from '@shell/utils/settings';
 import { PAGINATION_SETTINGS_STORE_DEFAULTS } from '@shell/plugins/steve/steve-pagination-utils';
 import { MANAGEMENT } from '@shell/config/types';
+import { VuexStore } from '@shell/types/store/vuex';
+import { IPlugin, ServerSidePaginationExtensionConfig, ServerSidePaginationExtensionPoints } from '@shell/core/types';
+import { Plugin } from '@shell/core/plugin';
+import { ExtensionManager } from '@shell/types/extension-manager';
 
 /**
  * Helper functions for server side pagination
@@ -38,15 +42,15 @@ class PaginationUtils {
     return perf.serverPagination;
   }
 
-  public getStoreSettings(ctx: any): PaginationSettingsStore
-  public getStoreSettings(serverPagination: PaginationSettings): PaginationSettingsStore
-  public getStoreSettings(arg: any | PaginationSettings): PaginationSettingsStore {
+  public getStoreSettings(ctx: any): PaginationSettingsStores
+  public getStoreSettings(serverPagination: PaginationSettings): PaginationSettingsStores
+  public getStoreSettings(arg: any | PaginationSettings): PaginationSettingsStores {
     const serverPagination: PaginationSettings = arg?.rootGetters !== undefined ? this.getSettings(arg) : arg;
 
     return serverPagination?.useDefaultStores ? this.getStoreDefault() : serverPagination?.stores || this.getStoreDefault();
   }
 
-  public getStoreDefault(): PaginationSettingsStore {
+  public getStoreDefault(): PaginationSettingsStores {
     return PAGINATION_SETTINGS_STORE_DEFAULTS;
   }
 
@@ -72,28 +76,18 @@ class PaginationUtils {
     return (entry.spec.value !== null) ? entry.spec.value : entry.status.default;
   }
 
-  /**
-   * Is pagination enabled at a global level or for a specific resource
-   */
-  isEnabled({ rootGetters }: any, enabledFor: PaginationResourceContext) {
-    // Cache must be enabled to support pagination api
-    if (!this.isSteveCacheEnabled({ rootGetters })) {
-      return false;
+  a({
+    ctx: { rootGetters },
+    storeSettings,
+    enabledFor
+  }: {
+    ctx: Partial<VuexStore>,
+    storeSettings: PaginationSettingsStore,
+    enabledFor: PaginationResourceContext
+  }): boolean {
+    if (enabledFor.resource?.id === 'catalog.cattle.io.uiplugin') {
+      debugger;
     }
-
-    const settings = this.getSettings({ rootGetters });
-
-    // No setting, not enabled
-    if (!settings) {
-      return false;
-    }
-
-    // Missing required params, not enabled
-    if (!enabledFor) {
-      return false;
-    }
-
-    const storeSettings = this.getStoreSettings(settings)?.[enabledFor.store];
 
     // No pagination setting for target store, not enabled
     if (!storeSettings) {
@@ -121,11 +115,11 @@ class PaginationUtils {
       !rootGetters['type-map/configuredPaginationHeaders'](enabledFor.resource.id) &&
       !rootGetters['type-map/hasCustomList'](enabledFor.resource.id);
 
-    if (storeSettings.resources.enableSome.generic && isGeneric) {
+    if (storeSettings.resources.enableSome?.generic && isGeneric) {
       return true;
     }
 
-    if (storeSettings.resources.enableSome.enabled.find((setting) => {
+    if (storeSettings.resources.enableSome?.enabled.find((setting) => {
       if (typeof setting === 'string') {
         return setting === enabledFor.resource?.id;
       }
@@ -144,6 +138,118 @@ class PaginationUtils {
     }
 
     return false;
+  }
+
+  /**
+   * Is pagination enabled at a global level or for a specific resource
+   */
+  isEnabled({ rootGetters, $plugin }: any, enabledFor: PaginationResourceContext) {
+    // Cache must be enabled to support pagination api
+    if (!this.isSteveCacheEnabled({ rootGetters })) {
+      return false;
+    }
+
+    const settings = this.getSettings({ rootGetters });
+
+    // No setting, not enabled
+    if (!settings) {
+      return false;
+    }
+
+    // Missing required params, not enabled
+    if (!enabledFor) {
+      return false;
+    }
+
+    const plugin = $plugin as ExtensionManager;
+    const extensionSettings = plugin.getAll()[ServerSidePaginationExtensionPoints.RESOURCES];
+
+    if (extensionSettings) {
+      const allowed = Object.entries(extensionSettings).find(([extension, settingsFn]) => {
+        if (!settingsFn) {
+          return false;
+        }
+
+        const settings = settingsFn();
+        const allowed = Object.entries(settings).find(([store, settingsFn]) => {
+          if (store !== enabledFor.store) {
+            return false;
+          }
+
+          return this.a({
+            ctx:           { rootGetters },
+            storeSettings: settings,
+            enabledFor
+          });
+        });
+
+        if (allowed) {
+          return true;
+        }
+      });
+
+      if (allowed) {
+        return true;
+      }
+    }
+
+    const storeSettings = this.getStoreSettings(settings)?.[enabledFor.store];
+
+    return this.a({
+      ctx: { rootGetters },
+      storeSettings,
+      enabledFor
+    });
+
+    // // No pagination setting for target store, not enabled
+    // if (!storeSettings) {
+    //   return false;
+    // }
+
+    // // Not interested in a resource, so just top level settings are checked
+    // if (!enabledFor.resource) {
+    //   return true;
+    // }
+
+    // // Store says all resources are enabled
+    // if (storeSettings.resources.enableAll) {
+    //   return true;
+    // }
+
+    // // given a resource... but no id... invalid
+    // if (!enabledFor.resource.id) {
+    //   return false;
+    // }
+
+    // // Store says only some (those that have pagination columns not from schema and no custom list)
+    // const isGeneric =
+    //   !rootGetters['type-map/configuredHeaders'](enabledFor.resource.id) &&
+    //   !rootGetters['type-map/configuredPaginationHeaders'](enabledFor.resource.id) &&
+    //   !rootGetters['type-map/hasCustomList'](enabledFor.resource.id);
+
+    // if (storeSettings.resources.enableSome.generic && isGeneric) {
+    //   return true;
+    // }
+
+    // if (storeSettings.resources.enableSome.enabled.find((setting) => {
+    //   if (typeof setting === 'string') {
+    //     return setting === enabledFor.resource?.id;
+    //   }
+
+    //   if (setting.resource === enabledFor.resource?.id) {
+    //     if (!!setting.context) {
+    //       return enabledFor.resource?.context ? setting.context.includes(enabledFor.resource.context) : false;
+    //     }
+
+    //     return true;
+    //   }
+
+    //   return false;
+    // })) {
+    //   return true;
+    // }
+
+    // return false;
   }
 
   listAutoRefreshToggleEnabled({ rootGetters }: any): boolean {

@@ -1,6 +1,7 @@
 import { ProductFunction } from './plugin';
 import { RouteRecordRaw } from 'vue-router';
 import type { ExtensionManager } from '@shell/types/extension-manager';
+import { PaginationSettingsStores } from '@shell/types/resources/settings';
 
 // Cluster Provisioning types
 export * from './types-provisioning';
@@ -50,6 +51,11 @@ export type NavHooks = {
   onLeave?: OnNavAwayFromPackage,
   onLogout?: OnLogOut,
   onLogin?: OnLogIn,
+}
+
+export enum ServerSidePaginationExtensionPoints {
+  ROOT = 'SSP', // eslint-disable-line no-unused-vars
+  RESOURCES = 'SSP-RESOURCES', // eslint-disable-line no-unused-vars
 }
 
 /** Enum regarding the extensible areas/places of the UI */
@@ -350,6 +356,17 @@ export type TableColumn = HeaderOptions;
  * External extension configuration for @PaginationHeaderOptions
  */
 export type PaginationTableColumn = PaginationHeaderOptions;
+
+export type ServerSidePaginationExtensionConfig = PaginationSettingsStores;
+
+// export interface ServerSidePaginationExtensionConfig {
+//   [store: string]: {
+//     enableAll?: boolean,
+//     enableSome?: {
+//       enabled: (string | { resource: string, context: string[]})[],
+//     }
+//   }
+// }
 
 export interface ConfigureTypeOptions {
   /**
@@ -692,6 +709,8 @@ export interface IPlugin {
     onLogIn?: OnLogIn,
   ): void;
   addNavHooks(hooks: NavHooks): void;
+
+  enableServerSidePagination(config: ServerSidePaginationExtensionConfig): void;
 
   /**
    * Adds a model extension
