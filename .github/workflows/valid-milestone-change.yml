@@ -2,89 +2,49 @@ name: Check for Unexpected Milestone Change
 
 on:
   issues:
-    types: [milestoned, demilestoned]
+    types: [milestoned]
 
 permissions:
   issues: read
-
-env:
-  TEAM_NAME: "rancher/ui"
-
+ 
 jobs:
   notify-on-milestone-change:
+    # This 'if' condition is the filter that makes it run only ONCE per milestone change.
+    if: |
+      github.event.action == 'milestoned' ||
+      github.event.action == 'demilestoned' ||
+      (github.event.action == 'edited' && github.event.changes.milestone)
+
+    permissions:
+      organization: read
+
     runs-on: ubuntu-latest
     steps:
-    - name: "Check if user is in a team"
-      id: check-team-membership
-      uses: actions/github-script@v7
-      with:
-        script: |
-          try {
-            // Get the team name from the environment variable.
-            const [org, teamSlug] = process.env.TEAM_NAME.split('/');
-            // Check if the user who triggered the event is a member of the specified team.
-            const { status } = await github.rest.teams.getMembershipForUserInOrg({
-                org: org,
-                team_slug: teamSlug,
-                username: context.payload.sender.login,
-            });
-
-            // Set an output variable based on the check.
-            // Status 200 means the user is a member, 404 means they are not.
-            console.log(`Membership check status: ${status}`);
-            if (status === 200) {
-                core.setOutput('is_member', 'true');
-            } else {
-                core.setOutput('is_member', 'false');
-            }
-          } catch (error) {
-            // If the user is not found, or there's an API error,
-            // we assume they are not a member for the purpose of this script.
-            console.error('An error occurred during team membership check:', error);
-            core.setOutput('is_member', 'false');
-          }
+    - name: Check Team Membership
+      id: check_team
+      # This is CRITICAL. If the user is NOT on the team, the API
+      # call fails (404), which fails the step. We want the workflow
+      # to continue so the 'if' condition below works.
+      continue-on-error: true
+      env:
+        # The GITHUB_TOKEN is automatically used by 'gh' for auth
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh api --silent \
+          /orgs/rancher/teams/ui/memberships/${{ github.event.sender.login }}
     - name: "Send Slack message if user is not a team member"
       # This step only runs if the 'is_member' output from the previous step is 'false'.
-      if: steps.check-team-membership.outputs.is_member == 'false'
+      if: steps.check_team.conclusion == 'success'
       uses: slackapi/slack-github-action@v1.26.0
       with:
         payload: |
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "🚨 Unexpected Milestone Changed on an Issue",
-                  "emoji": true
-                }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Issue:* <${{ github.event.issue.html_url }}|${{ github.event.issue.title }}>"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Changed by:* ${{ github.event.sender.login }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Old Milestone:* `${{ github.event.issue.milestone.title }}`"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*New Milestone:* `${{ github.event.issue.milestone.title }}`"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Reason:* The user who changed the milestone is not a member of ${{env.TEAM_NAME}}."
-                  }
-                ]
-              }
-            ]
-          }
+            {
+              "actor": "${{ github.event.sender.login }}",
+              "issue_title": "${{ github.event.issue.title }}",
+              "issue_url": "${{ github.event.issue.html_url }}",
+              "milestone_new": "${{ github.event.issue.milestone.title }}",
+              "milestone_old": "${{ github.event.changes.milestone.from.title }}"
+            }
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        # Use the new secret you created in Step 2
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WORKFLOW_MILESTONE_CHANGED_URL }}
