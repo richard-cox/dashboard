@@ -9,14 +9,16 @@ permissions:
  
 jobs:
   notify-on-milestone-change:
+    # permissions:
+    #   organization: read
+      
     # This 'if' condition is the filter that makes it run only ONCE per milestone change.
     if: |
       github.event.action == 'milestoned' ||
       github.event.action == 'demilestoned' ||
       (github.event.action == 'edited' && github.event.changes.milestone)
 
-    permissions:
-      organization: read
+
 
     runs-on: ubuntu-latest
     steps:
