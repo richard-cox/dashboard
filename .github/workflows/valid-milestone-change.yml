@@ -2,7 +2,7 @@ name: Check for Unexpected Milestone Change
 
 on:
   issues:
-    types: [milestoned]
+    types: [milestoned, demilestoned, edited]
 
 permissions:
   issues: read
@@ -12,16 +12,32 @@ jobs:
     # permissions:
     #   organization: read
       
-    # This 'if' condition is the filter that makes it run only ONCE per milestone change.
     if: |
       github.event.action == 'milestoned' ||
       github.event.action == 'demilestoned' ||
       (github.event.action == 'edited' && github.event.changes.milestone)
 
-
-
     runs-on: ubuntu-latest
     steps:
+    - name: Set Event Data
+      id: event_data
+      run: |
+        if [ "${{ github.event.action }}" == "milestoned" ]; then
+          echo "OLD_MILESTONE=None"
+          echo "NEW_MILESTONE=${{ github.event.issue.milestone.title }}"
+        
+        elif [ "${{ github.event.action }}" == "demilestoned" ]; then
+          echo "OLD_MILESTONE=${{ github.event.milestone.title }}"
+          echo "NEW_MILESTONE=None"
+        
+        elif [ "${{ github.event.action }}" == "edited" ]; then
+          echo "OLD_MILESTONE=${{ github.event.changes.milestone.from.title || 'None' }}"
+          echo "NEW_MILESTONE=${{ github.event.issue.milestone.title || 'None' }}"
+        fi >> $GITHUB_ENV
+        
+        echo "ACTOR=${{ github.event.sender.login }}" >> $GITHUB_ENV
+        echo "ISSUE_TITLE=${{ github.event.issue.title }}" >> $GITHUB_ENV
+        echo "ISSUE_URL=${{ github.event.issue.html_url }}" >> $GITHUB_ENV
     - name: Check Team Membership
       id: check_team
       # This is CRITICAL. If the user is NOT on the team, the API
@@ -41,11 +57,11 @@ jobs:
       with:
         payload: |
             {
-              "actor": "${{ github.event.sender.login }}",
-              "issue_title": "${{ github.event.issue.title }}",
-              "issue_url": "${{ github.event.issue.html_url }}",
-              "milestone_new": "${{ github.event.issue.milestone.title }}",
-              "milestone_old": "${{ github.event.changes.milestone.from.title }}"
+              "actor": "${{ env.ACTOR }}",
+              "issue_title": "${{ env.ISSUE_TITLE }}",
+              "issue_url": "${{ env.ISSUE_URL }}",
+              "milestone_new": "${{ env.OLD_MILESTONE }}",
+              "milestone_old": "${{ env.NEW_MILESTONE }}"
             }
       env:
         # Use the new secret you created in Step 2
