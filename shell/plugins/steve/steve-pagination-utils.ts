@@ -515,6 +515,10 @@ class StevePaginationUtils extends NamespaceProjectFilters {
       }
     }
 
+    if (opt.includeAssociatedData) {
+      params.push('includeAssociatedData=true');
+    }
+
     // Note - There is a `limit` property that is by default 100,000. This can be disabled by using `limit=-1`,
     // but we shouldn't be fetching any pages big enough to exceed the default
 
