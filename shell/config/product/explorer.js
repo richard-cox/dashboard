@@ -419,6 +419,8 @@ export function init(store) {
     [STEVE_STATE_COL, STEVE_NAME_COL, STEVE_NAMESPACE_COL, createSteveWorkloadImageCol(6), STEVE_WORKLOAD_ENDPOINTS, 'Ready', 'Current', 'Desired', STEVE_AGE_COL],
   );
 
+  const POD_RESTART_REG_EX = /^(\d+)\s*\(([^)]+)\)/;
+
   headers(POD,
     [STATE, NAME_COL, NAMESPACE_COL, POD_IMAGES, 'Ready', 'Restarts', 'IP', NODE_COL, AGE],
     [
@@ -428,7 +430,22 @@ export function init(store) {
         ...POD_IMAGES,
         sort:   false,
         search: 'spec.containers.image'
-      }, 'Ready', 'Restarts', 'IP', {
+      },
+      'Ready',
+      {
+        name:     'pod-restart',
+        labelKey: 'tableHeaders.podRestarts',
+        search:   'metadata.fields[3][0]',
+        sort:     'metadata.fields[3][0]',
+        value:    (row) => row.metadata.fields[3]?.match(POD_RESTART_REG_EX)?.[1] || '',
+      }, {
+        name:     'pod-last-restart',
+        labelKey: 'tableHeaders.podLastRestart',
+        value:    (row) => row.metadata.fields[3]?.match(POD_RESTART_REG_EX)?.[2] || '',
+        sort:     ['metadata.fields[3][1]', 'metadata.fields[3][0]', 'metadata.name'],
+      },
+      'IP',
+      {
         ...NODE_COL,
         search: 'spec.nodeName'
       },

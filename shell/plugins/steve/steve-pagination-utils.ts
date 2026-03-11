@@ -241,6 +241,8 @@ class StevePaginationUtils extends NamespaceProjectFilters {
     [POD]: [
       { field: 'spec.containers.image' },
       { field: 'spec.nodeName' },
+      { field: 'metadata.fields[3][0]' },
+      { field: 'metadata.fields[3][1]' },
     ],
     [MANAGEMENT.NODE]: [
       { field: 'status.nodeName' },

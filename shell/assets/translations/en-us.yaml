@@ -6988,6 +6988,7 @@ tableHeaders:
   progress: Progress
   podImages: Image
   podRestarts: Restarts
+  podLastRestart: Last Restart
   pods: Pods
   pod-Selector: Pod-Selector
   providers: Providers
