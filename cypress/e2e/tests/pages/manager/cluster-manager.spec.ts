@@ -79,7 +79,7 @@ describe('Cluster Manager', { testIsolation: 'off', tags: ['@manager', '@adminUs
     clusterList.goTo();
     clusterList.checkIsCurrentPage();
     clusterList.createCluster();
-    clusterCreatePage.gridElementExistanceByName('Azure AKS', 'not.exist');
+    clusterCreatePage.gridElementExistenceByName('Azure AKS', 'not.exist');
 
     // re-enable the AKS kontainer driver
     HostedProvidersPagePo.navTo();
@@ -93,7 +93,7 @@ describe('Cluster Manager', { testIsolation: 'off', tags: ['@manager', '@adminUs
     clusterList.goTo();
     clusterList.checkIsCurrentPage();
     clusterList.createCluster();
-    clusterCreatePage.gridElementExistanceByName('Azure AKS', 'exist');
+    clusterCreatePage.gridElementExistenceByName('Azure AKS', 'exist');
   });
 
   describe('RKE2 providers', () => {

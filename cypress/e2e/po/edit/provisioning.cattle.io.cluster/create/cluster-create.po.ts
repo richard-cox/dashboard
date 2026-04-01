@@ -25,7 +25,7 @@ export default class ClusterManagerCreatePagePo extends ClusterManagerCreateImpo
     return this.self().find('.title-bar h1.title, .primaryheader h1').invoke('text');
   }
 
-  gridElementExistanceByName(name: string, assertion: string) {
+  gridElementExistenceByName(name: string, assertion: string) {
     return this.self().contains('.grid .name', name, { timeout: 10000 }).should(assertion);
   }
 
